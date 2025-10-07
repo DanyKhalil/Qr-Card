@@ -1,0 +1,14 @@
+{
+  "name": "qr-card",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev:backend": "npm run dev --prefix apps/backend",
+    "dev:web": "npm run dev --prefix apps/web",
+    "dev:mobile": "npm start --prefix apps/mobile"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
