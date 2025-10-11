@@ -1,18 +1,22 @@
-import express from "express";
 import dotenv from "dotenv";
-import cors from "cors";
-
 dotenv.config();
 
-const app = express();
-app.use(cors());
-app.use(express.json());
+import app from "./app.js";
+import sequelize from "./config/db.js";
 
-// routes
-import authRoutes from "./routes/auth.js";
-app.use("/api/auth", authRoutes);
+const PORT = process.env.PORT || 3000;
 
-app.get("/", (req, res) => res.json({ message: "API running 🚀" }));
+const startServer = async () => {
+  try {
+    await sequelize.authenticate();
+    console.log("Database connection has been established successfully.");
 
-const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error("Unable to connect to the database:", error);
+  }
+};
+
+startServer();
