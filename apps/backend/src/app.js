@@ -1,0 +1,19 @@
+import express from "express";
+import sequelize from "./config/db.js";
+import userRoutes from "./routes/userRoutes.js";
+import authRoutes from "./routes/auth.js";
+
+const app = express();
+
+app.use(express.json());
+app.use((req, res, next) => {
+  console.log(req.method, req.url);
+  next();
+});
+
+// Routes
+app.use("/api/users", userRoutes);
+app.use("/api/auth", authRoutes);
+
+
+export default app;
