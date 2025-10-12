@@ -2,9 +2,9 @@ import React from 'react';
 import './Header.css';
 
 import companyLogo from "../../assets/images/logos/qr-card.png"
-import searchIcon from "../../assets/images/icons/search-icon.png"
-import scanQrIcon from "../../assets/images/icons/scan-qr-icon.png"
-import profileIcon from "../../assets/images/icons/profile-icon.png"
+import searchIcon from "../../assets/images/icons/search-icon-white.png"
+import scanQrIcon from "../../assets/images/icons/scan-qr-icon-white.png"
+import profileIcon from "../../assets/images/icons/profile-icon-white.png"
 
 const Header = () => {
 
@@ -13,7 +13,6 @@ const Header = () => {
         {name: "Search", icon: searchIcon},
         {name: "Scan QR", icon: scanQrIcon},
         {name: "My Profile", icon: profileIcon},
-        {}
     ];
     return (
         <div className="header">
