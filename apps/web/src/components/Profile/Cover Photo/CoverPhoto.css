@@ -5,6 +5,9 @@
     cursor: default;
     transition: all 0.3s ease-in-out;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding-top: 70px;
+    height: 300px;
+
 }
 
 .cover-photo-container.editable {
@@ -137,7 +140,6 @@
     border-radius: 20px !important;
 }
 
-/* Loading state */
 .cover-photo-container.loading {
     background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
     background-size: 200% 100%;
@@ -153,10 +155,17 @@
     }
 }
 
-/* Mobile responsiveness */
+@media (max-width: 1200px) {
+    .cover-photo-container {
+        height: 250px !important;
+        padding-top: 70px;
+    }
+}
+
 @media (max-width: 768px) {
     .cover-photo-container {
-        height: 200px !important;
+        height: 300px !important;
+        padding-top: 120px;
     }
     
     .cover-photo-default svg {
@@ -178,5 +187,19 @@
     .cover-photo-edit-button svg {
         width: 18px;
         height: 18px;
+    }
+}
+
+@media (max-width: 600px) {
+    .cover-photo-container {
+        height: 300px !important;
+        padding-top: 120px;
+    }
+}
+
+@media (max-width: 480px) {
+    .cover-photo-container {
+        height: 400px !important;
+        padding-top: 200px;
     }
 }

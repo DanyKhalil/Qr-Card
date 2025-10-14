@@ -1,0 +1,25 @@
+.profile-photo-and-headline{
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-end;
+    position: relative;
+    margin-left: 100px;
+    margin-top: -100px;
+    gap: 20px
+}
+
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .profile-photo-and-headline {
+        margin-left: 20px;
+        margin-top: -60px;
+    }
+}
+
+@media (max-width: 480px) {
+    .profile-photo-and-headline {
+        margin-left: 10px;
+        margin-top: -60px;
+    }
+}

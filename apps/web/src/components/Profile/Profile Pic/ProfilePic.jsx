@@ -4,9 +4,6 @@ import './ProfilePic.css';
 const ProfilePic = ({ 
         photo, 
         alt = "User profile", 
-        size = 60, 
-        borderWidth = 3,
-        borderColor = "#FF8559",
         className = ""
     }) => {
         const defaultUserIcon = (
@@ -15,14 +12,8 @@ const ProfilePic = ({
             </svg>
         );
 
-        const containerStyle = {
-            width: `${size}px`,
-            height: `${size}px`,
-            border: `${borderWidth}px solid ${borderColor}`,
-        };
-
   return (
-        <div className={`profile-circle ${className}`} style={containerStyle}>
+        <div className={`profile-circle ${className}`}>
             <div className="profile-circle-inner">
                 {photo ? 
                     (<img src={photo} alt={alt} className="profile-photo"/>) 

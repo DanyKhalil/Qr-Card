@@ -4,9 +4,6 @@ import './CoverPhoto.css';
 const CoverPhoto = ({ 
     photo, 
     alt = "Cover photo", 
-    height = 300,
-    width = "100%",
-    paddingTop = 0,
     className = ""
 }) => {
     const defaultCoverIcon = (
@@ -15,16 +12,10 @@ const CoverPhoto = ({
         </svg>
     );
 
-    const containerStyle = {
-        paddingTop: `${paddingTop}px`,
-        height: `${height}px`,
-        width: width,
-    };
 
     return (
         <div 
             className={`cover-photo-container ${className}`} 
-            style={containerStyle}
         >
             <div className="cover-photo-content">
                 {photo ? (
