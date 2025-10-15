@@ -1,0 +1,25 @@
+.icon-with-name {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: 8px; /* Default gap, can be overridden by prop */
+}
+
+.icon-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+
+
+.name-text {
+    font-family: inherit;
+    color: inherit;
+    line-height: 1.4;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
