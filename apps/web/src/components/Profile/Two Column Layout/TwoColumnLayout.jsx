@@ -1,13 +1,16 @@
 import React from 'react';
 import './TwoColumnLayout.css';
 import TitleAndLinks from '../Title With Links/TitleAndLinks';
+import DescriptionText from '../Description Text/DescriptionText';
+import YoutubePreview from '../Youtube Preview/YoutubePreview';
 
 const TwoColumnLayout = ({ 
     className = "",
     gap = "0px",
     contactLinks = [{name: "@dany-khalil", iconName: "instagram"},{name: "71 239 110", iconName: "phone"}],
     connectLinks = [{name: "@dany-khalil", iconName: "instagram"},{name: "71 239 110", iconName: "phone"}],
-    websiteLink = [{name:"www.dany.com", iconName:"web"}]
+    websiteLink = [{name:"www.dany.com", iconName:"web"}],
+    bio = "Hello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello"
 }) => {
 
     return (
@@ -29,29 +32,12 @@ const TwoColumnLayout = ({
             />
             
             <div className="column right-column">
-                {/* {rightChild} */}
+                <DescriptionText text={bio} />
+                <YoutubePreview youtubeUrl="https://www.youtube.com/watch?v=dQw4w9WgXcQ" />
+
             </div>
         </div>
     );
 };
 
-// Left Column Component
-const LeftColumn = ({ children, className = "" }) => {
-    return (
-        <div className={`left-column-content ${className}`}>
-            {children}
-        </div>
-    );
-};
-
-// Right Column Component
-const RightColumn = ({ children, className = "" }) => {
-    return (
-        <div className={`right-column-content ${className}`}>
-            {children}
-        </div>
-    );
-};
-
 export default TwoColumnLayout;
-export { LeftColumn, RightColumn };

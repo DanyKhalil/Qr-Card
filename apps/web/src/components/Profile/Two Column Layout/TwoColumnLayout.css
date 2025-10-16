@@ -28,8 +28,12 @@
 
 .separator {
     flex-shrink: 0;
-    height: 100%;
-    min-height: 100%;
+    width: 5px;
+    background-color: #4CAF50;
+    align-self: stretch; 
+    height: auto;
+    margin-top: 80px;
+    margin-bottom: 20px;
 }
 
 .left-column-content,
@@ -47,7 +51,6 @@
     box-sizing: border-box;
 }
 
-/* Responsive design */
 @media (max-width: 768px) {
     .two-column-layout {
         flex-direction: column;
