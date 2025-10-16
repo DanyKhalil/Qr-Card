@@ -1,10 +1,11 @@
 import React from 'react';
+import './TitleAndLinks.css';
 import IconWithName from '../Icon With Name/IconWithName';
 
 const TitleAndLinks = ({ title, links }) => {
   return (
     <div className="social-section">
-      <h1 className="section-title">{title}</h1>
+      <h2 className="section-title">{title}</h2>
       <div className="social-links">
         {links.map((social, index) => (
           <IconWithName 

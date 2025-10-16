@@ -5,7 +5,6 @@ const Headline = ({
     name, 
     dob, 
     headline,
-    className = ""
 }) => {
 
     const calculateAge = (birthDate) => {
@@ -23,16 +22,16 @@ const Headline = ({
 
     const age = calculateAge(dob);
 
-    const containerClasses = `profile-header ${className}`;
+    const containerClasses = `profile-header`;
 
     return (
         <div className={containerClasses}>
-        <div className="name-age-container">
-            <h1>{name}</h1>
-            <span className="age">{age} years old</span>
-        </div>
-        
-        <p className="headline">{headline}</p>
+            <div className="name-age-container">
+                <span className='name'>{name}</span>
+                <span className="age">{age} years old</span>
+            </div>
+            
+            <p className="headline">{headline}</p>
         </div>
     );
 };

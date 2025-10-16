@@ -28,9 +28,9 @@ const iconMap = {
 const IconWithName = ({ 
     name, 
     iconName, 
-    fontSize = '16px',
+    fontSize = '20px',
     className = "",
-    iconSize = '20px',
+    iconSize = '24px',
 }) => {
     const iconSrc = iconMap[iconName?.toLowerCase()];
 
