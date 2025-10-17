@@ -1,0 +1,73 @@
+.user-videos-section {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.user-videos-title {
+    font-size: clamp(1.5rem, 4vw, 2.5rem);
+    font-weight: 700;
+    margin-bottom: 40px;
+    color: #333;
+    line-height: 1.3;
+}
+
+.user-name {
+    color: #4CAF50;
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.videos-column {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    align-items: center;
+}
+
+.video-item {
+    width: 100%;
+    max-width: 800px;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.video-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+@media (max-width: 1024px) {
+    .user-videos-section {
+        padding: 30px 20px;
+    }
+    
+    .video-item {
+        max-width: 700px;
+    }
+}
+
+@media (max-width: 768px) {
+    .user-videos-section {
+        padding: 20px 15px;
+    }
+    
+    .user-videos-title {
+        margin-bottom: 30px;
+    }
+    
+    .video-item {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .user-videos-section {
+        padding: 20px 10px;
+    }
+}

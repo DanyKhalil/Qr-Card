@@ -3,56 +3,165 @@
     justify-content: space-between;
     align-items: center;
     padding: 16px 24px;
-    background-color: #fff;
+    background-color: #FF8559;
     border-bottom: 1px solid #e0e0e0;
     font-family: Arial, sans-serif;
+    padding: clamp(12px, 3vw, 24px);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease-in-out;
 }
 
 .header-left {
     display: flex;
     align-items: center;
     gap: 12px;
+    flex-shrink: 1;
+    min-width: 0;
 }
 
 .logo {
-    width: 40px;
-    height: 40px;
+    width: 50px;
+    height: 50px;
     object-fit: contain;
+    width: clamp(40px, 8vw, 50px);
+    height: clamp(40px, 8vw, 50px);
 }
 
 .company-name {
-    font-size: 18px;
+    font-size: 36px;
     font-weight: bold;
-    color: #333;
+    color: #BCF4CB;
+    -webkit-text-stroke: 1px black;
+    text-stroke: 1px black;
+    paint-order: stroke fill;
+    font-size: clamp(20px, 5vw, 36px);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .header-right {
     display: flex;
     align-items: center;
     gap: 24px;
+    gap: clamp(12px, 3vw, 24px);
+    flex-wrap: wrap;
+    justify-content: flex-end;
 }
 
 .menu-item {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 20px;
     cursor: pointer;
     padding: 8px 12px;
     border-radius: 6px;
-    transition: background-color 0.2s;
+    transition: all 0.3s ease-in-out;
+    transition-delay: 0.1s;
+    padding: clamp(6px, 2vw, 12px);
+    gap: clamp(8px, 2vw, 20px);
+    white-space: nowrap;
 }
 
 .menu-item:hover {
-    background-color: #f5f5f5;
+    background-color: #FF6F3C;
+    transition-delay: 0s;
 }
 
 .menu-icon {
-    width: 20px;
-    height: 20px;
+    width: 25px;
+    height: 25px;
     object-fit: contain;
+    width: clamp(20px, 5vw, 25px);
+    height: clamp(20px, 5vw, 25px);
 }
 
 .menu-name {
-    font-size: 14px;
-    color: #333;
+    font-size: 18px;
+    color: #ffffff;
+    font-size: clamp(14px, 3vw, 18px);
+    text-shadow: 
+        -0.5px -0.5px 0 rgba(0,0,0,0.3),
+        0.5px -0.5px 0 rgba(0,0,0,0.3),
+        -0.5px 0.5px 0 rgba(0,0,0,0.3),
+        0.5px 0.5px 0 rgba(0,0,0,0.3);
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        gap: 16px;
+        padding: 12px 16px;
+    }
+    
+    .header-left {
+        justify-content: center;
+        text-align: center;
+    }
+    
+    .header-right {
+        justify-content: center;
+        width: 100%;
+        gap: 16px;
+    }
+    
+    .menu-item {
+        flex: 1;
+        justify-content: center;
+        min-width: 120px;
+    }
+}
+
+@media (max-width: 480px) {
+    .header {
+        padding: 8px 12px;
+    }
+    
+    .header-right {
+        flex-direction: column;
+        gap: 8px;
+        width: 100%;
+    }
+    
+    .menu-item {
+        width: 100%;
+        justify-content: flex-start;
+        padding: 10px 16px;
+    }
+    
+    .company-name {
+        font-size: 24px;
+    }
+}
+
+
+@media (min-width: 1200px) {
+    .header {
+        padding: 20px 48px;
+    }
+    
+    .menu-item {
+        padding: 10px 16px;
+    }
+}
+
+
+.menu-item, .logo, .company-name {
+    transition: all 0.3s ease-in-out;
+}
+
+
+.menu-item:hover .menu-icon {
+    transform: scale(1.1);
+    transition: transform 0.3s ease-in-out 0.1s;
+}
+
+.menu-item:hover .menu-name {
+    transition: color 0.3s ease-in-out 0.1s;
 }

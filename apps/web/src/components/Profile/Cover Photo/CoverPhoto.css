@@ -1,0 +1,205 @@
+.cover-photo-container {
+    position: relative;
+    background: #f8f9fa;
+    overflow: hidden;
+    cursor: default;
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding-top: 70px;
+    height: 300px;
+
+}
+
+.cover-photo-container.editable {
+    cursor: pointer;
+}
+
+.cover-photo-container.editable:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.cover-photo-container.editable:hover .cover-photo-edit-button {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.cover-photo-content {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cover-photo-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.cover-photo-default {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #adb5bd;
+    background: linear-gradient(135deg, #e9ecef, #dee2e6);
+    transition: all 0.3s ease-in-out;
+}
+
+.cover-photo-container.editable:hover .cover-photo-default {
+    background: linear-gradient(135deg, #dee2e6, #ced4da);
+    color: #6c757d;
+}
+
+.cover-photo-default svg {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 10px;
+}
+
+.cover-photo-label {
+    font-size: 16px;
+    font-weight: 500;
+    color: #6c757d;
+}
+
+.cover-photo-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.cover-photo-edit-button {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: white;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.3s ease-in-out;
+    cursor: pointer;
+}
+
+.cover-photo-edit-button:hover {
+    background: #f8f9fa;
+    transform: scale(1.1);
+}
+
+.cover-photo-edit-button svg {
+    width: 20px;
+    height: 20px;
+    color: #495057;
+}
+
+/* Size variants */
+.cover-photo-container.small {
+    height: 200px !important;
+}
+
+.cover-photo-container.medium {
+    height: 300px !important;
+}
+
+.cover-photo-container.large {
+    height: 400px !important;
+}
+
+.cover-photo-container.xlarge {
+    height: 500px !important;
+}
+
+/* Border radius variants */
+.cover-photo-container.rounded-sm {
+    border-radius: 8px !important;
+}
+
+.cover-photo-container.rounded-md {
+    border-radius: 12px !important;
+}
+
+.cover-photo-container.rounded-lg {
+    border-radius: 16px !important;
+}
+
+.cover-photo-container.rounded-xl {
+    border-radius: 20px !important;
+}
+
+.cover-photo-container.loading {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+@media (max-width: 1200px) {
+    .cover-photo-container {
+        height: 250px !important;
+        padding-top: 70px;
+    }
+}
+
+@media (max-width: 768px) {
+    .cover-photo-container {
+        height: 300px !important;
+        padding-top: 120px;
+    }
+    
+    .cover-photo-default svg {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .cover-photo-label {
+        font-size: 14px;
+    }
+    
+    .cover-photo-edit-button {
+        width: 36px;
+        height: 36px;
+        top: 12px;
+        right: 12px;
+    }
+    
+    .cover-photo-edit-button svg {
+        width: 18px;
+        height: 18px;
+    }
+}
+
+@media (max-width: 600px) {
+    .cover-photo-container {
+        height: 300px !important;
+        padding-top: 120px;
+    }
+}
+
+@media (max-width: 480px) {
+    .cover-photo-container {
+        height: 400px !important;
+        padding-top: 200px;
+    }
+}
