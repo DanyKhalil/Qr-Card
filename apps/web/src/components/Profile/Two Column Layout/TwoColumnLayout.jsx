@@ -13,7 +13,10 @@ const TwoColumnLayout = ({
     contactLinks = [{name: "@dany-khalil", iconName: "instagram"},{name: "71 239 110", iconName: "phone"}],
     connectLinks = [{name: "@dany-khalil", iconName: "instagram"},{name: "71 239 110", iconName: "phone"}],
     websiteLink = [{name:"www.dany.com", iconName:"web"}],
-    bio = "Hello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello"
+    bio = "Hello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello",
+    userName = "John Doe",
+    videos = [],
+    locations = [],
 }) => {
 
     return (
@@ -37,45 +40,12 @@ const TwoColumnLayout = ({
             <div className="column right-column">
                 <DescriptionText text={bio} />
                 <YoutubeVideos 
-                    userName="John Doe" 
-                    videos={[
-                        "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-                        "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-                        "https://youtu.be/video3"
-                    ]}
+                    userName={userName} 
+                    videos={videos}
                 />
 
                 <Locations
-                    locations={[
-                        {
-                        title: "Main Office",
-                        floor: "5th Floor",
-                        building: "Tech Tower",
-                        street: "123 Innovation Street",
-                        city: "San Francisco",
-                        state: "California",
-                        country: "USA",
-                        mapsLink: "https://goo.gl/maps/example1"
-                        },
-                        {
-                        title: "Branch Office",
-                        floor: "2nd Floor",
-                        building: "Business Plaza",
-                        street: "456 Commerce Avenue",
-                        city: "New York",
-                        state: "New York",
-                        country: "USA",
-                        mapsLink: "https://goo.gl/maps/example2"
-                        },
-                        {
-                        title: "Warehouse",
-                        street: "789 Industrial Road",
-                        city: "Chicago",
-                        state: "Illinois",
-                        country: "USA",
-                        mapsLink: "https://goo.gl/maps/example3"
-                        }
-                    ]}
+                    locations={locations}
                 />
 
             </div>
