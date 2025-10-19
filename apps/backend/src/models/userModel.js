@@ -56,4 +56,11 @@ const User = sequelize.define(
   }
 );
 
+User.associate = function(models) {
+  User.hasOne(models.Profile, {
+    foreignKey: 'user_id',
+    as: 'profile'
+  });
+};
+
 export default User;

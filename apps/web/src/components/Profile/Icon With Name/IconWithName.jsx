@@ -34,9 +34,6 @@ const IconWithName = ({
 }) => {
     const iconSrc = iconMap[iconName?.toLowerCase()];
 
-    console.log('IconWithName props:', { name, iconName, iconSrc });
-    console.log('Available icons:', Object.keys(iconMap));
-
     return (
         <div className={`icon-with-name ${className}`}>
             {iconSrc && (
