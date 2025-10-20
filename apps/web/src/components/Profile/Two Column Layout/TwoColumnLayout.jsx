@@ -19,11 +19,31 @@ const TwoColumnLayout = ({
     locations = [],
 }) => {
 
+    function formatSocialLinks(links) {
+        console.log(links)
+        return links.map(({ url }) => {
+            try {
+            const hostname = new URL(url).hostname.replace("www.", "");
+            const icon = hostname.split(".")[0];
+            const username = url.split("/").filter(Boolean).pop();
+            console.log("URL:", icon, url);
+            return {
+                iconName: icon,
+                name: `@${username}`
+            };
+            } catch (error) {
+            console.error("Invalid URL:", url);
+            return null;
+            }
+        }).filter(Boolean);
+    }
+
+
     return (
         <div className={`two-column-layout ${className}`}>
             <div className="column left-column">
                 <TitleAndLinks title="Contact" links={contactLinks}/>
-                <TitleAndLinks title="Connect" links={connectLinks}/>
+                <TitleAndLinks title="Connect" links={formatSocialLinks(connectLinks)}/>
                 <TitleAndLinks title="Website" links={websiteLink}/>
             </div>
             

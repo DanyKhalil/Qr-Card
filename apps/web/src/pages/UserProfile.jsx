@@ -66,10 +66,10 @@ const UserProfile = ({userId = 'user001'}) => {
                 dob = {userData.dob}
                 headline = {userData.headline}
                 contactLinks = {contactLinks}
-                // connectLinks = {userData.name}
+                connectLinks = {userData.social_media_links}
                 websiteLink = {userData.website_link}
                 bio = {userData.bio}
-                // videos = {userData.videos_links}
+                videos = {userData.videos_links}
                 locations = {userData.locations}
             />
         </div>
