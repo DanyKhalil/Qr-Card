@@ -25,7 +25,7 @@ const YoutubeVideos = ({
                 {videos.map((videoUrl, index) => (
                 <div key={index} className="video-item">
                     <YoutubePreview 
-                        youtubeUrl={videoUrl}
+                        youtubeObject={videoUrl}
                         width="100%"
                         height="250px"
                         autoPlay={false}

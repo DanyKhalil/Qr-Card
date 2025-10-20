@@ -13,14 +13,37 @@ const TwoColumnLayout = ({
     contactLinks = [{name: "@dany-khalil", iconName: "instagram"},{name: "71 239 110", iconName: "phone"}],
     connectLinks = [{name: "@dany-khalil", iconName: "instagram"},{name: "71 239 110", iconName: "phone"}],
     websiteLink = [{name:"www.dany.com", iconName:"web"}],
-    bio = "Hello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello"
+    bio = "Hello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello",
+    userName = "John Doe",
+    videos = [],
+    locations = [],
 }) => {
+
+    function formatSocialLinks(links) {
+        console.log(links)
+        return links.map(({ url }) => {
+            try {
+            const hostname = new URL(url).hostname.replace("www.", "");
+            const icon = hostname.split(".")[0];
+            const username = url.split("/").filter(Boolean).pop();
+            console.log("URL:", icon, url);
+            return {
+                iconName: icon,
+                name: `@${username}`
+            };
+            } catch (error) {
+            console.error("Invalid URL:", url);
+            return null;
+            }
+        }).filter(Boolean);
+    }
+
 
     return (
         <div className={`two-column-layout ${className}`}>
             <div className="column left-column">
                 <TitleAndLinks title="Contact" links={contactLinks}/>
-                <TitleAndLinks title="Connect" links={connectLinks}/>
+                <TitleAndLinks title="Connect" links={formatSocialLinks(connectLinks)}/>
                 <TitleAndLinks title="Website" links={websiteLink}/>
             </div>
             
@@ -37,45 +60,12 @@ const TwoColumnLayout = ({
             <div className="column right-column">
                 <DescriptionText text={bio} />
                 <YoutubeVideos 
-                    userName="John Doe" 
-                    videos={[
-                        "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-                        "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-                        "https://youtu.be/video3"
-                    ]}
+                    userName={userName} 
+                    videos={videos}
                 />
 
                 <Locations
-                    locations={[
-                        {
-                        title: "Main Office",
-                        floor: "5th Floor",
-                        building: "Tech Tower",
-                        street: "123 Innovation Street",
-                        city: "San Francisco",
-                        state: "California",
-                        country: "USA",
-                        mapsLink: "https://goo.gl/maps/example1"
-                        },
-                        {
-                        title: "Branch Office",
-                        floor: "2nd Floor",
-                        building: "Business Plaza",
-                        street: "456 Commerce Avenue",
-                        city: "New York",
-                        state: "New York",
-                        country: "USA",
-                        mapsLink: "https://goo.gl/maps/example2"
-                        },
-                        {
-                        title: "Warehouse",
-                        street: "789 Industrial Road",
-                        city: "Chicago",
-                        state: "Illinois",
-                        country: "USA",
-                        mapsLink: "https://goo.gl/maps/example3"
-                        }
-                    ]}
+                    locations={locations}
                 />
 
             </div>
