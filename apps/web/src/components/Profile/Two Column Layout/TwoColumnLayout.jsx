@@ -20,16 +20,15 @@ const TwoColumnLayout = ({
 }) => {
 
     function formatSocialLinks(links) {
-        console.log(links)
         return links.map(({ url }) => {
             try {
             const hostname = new URL(url).hostname.replace("www.", "");
             const icon = hostname.split(".")[0];
             const username = url.split("/").filter(Boolean).pop();
-            console.log("URL:", icon, url);
             return {
                 iconName: icon,
-                name: `@${username}`
+                name: `@${username}`,
+                link: url
             };
             } catch (error) {
             console.error("Invalid URL:", url);
@@ -37,7 +36,6 @@ const TwoColumnLayout = ({
             }
         }).filter(Boolean);
     }
-
 
     return (
         <div className={`two-column-layout ${className}`}>
