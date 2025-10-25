@@ -1,4 +1,5 @@
 import './App.css'
+import { Routes, Route } from "react-router-dom";
 
 import Header from './components/Header/Header.jsx';
 import CoverPhoto from './components/Profile/Cover Photo/CoverPhoto.jsx';
@@ -9,9 +10,9 @@ import UserProfile from './pages/UserProfile.jsx';
 
 function App() {
   return (    
-        <div className="App">
-               <UserProfile />
-        </div>
+    <Routes>
+      <Route path="/profile/:id" element={<UserProfile/>}/>
+    </Routes>
   )
 }
 
