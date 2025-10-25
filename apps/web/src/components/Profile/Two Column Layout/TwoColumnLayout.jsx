@@ -6,6 +6,7 @@ import YoutubePreview from '../Youtube Preview/YoutubePreview';
 import YoutubeVideos from '../Youtube Videos/YoutubeVideos';
 import AddressCard from '../Address Card/AddressCard';
 import Locations from '../Locations/Locations';
+import ProfileQrCode from '../Qr Code/ProfileQrCode';
 
 const TwoColumnLayout = ({ 
     className = "",
@@ -17,6 +18,7 @@ const TwoColumnLayout = ({
     userName = "John Doe",
     videos = [],
     locations = [],
+    id = "User001",
 }) => {
 
     function formatSocialLinks(links) {
@@ -37,12 +39,15 @@ const TwoColumnLayout = ({
         }).filter(Boolean);
     }
 
+    const profileUrlForQrCode = `${window.location.origin}/profile/${id}`;
+
     return (
         <div className={`two-column-layout ${className}`}>
             <div className="column left-column">
                 <TitleAndLinks title="Contact" links={contactLinks}/>
                 <TitleAndLinks title="Connect" links={formatSocialLinks(connectLinks)}/>
                 <TitleAndLinks title="Website" links={websiteLink}/>
+                <ProfileQrCode profileUrl={profileUrlForQrCode}/>
             </div>
             
             <div 

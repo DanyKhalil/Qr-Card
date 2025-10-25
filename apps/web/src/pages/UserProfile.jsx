@@ -76,6 +76,7 @@ const UserProfile = () => {
                 bio = {userData.bio}
                 videos = {userData.videos_links}
                 locations = {userData.locations}
+                id = {id}
             />
         </div>
     );
