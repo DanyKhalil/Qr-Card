@@ -7,10 +7,11 @@ const Locations = ({
   className = "",
   gap = "30px"
 }) => {
-  // Don't render if no locations
+  // dont render if no locations
   if (!locations || locations.length === 0) {
     return null;
   }
+  console.log(locations)
 
   return (
     <div className={`locations-section ${className}`}>

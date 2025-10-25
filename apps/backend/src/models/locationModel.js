@@ -48,6 +48,10 @@ const Location = sequelize.define(
             type: DataTypes.DATE,
             defaultValue: DataTypes.NOW,
         },
+        title: {
+            type: DataTypes.STRING(255),
+            allowNull: true,
+        },
     },
     {
         tableName: "Location",

@@ -46,7 +46,7 @@ const TwoColumnLayout = ({
             <div className="column left-column">
                 <TitleAndLinks title="Contact" links={contactLinks}/>
                 <TitleAndLinks title="Connect" links={formatSocialLinks(connectLinks)}/>
-                <TitleAndLinks title="Website" links={websiteLink}/>
+                <TitleAndLinks title="Website" links={[{name:websiteLink, iconName:"web"}]}/>
                 <ProfileQrCode profileUrl={profileUrlForQrCode}/>
             </div>
             

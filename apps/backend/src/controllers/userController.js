@@ -67,7 +67,7 @@ export const getUserProfile = async (req, res) => {
               model: Location,
               as: 'locations',
               attributes: [
-                'id', 'country', 'state', 'city', 'street', 'building', 
+                'id', 'title', 'country', 'state', 'city', 'street', 'building', 
                 'floor', 'maps_url', 'latitude', 'longitude'
               ]
             }
@@ -106,6 +106,7 @@ export const getUserProfile = async (req, res) => {
         display_order: video.display_order
       })) || [],
       locations: user.profile.locations?.map(location => ({
+        title: location.title,
         country: location.country,
         state: location.state,
         city: location.city,
