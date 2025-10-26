@@ -1,0 +1,54 @@
+/* ---- Base Button Styles ---- */
+.fancy-btn__root {
+  border: none;
+  border-radius: 12px;
+  padding: 0.6rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  color: white;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* ---- Hover and Active Effects ---- */
+.fancy-btn__root:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+}
+
+.fancy-btn__root:active {
+  transform: scale(0.97);
+}
+
+/* ---- Bold Option ---- */
+.fancy-btn__bold {
+  font-weight: 700;
+}
+
+/* ---- Coral Color Palette ---- */
+.fancy-btn__coral {
+  background-color: #ff8559;
+}
+
+.fancy-btn__coral:hover {
+  background-color: #ff571a;
+}
+
+.fancy-btn__coral:active {
+  background-color: #ffae91;
+}
+
+/* ---- Green Color Palette ---- */
+.fancy-btn__green {
+  background-color: #82c294;
+}
+
+.fancy-btn__green:hover {
+  background-color: #47855b;
+}
+
+.fancy-btn__green:active {
+  background-color: #bcf4cb;
+}

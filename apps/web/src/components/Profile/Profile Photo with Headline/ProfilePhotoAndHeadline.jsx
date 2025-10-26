@@ -1,17 +1,43 @@
 import React from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import "./ProfilePhotoAndHeadline.css"
 import ProfilePic from "../Profile Pic/ProfilePic.jsx"
 import Headline from "../Headline/Headline.jsx"
+import Button from '../Button/Button.jsx';
 
 const ProfilePhotoAndHeadline = ({photo, name, dob, headline,}) => {
+    const navigate = useNavigate();
+    const { id } = useParams(); // grabs "User001" from /profile/User001
+
+    const handleAnalytics = () => {
+        navigate(`/profile-analytics/${id}`);
+    };
+    const handleUpdate = () => {
+        navigate(`/edit-profile/${id}`);
+    };
+
+
     return (
-        <div className = "profile-photo-and-headline">
-            <ProfilePic photo={photo} borderColor="#82C294"/>
-            <Headline 
-                    name={name}
-                    dob={dob}
-                    headline={headline}
-            />
+        <div className="profile-section__wrapper">
+            <div className="profile-section__left">
+                <ProfilePic photo={photo} borderColor="#82C294" />
+                <Headline name={name} dob={dob} headline={headline} />
+            </div>
+
+            <div className="profile-section__right">
+                <Button
+                    text="Profile Analytics"
+                    color="green"
+                    bold
+                    action={handleAnalytics}
+                />
+                <Button
+                    text="Edit Profile"
+                    color="coral"
+                    bold
+                    action={handleUpdate}
+                />
+            </div>
         </div>
     )    
 }
