@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import { QRCodeCanvas } from "qrcode.react";
 import "./ProfileQrCode.css";
+import Button from "../Button/Button";
 
 const ProfileQrCode = ({ profileUrl }) => {
     // it takes a sparameter the profile Url which will be localhose//1557//profile/id
@@ -46,9 +47,14 @@ const ProfileQrCode = ({ profileUrl }) => {
                 bgColor="#ffffff"
                 fgColor="#0a0a0a"
             />
-            <button className="qr-download-btn" onClick={handleDownload} style={{width:qrSize}}>
-                Download QR Code
-            </button>
+            <br></br>
+            <Button
+                text="Download QR Code"
+                color="green"
+                bold
+                action={handleDownload}
+                width={qrSize}
+            />
         </div>
     );
 };

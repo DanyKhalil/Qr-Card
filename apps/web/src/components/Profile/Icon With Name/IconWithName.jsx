@@ -11,6 +11,7 @@ import Github from "../../../assets/images/icons/github-icon-green.png";
 import Phone from "../../../assets/images/icons/phone-icon-green.png";
 import Email from "../../../assets/images/icons/email-icon-green.png";
 import Web from "../../../assets/images/icons/web-icon-green.png";
+import LinkedIn from "../../../assets/images/icons/linkedin-icon-green.png"
 
 const iconMap = {
     whatsapp: Whatsapp,
@@ -19,6 +20,8 @@ const iconMap = {
     tiktok: Tiktok,
     youtube: Youtube,
     x: X,
+    twitter: X,
+    linkedin: LinkedIn,
     github: Github,
     phone: Phone,
     email: Email,

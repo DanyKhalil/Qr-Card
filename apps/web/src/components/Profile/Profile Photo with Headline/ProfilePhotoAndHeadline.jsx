@@ -7,7 +7,7 @@ import Button from '../Button/Button.jsx';
 
 const ProfilePhotoAndHeadline = ({photo, name, dob, headline,}) => {
     const navigate = useNavigate();
-    const { id } = useParams(); // grabs "User001" from /profile/User001
+    const { id } = useParams();
 
     const handleAnalytics = () => {
         navigate(`/profile-analytics/${id}`);

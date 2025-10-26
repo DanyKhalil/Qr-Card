@@ -6,6 +6,7 @@ const Button = ({
     bold = false,
     color = "coral", // coud be green or coral
     action = () => {},
+    width = "220px"
 }) => {
     const colorClass = color === "coral" ? "fancy-btn__coral" : "fancy-btn__green";
 
@@ -15,6 +16,7 @@ const Button = ({
                 bold ? "fancy-btn__bold" : ""
             }`}
             onClick={action}
+            style={{width:width}}
         >
             {text}
         </button>
