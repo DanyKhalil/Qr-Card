@@ -7,11 +7,13 @@ import ProfilePhotoAndHeadline from './components/Profile/Profile Photo with Hea
 import TwoColumnLayout from './components/Profile/Two Column Layout/TwoColumnLayout.jsx';
 import Footer from './components/Footer/Footer.jsx';
 import UserProfile from './pages/UserProfile.jsx';
+import EditUserProfile from './pages/EditUserProfile.jsx';
 
 function App() {
   return (    
     <Routes>
       <Route path="/profile/:id" element={<UserProfile/>}/>
+      <Route path="/edit-profile/:id" element={<EditUserProfile/>}/>
     </Routes>
   )
 }
