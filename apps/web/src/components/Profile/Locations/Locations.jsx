@@ -11,7 +11,6 @@ const Locations = ({
   if (!locations || locations.length === 0) {
     return null;
   }
-  console.log(locations)
 
   return (
     <div className={`locations-section ${className}`}>

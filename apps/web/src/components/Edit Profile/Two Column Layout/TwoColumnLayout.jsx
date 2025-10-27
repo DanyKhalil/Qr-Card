@@ -1,17 +1,20 @@
 import React from 'react';
 import './TwoColumnLayout.css';
-import TitleAndLinks from "../../Profile/Title With Links/TitleAndLinks"
+import TitleAndLinks from "../Title With Links/TitleAndLinks"
 import DescriptionText from '../../Profile/Description Text/DescriptionText';
 import YoutubePreview from '../../Profile/Youtube Preview/YoutubePreview';
-import YoutubeVideos from '../../Profile/Youtube Videos/YoutubeVideos';
+import YoutubeVideos from '../Youtube Videos/YoutubeVideos';
 import AddressCard from '../../Profile/Address Card/AddressCard';
 import Locations from '../../Profile/Locations/Locations';
 import ProfileQrCode from '../../Profile/Qr Code/ProfileQrCode';
 import TitleAndFields from '../Title With Fields/TitleAndFields';
+import LabelWithTextArea from '../Label With Text Area/LabelWithTextArea';
+import YouTubeCard from '../Youtube Card/YoutubeCard';
 
 const TwoColumnLayout = ({ 
     className = "",
     gap = "0px",
+    headline = "",
     personalInformationFields = [],
     connectLinks = [{name: "@dany-khalil", iconName: "instagram"},{name: "71 239 110", iconName: "phone"}],
     websiteLink = [{name:"www.dany.com", iconName:"web"}],
@@ -34,7 +37,7 @@ const TwoColumnLayout = ({
                 link: url
             };
             } catch (error) {
-            console.error("Invalid URL:", url);
+            console.error("Invalid URL:", url, error);
             return null;
             }
         }).filter(Boolean);
@@ -46,8 +49,7 @@ const TwoColumnLayout = ({
         <div className={`two-column-layout ${className}`}>
             <div className="column left-column">
                 <TitleAndFields title="Personal Information" fields={personalInformationFields}/>
-                <TitleAndLinks title="Connect" links={formatSocialLinks(connectLinks)}/>
-                <TitleAndLinks title="Website" links={[{name:websiteLink, iconName:"web"}]}/>
+                <TitleAndLinks title="Social Media" links={formatSocialLinks(connectLinks)}/>
                 <ProfileQrCode profileUrl={profileUrlForQrCode}/>
             </div>
             
@@ -62,15 +64,18 @@ const TwoColumnLayout = ({
             />
             
             <div className="column right-column">
-                <DescriptionText text={bio} />
+                <TitleAndFields title="Profile Summary" fields={[{label:"Headline", id: "headline", value: headline}]}/>
+                <LabelWithTextArea label="Description" id="bio" value={bio} />
+                <TitleAndFields title="Website" fields={[{label:"URL", id: "website_url", value: websiteLink}]}/>
+
                 <YoutubeVideos 
                     userName={userName} 
                     videos={videos}
                 />
 
-                <Locations
+                {/* <Locations
                     locations={locations}
-                />
+                /> */}
 
             </div>
         </div>

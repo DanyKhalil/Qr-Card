@@ -27,17 +27,17 @@ const EditUserProfile = ({
 ) => {
   // here ill put  the inputs properties, and case they are not euqal the above anymore, ill sedn
   // a update request to the backend logic
-  // const [coverPhotoInput, setCoverPhotoInput] = useState(coverPhoto);
-  // const [profilePicInput, setProfilePicInput] = useState(profilePic);
+  const [coverPhotoInput, setCoverPhotoInput] = useState(coverPhoto);
+  const [profilePicInput, setProfilePicInput] = useState(profilePic);
   const [userNameInput, setUserNameInput] = useState(userName);
   const [dobInput, setDobInput] = useState(dob);
-  // const [headlineInput, setHeadlineInput] = useState(headline);
+  const [headlineInput, setHeadlineInput] = useState(headline);
   const [phoneNumberInput, setPhoneNumberInput] = useState(contactLinks[1].name);
-  // const [connectLinksInput, setConnectLinksInput] = useState(connectLinks);
-  // const [websiteLinkInput, setWebsiteLinkInput] = useState(websiteLink);
-  // const [bioInput, setBioInput] = useState(bio);
-  // const [videosInput, setVideosInput] = useState(videos);
-  // const [locationsInput, setLocationsInput] = useState(locations);
+  const [connectLinksInput, setConnectLinksInput] = useState(connectLinks);
+  const [websiteLinkInput, setWebsiteLinkInput] = useState(websiteLink);
+  const [bioInput, setBioInput] = useState(bio);
+  const [videosInput, setVideosInput] = useState(videos);
+  const [locationsInput, setLocationsInput] = useState(locations);
 
   let personalInformationFields = [
     {label:"Name", id: "name", value: userNameInput},
@@ -49,11 +49,10 @@ const EditUserProfile = ({
   return (    
     <div>
       <Header/>
-      <CoverPhoto photo={coverPhoto} height={300} paddingTop={80}/>
-      <ProfilePhotoAndHeadline  photo={profilePic} 
-                                name={userName}
-                                dob={dob}
-                                headline={headline}
+      <CoverPhoto photo={coverPhotoInput} height={300} paddingTop={80}/>
+      <ProfilePhotoAndHeadline  photo={profilePicInput} 
+                                name={userNameInput}
+                                dob={dobInput}
       />
       <TwoColumnLayout 
               separatorWidth="3px"
@@ -61,12 +60,13 @@ const EditUserProfile = ({
               gap="10px"
               className="my-layout"
               personalInformationFields = {personalInformationFields}
-              connectLinks = {connectLinks}
-              websiteLink = {websiteLink}
-              bio = {bio}
-              userName = {userName}
-              videos = {videos}
-              locations = {locations}
+              headline={headlineInput}
+              connectLinks = {connectLinksInput}
+              websiteLink = {websiteLinkInput}
+              bio = {bioInput}
+              userName = {userNameInput}
+              videos = {videosInput}
+              locations = {locationsInput}
               id = {id}
       >
       </TwoColumnLayout>

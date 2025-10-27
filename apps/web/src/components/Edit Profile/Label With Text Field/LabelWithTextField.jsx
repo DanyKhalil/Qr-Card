@@ -10,7 +10,6 @@ const LabelWithTextField = ({ label, id, value }) => {
                 id={id}
                 value={value}
                 className="label-field__input"
-                readOnly
             />
         </div>
     );
