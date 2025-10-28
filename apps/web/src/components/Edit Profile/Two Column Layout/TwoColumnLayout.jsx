@@ -10,6 +10,7 @@ import ProfileQrCode from '../../Profile/Qr Code/ProfileQrCode';
 import TitleAndFields from '../Title With Fields/TitleAndFields';
 import LabelWithTextArea from '../Label With Text Area/LabelWithTextArea';
 import YouTubeCard from '../Youtube Card/YoutubeCard';
+import AddressCards from '../Address Cards/AddressCards';
 
 const TwoColumnLayout = ({ 
     className = "",
@@ -73,9 +74,9 @@ const TwoColumnLayout = ({
                     videos={videos}
                 />
 
-                {/* <Locations
-                    locations={locations}
-                /> */}
+                <AddressCards
+                    addresses={locations}
+                />
 
             </div>
         </div>

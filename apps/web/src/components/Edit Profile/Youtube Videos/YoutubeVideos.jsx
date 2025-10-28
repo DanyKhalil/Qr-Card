@@ -1,6 +1,7 @@
 import React from 'react';
 import './YoutubeVideos.css';
 import YouTubeCard from '../Youtube Card/YoutubeCard';
+import Button from '../../Profile/Button/Button';
 
 const YoutubeVideos = ({ 
     videos = [],
@@ -32,6 +33,8 @@ const YoutubeVideos = ({
                 </div>
                 ))}
             </div>
+            <br></br>
+            <Button text='Add Video Link' color='green' width='100%' />
         </div>
     );
 };
