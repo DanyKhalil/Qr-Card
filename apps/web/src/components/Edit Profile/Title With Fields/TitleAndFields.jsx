@@ -15,6 +15,7 @@ const TitleAndFields = ({ title, fields }) => {
             label={field.label}
             id={field.id}
             value={field.value}
+            setter={field.setter}
           />
         ))}
       </div>

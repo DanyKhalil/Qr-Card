@@ -11,7 +11,6 @@ const YoutubeVideos = ({
     if (!videos || videos.length === 0) {
         return null;
     }
-    console.log(videos)
 
     return (
         <div className={`user-videos-section ${className}`}>

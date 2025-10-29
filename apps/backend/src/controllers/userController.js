@@ -127,3 +127,43 @@ export const getUserProfile = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+// --- to start updating the user info on all tabels -
+export const updateUserProfile = async (req, res) => {
+  try {
+    const {id} = req.params;
+    const {headline} = req.body;
+
+    if (!id) {
+      return res.status(403).json({
+        success:false,
+        message: 'Unauthorized User'
+      })
+    }
+
+    const profile = await Profile.findOne({
+      where: {user_id: id}
+    })
+
+    if (!profile){
+      return res.status(404).json({
+        success: false,
+        message: "Not FOund User"
+      })
+    }
+
+    const updateProfile = await profile.update({
+      headline: headline.trim()
+    })
+
+    res.status(200).json({
+      success: true,
+      message: 'Profile updated succesffully',
+    })
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    })
+  }
+}

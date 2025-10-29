@@ -19,6 +19,15 @@ export const userApi = {
             throw error;
         }
     },
+    updateUserProfile: async (userId, profileData) => {
+        try {
+            const response = await api.put(`/users/${userId}`, profileData);
+            return response.data
+        } catch (error) {
+            console.error('ERor while updating user profile', error);
+            throw error
+        }
+    }
 };
 
 export default api;

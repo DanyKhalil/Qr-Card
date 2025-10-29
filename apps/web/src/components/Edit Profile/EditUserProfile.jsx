@@ -1,9 +1,11 @@
+import { userApi } from '../../services/userApi.js';
 import { useState } from 'react'
 import Footer from '../Footer/Footer.jsx'
 import Header from '../Header/Header.jsx'
 import CoverPhoto from '../Profile/Cover Photo/CoverPhoto.jsx'
 import ProfilePhotoAndHeadline from './Profile Photo with Headline/ProfilePhotoAndHeadline.jsx'
 import TwoColumnLayout from './Two Column Layout/TwoColumnLayout.jsx'
+import { useNavigate } from 'react-router-dom';
 
 
 const EditUserProfile = ({
@@ -25,6 +27,9 @@ const EditUserProfile = ({
   id = "User001",
 }
 ) => {
+
+  const navigate = useNavigate();
+
   // here ill put  the inputs properties, and case they are not euqal the above anymore, ill sedn
   // a update request to the backend logic
   const [coverPhotoInput, setCoverPhotoInput] = useState(coverPhoto);
@@ -40,33 +45,77 @@ const EditUserProfile = ({
   const [locationsInput, setLocationsInput] = useState(locations);
 
   let personalInformationFields = [
-    {label:"Name", id: "name", value: userNameInput},
-    {label:"Date of Birth", id: "dob", value: dobInput},
-    {label:"Phone No.", id: "phone_number", value: phoneNumberInput}
+    {label:"Name", id: "name", value: userNameInput, setter: setUserNameInput},
+    {label:"Date of Birth", id: "dob", value: dobInput, setter: setDobInput},
+    {label:"Phone No.", id: "phone_number", value: phoneNumberInput, setter: setPhoneNumberInput}
   ];
+
+
+
+
+
+  // function to update user in db
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [updateMessage, setUpdateMessage] = useState('');
+  const handleUserProfileUpdate = async (newHeadline) => {
+
+    setIsUpdating(true);
+    setUpdateMessage('');
+
+    try {
+      const result = await userApi.updateUserProfile(id, {headline: newHeadline});
+      
+      if (result.success) {
+        setUpdateMessage('User updated successfully!');
+        setTimeout(() => {setUpdateMessage(''); navigate(`/profile/${id}`);}, 2000);
+        
+      }
+    } catch (error) {
+      console.error('Failed to update userprofile:', error);
+      setUpdateMessage(`Error: ${error.message}`);
+      setTimeout(() => setUpdateMessage(''), 5000);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+
+  const handleSaveChanges = () => {
+    handleUserProfileUpdate(headlineInput);
+  };
 
 
   return (    
     <div>
       <Header/>
       <CoverPhoto photo={coverPhotoInput} height={300} paddingTop={80}/>
-      <ProfilePhotoAndHeadline  photo={profilePicInput} 
-                                name={userNameInput}
-                                dob={dobInput}
-      />
+      <ProfilePhotoAndHeadline  photo={profilePicInput} saveAction={handleSaveChanges}/>
+      {updateMessage && (
+        <div style={{
+          position: "fixed",
+          right: "10px",
+          top: "100px",
+          display: "inline",
+          borderRadius: '4px',
+          backgroundColor: updateMessage.includes('Error') ? '#ffebee' : '#e8f5e8',
+          color: updateMessage.includes('Error') ? '#c62828' : '#2e7d32',
+          border: `1px solid ${updateMessage.includes('Error') ? '#ffcdd2' : '#c8e6c9'}`
+        }}>
+          {updateMessage}
+        </div>
+      )}
       <TwoColumnLayout 
               separatorWidth="3px"
               separatorColor="#82C294"
               gap="10px"
               className="my-layout"
               personalInformationFields = {personalInformationFields}
-              headline={headlineInput}
-              connectLinks = {connectLinksInput}
-              websiteLink = {websiteLinkInput}
-              bio = {bioInput}
-              userName = {userNameInput}
-              videos = {videosInput}
-              locations = {locationsInput}
+              headline={headlineInput} headlineSetter = {setHeadlineInput}
+              connectLinks = {connectLinksInput} connectLinksSetter = {setConnectLinksInput}
+              websiteLink = {websiteLinkInput} websiteLinkSetter = {setWebsiteLinkInput}
+              bio = {bioInput} bioSetter = {setBioInput}
+              videos = {videosInput} videosSetter = {setVideosInput}
+              locations = {locationsInput} locationSetter={setLocationsInput}
               id = {id}
       >
       </TwoColumnLayout>

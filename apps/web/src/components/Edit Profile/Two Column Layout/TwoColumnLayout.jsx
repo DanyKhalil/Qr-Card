@@ -20,10 +20,15 @@ const TwoColumnLayout = ({
     connectLinks = [{name: "@dany-khalil", iconName: "instagram"},{name: "71 239 110", iconName: "phone"}],
     websiteLink = [{name:"www.dany.com", iconName:"web"}],
     bio = "Hello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello",
-    userName = "John Doe",
     videos = [],
     locations = [],
     id = "User001",
+    headlineSetter,
+    connectLinksSetter,
+    websiteLinkSetter,
+    bioSetter,
+    videosSetter,
+    locationSetter,
 }) => {
 
     function formatSocialLinks(links) {
@@ -65,12 +70,11 @@ const TwoColumnLayout = ({
             />
             
             <div className="column right-column">
-                <TitleAndFields title="Profile Summary" fields={[{label:"Headline", id: "headline", value: headline}]}/>
+                <TitleAndFields title="Profile Summary" fields={[{label:"Headline", id: "headline", value: headline, setter: headlineSetter}]}/>
                 <LabelWithTextArea label="Description" id="bio" value={bio} />
-                <TitleAndFields title="Website" fields={[{label:"URL", id: "website_url", value: websiteLink}]}/>
+                <TitleAndFields title="Website" fields={[{label:"URL", id: "website_url", value: websiteLink, setter:websiteLinkSetter}]}/>
 
                 <YoutubeVideos 
-                    userName={userName} 
                     videos={videos}
                 />
 

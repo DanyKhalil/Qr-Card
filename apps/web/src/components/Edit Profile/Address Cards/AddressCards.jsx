@@ -11,7 +11,6 @@ const AddressCards = ({
     if (!addresses || addresses.length === 0) {
         return null;
     }
-    console.log(addresses)
 
     return (
         <div className={`user-videos-section ${className}`}>

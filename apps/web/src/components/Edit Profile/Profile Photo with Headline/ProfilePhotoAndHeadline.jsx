@@ -4,7 +4,7 @@ import "./ProfilePhotoAndHeadline.css";
 import ProfilePic from '../../Profile/Profile Pic/ProfilePic.jsx';
 import Button from '../../Profile/Button/Button.jsx';
 
-const ProfilePhotoAndHeadline = ({ photo }) => {
+const ProfilePhotoAndHeadline = ({ photo, saveAction }) => {
     const navigate = useNavigate();
     const { id } = useParams();
 
@@ -12,7 +12,7 @@ const ProfilePhotoAndHeadline = ({ photo }) => {
         navigate(`/profile/${id}`);
     };
     const handleSave = () => {
-        alert("Saved!");
+        saveAction();
     };
 
     const handleUpload = () => {
