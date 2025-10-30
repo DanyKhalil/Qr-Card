@@ -70,9 +70,9 @@ const TwoColumnLayout = ({
             />
             
             <div className="column right-column">
-                <TitleAndFields title="Profile Summary" fields={[{label:"Headline", id: "headline", value: headline, setter: headlineSetter}]}/>
-                <LabelWithTextArea label="Description" id="bio" value={bio} />
-                <TitleAndFields title="Website" fields={[{label:"URL", id: "website_url", value: websiteLink, setter:websiteLinkSetter}]}/>
+                <TitleAndFields title="Profile Summary" fields={[{label:"Headline", type:"text", id: "headline", value: headline, setter: headlineSetter}]}/>
+                <LabelWithTextArea label="Description" id="bio" value={bio} setter={bioSetter}/>
+                <TitleAndFields title="Website" fields={[{label:"URL", type:"text", id: "website_url", value: websiteLink, setter:websiteLinkSetter}]}/>
 
                 <YoutubeVideos 
                     videos={videos}

@@ -1,7 +1,7 @@
 import React from 'react';
 import './LabelWithTextArea.css';
 
-const LabelWithTextArea = ({ label, id, value }) => {
+const LabelWithTextArea = ({ label, id, value, setter }) => {
     return (
         <div className='title-and-fields'>
             <div className="label-field">
@@ -10,6 +10,7 @@ const LabelWithTextArea = ({ label, id, value }) => {
                     id={id}
                     value={value}
                     className="label-field__text-area"
+                    onChange={(e)=>setter(e.target.value)}
                 />
             </div>
         </div>

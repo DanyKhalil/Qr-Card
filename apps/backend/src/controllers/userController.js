@@ -132,7 +132,7 @@ export const getUserProfile = async (req, res) => {
 export const updateUserProfile = async (req, res) => {
   try {
     const {id} = req.params;
-    const {headline} = req.body;
+    const {userName, dob, phoneNumber, headline, bio, websiteUrl} = req.body;
 
     if (!id) {
       return res.status(403).json({
@@ -141,19 +141,30 @@ export const updateUserProfile = async (req, res) => {
       })
     }
 
+    const user = await User.findOne({
+      where: {id: id}
+    })
     const profile = await Profile.findOne({
       where: {user_id: id}
     })
 
-    if (!profile){
+    if (!user || !profile){
       return res.status(404).json({
         success: false,
         message: "Not FOund User"
       })
     }
+    console.log(phoneNumber)
 
+    const updateUser = await user.update({
+      name: userName.trim()
+    })
     const updateProfile = await profile.update({
-      headline: headline.trim()
+      headline: headline.trim(),
+      dob: dob,
+      phone_number: phoneNumber,
+      bio: bio,
+      website: websiteUrl
     })
 
     res.status(200).json({
@@ -161,6 +172,7 @@ export const updateUserProfile = async (req, res) => {
       message: 'Profile updated succesffully',
     })
   } catch (error) {
+    console.log(error)
     res.status(500).json({
       success: false,
       message: error.message

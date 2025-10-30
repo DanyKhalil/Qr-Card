@@ -33,23 +33,43 @@ const EditUserProfile = ({
   // here ill put  the inputs properties, and case they are not euqal the above anymore, ill sedn
   // a update request to the backend logic
   const [coverPhotoInput, setCoverPhotoInput] = useState(coverPhoto);
+  const [coverPhotoInputErrorMessage, setCoverPhotoInputErrorMessage] = useState('');
+
   const [profilePicInput, setProfilePicInput] = useState(profilePic);
+  const [profilePicInputErrorMessage, setProfilePicInputErrorMessage] = useState('');
+
   const [userNameInput, setUserNameInput] = useState(userName);
+  const [userNameInputErrorMessage, setUserNameInputErrorMessage] = useState('');
+
   const [dobInput, setDobInput] = useState(dob);
+  const [dobInputErrorMessage, setDobInputErrorMessage] = useState('');
+
   const [headlineInput, setHeadlineInput] = useState(headline);
-  const [phoneNumberInput, setPhoneNumberInput] = useState(contactLinks[1].name);
+  const [headlineInputErrorMessage, setHeadlineInputErrorMessage] = useState('');
+
+  const [phoneNumberInput, setPhoneNumberInput] = useState(contactLinks[1].name[0]);
+  const [phoneNumberInputErrorMessage, setPhoneNumberInputErrorMessage] = useState('');
+
   const [connectLinksInput, setConnectLinksInput] = useState(connectLinks);
+  const [connectLinksInputErrorMessage, setConnectLinksInputErrorMessage] = useState('');
+
   const [websiteLinkInput, setWebsiteLinkInput] = useState(websiteLink);
+  const [websiteLinkInputErrorMessage, setWebsiteLinkInputErrorMessage] = useState('');
+
   const [bioInput, setBioInput] = useState(bio);
+  const [bioInputErrorMessage, setBioInputErrorMessage] = useState('');
+
   const [videosInput, setVideosInput] = useState(videos);
+  const [videosInputErrorMessage, setVideosInputErrorMessage] = useState('');
+
   const [locationsInput, setLocationsInput] = useState(locations);
+  const [locationsInputErrorMessage, setLocationsInputErrorMessage] = useState('');
 
   let personalInformationFields = [
-    {label:"Name", id: "name", value: userNameInput, setter: setUserNameInput},
-    {label:"Date of Birth", id: "dob", value: dobInput, setter: setDobInput},
-    {label:"Phone No.", id: "phone_number", value: phoneNumberInput, setter: setPhoneNumberInput}
+    {label:"Name", type: "text", id: "name", value: userNameInput, setter: setUserNameInput},
+    {label:"Date of Birth", type: "date", id: "dob", value: dobInput, setter: setDobInput},
+    {label:"Phone No.", type: "text", id: "phone_number", value: phoneNumberInput, setter: setPhoneNumberInput}
   ];
-
 
 
 
@@ -57,13 +77,22 @@ const EditUserProfile = ({
   // function to update user in db
   const [isUpdating, setIsUpdating] = useState(false);
   const [updateMessage, setUpdateMessage] = useState('');
-  const handleUserProfileUpdate = async (newHeadline) => {
+
+  const handleUserProfileUpdate = async (newUserName, newDob, newPhoneNumber, newHeadline, newBio, newWebsite) => {
 
     setIsUpdating(true);
     setUpdateMessage('');
 
     try {
-      const result = await userApi.updateUserProfile(id, {headline: newHeadline});
+      const result = await userApi.updateUserProfile(id, 
+        {
+          userName: newUserName,
+          dob: newDob,
+          phoneNumber: newPhoneNumber,
+          headline: newHeadline,
+          bio: newBio,
+          websiteUrl: newWebsite,
+        });
       
       if (result.success) {
         setUpdateMessage('User updated successfully!');
@@ -81,7 +110,7 @@ const EditUserProfile = ({
 
 
   const handleSaveChanges = () => {
-    handleUserProfileUpdate(headlineInput);
+    handleUserProfileUpdate(userNameInput, dobInput, phoneNumberInput, headlineInput, bioInput, websiteLinkInput);
   };
 
 
@@ -96,7 +125,8 @@ const EditUserProfile = ({
           right: "10px",
           top: "100px",
           display: "inline",
-          borderRadius: '4px',
+          borderRadius: '15px',
+          padding: '20px',
           backgroundColor: updateMessage.includes('Error') ? '#ffebee' : '#e8f5e8',
           color: updateMessage.includes('Error') ? '#c62828' : '#2e7d32',
           border: `1px solid ${updateMessage.includes('Error') ? '#ffcdd2' : '#c8e6c9'}`

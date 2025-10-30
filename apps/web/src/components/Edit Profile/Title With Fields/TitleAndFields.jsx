@@ -13,6 +13,7 @@ const TitleAndFields = ({ title, fields }) => {
           <LabelWithTextField
             key={index}
             label={field.label}
+            type={field.type}
             id={field.id}
             value={field.value}
             setter={field.setter}
