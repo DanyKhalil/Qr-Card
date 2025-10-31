@@ -29,8 +29,10 @@ const iconMap = {
 };
 
 const IconWithName = ({ 
+    id,
     name, 
     iconName, 
+    setter,
     fontSize = '20px',
     className = "",
     iconSize = '24px',
@@ -40,7 +42,9 @@ const IconWithName = ({
 
     const handleRemoveClick = (e) => {
         e.stopPropagation();
-        alert('Remove clicked!');
+        let confirmation = window.confirm("Are you sure you want to remove this link?")
+        if (confirmation) 
+            setter((oldLinks) => oldLinks.filter((link)=>(link.id !== id)))
     };
 
     return (

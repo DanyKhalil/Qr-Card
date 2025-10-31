@@ -95,17 +95,20 @@ export const getUserProfile = async (req, res) => {
       phone_number: user.profile.phone_number ? [user.profile.phone_number] : [],
       email: user.email ? [user.email] : [],
       social_media_links: user.profile.social_media?.map(sm => ({
+        id: sm.id,
         url: sm.url,
         display_order: sm.display_order
       })) || [],
       website_link: user.profile.website,
       videos_links: user.profile.videos?.map(video => ({
+        id: video.id,
         video_url: video.video_url,
         title: video.title,
         description: video.description,
         display_order: video.display_order
       })) || [],
       locations: user.profile.locations?.map(location => ({
+        id: location.id,
         title: location.title,
         country: location.country,
         state: location.state,

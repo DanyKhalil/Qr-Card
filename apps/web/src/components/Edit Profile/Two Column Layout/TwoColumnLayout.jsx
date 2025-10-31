@@ -31,13 +31,16 @@ const TwoColumnLayout = ({
     locationSetter,
 }) => {
 
+    console.log(connectLinks)
+
     function formatSocialLinks(links) {
-        return links.map(({ url }) => {
+        return links.map(({ id, url }) => {
             try {
             const hostname = new URL(url).hostname.replace("www.", "");
             const icon = hostname.split(".")[0];
             const username = url.split("/").filter(Boolean).pop();
             return {
+                id: id,
                 iconName: icon,
                 name: `@${username}`,
                 link: url
@@ -55,7 +58,7 @@ const TwoColumnLayout = ({
         <div className={`two-column-layout ${className}`}>
             <div className="column left-column">
                 <TitleAndFields title="Personal Information" fields={personalInformationFields}/>
-                <TitleAndLinks title="Social Media" links={formatSocialLinks(connectLinks)}/>
+                <TitleAndLinks title="Social Media" links={formatSocialLinks(connectLinks)} setter={connectLinksSetter}/>
                 <ProfileQrCode profileUrl={profileUrlForQrCode}/>
             </div>
             
@@ -76,10 +79,12 @@ const TwoColumnLayout = ({
 
                 <YoutubeVideos 
                     videos={videos}
+                    setter={videosSetter}
                 />
 
                 <AddressCards
                     addresses={locations}
+                    setter={locationSetter}
                 />
 
             </div>

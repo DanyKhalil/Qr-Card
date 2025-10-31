@@ -5,6 +5,7 @@ import Button from '../../Profile/Button/Button';
 
 const AddressCards = ({ 
     addresses = [],
+    setter,
     gap = "30px",
     className = ""
 }) => {
@@ -25,6 +26,7 @@ const AddressCards = ({
                 {addresses.map((address, index) => (
                 <div key={index} className="video-item">
                     <AddressCard 
+                        id={address.id}
                         title={address.title}
                         floor={address.floor}
                         building={address.building}
@@ -33,6 +35,7 @@ const AddressCards = ({
                         state={address.state}
                         country={address.country}
                         googleMapsUrl={address.maps_url}
+                        setter={setter}
                     />
                 </div>
                 ))}

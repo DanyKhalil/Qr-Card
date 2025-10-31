@@ -5,6 +5,7 @@ import Button from '../../Profile/Button/Button';
 
 const YoutubeVideos = ({ 
     videos = [],
+    setter,
     gap = "30px",
     className = ""
 }) => {
@@ -25,9 +26,11 @@ const YoutubeVideos = ({
                 {videos.map((videoUrl, index) => (
                 <div key={index} className="video-item">
                     <YouTubeCard 
+                        id={videoUrl.id}
                         title={videoUrl.title}
                         description={videoUrl.description}
                         url={videoUrl.video_url}
+                        setter={setter}
                     />
                 </div>
                 ))}

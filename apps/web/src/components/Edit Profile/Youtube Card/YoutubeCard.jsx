@@ -3,11 +3,20 @@ import './YouTubeCard.css';
 import Button from '../../Profile/Button/Button';
 
 const YouTubeCard = ({ 
+    id,
     title = "",
     description = "",
-    url = "", 
+    url = "",
+    setter, 
     className = "" 
 }) => {
+    const handleDeleteVideo = (e) => {
+        e.stopPropagation();
+        let confirmation = window.confirm("Are you sure you want to remove this video?")
+        if (confirmation)
+            setter((oldVideos) => oldVideos.filter((video) => video.id != id))
+
+    }
     return (
         <div className={`youtube-card ${className}`}>
             <div className="youtube-card__content">
@@ -34,7 +43,7 @@ const YouTubeCard = ({
 
                 <div className="youtube-card__buttons">
                     <Button text="Edit" color="green" action={()=>alert("edit")} width="100px"/>
-                    <Button text="Remove" color="coral" action={()=>alert("remove")} width="100px"/>
+                    <Button text="Remove" color="coral" action={handleDeleteVideo} width="100px"/>
                 </div>
             </div>
         </div>

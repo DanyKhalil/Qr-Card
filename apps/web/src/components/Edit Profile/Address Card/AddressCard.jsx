@@ -3,6 +3,7 @@ import './AddressCard.css';
 import Button from '../../Profile/Button/Button';
 
 const AddressCard = ({ 
+    id,
     title = "",
     floor = "",
     building="",
@@ -11,8 +12,17 @@ const AddressCard = ({
     state = "",
     country = "",
     googleMapsUrl = "",
+    setter,
     className = "" 
 }) => {
+    
+    const handleDeleteLocation = (e) => {
+        e.stopPropagation();
+        let confirmation = window.confirm("Are you sure you want to remove this location")
+        if (confirmation)
+            setter((oldLocations) => oldLocations.filter((location) => location.id != id))
+    }
+
     return (
         <div className={`location-card ${className}`}>
             <div className="location-card__content">
@@ -76,7 +86,7 @@ const AddressCard = ({
 
                 <div className="location-card__buttons">
                     <Button text="Edit" color="green" action={()=>alert("edit")} width="100px"/>
-                    <Button text="Remove" color="coral" action={()=>alert("remove")} width="100px"/>
+                    <Button text="Remove" color="coral" action={handleDeleteLocation} width="100px"/>
                 </div>
             </div>
         </div>
