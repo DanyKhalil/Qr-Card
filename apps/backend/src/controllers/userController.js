@@ -135,7 +135,11 @@ export const getUserProfile = async (req, res) => {
 export const updateUserProfile = async (req, res) => {
   try {
     const {id} = req.params;
-    const {userName, dob, phoneNumber, headline, bio, websiteUrl} = req.body;
+    const {
+      userName, dob, phoneNumber, 
+      headline, bio, websiteUrl, 
+      connectLinks, videos, locations
+    } = req.body;
 
     if (!id) {
       return res.status(403).json({
@@ -150,6 +154,15 @@ export const updateUserProfile = async (req, res) => {
     const profile = await Profile.findOne({
       where: {user_id: id}
     })
+    const socialMediaLinks = await SocialMedia.findAll({
+      where: {profile_id: profile.id}
+    })
+    const userVideos = await Video.findAll({
+      where: {profile_id: profile.id}
+    })
+    const userLocations = await Location.findAll({
+      where: {profile_id: profile.id}
+    }) 
 
     if (!user || !profile){
       return res.status(404).json({
@@ -157,7 +170,22 @@ export const updateUserProfile = async (req, res) => {
         message: "Not FOund User"
       })
     }
-    console.log(phoneNumber)
+
+
+    const checkIfDeleted = (id, objects) => {
+      for (let obj of objects) {
+        if (obj.id === id)
+          return false;
+      }
+      return true;
+    }
+    const checkIfNew = (id, objects) => {
+      for (let obj of objects) {
+        if (obj.id === id)
+          return false;
+      }
+      return true;
+    }
 
     const updateUser = await user.update({
       name: userName.trim()
@@ -169,6 +197,93 @@ export const updateUserProfile = async (req, res) => {
       bio: bio,
       website: websiteUrl
     })
+
+    // social media links uodate
+    for (let link of socialMediaLinks) {
+      let deleted = checkIfDeleted(link.id, connectLinks);
+      if (deleted) {
+        await SocialMedia.destroy({ where: {id: link.id}})
+      }
+      else {
+        let incomingLink = await connectLinks.find(curLink => curLink.id === link.id);
+        await link.update({
+          url: incomingLink.url,
+        })
+      }
+    }
+    for (let link of connectLinks) {
+      let newLink = checkIfNew(link.id, socialMediaLinks);
+      if (newLink) {
+        await SocialMedia.create({
+          profile_id: profile.id,
+          url: link.url
+        })
+      }
+    }
+
+    // vidoes links update
+    for (let link of userVideos) {
+      let deleted = checkIfDeleted(link.id, videos);
+      if (deleted) {
+        await Video.destroy({ where: {id: link.id}})
+      }
+      else {
+        let incomingLink = await userVideos.find(curLink => curLink.id === link.id);
+        await link.update({
+          video_url: incomingLink.video_url,
+          title: incomingLink.title,
+          description: incomingLink.description,
+        })
+      }
+    }
+    for (let link of videos) {
+      let newLink = checkIfNew(link.id, userVideos);
+      if (newLink) {
+        await Video.create({
+          profile_id: profile.id,
+          video_url: link.video_url,
+          title: link.title,
+          description: link.description,
+        })
+      }
+    }
+
+    // locations update
+    for (let link of userLocations) {
+      let deleted = checkIfDeleted(link.id, locations);
+      if (deleted) {
+        await Location.destroy({ where: {id: link.id}})
+      }
+      else {
+        let incomingLink = await userLocations.find(curLink => curLink.id === link.id);
+        await link.update({
+          floor: incomingLink.floor,
+          building: incomingLink.building,
+          street: incomingLink.street,
+          city: incomingLink.city,
+          state: incomingLink.state,
+          country: incomingLink.country,
+          maps_url: incomingLink.maps_url,
+          title: incomingLink.title,
+        })
+      }
+    }
+    for (let link of locations) {
+      let newLink = checkIfNew(link.id, userLocations);
+      if (newLink) {
+        await Location.create({
+          profile_id: profile.id,
+          floor: incomingLink.floor,
+          building: incomingLink.building,
+          street: incomingLink.street,
+          city: incomingLink.city,
+          state: incomingLink.state,
+          country: incomingLink.country,
+          maps_url: incomingLink.maps_url,
+          title: incomingLink.title,
+        })
+      }
+    }
 
     res.status(200).json({
       success: true,

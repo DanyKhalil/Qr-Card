@@ -78,7 +78,7 @@ const EditUserProfile = ({
   const [isUpdating, setIsUpdating] = useState(false);
   const [updateMessage, setUpdateMessage] = useState('');
 
-  const handleUserProfileUpdate = async (newUserName, newDob, newPhoneNumber, newHeadline, newBio, newWebsite) => {
+  const handleUserProfileUpdate = async (newUserName, newDob, newPhoneNumber, newHeadline, newBio, newWebsite, newSocialMediaLinks, newVideos, newLocations) => {
 
     setIsUpdating(true);
     setUpdateMessage('');
@@ -92,6 +92,9 @@ const EditUserProfile = ({
           headline: newHeadline,
           bio: newBio,
           websiteUrl: newWebsite,
+          connectLinks: newSocialMediaLinks,
+          videos: newVideos,
+          locations: newLocations
         });
       
       if (result.success) {
@@ -110,7 +113,7 @@ const EditUserProfile = ({
 
 
   const handleSaveChanges = () => {
-    handleUserProfileUpdate(userNameInput, dobInput, phoneNumberInput, headlineInput, bioInput, websiteLinkInput);
+    handleUserProfileUpdate(userNameInput, dobInput, phoneNumberInput, headlineInput, bioInput, websiteLinkInput, connectLinksInput, videosInput, locationsInput);
   };
 
 

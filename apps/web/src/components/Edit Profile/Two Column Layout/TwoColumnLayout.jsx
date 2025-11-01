@@ -31,8 +31,6 @@ const TwoColumnLayout = ({
     locationSetter,
 }) => {
 
-    console.log(connectLinks)
-
     function formatSocialLinks(links) {
         return links.map(({ id, url }) => {
             try {
