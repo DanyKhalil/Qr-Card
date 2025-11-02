@@ -13,8 +13,11 @@ const AddressCard = ({
     country = "",
     googleMapsUrl = "",
     setter,
-    className = "" 
+    className = "",
+    updateAction,
+    objectSetter
 }) => {
+    const locationObject={id:id, title:title, floor:floor, building:building, street:street, city:city, state:state, country:country, maps_url:googleMapsUrl};
     
     const handleDeleteLocation = (e) => {
         e.stopPropagation();
@@ -85,7 +88,7 @@ const AddressCard = ({
                 </div>
 
                 <div className="location-card__buttons">
-                    <Button text="Edit" color="green" action={()=>alert("edit")} width="100px"/>
+                    <Button text="Edit" color="green" action={()=>{updateAction(); objectSetter(locationObject)}} width="100px"/>
                     <Button text="Remove" color="coral" action={handleDeleteLocation} width="100px"/>
                 </div>
             </div>

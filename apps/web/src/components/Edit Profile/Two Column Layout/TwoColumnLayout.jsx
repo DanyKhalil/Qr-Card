@@ -32,7 +32,10 @@ const TwoColumnLayout = ({
     addSocialMediaModalVisibiltySetter,
     addVideoModalVisibiltySetter,
     updateVideoModalVisibiltySetter,
-    videoObjectUnderUpdateSetter
+    videoObjectUnderUpdateSetter,
+    addLocationModalVisibiltySetter,
+    updateLocationModalVisibiltySetter,
+    locationObjectUnderUpdateSetter
 }) => {
 
     function formatSocialLinks(links) {
@@ -98,6 +101,9 @@ const TwoColumnLayout = ({
                 <AddressCards
                     addresses={locations}
                     setter={locationSetter}
+                    addAction={()=>addLocationModalVisibiltySetter(true)}
+                    updateAction={()=>updateLocationModalVisibiltySetter(true)}
+                    objectSetter={locationObjectUnderUpdateSetter}
                 />
 
             </div>

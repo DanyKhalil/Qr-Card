@@ -29,7 +29,7 @@ const Location = sequelize.define(
             type: DataTypes.STRING(100),
         },
         floor: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.STRING(50),
         },
         maps_url: {
             type: DataTypes.STRING(500),

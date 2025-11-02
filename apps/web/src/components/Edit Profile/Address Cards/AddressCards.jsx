@@ -7,7 +7,10 @@ const AddressCards = ({
     addresses = [],
     setter,
     gap = "30px",
-    className = ""
+    className = "",
+    addAction,
+    updateAction,
+    objectSetter
 }) => {
     if (!addresses || addresses.length === 0) {
         return null;
@@ -36,12 +39,14 @@ const AddressCards = ({
                         country={address.country}
                         googleMapsUrl={address.maps_url}
                         setter={setter}
+                        updateAction={updateAction}
+                        objectSetter={objectSetter}
                     />
                 </div>
                 ))}
             </div>
             <br></br>
-            <Button text='Add Location' color='green' width='100%' />
+            <Button text='Add Location' color='green' width='100%' action={addAction}/>
         </div>
     );
 };

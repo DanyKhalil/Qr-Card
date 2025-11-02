@@ -9,6 +9,8 @@ import { useNavigate } from 'react-router-dom';
 import AddSocialMediaModal from './Modals/AddSocialMediaModal/AddSocialMediaModal.jsx';
 import AddVideoModal from './Modals/VideoModals/AddVideoModal.jsx';
 import EditVideoModal from './Modals/VideoModals/EditVideoModal.jsx';
+import AddLocationModal from './Modals/LocationModals/AddLocationModal.jsx';
+import EditLocationModal from './Modals/LocationModals/EditLocationModal.jsx';
 
 
 const EditUserProfile = ({
@@ -81,7 +83,7 @@ const EditUserProfile = ({
 
   // updating Modal Objecst
   const [videoObjectUnderUpdate, setVideoObjectUnderUpdate] = useState({id:'', title:'', description:'', video_url:''})
-  const [locationObjectUnderUpdate, setLocationObjectUnderUpdate] = useState(null)
+  const [locationObjectUnderUpdate, setLocationObjectUnderUpdate] = useState({id:'', title:'', floor:'', building:'', street:'', city:'', state:'', country:'', maps_url:''})
 
 
 
@@ -176,9 +178,15 @@ const EditUserProfile = ({
               id = {id}
 
               addSocialMediaModalVisibiltySetter = {setAddSocialMediaModalIsVisible}
+
               addVideoModalVisibiltySetter = {setAddVideoModalIsVisible}
               updateVideoModalVisibiltySetter = {setUpdateVideoModalIsVisible}
               videoObjectUnderUpdateSetter = {setVideoObjectUnderUpdate}
+
+              addLocationModalVisibiltySetter = {setAddAdressModalIsVisible}
+              updateLocationModalVisibiltySetter = {setUpdateAdressModalIsVisible}
+              locationObjectUnderUpdateSetter = {setLocationObjectUnderUpdate}
+
       >
       </TwoColumnLayout>
       <Footer />
@@ -199,6 +207,17 @@ const EditUserProfile = ({
         visible={updateVideoModalIsVisible}
         onClose={() => setUpdateVideoModalIsVisible(false)}
         setter={setVideosInput}
+      />
+      <AddLocationModal
+        visible={addAdressModalIsVisible}
+        onClose={() => setAddAdressModalIsVisible(false)}
+        setter={setLocationsInput}
+      />
+      <EditLocationModal
+        locationObject={locationObjectUnderUpdate}
+        visible={updateAdressModalIsVisible}
+        onClose={() => setUpdateAdressModalIsVisible(false)}
+        setter={setLocationsInput}
       />
     </div>
   )

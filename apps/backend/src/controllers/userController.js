@@ -255,7 +255,7 @@ export const updateUserProfile = async (req, res) => {
         await Location.destroy({ where: {id: link.id}})
       }
       else {
-        let incomingLink = await userLocations.find(curLink => curLink.id === link.id);
+        let incomingLink = await locations.find(curLink => curLink.id === link.id);
         await link.update({
           floor: incomingLink.floor,
           building: incomingLink.building,
@@ -273,14 +273,14 @@ export const updateUserProfile = async (req, res) => {
       if (newLink) {
         await Location.create({
           profile_id: profile.id,
-          floor: incomingLink.floor,
-          building: incomingLink.building,
-          street: incomingLink.street,
-          city: incomingLink.city,
-          state: incomingLink.state,
-          country: incomingLink.country,
-          maps_url: incomingLink.maps_url,
-          title: incomingLink.title,
+          floor: link.floor,
+          building: link.building,
+          street: link.street,
+          city: link.city,
+          state: link.state,
+          country: link.country,
+          maps_url: link.maps_url,
+          title: link.title,
         })
       }
     }
