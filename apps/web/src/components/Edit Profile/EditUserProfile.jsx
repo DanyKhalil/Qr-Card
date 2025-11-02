@@ -6,6 +6,7 @@ import CoverPhoto from '../Profile/Cover Photo/CoverPhoto.jsx'
 import ProfilePhotoAndHeadline from './Profile Photo with Headline/ProfilePhotoAndHeadline.jsx'
 import TwoColumnLayout from './Two Column Layout/TwoColumnLayout.jsx'
 import { useNavigate } from 'react-router-dom';
+import AddSocialMediaModal from './Modals/AddSocialMediaModal/AddSocialMediaModal.jsx';
 
 
 const EditUserProfile = ({
@@ -64,6 +65,20 @@ const EditUserProfile = ({
 
   const [locationsInput, setLocationsInput] = useState(locations);
   const [locationsInputErrorMessage, setLocationsInputErrorMessage] = useState('');
+
+  // states for modals to add or update things
+  const [addSocialMediaModalIsVisible, setAddSocialMediaModalIsVisible] = useState(false);
+  
+  const [addVideoModalIsVisible, setAddVideoModalIsVisible] = useState(false);
+  const [updateVideoModalIsVisible, setUpdateVideoModalIsVisible] = useState(false);
+
+  const [addAdressModalIsVisible, setAddAdressModalIsVisible] = useState(false);
+  const [updateAdressModalIsVisible, setUpdateAdressModalIsVisible] = useState(false);
+
+
+
+
+
 
   let personalInformationFields = [
     {label:"Name", type: "text", id: "name", value: userNameInput, setter: setUserNameInput},
@@ -124,6 +139,7 @@ const EditUserProfile = ({
       <ProfilePhotoAndHeadline  photo={profilePicInput} saveAction={handleSaveChanges}/>
       {updateMessage && (
         <div style={{
+          fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
           position: "fixed",
           right: "10px",
           top: "100px",
@@ -150,9 +166,18 @@ const EditUserProfile = ({
               videos = {videosInput} videosSetter = {setVideosInput}
               locations = {locationsInput} locationSetter={setLocationsInput}
               id = {id}
+
+              addSocialMediaModalVisibiltySetter = {setAddSocialMediaModalIsVisible}
       >
       </TwoColumnLayout>
       <Footer />
+
+      {/* Hidden Modasl*/}
+      <AddSocialMediaModal 
+        visible={addSocialMediaModalIsVisible}
+        onClose={() => setAddSocialMediaModalIsVisible(false)}
+        setter={setConnectLinksInput}
+      />
     </div>
   )
 }

@@ -29,6 +29,7 @@ const TwoColumnLayout = ({
     bioSetter,
     videosSetter,
     locationSetter,
+    addSocialMediaModalVisibiltySetter
 }) => {
 
     function formatSocialLinks(links) {
@@ -56,7 +57,12 @@ const TwoColumnLayout = ({
         <div className={`two-column-layout ${className}`}>
             <div className="column left-column">
                 <TitleAndFields title="Personal Information" fields={personalInformationFields}/>
-                <TitleAndLinks title="Social Media" links={formatSocialLinks(connectLinks)} setter={connectLinksSetter}/>
+                <TitleAndLinks 
+                    title="Social Media" 
+                    links={formatSocialLinks(connectLinks)} 
+                    setter={connectLinksSetter} 
+                    addAction={()=>addSocialMediaModalVisibiltySetter(true)}
+                />
                 <ProfileQrCode profileUrl={profileUrlForQrCode}/>
             </div>
             
@@ -73,7 +79,10 @@ const TwoColumnLayout = ({
             <div className="column right-column">
                 <TitleAndFields title="Profile Summary" fields={[{label:"Headline", type:"text", id: "headline", value: headline, setter: headlineSetter}]}/>
                 <LabelWithTextArea label="Description" id="bio" value={bio} setter={bioSetter}/>
-                <TitleAndFields title="Website" fields={[{label:"URL", type:"text", id: "website_url", value: websiteLink, setter:websiteLinkSetter}]}/>
+                <TitleAndFields 
+                    title="Website" 
+                    fields={[{label:"URL", type:"text", id: "website_url", value: websiteLink, setter:websiteLinkSetter}]}
+                />
 
                 <YoutubeVideos 
                     videos={videos}

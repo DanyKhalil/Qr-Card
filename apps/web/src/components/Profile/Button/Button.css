@@ -1,4 +1,3 @@
-/* ---- Base Button Styles ---- */
 .fancy-btn__root {
   border: none;
   border-radius: 12px;
@@ -12,43 +11,54 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
+.fancy-btn__root:disabled {
+  background-color: #cccccc !important;
+  color: #666666 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.fancy-btn__root:disabled:hover {
+  transform: none !important;
+  box-shadow: none !important;
+  background-color: #cccccc !important;
+}
+
 /* ---- Hover and Active Effects ---- */
-.fancy-btn__root:hover {
+.fancy-btn__root:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
 }
 
-.fancy-btn__root:active {
+.fancy-btn__root:active:not(:disabled) {
   transform: scale(0.97);
 }
 
-/* ---- Bold Option ---- */
 .fancy-btn__bold {
   font-weight: 700;
 }
 
-/* ---- Coral Color Palette ---- */
 .fancy-btn__coral {
   background-color: #ff8559;
 }
 
-.fancy-btn__coral:hover {
+.fancy-btn__coral:hover:not(:disabled) {
   background-color: #ff571a;
 }
 
-.fancy-btn__coral:active {
+.fancy-btn__coral:active:not(:disabled) {
   background-color: #ffae91;
 }
 
-/* ---- Green Color Palette ---- */
 .fancy-btn__green {
   background-color: #82c294;
 }
 
-.fancy-btn__green:hover {
+.fancy-btn__green:hover:not(:disabled) {
   background-color: #47855b;
 }
 
-.fancy-btn__green:active {
+.fancy-btn__green:active:not(:disabled) {
   background-color: #bcf4cb;
 }

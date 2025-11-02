@@ -1,12 +1,14 @@
 import React from 'react';
 import './TitleAndLinks.css';
 import IconWithName from '../Icon With Name/IconWithName';
+import Button from '../../Profile/Button/Button';
 
-const TitleAndLinks = ({ title, links, setter }) => {
+const TitleAndLinks = ({ title, links, setter, addAction }) => {
   if (!links || !Array.isArray(links) || links.length === 0) {
     return null;
   }
 
+  console.log(addAction)
   return (
     <div className="social-section">
       <h2 className="section-title">{title}</h2>
@@ -22,6 +24,13 @@ const TitleAndLinks = ({ title, links, setter }) => {
           />
         ))}
       </div>
+      <br></br>
+      <Button 
+        text="Add Links"
+        color="green"
+        width="150px"
+        action={addAction}
+      />
     </div>
   );
 };
