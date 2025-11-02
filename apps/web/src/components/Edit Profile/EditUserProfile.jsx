@@ -90,6 +90,41 @@ const EditUserProfile = ({
 
 
 
+  // Profile and Cover Photos UseStates:
+  const [coverPhotoFile, setCoverPhotoFile] = useState(null);
+  const [profilePicFile, setProfilePicFile] = useState(null);
+  
+  const handleProfilePicChange = (file) => {
+    if (file) {
+      setProfilePicFile(file);
+      const previewUrl = URL.createObjectURL(file);
+      setProfilePicInput(previewUrl);
+    }
+  };
+
+  const handleCoverPhotoChange = (file) => {
+    if (file) {
+      setCoverPhotoFile(file);
+      const previewUrl = URL.createObjectURL(file);
+      setCoverPhotoInput(previewUrl);
+    }
+  };
+
+  const handleRemoveProfilePic = () => {
+    setProfilePicFile(null);
+    setProfilePicInput(null);
+  };
+
+  const handleRemoveCoverPhoto = () => {
+    setCoverPhotoFile(null);
+    setCoverPhotoInput(null);
+  };
+
+
+
+
+
+
   let personalInformationFields = [
     {label:"Name", type: "text", id: "name", value: userNameInput, setter: setUserNameInput},
     {label:"Date of Birth", type: "date", id: "dob", value: dobInput, setter: setDobInput},
@@ -104,28 +139,45 @@ const EditUserProfile = ({
   const [updateMessage, setUpdateMessage] = useState('');
 
   const handleUserProfileUpdate = async (newUserName, newDob, newPhoneNumber, newHeadline, newBio, newWebsite, newSocialMediaLinks, newVideos, newLocations) => {
-
     setIsUpdating(true);
     setUpdateMessage('');
 
     try {
-      const result = await userApi.updateUserProfile(id, 
-        {
-          userName: newUserName,
-          dob: newDob,
-          phoneNumber: newPhoneNumber,
-          headline: newHeadline,
-          bio: newBio,
-          websiteUrl: newWebsite,
-          connectLinks: newSocialMediaLinks,
-          videos: newVideos,
-          locations: newLocations
-        });
+      const formData = new FormData();
+      
+      formData.append('userName', newUserName);
+      formData.append('dob', newDob);
+      formData.append('phoneNumber', newPhoneNumber);
+      formData.append('headline', newHeadline);
+      formData.append('bio', newBio);
+      formData.append('websiteUrl', newWebsite);
+      formData.append('connectLinks', JSON.stringify(newSocialMediaLinks));
+      formData.append('videos', JSON.stringify(newVideos));
+      formData.append('locations', JSON.stringify(newLocations));
+      
+      if (profilePicFile) {
+        formData.append('profilePicture', profilePicFile);
+      } else {
+        formData.append('profilePhotoPath', profilePicInput || ''); // Ensure it's a string
+      }
+      
+      if (coverPhotoFile) {
+        formData.append('coverPhoto', coverPhotoFile);
+      } else {
+        formData.append('coverPhotoPath', coverPhotoInput || '');
+      }
+
+      // Send as FormData instead of JSON
+      const result = await userApi.updateUserProfile(id, formData);
       
       if (result.success) {
+        setProfilePicFile(null);
+        setCoverPhotoFile(null);
         setUpdateMessage('User updated successfully!');
-        setTimeout(() => {setUpdateMessage(''); navigate(`/profile/${id}`);}, 2000);
-        
+        setTimeout(() => {
+          setUpdateMessage(''); 
+          navigate(`/profile/${id}`);
+        }, 2000);
       }
     } catch (error) {
       console.error('Failed to update userprofile:', error);
@@ -136,7 +188,6 @@ const EditUserProfile = ({
     }
   };
 
-
   const handleSaveChanges = () => {
     handleUserProfileUpdate(userNameInput, dobInput, phoneNumberInput, headlineInput, bioInput, websiteLinkInput, connectLinksInput, videosInput, locationsInput);
   };
@@ -146,7 +197,15 @@ const EditUserProfile = ({
     <div>
       <Header/>
       <CoverPhoto photo={coverPhotoInput} height={300} paddingTop={80}/>
-      <ProfilePhotoAndHeadline  photo={profilePicInput} saveAction={handleSaveChanges}/>
+      <ProfilePhotoAndHeadline
+        photo={profilePicInput}
+        saveAction={handleSaveChanges}
+
+        onProfilePicChange={handleProfilePicChange}
+        onCoverPhotoChange={handleCoverPhotoChange}
+        onRemoveProfilePic={handleRemoveProfilePic}
+        onRemoveCoverPhoto={handleRemoveCoverPhoto}
+      />
       {updateMessage && (
         <div style={{
           fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",

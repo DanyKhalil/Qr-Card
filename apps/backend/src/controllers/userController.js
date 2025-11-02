@@ -138,7 +138,8 @@ export const updateUserProfile = async (req, res) => {
     const {
       userName, dob, phoneNumber, 
       headline, bio, websiteUrl, 
-      connectLinks, videos, locations
+      connectLinks, videos, locations,
+      coverPhotoPath, profilePhotoPath
     } = req.body;
 
     if (!id) {
@@ -146,6 +147,37 @@ export const updateUserProfile = async (req, res) => {
         success:false,
         message: 'Unauthorized User'
       })
+    }
+
+    // parsee JSON strings
+    const parsedConnectLinks = connectLinks ? JSON.parse(connectLinks) : [];
+    const parsedVideos = videos ? JSON.parse(videos) : [];
+    const parsedLocations = locations ? JSON.parse(locations) : [];
+    
+    console.log('Parsed connectLinks:', parsedConnectLinks); // Debug log
+
+
+    // handling cover and profile picture changes
+    let finalProfilePhotoPath = profilePhotoPath;
+    let finalCoverPhotoPath = coverPhotoPath;
+
+    // Check if new profile picture was uploaded
+    if (req.files && req.files.profilePicture) {
+      const profileFile = req.files.profilePicture[0];
+      // finalProfilePhotoPath = `/uploads/profiles/${profileFile.filename}`;
+      finalProfilePhotoPath = `http://localhost:5050/uploads/profiles/${profileFile.filename}`;
+      console.log('New profile picture uploaded:', finalProfilePhotoPath);
+    } else {
+      finalProfilePhotoPath = profilePhotoPath || null;
+    }
+    // Check if new cover photo was uploaded
+    if (req.files && req.files.coverPhoto) {
+      const coverFile = req.files.coverPhoto[0];
+      // finalCoverPhotoPath = `/uploads/covers/${coverFile.filename}`;
+      finalCoverPhotoPath = `http://localhost:5050/uploads/covers/${coverFile.filename}`;
+      console.log('New cover photo uploaded:', finalCoverPhotoPath);
+    } else {
+      finalCoverPhotoPath = coverPhotoPath || null;
     }
 
     const user = await User.findOne({
@@ -167,10 +199,9 @@ export const updateUserProfile = async (req, res) => {
     if (!user || !profile){
       return res.status(404).json({
         success: false,
-        message: "Not FOund User"
+        message: "Not Found User"
       })
     }
-
 
     const checkIfDeleted = (id, objects) => {
       for (let obj of objects) {
@@ -195,40 +226,47 @@ export const updateUserProfile = async (req, res) => {
       dob: dob,
       phone_number: phoneNumber,
       bio: bio,
-      website: websiteUrl
+      website: websiteUrl,
+      cover_pic_url: finalCoverPhotoPath,
+      profile_pic_url: finalProfilePhotoPath,
     })
 
     // social media links uodate
     for (let link of socialMediaLinks) {
-      let deleted = checkIfDeleted(link.id, connectLinks);
+      let deleted = checkIfDeleted(link.id, parsedConnectLinks);
       if (deleted) {
         await SocialMedia.destroy({ where: {id: link.id}})
       }
       else {
-        let incomingLink = await connectLinks.find(curLink => curLink.id === link.id);
-        await link.update({
-          url: incomingLink.url,
-        })
+        let incomingLink = parsedConnectLinks.find(curLink => curLink.id === link.id);
+        if (incomingLink && incomingLink.url) {
+          await link.update({
+            url: incomingLink.url,
+          })
+        }
       }
     }
-    for (let link of connectLinks) {
+    for (let link of parsedConnectLinks) { // CHANGED
       let newLink = checkIfNew(link.id, socialMediaLinks);
       if (newLink) {
-        await SocialMedia.create({
-          profile_id: profile.id,
-          url: link.url
-        })
+        // ADD NULL CHECK
+        if (link.url) {
+          await SocialMedia.create({
+            profile_id: profile.id,
+            url: link.url
+          })
+        }
       }
     }
 
     // vidoes links update
     for (let link of userVideos) {
-      let deleted = checkIfDeleted(link.id, videos);
+      let deleted = checkIfDeleted(link.id, parsedVideos);
       if (deleted) {
         await Video.destroy({ where: {id: link.id}})
       }
       else {
-        let incomingLink = await videos.find(curLink => curLink.id === link.id);
+        let incomingLink = parsedVideos.find(curLink => curLink.id === link.id);
         await link.update({
           video_url: incomingLink.video_url,
           title: incomingLink.title,
@@ -236,7 +274,7 @@ export const updateUserProfile = async (req, res) => {
         })
       }
     }
-    for (let link of videos) {
+    for (let link of parsedVideos) {
       let newLink = checkIfNew(link.id, userVideos);
       if (newLink) {
         await Video.create({
@@ -250,12 +288,12 @@ export const updateUserProfile = async (req, res) => {
 
     // locations update
     for (let link of userLocations) {
-      let deleted = checkIfDeleted(link.id, locations);
+      let deleted = checkIfDeleted(link.id, parsedLocations);
       if (deleted) {
         await Location.destroy({ where: {id: link.id}})
       }
       else {
-        let incomingLink = await locations.find(curLink => curLink.id === link.id);
+        let incomingLink = parsedLocations.find(curLink => curLink.id === link.id);
         await link.update({
           floor: incomingLink.floor,
           building: incomingLink.building,
@@ -268,7 +306,7 @@ export const updateUserProfile = async (req, res) => {
         })
       }
     }
-    for (let link of locations) {
+    for (let link of parsedLocations) {
       let newLink = checkIfNew(link.id, userLocations);
       if (newLink) {
         await Location.create({

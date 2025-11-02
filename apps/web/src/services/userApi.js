@@ -4,9 +4,6 @@ const API_BASE_URL = 'http://localhost:5050/api';
 
 const api = axios.create({
     baseURL: API_BASE_URL,
-    headers: {
-        'Content-Type': 'application/json',
-    },
 });
 
 export const userApi = {
@@ -21,11 +18,21 @@ export const userApi = {
     },
     updateUserProfile: async (userId, profileData) => {
         try {
-            const response = await api.put(`/users/${userId}`, profileData);
-            return response.data
+            const config = profileData instanceof FormData 
+                ? {
+                    headers: {}
+                  }
+                : {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                  };
+            
+            const response = await api.put(`/users/${userId}`, profileData, config);
+            return response.data;
         } catch (error) {
-            console.error('ERor while updating user profile', error);
-            throw error
+            console.error('Error while updating user profile', error);
+            throw error;
         }
     }
 };
