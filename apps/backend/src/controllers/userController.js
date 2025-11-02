@@ -228,7 +228,7 @@ export const updateUserProfile = async (req, res) => {
         await Video.destroy({ where: {id: link.id}})
       }
       else {
-        let incomingLink = await userVideos.find(curLink => curLink.id === link.id);
+        let incomingLink = await videos.find(curLink => curLink.id === link.id);
         await link.update({
           video_url: incomingLink.video_url,
           title: incomingLink.title,

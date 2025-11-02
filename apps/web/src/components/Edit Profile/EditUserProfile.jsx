@@ -8,6 +8,7 @@ import TwoColumnLayout from './Two Column Layout/TwoColumnLayout.jsx'
 import { useNavigate } from 'react-router-dom';
 import AddSocialMediaModal from './Modals/AddSocialMediaModal/AddSocialMediaModal.jsx';
 import AddVideoModal from './Modals/VideoModals/AddVideoModal.jsx';
+import EditVideoModal from './Modals/VideoModals/EditVideoModal.jsx';
 
 
 const EditUserProfile = ({
@@ -67,6 +68,8 @@ const EditUserProfile = ({
   const [locationsInput, setLocationsInput] = useState(locations);
   const [locationsInputErrorMessage, setLocationsInputErrorMessage] = useState('');
 
+
+
   // states for modals to add or update things
   const [addSocialMediaModalIsVisible, setAddSocialMediaModalIsVisible] = useState(false);
   
@@ -75,6 +78,10 @@ const EditUserProfile = ({
 
   const [addAdressModalIsVisible, setAddAdressModalIsVisible] = useState(false);
   const [updateAdressModalIsVisible, setUpdateAdressModalIsVisible] = useState(false);
+
+  // updating Modal Objecst
+  const [videoObjectUnderUpdate, setVideoObjectUnderUpdate] = useState({id:'', title:'', description:'', video_url:''})
+  const [locationObjectUnderUpdate, setLocationObjectUnderUpdate] = useState(null)
 
 
 
@@ -170,6 +177,8 @@ const EditUserProfile = ({
 
               addSocialMediaModalVisibiltySetter = {setAddSocialMediaModalIsVisible}
               addVideoModalVisibiltySetter = {setAddVideoModalIsVisible}
+              updateVideoModalVisibiltySetter = {setUpdateVideoModalIsVisible}
+              videoObjectUnderUpdateSetter = {setVideoObjectUnderUpdate}
       >
       </TwoColumnLayout>
       <Footer />
@@ -183,6 +192,12 @@ const EditUserProfile = ({
       <AddVideoModal
         visible={addVideoModalIsVisible}
         onClose={() => setAddVideoModalIsVisible(false)}
+        setter={setVideosInput}
+      />
+      <EditVideoModal
+        videoObject={videoObjectUnderUpdate}
+        visible={updateVideoModalIsVisible}
+        onClose={() => setUpdateVideoModalIsVisible(false)}
         setter={setVideosInput}
       />
     </div>

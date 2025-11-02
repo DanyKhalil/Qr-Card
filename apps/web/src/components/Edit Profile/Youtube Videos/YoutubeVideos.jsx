@@ -8,7 +8,9 @@ const YoutubeVideos = ({
     setter,
     gap = "30px",
     className = "",
-    addAction
+    addAction,
+    updateAction,
+    objectSetter
 }) => {
     if (!videos || videos.length === 0) {
         return null;
@@ -32,6 +34,8 @@ const YoutubeVideos = ({
                         description={videoUrl.description}
                         url={videoUrl.video_url}
                         setter={setter}
+                        updateAction={updateAction}
+                        objectSetter={objectSetter}
                     />
                 </div>
                 ))}

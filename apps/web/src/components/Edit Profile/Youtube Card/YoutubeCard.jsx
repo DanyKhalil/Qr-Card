@@ -8,8 +8,11 @@ const YouTubeCard = ({
     description = "",
     url = "",
     setter, 
-    className = "" 
+    className = "",
+    updateAction,
+    objectSetter,
 }) => {
+    const videoObject={id:id, title:title, description:description, video_url:url};
     const handleDeleteVideo = (e) => {
         e.stopPropagation();
         let confirmation = window.confirm("Are you sure you want to remove this video?")
@@ -42,7 +45,7 @@ const YouTubeCard = ({
                 </div>
 
                 <div className="youtube-card__buttons">
-                    <Button text="Edit" color="green" action={()=>alert("edit")} width="100px"/>
+                    <Button text="Edit" color="green" action={()=>{updateAction(); objectSetter(videoObject)}} width="100px"/>
                     <Button text="Remove" color="coral" action={handleDeleteVideo} width="100px"/>
                 </div>
             </div>

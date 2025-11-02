@@ -11,6 +11,7 @@ const AddSocialMediaModal = ({ visible, onClose, setter }) => {
         if (socialMediaLink.trim()) {
             setter((oldLinks) => [...oldLinks, 
                 {
+                    id: crypto.randomUUID(),
                     url: socialMediaLink
                 }
             ])

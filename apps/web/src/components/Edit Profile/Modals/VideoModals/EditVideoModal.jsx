@@ -1,24 +1,35 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import "../AddSocialMediaModal/AddSocialMediaModal.css"
 import Modal from '../Modal/Modal';
 import Button from '../../../Profile/Button/Button';
 
-const AddVideoModal = ({ visible, onClose, setter }) => {
-    const [videoUrl, setVideoUrl] = useState('');
-    const [videoTitle, setVideoTitle] = useState('');
-    const [videoDescription, setVideoDescription] = useState('');
+const EditVideoModal = ({ videoObject ,visible, onClose, setter }) => {
+    const [videoUrl, setVideoUrl] = useState(videoObject.video_url);
+    const [videoTitle, setVideoTitle] = useState(videoObject.title);
+    const [videoDescription, setVideoDescription] = useState(videoObject.description);
+    console.log(videoObject);
+
+    useEffect(() => {
+        setVideoUrl(videoObject.video_url);
+        setVideoTitle(videoObject.title);
+        setVideoDescription(videoObject.description);
+    }, [videoObject]); 
 
     const handleSubmit = (e) => {
         e.preventDefault();
         if (videoUrl.trim() && videoTitle.trim()) {
-            setter((oldVideos) => [...oldVideos, 
-                {
-                    id: crypto.randomUUID(),
-                    video_url: videoUrl,
-                    title: videoTitle,
-                    description: videoDescription,
-                }
-            ])
+            setter((oldVideos) => 
+                oldVideos.map(vid => 
+                    vid.id === videoObject.id 
+                        ? {
+                            ...vid,
+                            video_url: videoUrl.trim(),
+                            title: videoTitle.trim(),
+                            description: videoDescription.trim(),
+                          }
+                        : vid
+                )
+            );
             setVideoUrl('');
             setVideoTitle('');
             setVideoDescription('');
@@ -37,7 +48,7 @@ const AddVideoModal = ({ visible, onClose, setter }) => {
         <Modal 
             visible={visible} 
             onClose={handleCancel}
-            title="Add Video"
+            title="Edit Video"
         >
             <form onSubmit={handleSubmit} className="add-social-modal-form">
                 <div className="add-social-modal-content">
@@ -89,7 +100,7 @@ const AddVideoModal = ({ visible, onClose, setter }) => {
                         className="add-social-modal-cancel-btn"
                     />
                     <Button 
-                        text = "Add Link"
+                        text = "Save"
                         color = "green"
                         action={handleSubmit}
                         disabled={!videoUrl.trim() && !videoTitle.trim()}
@@ -101,4 +112,4 @@ const AddVideoModal = ({ visible, onClose, setter }) => {
     );
 };
 
-export default AddVideoModal;
+export default EditVideoModal;

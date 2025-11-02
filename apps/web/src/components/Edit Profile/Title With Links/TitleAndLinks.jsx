@@ -8,7 +8,6 @@ const TitleAndLinks = ({ title, links, setter, addAction }) => {
     return null;
   }
 
-  console.log(addAction)
   return (
     <div className="social-section">
       <h2 className="section-title">{title}</h2>
