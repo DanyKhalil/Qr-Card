@@ -29,7 +29,8 @@ const TwoColumnLayout = ({
     bioSetter,
     videosSetter,
     locationSetter,
-    addSocialMediaModalVisibiltySetter
+    addSocialMediaModalVisibiltySetter,
+    addVideoModalVisibiltySetter
 }) => {
 
     function formatSocialLinks(links) {
@@ -87,6 +88,7 @@ const TwoColumnLayout = ({
                 <YoutubeVideos 
                     videos={videos}
                     setter={videosSetter}
+                    addAction={()=>addVideoModalVisibiltySetter(true)}
                 />
 
                 <AddressCards

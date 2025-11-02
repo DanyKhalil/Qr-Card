@@ -56,7 +56,7 @@ const AddSocialMediaModal = ({ visible, onClose, setter }) => {
                     <Button 
                         text = "Add Link"
                         color = "green"
-                        // action
+                        action={handleSubmit}
                         disabled={!socialMediaLink.trim()}
                         className="add-social-modal-cancel-btn"
                     />

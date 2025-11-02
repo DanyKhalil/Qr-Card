@@ -7,7 +7,8 @@ const YoutubeVideos = ({
     videos = [],
     setter,
     gap = "30px",
-    className = ""
+    className = "",
+    addAction
 }) => {
     if (!videos || videos.length === 0) {
         return null;
@@ -36,7 +37,7 @@ const YoutubeVideos = ({
                 ))}
             </div>
             <br></br>
-            <Button text='Add Video Link' color='green' width='100%' />
+            <Button text='Add Video Link' color='green' width='100%' action={addAction}/>
         </div>
     );
 };

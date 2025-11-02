@@ -7,6 +7,7 @@ import ProfilePhotoAndHeadline from './Profile Photo with Headline/ProfilePhotoA
 import TwoColumnLayout from './Two Column Layout/TwoColumnLayout.jsx'
 import { useNavigate } from 'react-router-dom';
 import AddSocialMediaModal from './Modals/AddSocialMediaModal/AddSocialMediaModal.jsx';
+import AddVideoModal from './Modals/VideoModals/AddVideoModal.jsx';
 
 
 const EditUserProfile = ({
@@ -168,6 +169,7 @@ const EditUserProfile = ({
               id = {id}
 
               addSocialMediaModalVisibiltySetter = {setAddSocialMediaModalIsVisible}
+              addVideoModalVisibiltySetter = {setAddVideoModalIsVisible}
       >
       </TwoColumnLayout>
       <Footer />
@@ -177,6 +179,11 @@ const EditUserProfile = ({
         visible={addSocialMediaModalIsVisible}
         onClose={() => setAddSocialMediaModalIsVisible(false)}
         setter={setConnectLinksInput}
+      />
+      <AddVideoModal
+        visible={addVideoModalIsVisible}
+        onClose={() => setAddVideoModalIsVisible(false)}
+        setter={setVideosInput}
       />
     </div>
   )
