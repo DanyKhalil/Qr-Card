@@ -21,6 +21,7 @@ const UserProfile = ({
             "https://youtu.be/video3"
           ],
   locations = [],
+  id = "User001",
 }
 ) => {
   return (    
@@ -44,6 +45,7 @@ const UserProfile = ({
               userName = {userName}
               videos = {videos}
               locations = {locations}
+              id = {id}
       >
       </TwoColumnLayout>
       <Footer />

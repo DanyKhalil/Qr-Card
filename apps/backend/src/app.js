@@ -2,10 +2,18 @@ import express from "express";
 import sequelize from "./config/db.js";
 import userRoutes from "./routes/userRoutes.js";
 import authRoutes from "./routes/auth.js";
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 const app = express();
 
+// this so the default folder will be the one with images
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 app.use(express.json());
+
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', 'http://localhost:5173');

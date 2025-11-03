@@ -1,0 +1,128 @@
+.icon-with-name {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 12px;
+    padding: 6px 8px;
+    box-sizing: border-box;
+    flex-wrap: nowrap;
+    overflow: hidden; 
+    min-width: 0; 
+}
+
+.icon-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.name-text {
+    font-family: inherit;
+    color: inherit;
+    line-height: 1.4;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1 1 auto;
+    min-width: 0; /* critical to prevent overflow in flex layouts */
+}
+
+
+.remove-btn {
+    background-color: #e63946;
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    font-size: 16px;
+    font-weight: bold;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    flex-shrink: 0;
+}
+
+.remove-btn:hover {
+    background-color: #d62828;
+    transform: scale(1.5);
+}
+
+
+@media (max-width: 1250px) {
+    .icon-with-name {
+        gap: 4px;
+        padding: 5px 6px;
+    }
+
+    .name-text {
+        font-size: 18px;
+    }
+
+    .remove-btn {
+        margin-left: 4px;
+        width: 20px;
+        height: 20px;
+        font-size: 15px;
+    }
+}
+
+
+@media (max-width: 768px) {
+    .icon-with-name {
+        gap: 4px;
+        padding: 4px 6px;
+        flex-wrap: nowrap;
+    }
+
+    .name-text {
+        font-size: 16px !important;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .remove-btn {
+        width: 20px;
+        height: 20px;
+        font-size: 14px;
+    }
+}
+
+
+@media (max-width: 480px) {
+    .icon-with-name {
+        flex-wrap: nowrap;
+        justify-content: space-between;
+        gap: 4px;
+        padding: 4px 4px;
+        overflow: hidden;
+    }
+
+    .icon-container img {
+        width: 20px !important;
+        height: 20px !important;
+    }
+
+    .name-text {
+        font-size: 14px !important;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
+        flex: 1;
+    }
+
+    .remove-btn {
+        width: 18px;
+        height: 18px;
+        font-size: 12px;
+        margin-left: 4px;
+    }
+}

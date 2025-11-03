@@ -1,17 +1,22 @@
 import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+
 import UserProfileComponent from '../components/Profile/UserProfile.jsx';
 import { userApi } from '../services/userApi.js';
 
-const UserProfile = ({userId = 'user001'}) => {
+
+const UserProfile = () => {
+    const { id } = useParams();
+
     const [userData, setUserData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    const fetchUserProfile = async (userId) => {
+    const fetchUserProfile = async (id) => {
         try {
             setLoading(true);
             setError(null);
-            const data = await userApi.getUserProfile(userId);
+            const data = await userApi.getUserProfile(id);
             setUserData(data);
         } catch (err) {
             setError(err.response?.data?.error || 'Failed to fetch user profile');
@@ -26,7 +31,7 @@ const UserProfile = ({userId = 'user001'}) => {
         // We can get the user ID from:
         // 1. URL parameters (if using React Router)
         // 2. Authentication context
-        fetchUserProfile(userId);
+        fetchUserProfile(id);
     }, []);
 
     if (loading) {
@@ -53,8 +58,8 @@ const UserProfile = ({userId = 'user001'}) => {
     }
 
     let contactLinks =  [
-                            {name:userData.email, icon: "email"}, 
-                            {name:userData.phone_number, icon:"phone"}
+                            {name:userData.email, iconName: "email", link:userData.email}, 
+                            {name:userData.phone_number, iconName:"phone", link:userData.phone_number}
                         ];
 
     return (    
@@ -71,6 +76,7 @@ const UserProfile = ({userId = 'user001'}) => {
                 bio = {userData.bio}
                 videos = {userData.videos_links}
                 locations = {userData.locations}
+                id = {id}
             />
         </div>
     );

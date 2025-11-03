@@ -1,3 +1,9 @@
+.icon-with-name.clickable:hover {
+    opacity: 0.8;
+    text-decoration: underline;
+}
+
+
 .icon-with-name {
     display: flex;
     align-items: center;

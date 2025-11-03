@@ -9,7 +9,6 @@ const YoutubePreview = ({
   autoPlay = false
 }) => {
   const [isPlaying, setIsPlaying] = useState(false);
-  console.log(youtubeObject.video_url);
   const getVideoId = (youtubeObj) => {
     if (!youtubeObj || typeof youtubeObj !== 'object') {
       return null;
