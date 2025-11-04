@@ -8,12 +8,14 @@ import TwoColumnLayout from './components/Profile/Two Column Layout/TwoColumnLay
 import Footer from './components/Footer/Footer.jsx';
 import UserProfile from './pages/UserProfile.jsx';
 import EditUserProfile from './pages/EditUserProfile.jsx';
+import ScanQrCode from './pages/ScanQrCode.jsx';
 
 function App() {
   return (    
     <Routes>
       <Route path="/profile/:id" element={<UserProfile/>}/>
       <Route path="/edit-profile/:id" element={<EditUserProfile/>}/>
+      <Route path="/scan-qr-code" element={<ScanQrCode/>}/>
     </Routes>
   )
 }
