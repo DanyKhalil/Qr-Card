@@ -3,27 +3,29 @@ import { Html5QrcodeScanner } from 'html5-qrcode';
 import './Camera.css';
 import Button from '../../Profile/Button/Button';
 
-const Camera = ({setUrlToVisit}) => {
-    const [scanResult, setScanResult] = useState(null);
-    const [cameraActive, setCameraActive] = useState(false);
-    const scannerRef = useRef(null);
+const Camera = () => {
+    const [scanResult, setScanResult] = useState(null); // this one for saving the url from qr code
+    const [cameraActive, setCameraActive] = useState(false); // this one to set a camera to active or not
+    const scannerRef = useRef(null); // this ref to save the reference of the scanner
+    const scanResultRef = useRef(null); // this ref to save the reference of the scanner result section down ther to scroll
     const qrBoxSize = 250;
 
-    useEffect(() => {
-        if (scanResult) {
-            try {
-                setUrlToVisit(scanResult);
-            } catch (error) {
-                console.error(error);
-            }
-        }
-    }, [scanResult]);
-
     const activateScanner = () => {
+        /// first need to check is there is already a scanner
+        if (scannerRef.current?.scanner) {
+            scannerRef.current.scanner.clear().catch(error => {
+                console.debug('Error when clearin scaner:', error);
+            });
+            scannerRef.current.scanner = null;
+        }
+
         setCameraActive(true);
+        setScanResult(null);
+        
+        // addign a bit of delay so dom is ready
         setTimeout(() => {
-            if (scannerRef.current) {
-                // here adding a html5qrcodscanner object
+            if (scannerRef.current && !scannerRef.current.scanner) {
+                // adding a QRCODESCANNER object
                 const scanner = new Html5QrcodeScanner(
                     'qr-reader',
                     {
@@ -37,38 +39,52 @@ const Camera = ({setUrlToVisit}) => {
                     false
                 );
 
-                scanner.render( (decodedText) => {
-                    setScanResult(decodedText);
-                    scanner.clear();
-                    setCameraActive(false);
+                // Saving the result of the url extracted fromq r code
+                scanner.render((decodedText) => {
+                    scanner.clear().catch(error => {
+                        console.debug('Error after clearing after scanning:', error);
+                    });
+                    scannerRef.current.scanner = null;
                     
-                    if (isValidUrl(decodedText)) {
-                        // window.location.href = decodedText;
-                    }
+                    setScanResult(decodedText);
+                    setCameraActive(false);
                 }, (error) => {
                     console.debug('QR scan error:', error);
                 });
 
-                /// storing a scanner instance for cleanup
+                // setting the current scanner to be this QRCODESCANNER object
                 scannerRef.current.scanner = scanner;
             }
-        }, 100);
+        }, 300);
     };
 
+    // this will function deactivate the scanner, turn off camera
     const deactivateScanner = () => {
-        if (scannerRef.current?.scanner) {
-            scannerRef.current.scanner.clear();
-        }
         setCameraActive(false);
         setScanResult(null);
+        
+        if (scannerRef.current?.scanner) {
+            scannerRef.current.scanner.clear().catch(error => {
+                console.debug('Error after deactivating scanner:', error);
+            });
+            scannerRef.current.scanner = null;
+        }
     };
 
+    // making sure that the url is a url, and it is on our website,
     const isValidUrl = (string) => {
         try {
-            new URL(string);
-            return true;
+            const scannedUrl = new URL(string);
+            const currentUrl = new URL(window.location.href);
+            
+            if (scannedUrl.hostname === currentUrl.hostname) {
+                return true;
+            } else {
+                console.log('Other wesbite scanne:', scannedUrl.hostname);
+                return false;
+            }
         } catch (error) {
-            console.log(error);
+            console.log('Invalid URL format:', error);
             return false;
         }
     };
@@ -78,6 +94,34 @@ const Camera = ({setUrlToVisit}) => {
             window.location.href = scanResult;
         }
     };
+
+    useEffect(() => {
+        if (scanResult && scanResultRef.current) {
+            setTimeout(() => {
+                scanResultRef.current.scrollIntoView({ 
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+            }, 100);
+        }
+    }, [scanResult]);
+    useEffect(() => {
+        return () => {
+            if (scannerRef.current?.scanner) {
+                scannerRef.current.scanner.clear().catch(error => {
+                    console.debug('Cleanup error:', error);
+                });
+            }
+        };
+    }, []);
+    useEffect(() => {
+        if (!cameraActive && scannerRef.current?.scanner) {
+            scannerRef.current.scanner.clear().catch(error => {
+                console.debug('Camera inactive cleanup error:', error);
+            });
+            scannerRef.current.scanner = null;
+        }
+    }, [cameraActive]);
 
     return (
         <div className="scan-qr-container">
@@ -90,6 +134,7 @@ const Camera = ({setUrlToVisit}) => {
                 <div 
                     id="qr-reader" 
                     ref={scannerRef}
+                    key={cameraActive ? 'scanner-active' : 'scanner-inactive'}
                     className={`qr-reader ${cameraActive ? 'active' : ''}`}
                 >
                     {!cameraActive && (
@@ -117,7 +162,7 @@ const Camera = ({setUrlToVisit}) => {
             </div>
 
             {scanResult && (
-                <div className="scan-result">
+                <div className="scan-result" ref={scanResultRef}>
                     <h3>Scan Successful!</h3>
                     <div className="result-url">
                         <strong>Detected URL:</strong>
@@ -125,7 +170,8 @@ const Camera = ({setUrlToVisit}) => {
                     </div>
                     <div className="result-actions">
                         <Button text="Visit Website" action={handleManualRedirect} color="green" disabled={!isValidUrl(scanResult)}/> 
-                        <Button text="Scan Again" action={() => setScanResult(null)} color="green"/> 
+                        {/* <Button text="Scan Again" action={() => setScanResult(null)} color="green"/>  */}
+                        <Button text="Scan Again" action={activateScanner} color="green"/>
                     </div>
                     {!isValidUrl(scanResult) && (
                         <p className="error-message">Invalid URL detected</p>
