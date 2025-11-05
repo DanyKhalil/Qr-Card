@@ -8,7 +8,7 @@ const ScanQrCode = () => {
   
   return (    
     <div>
-      <Header/>
+      <Header activeIndex={1}/>
       <Camera/>
       <Footer/>
     </div>

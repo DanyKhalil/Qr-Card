@@ -15,7 +15,8 @@ function App() {
     <Routes>
       <Route path="/profile/:id" element={<UserProfile/>}/>
       <Route path="/edit-profile/:id" element={<EditUserProfile/>}/>
-      <Route path="/scan-qr-code" element={<ScanQrCode/>}/>
+      <Route path="/scan-qr-code/:id" element={<ScanQrCode/>}/>
+      <Route path="/profile-analytics/:id" element/>
     </Routes>
   )
 }
