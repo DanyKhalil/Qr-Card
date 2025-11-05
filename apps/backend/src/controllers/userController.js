@@ -67,7 +67,7 @@ export const getUserProfile = async (req, res) => {
               model: Location,
               as: 'locations',
               attributes: [
-                'id', 'country', 'state', 'city', 'street', 'building', 
+                'id', 'title', 'country', 'state', 'city', 'street', 'building', 
                 'floor', 'maps_url', 'latitude', 'longitude'
               ]
             }
@@ -95,17 +95,21 @@ export const getUserProfile = async (req, res) => {
       phone_number: user.profile.phone_number ? [user.profile.phone_number] : [],
       email: user.email ? [user.email] : [],
       social_media_links: user.profile.social_media?.map(sm => ({
+        id: sm.id,
         url: sm.url,
         display_order: sm.display_order
       })) || [],
       website_link: user.profile.website,
       videos_links: user.profile.videos?.map(video => ({
+        id: video.id,
         video_url: video.video_url,
         title: video.title,
         description: video.description,
         display_order: video.display_order
       })) || [],
       locations: user.profile.locations?.map(location => ({
+        id: location.id,
+        title: location.title,
         country: location.country,
         state: location.state,
         city: location.city,
@@ -126,3 +130,208 @@ export const getUserProfile = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+// --- to start updating the user info on all tabels -
+export const updateUserProfile = async (req, res) => {
+  try {
+    const {id} = req.params;
+    const {
+      userName, dob, phoneNumber, 
+      headline, bio, websiteUrl, 
+      connectLinks, videos, locations,
+      coverPhotoPath, profilePhotoPath
+    } = req.body;
+
+    if (!id) {
+      return res.status(403).json({
+        success:false,
+        message: 'Unauthorized User'
+      })
+    }
+
+    // parsee JSON strings
+    const parsedConnectLinks = connectLinks ? JSON.parse(connectLinks) : [];
+    const parsedVideos = videos ? JSON.parse(videos) : [];
+    const parsedLocations = locations ? JSON.parse(locations) : [];
+    
+    console.log('Parsed connectLinks:', parsedConnectLinks); // Debug log
+
+
+    // handling cover and profile picture changes
+    let finalProfilePhotoPath = profilePhotoPath;
+    let finalCoverPhotoPath = coverPhotoPath;
+
+    // Check if new profile picture was uploaded
+    if (req.files && req.files.profilePicture) {
+      const profileFile = req.files.profilePicture[0];
+      // finalProfilePhotoPath = `/uploads/profiles/${profileFile.filename}`;
+      finalProfilePhotoPath = `http://localhost:5050/uploads/profiles/${profileFile.filename}`;
+      console.log('New profile picture uploaded:', finalProfilePhotoPath);
+    } else {
+      finalProfilePhotoPath = profilePhotoPath || null;
+    }
+    // Check if new cover photo was uploaded
+    if (req.files && req.files.coverPhoto) {
+      const coverFile = req.files.coverPhoto[0];
+      // finalCoverPhotoPath = `/uploads/covers/${coverFile.filename}`;
+      finalCoverPhotoPath = `http://localhost:5050/uploads/covers/${coverFile.filename}`;
+      console.log('New cover photo uploaded:', finalCoverPhotoPath);
+    } else {
+      finalCoverPhotoPath = coverPhotoPath || null;
+    }
+
+    const user = await User.findOne({
+      where: {id: id}
+    })
+    const profile = await Profile.findOne({
+      where: {user_id: id}
+    })
+    const socialMediaLinks = await SocialMedia.findAll({
+      where: {profile_id: profile.id}
+    })
+    const userVideos = await Video.findAll({
+      where: {profile_id: profile.id}
+    })
+    const userLocations = await Location.findAll({
+      where: {profile_id: profile.id}
+    }) 
+
+    if (!user || !profile){
+      return res.status(404).json({
+        success: false,
+        message: "Not Found User"
+      })
+    }
+
+    const checkIfDeleted = (id, objects) => {
+      for (let obj of objects) {
+        if (obj.id === id)
+          return false;
+      }
+      return true;
+    }
+    const checkIfNew = (id, objects) => {
+      for (let obj of objects) {
+        if (obj.id === id)
+          return false;
+      }
+      return true;
+    }
+
+    const updateUser = await user.update({
+      name: userName.trim()
+    })
+    const updateProfile = await profile.update({
+      headline: headline.trim(),
+      dob: dob,
+      phone_number: phoneNumber,
+      bio: bio,
+      website: websiteUrl,
+      cover_pic_url: finalCoverPhotoPath,
+      profile_pic_url: finalProfilePhotoPath,
+    })
+
+    // social media links uodate
+    for (let link of socialMediaLinks) {
+      let deleted = checkIfDeleted(link.id, parsedConnectLinks);
+      if (deleted) {
+        await SocialMedia.destroy({ where: {id: link.id}})
+      }
+      else {
+        let incomingLink = parsedConnectLinks.find(curLink => curLink.id === link.id);
+        if (incomingLink && incomingLink.url) {
+          await link.update({
+            url: incomingLink.url,
+          })
+        }
+      }
+    }
+    for (let link of parsedConnectLinks) { // CHANGED
+      let newLink = checkIfNew(link.id, socialMediaLinks);
+      if (newLink) {
+        // ADD NULL CHECK
+        if (link.url) {
+          await SocialMedia.create({
+            profile_id: profile.id,
+            url: link.url
+          })
+        }
+      }
+    }
+
+    // vidoes links update
+    for (let link of userVideos) {
+      let deleted = checkIfDeleted(link.id, parsedVideos);
+      if (deleted) {
+        await Video.destroy({ where: {id: link.id}})
+      }
+      else {
+        let incomingLink = parsedVideos.find(curLink => curLink.id === link.id);
+        await link.update({
+          video_url: incomingLink.video_url,
+          title: incomingLink.title,
+          description: incomingLink.description,
+        })
+      }
+    }
+    for (let link of parsedVideos) {
+      let newLink = checkIfNew(link.id, userVideos);
+      if (newLink) {
+        await Video.create({
+          profile_id: profile.id,
+          video_url: link.video_url,
+          title: link.title,
+          description: link.description,
+        })
+      }
+    }
+
+    // locations update
+    for (let link of userLocations) {
+      let deleted = checkIfDeleted(link.id, parsedLocations);
+      if (deleted) {
+        await Location.destroy({ where: {id: link.id}})
+      }
+      else {
+        let incomingLink = parsedLocations.find(curLink => curLink.id === link.id);
+        await link.update({
+          floor: incomingLink.floor,
+          building: incomingLink.building,
+          street: incomingLink.street,
+          city: incomingLink.city,
+          state: incomingLink.state,
+          country: incomingLink.country,
+          maps_url: incomingLink.maps_url,
+          title: incomingLink.title,
+        })
+      }
+    }
+    for (let link of parsedLocations) {
+      let newLink = checkIfNew(link.id, userLocations);
+      if (newLink) {
+        await Location.create({
+          profile_id: profile.id,
+          floor: link.floor,
+          building: link.building,
+          street: link.street,
+          city: link.city,
+          state: link.state,
+          country: link.country,
+          maps_url: link.maps_url,
+          title: link.title,
+        })
+      }
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Profile updated succesffully',
+    })
+  } catch (error) {
+    console.log(error)
+    res.status(500).json({
+      success: false,
+      message: error.message
+    })
+  }
+}

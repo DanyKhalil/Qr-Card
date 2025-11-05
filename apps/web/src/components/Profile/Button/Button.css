@@ -1,0 +1,64 @@
+.fancy-btn__root {
+  border: none;
+  border-radius: 12px;
+  padding: 0.6rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  color: white;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.fancy-btn__root:disabled {
+  background-color: #cccccc !important;
+  color: #666666 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.fancy-btn__root:disabled:hover {
+  transform: none !important;
+  box-shadow: none !important;
+  background-color: #cccccc !important;
+}
+
+/* ---- Hover and Active Effects ---- */
+.fancy-btn__root:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+}
+
+.fancy-btn__root:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.fancy-btn__bold {
+  font-weight: 700;
+}
+
+.fancy-btn__coral {
+  background-color: #ff8559;
+}
+
+.fancy-btn__coral:hover:not(:disabled) {
+  background-color: #ff571a;
+}
+
+.fancy-btn__coral:active:not(:disabled) {
+  background-color: #ffae91;
+}
+
+.fancy-btn__green {
+  background-color: #82c294;
+}
+
+.fancy-btn__green:hover:not(:disabled) {
+  background-color: #47855b;
+}
+
+.fancy-btn__green:active:not(:disabled) {
+  background-color: #bcf4cb;
+}

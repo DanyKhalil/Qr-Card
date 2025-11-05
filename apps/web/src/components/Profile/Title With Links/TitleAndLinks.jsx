@@ -16,6 +16,7 @@ const TitleAndLinks = ({ title, links }) => {
             key={index}
             name={social.name}
             iconName={social.iconName}
+            link={social.link}
           />
         ))}
       </div>

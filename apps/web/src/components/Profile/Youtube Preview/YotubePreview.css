@@ -26,7 +26,7 @@
 }
 
 .youtube-preview:hover {
-  transform: translateY(-2px);
+  /* transform: translateY(-2px); */
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
 }
 
@@ -69,7 +69,7 @@
 }
 
 .youtube-thumbnail-container:hover .youtube-play-button svg {
-  transform: scale(1.1);
+  /* transform: scale(1.1); */
 }
 
 .youtube-embed-container {

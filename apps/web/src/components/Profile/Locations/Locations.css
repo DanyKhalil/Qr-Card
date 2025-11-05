@@ -28,7 +28,7 @@
     }
 
 .location-item:hover {
-    transform: translateY(-5px);
+    /* transform: translateY(-30px); */
 }
 
 @media (max-width: 1200px) {
