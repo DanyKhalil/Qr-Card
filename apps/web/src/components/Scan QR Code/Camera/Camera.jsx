@@ -91,7 +91,10 @@ const Camera = () => {
 
     const handleManualRedirect = () => {
         if (scanResult && isValidUrl(scanResult)) {
-            window.location.href = scanResult;
+            // i am appending the qrScan parameter to retrieve it in the other page
+            const separator = scanResult.includes('?') ? '&' : '?';
+            const urlWithParam = `${scanResult}${separator}qrScan=true`;
+            window.location.href = urlWithParam;
         }
     };
 

@@ -18,7 +18,7 @@ export const profileAnalyticsApi = {
     },
     visitUserProfile: async (id, qrScan = false) => {
         try {
-            const response = await api.post(`/profile-visit/${id}`, {
+            const response = await api.post(`/profile-analytics/${id}`, {
                 qr_scan: qrScan
             });
             return response.data;
