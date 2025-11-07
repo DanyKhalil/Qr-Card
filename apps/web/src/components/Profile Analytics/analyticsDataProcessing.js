@@ -1,63 +1,125 @@
-export const processDailyVisits = (analyticsData) => {
-  const dailyCounts = {};
-  
-  analyticsData.forEach(visit => {
-    const date = new Date(visit.visit_date_time).toLocaleDateString();
-    dailyCounts[date] = (dailyCounts[date] || 0) + 1;
-  });
-  
-  return Object.entries(dailyCounts).map(([date, count]) => ({
-    date,
-    visits: count,
-    fullDate: new Date(date)
-  })).sort((a, b) => a.fullDate - b.fullDate);
+// this will filter the visits to only incldue the ones in a range
+export const processDateRangeData = (analyticsData, dateRange) => {
+  const now = new Date();
+  let startDate = new Date();
+
+  switch (dateRange) {
+    case 'today':
+      startDate.setHours(0, 0, 0, 0);
+      break;
+    case '7days':
+      startDate.setDate(now.getDate() - 7);
+      break;
+    case '30days':
+      startDate.setDate(now.getDate() - 30);
+      break;
+    case 'year':
+      startDate.setFullYear(now.getFullYear() - 1);
+      break;
+    default:
+      startDate.setDate(now.getDate() - 7);
+  }
+
+  const filteredData = analyticsData.filter(visit => 
+    new Date(visit.visit_date_time) >= startDate
+  );
+
+  if (dateRange === 'today') {
+    return processHourlyData(filteredData);
+  } else if (dateRange === '7days') {
+    return processDailyData(filteredData, 7);
+  } else if (dateRange === '30days') {
+    return processDailyData(filteredData, 30);
+  } else {
+    return processMonthlyData(filteredData);
+  }
 };
 
-export const processHourlyVisits = (analyticsData) => {
+// this will show the amount of qr_scans for a date
+export const processScanTypeData = (analyticsData, dateRange) => {
+  const now = new Date();
+  let startDate = new Date();
+
+  switch (dateRange) {
+    case 'today':
+      startDate.setHours(0, 0, 0, 0);
+      break;
+    case '7days':
+      startDate.setDate(now.getDate() - 7);
+      break;
+    case '30days':
+      startDate.setDate(now.getDate() - 30);
+      break;
+    case 'year':
+      startDate.setFullYear(now.getFullYear() - 1);
+      break;
+    default:
+      startDate.setDate(now.getDate() - 7);
+  }
+
+  const filteredData = analyticsData.filter(visit => 
+    new Date(visit.visit_date_time) >= startDate
+  );
+
+  const qrScans = filteredData.filter(visit => visit.qr_scan).length;
+  const regularVisits = filteredData.length - qrScans;
+
+  return [
+    { name: 'QR Scans', value: qrScans },
+    { name: 'Regular Visits', value: regularVisits }
+  ];
+};
+
+
+const processHourlyData = (data) => {
   const hourlyCounts = Array(24).fill(0);
   
-  analyticsData.forEach(visit => {
+  data.forEach(visit => {
     const hour = new Date(visit.visit_date_time).getHours();
     hourlyCounts[hour]++;
   });
   
   return hourlyCounts.map((count, hour) => ({
-    hour: `${hour}:00`,
-    visits: count,
-    hourNumber: hour
+    name: `${hour}:00`,
+    visits: count
   }));
 };
 
-export const processScanTypes = (analyticsData) => {
-  const qrScans = analyticsData.filter(visit => visit.qr_scan).length;
-  const regularVisits = analyticsData.length - qrScans;
-  
-  return [
-    { type: 'QR Scans', count: qrScans },
-    { type: 'Regular Visits', count: regularVisits }
-  ];
-};
-
-export const processLast7Days = (analyticsData) => {
-  const last7Days = [];
+const processDailyData = (data, days) => {
+  const dailyCounts = {};
   const today = new Date();
   
-  for (let i = 6; i >= 0; i--) {
+  for (let i = days - 1; i >= 0; i--) {
     const date = new Date(today);
     date.setDate(date.getDate() - i);
     const dateString = date.toLocaleDateString();
-    
-    const dayVisits = analyticsData.filter(visit => {
-      const visitDate = new Date(visit.visit_date_time).toLocaleDateString();
-      return visitDate === dateString;
-    }).length;
-    
-    last7Days.push({
-      date: dateString,
-      visits: dayVisits,
-      dayName: date.toLocaleDateString('en-US', { weekday: 'short' })
-    });
+    dailyCounts[dateString] = 0;
   }
   
-  return last7Days;
+  data.forEach(visit => {
+    const dateString = new Date(visit.visit_date_time).toLocaleDateString();
+    if (dailyCounts[dateString] !== undefined) {
+      dailyCounts[dateString]++;
+    }
+  });
+  
+  return Object.entries(dailyCounts).map(([date, visits]) => ({
+    name: date,
+    visits
+  }));
+};
+
+const processMonthlyData = (data) => {
+  const monthlyCounts = {};
+  
+  data.forEach(visit => {
+    const date = new Date(visit.visit_date_time);
+    const monthYear = `${date.getMonth() + 1}/${date.getFullYear()}`;
+    monthlyCounts[monthYear] = (monthlyCounts[monthYear] || 0) + 1;
+  });
+  
+  return Object.entries(monthlyCounts).map(([month, visits]) => ({
+    name: month,
+    visits
+  }));
 };

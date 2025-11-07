@@ -49,7 +49,7 @@ const EditUserProfile = () => {
             <div className="App">
                 <div className="error-container">
                     <p>Error: {error}</p>
-                    <button onClick={() => fetchUserProfile('user001')}>
+                    <button onClick={() => fetchUserProfile(id)}>
                         Retry
                     </button>
                 </div>

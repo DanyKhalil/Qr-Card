@@ -6,7 +6,7 @@ const api = axios.create({
     baseURL: API_BASE_URL,
 });
 
-export const userApi = {
+export const profileAnalyticsApi = {
     getUserProfileAnalytics: async (id) => {
         try {
             const response = await api.get(`/profile-analytics/${id}`);
