@@ -5,14 +5,19 @@ import companyLogo from "../../assets/images/logos/qr-card.png"
 import searchIcon from "../../assets/images/icons/search-icon-white.png"
 import scanQrIcon from "../../assets/images/icons/scan-qr-icon-white.png"
 import profileIcon from "../../assets/images/icons/profile-icon-white.png"
+import { useNavigate, useParams } from 'react-router-dom';
 
-const Header = () => {
+const Header = ({activeIndex}) => {
+    const { id } = useParams();
+    const navigate = useNavigate();
+    const goToProfile = () => {navigate(`/profile/${id}`)}
+    const goToScanQrCode = () => {navigate(`/scan-qr-code/${id}`)}
 
     let companyName = "QR CARD";
     let menuItems = [
-        {name: "Search", icon: searchIcon},
-        {name: "Scan QR", icon: scanQrIcon},
-        {name: "My Profile", icon: profileIcon},
+        {name: "Search", icon: searchIcon, active:(activeIndex === 0)},
+        {name: "Scan QR", icon: scanQrIcon, action: goToScanQrCode, active:(activeIndex === 1)},
+        {name: "My Profile", icon: profileIcon, action: goToProfile, active:(activeIndex === 2)},
     ];
     return (
         <div className="header">
@@ -23,7 +28,7 @@ const Header = () => {
 
         <div className="header-right">
             {menuItems.map((item, index) => (
-            <div key={index} className="menu-item">
+            <div key={index} className={item.active ? "menu-item active" : "menu-item"} onClick={()=> item.action()}>
                 <img src={item.icon} alt={item.name} className="menu-icon" />
                 <span className="menu-name">{item.name}</span>
             </div>

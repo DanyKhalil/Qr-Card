@@ -67,6 +67,9 @@
     gap: clamp(8px, 2vw, 20px);
     white-space: nowrap;
 }
+.menu-item.active {
+    background-color: #FF6F3C;
+}
 
 .menu-item:hover {
     background-color: #FF6F3C;

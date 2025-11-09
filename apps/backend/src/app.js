@@ -1,6 +1,7 @@
 import express from "express";
 import sequelize from "./config/db.js";
 import userRoutes from "./routes/userRoutes.js";
+import profileAnalyticsRoutes from "./routes/profileAnalyticsRoutes.js"
 import authRoutes from "./routes/authRoutes.js";
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -35,6 +36,7 @@ app.use((req, res, next) => {
 // Routes
 app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/profile-analytics", profileAnalyticsRoutes)
 
 
 if (app._router) {
