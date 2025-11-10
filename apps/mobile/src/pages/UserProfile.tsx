@@ -4,8 +4,8 @@ import UserProfileComponent from '../components/UserProfile.tsx';
 
 const mockUserData = {
     name: "Adriana Hamid Mirna Keyrouz",
-    cover_photo_url: "http://localhost:5050/uploads/covers/cover-1762121904321-710563240.jpg",
-    profile_pic_url: "http://localhost:5050/uploads/profiles/profile-1762121904320-95975363.jpg",
+    cover_photo_url: "http://192.168.0.106:5050/uploads/covers/cover-1762121904321-710563240.jpg",
+    profile_pic_url: "http://192.168.0.106:5050/uploads/profiles/profile-1762121904320-95975363.jpg",
     dob: "1999-05-17",
     headline: "Technosoft Geometry Experttttttttt",
     bio: "Heating Coil, Ovoid Vessel, Weld Animationttttttttttttttt",
@@ -68,6 +68,7 @@ export default function UserProfilePage() {
         <UserProfileComponent
             {...mockUserData}
             coverPhoto = {mockUserData.cover_photo_url}
+            profilePic = {mockUserData.profile_pic_url}
             id={id as string}
         />
     );

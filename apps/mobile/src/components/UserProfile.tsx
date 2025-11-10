@@ -2,6 +2,7 @@ import React from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CoverPhoto from './CoverPhoto/CoverPhoto';
+import ProfilePic from './ProfilePIc/ProfilePic';
 
 
 interface UserProfileProps {
@@ -36,32 +37,11 @@ const UserProfile = ({
         return (
                 <ScrollView style={{ flex: 1 }}>
                     <CoverPhoto photo={coverPhoto} height={150} />
+                    <ProfilePic photo={profilePic} size='xxlarge' />
                     
                     
-                    <ProfileContentPlaceholder 
-                        userName={userName}
-                        headline={headline}
-                        bio={bio}
-                    />
                 </ScrollView>
         );
-};
-
-// Temporary placeholder for other components
-const ProfileContentPlaceholder = ({ userName, headline, bio }: any) => {
-  return (
-    <View style={{ padding: 20 }}>
-        <Text style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 10 }}>
-            {userName}
-        </Text>
-        <Text style={{ fontSize: 16, color: '#666', marginBottom: 10 }}>
-            {headline}
-        </Text>
-        <Text style={{ fontSize: 14, color: '#333' }}>
-            {bio}
-        </Text>
-    </View>
-  );
 };
 
 export default UserProfile;
