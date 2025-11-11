@@ -114,7 +114,7 @@ const ProfilePic = ({
                         height: containerSize,
                         borderWidth: borderWidth,
                         marginTop: marginTop,
-                        marginLeft: 20,
+                        marginLeft: 0,
                     },
                 ]}
                 onPress={onPress}

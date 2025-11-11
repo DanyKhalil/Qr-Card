@@ -1,5 +1,5 @@
-import { useLocalSearchParams } from 'expo-router';
-import UserProfileComponent from '../components/UserProfile/UserProfile.tsx';
+// import { useLocalSearchParams } from 'expo-router';
+import UserProfileComponent from '../components/UserProfile/UserProfile';
 
 
 const mockUserData = {
@@ -8,7 +8,7 @@ const mockUserData = {
     profile_pic_url: "http://192.168.0.106:5050/uploads/profiles/profile-1762121904320-95975363.jpg",
     dob: "1999-05-17",
     headline: "Technosoft Geometry Experttttttttt",
-    bio: "Heating Coil, Ovoid Vessel, Weld Animationttttttttttttttt",
+    bio: "Heating Coil, Ovoid Vessel, Weld Animation Weld Animation Weld AnimationWeld Animation Weld AnimationWeld Animation Weld AnimationWeld Animation Weld AnimationWeld Animation Weld AnimationWeld Animation",
     phone_number: [
         "999999999"
     ],
@@ -24,6 +24,27 @@ const mockUserData = {
     ],
     website_link: "https://adz.comtttttttt",
     videos_links: [
+        {
+            id: "52f2aef2-e77e-4e36-a59a-2ee38a9ca554",
+            video_url: "https://youtu.be/TKfO-ZYCTow?si=XvmKNJY_2KI3liZS",
+            title: "Nidattttttttttt",
+            description: "Nadoulattttttttttttt",
+            display_order: 0
+        },
+        {
+            id: "52f2aef2-e77e-4e36-a59a-2ee38a9ca554",
+            video_url: "https://youtu.be/TKfO-ZYCTow?si=XvmKNJY_2KI3liZS",
+            title: "Nidattttttttttt",
+            description: "Nadoulattttttttttttt",
+            display_order: 0
+        },
+        {
+            id: "52f2aef2-e77e-4e36-a59a-2ee38a9ca554",
+            video_url: "https://youtu.be/TKfO-ZYCTow?si=XvmKNJY_2KI3liZS",
+            title: "Nidattttttttttt",
+            description: "Nadoulattttttttttttt",
+            display_order: 0
+        },
         {
             id: "52f2aef2-e77e-4e36-a59a-2ee38a9ca554",
             video_url: "https://youtu.be/TKfO-ZYCTow?si=XvmKNJY_2KI3liZS",
@@ -66,9 +87,13 @@ export default function UserProfilePage() {
     
     return (
         <UserProfileComponent
-            {...mockUserData}
             coverPhoto = {mockUserData.cover_photo_url}
             profilePic = {mockUserData.profile_pic_url}
+            userName = {mockUserData.name}
+            dob = {mockUserData.dob}
+            headline = {mockUserData.headline}
+            bio={mockUserData.bio}
+            videos={mockUserData.videos_links}
             id={id as string}
         />
     );
