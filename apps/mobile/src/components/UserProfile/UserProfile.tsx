@@ -3,6 +3,7 @@ import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CoverPhoto from './CoverPhoto/CoverPhoto';
 import ProfilePic from './ProfilePIc/ProfilePic';
+import Headline from './Headline/Headline';
 
 
 interface UserProfileProps {
@@ -38,6 +39,7 @@ const UserProfile = ({
                 <ScrollView style={{ flex: 1 }}>
                     <CoverPhoto photo={coverPhoto} height={150} />
                     <ProfilePic photo={profilePic} size='xxlarge' />
+                    <Headline name={userName} dob={dob} headline={headline} />
                     
                     
                 </ScrollView>

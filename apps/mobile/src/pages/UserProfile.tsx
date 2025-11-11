@@ -1,5 +1,5 @@
 import { useLocalSearchParams } from 'expo-router';
-import UserProfileComponent from '../components/UserProfile.tsx';
+import UserProfileComponent from '../components/UserProfile/UserProfile.tsx';
 
 
 const mockUserData = {
