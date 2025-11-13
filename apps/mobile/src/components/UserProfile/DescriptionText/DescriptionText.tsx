@@ -60,7 +60,8 @@ const styles = StyleSheet.create({
         fontFamily: 'System',
         fontWeight: '400',
         flexWrap: 'wrap',
-        marginTop: '40',
+        marginTop: 40,
+        marginBottom: 30,
     },
 });
 

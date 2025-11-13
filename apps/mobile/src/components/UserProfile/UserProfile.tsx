@@ -1,14 +1,12 @@
 import React from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import CoverPhoto from './CoverPhoto/CoverPhoto';
 import ProfilePic from './ProfilePIc/ProfilePic';
 import Headline from './Headline/Headline';
 import Button from './Button/Button';
-import AnimatedButton from './Button/AnimatedButton';
 import DescriptionText from './DescriptionText/DescriptionText';
-import YouTubePreview from './YoutubePreview/YoutubePreview';
 import YouTubeVideos from './YoutubeVideos/YoutubeVideos';
+import Locations from './Locations/Locations';
 
 
 interface UserProfileProps {
@@ -44,7 +42,7 @@ const UserProfile = ({
                 <ScrollView style={{ flex: 1 }}>
                     <CoverPhoto photo={coverPhoto} height={150} />
                     <View style={styles.profileSection}>
-                        <ProfilePic photo={profilePic} size='xxlarge' />
+                        <ProfilePic photo={profilePic} size="xxlarge" />
                         <View style={styles.buttonsColumn}>
                             <Button 
                                 text="Profile Analytics"
@@ -69,6 +67,7 @@ const UserProfile = ({
                         userName={userName}
                         videos={videos}
                     />
+                    <Locations locations={locations}/>
                     
                     
                 </ScrollView>

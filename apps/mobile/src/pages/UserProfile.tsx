@@ -4,8 +4,8 @@ import UserProfileComponent from '../components/UserProfile/UserProfile';
 
 const mockUserData = {
     name: "Adriana Hamid Mirna Keyrouz",
-    cover_photo_url: "http://192.168.0.106:5050/uploads/covers/cover-1762121904321-710563240.jpg",
-    profile_pic_url: "http://192.168.0.106:5050/uploads/profiles/profile-1762121904320-95975363.jpg",
+    cover_photo_url: "http://192.168.0.102:5050/uploads/covers/cover-1762121904321-710563240.jpg",
+    profile_pic_url: "http://192.168.0.102:5050/uploads/profiles/profile-1762121904320-95975363.jpg",
     dob: "1999-05-17",
     headline: "Technosoft Geometry Experttttttttt",
     bio: "Heating Coil, Ovoid Vessel, Weld Animation Weld Animation Weld AnimationWeld Animation Weld AnimationWeld Animation Weld AnimationWeld Animation Weld AnimationWeld Animation Weld AnimationWeld Animation",
@@ -94,6 +94,7 @@ export default function UserProfilePage() {
             headline = {mockUserData.headline}
             bio={mockUserData.bio}
             videos={mockUserData.videos_links}
+            locations={mockUserData.locations}
             id={id as string}
         />
     );

@@ -8,7 +8,7 @@ const { width: screenWidth } = Dimensions.get('window');
 interface ProfilePicProps {
     photo?: string;
     alt?: string;
-    size?: 'small' | 'medium' | 'large' | 'xlarge' | 'default';
+    size?: 'small' | 'medium' | 'large' | 'xlarge' | 'xxlarge' | 'default';
     onPress?: () => void;
     className?: string;
 }

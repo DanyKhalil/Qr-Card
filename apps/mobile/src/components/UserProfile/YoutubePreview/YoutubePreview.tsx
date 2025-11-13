@@ -109,7 +109,7 @@ const YouTubePreview = ({
 
 const styles = StyleSheet.create({
     container: {
-        marginVertical: 16,
+        // marginVertical: 16,
     },
     titleContainer: {
         marginBottom: 12,

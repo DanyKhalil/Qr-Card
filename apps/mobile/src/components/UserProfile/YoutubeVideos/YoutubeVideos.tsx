@@ -88,7 +88,7 @@ const YouTubeVideos = ({
 
 const styles = StyleSheet.create({
     container: {
-        marginVertical: 24,
+        marginVertical: 12,
         paddingVertical: 16,
     },
     header: {
@@ -110,7 +110,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     videoCard: {
-        padding: 12,
+        // padding: 12,
         marginHorizontal: 8,
     },
     dotsContainer: {
