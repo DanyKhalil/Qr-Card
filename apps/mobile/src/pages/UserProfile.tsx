@@ -20,6 +20,11 @@ const mockUserData = {
             id: "5f3648f8-945a-4ef0-809c-cf682315c22a",
             url: "https://www.linkedin.com/in/dany-al-khalil/",
             display_order: 0
+        },
+        {
+            id: "5f3648f8-945a-4ef0-809c-cf682315c22a",
+            url: "https://www.instagram.com/dany-el-khalil/",
+            display_order: 0
         }
     ],
     website_link: "https://adz.comtttttttt",
@@ -95,6 +100,9 @@ export default function UserProfilePage() {
             bio={mockUserData.bio}
             videos={mockUserData.videos_links}
             locations={mockUserData.locations}
+            // contactLinks={}
+            connectLinks={mockUserData.social_media_links}
+            // websiteLink={mockUserData.website_link}
             id={id as string}
         />
     );

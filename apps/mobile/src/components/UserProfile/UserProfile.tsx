@@ -1,5 +1,5 @@
 import React from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import CoverPhoto from './CoverPhoto/CoverPhoto';
 import ProfilePic from './ProfilePIc/ProfilePic';
 import Headline from './Headline/Headline';
@@ -7,6 +7,9 @@ import Button from './Button/Button';
 import DescriptionText from './DescriptionText/DescriptionText';
 import YouTubeVideos from './YoutubeVideos/YoutubeVideos';
 import Locations from './Locations/Locations';
+import IconWithName from './IconWithName/IconWithName';
+import TitleAndLinks from './TitleAndLinks/TitleAndLinks';
+import ProfileQrCode from './ProfileQrCode/ProfileQrCode';
 
 
 interface UserProfileProps {
@@ -38,6 +41,25 @@ const UserProfile = ({
         locations = [],
         id = "User001",
     }: UserProfileProps) => {
+        const formatSocialLinks = (links: any[]) => {
+            return links.map(({ url }) => {
+                try {
+                    const hostname = new URL(url).hostname.replace("www.", "");
+                    const icon = hostname.split(".")[0];
+                    const username = url.split("/").filter(Boolean).pop();
+                    return {
+                        iconName: icon,
+                        name: `@${username}`,
+                        link: url
+                    };
+                } catch (error) {
+                    console.error("Invalid URL:", url);
+                    return null;
+                }
+            }).filter(Boolean);
+            
+        }
+
         return (
                 <ScrollView style={{ flex: 1 }}>
                     <CoverPhoto photo={coverPhoto} height={150} />
@@ -68,6 +90,12 @@ const UserProfile = ({
                         videos={videos}
                     />
                     <Locations locations={locations}/>
+
+                    <TitleAndLinks title="Contact" links={contactLinks}/>
+                    <TitleAndLinks title="Connect" links={formatSocialLinks(connectLinks)}/>
+                    {websiteLink && <TitleAndLinks title="Website" links={[{name:websiteLink, iconName:"web"}]}/>}
+
+                    <ProfileQrCode id={id}/>
                     
                     
                 </ScrollView>
