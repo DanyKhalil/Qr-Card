@@ -104,6 +104,9 @@ const ProfilePic = ({
 
     const ContainerComponent = TouchableOpacity;
 
+
+    console.log('Profile Photo in Profile Pic Component: ', photo)
+
     return (
         <>
             <ContainerComponent

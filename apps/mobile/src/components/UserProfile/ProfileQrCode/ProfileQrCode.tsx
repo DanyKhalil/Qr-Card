@@ -5,13 +5,14 @@ import Button from '../Button/Button';
 import * as MediaLibrary from 'expo-media-library';
 import * as FileSystem from 'expo-file-system';
 import { captureRef } from 'react-native-view-shot';
+import { getExpoDeepLink } from '../../../config/development';
 
 interface ProfileQrCodeProps {
     profileUrl: string;
 }
 
 const ProfileQrCode = ({ id }: { id: string }) => {
-    const expoUrl = `exp://192.168.0.102:8081/--/(stack)/user-profile/${id}`;
+    const expoUrl = getExpoDeepLink(`/(stack)/user-profile/${id}`);
     // const webUrl = `http://192.168.1.100:8081/user-profile/${id}`;
 
     const { width: screenWidth } = useWindowDimensions();

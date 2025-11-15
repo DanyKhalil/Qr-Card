@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useLocation, useParams, useSearchParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 
 import UserProfileComponent from '../components/Profile/UserProfile.jsx';
 import { userApi } from '../services/userApi.js';
@@ -37,7 +37,6 @@ const UserProfile = () => {
             hasVisited.current = true;
             try {
                 let res = await profileAnalyticsApi.visitUserProfile(id, qrScan);
-                console.log(res);
             } catch (err) {
                 console.error('Error in visitProfile:', err);
             }

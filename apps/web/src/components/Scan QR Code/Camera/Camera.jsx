@@ -80,7 +80,6 @@ const Camera = () => {
             if (scannedUrl.hostname === currentUrl.hostname) {
                 return true;
             } else {
-                console.log('Other wesbite scanne:', scannedUrl.hostname);
                 return false;
             }
         } catch (error) {

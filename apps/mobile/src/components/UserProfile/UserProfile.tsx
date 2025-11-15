@@ -41,25 +41,7 @@ const UserProfile = ({
         locations = [],
         id = "User001",
     }: UserProfileProps) => {
-        const formatSocialLinks = (links: any[]) => {
-            return links.map(({ url }) => {
-                try {
-                    const hostname = new URL(url).hostname.replace("www.", "");
-                    const icon = hostname.split(".")[0];
-                    const username = url.split("/").filter(Boolean).pop();
-                    return {
-                        iconName: icon,
-                        name: `@${username}`,
-                        link: url
-                    };
-                } catch (error) {
-                    console.error("Invalid URL:", url);
-                    return null;
-                }
-            }).filter(Boolean);
-            
-        }
-
+        console.log('Profile Pic in User Profile COmponent: ', profilePic)
         return (
                 <ScrollView style={{ flex: 1 }}>
                     <CoverPhoto photo={coverPhoto} height={150} />
@@ -92,7 +74,7 @@ const UserProfile = ({
                     <Locations locations={locations}/>
 
                     <TitleAndLinks title="Contact" links={contactLinks}/>
-                    <TitleAndLinks title="Connect" links={formatSocialLinks(connectLinks)}/>
+                    <TitleAndLinks title="Connect" links={connectLinks}/>
                     {websiteLink && <TitleAndLinks title="Website" links={[{name:websiteLink, iconName:"web"}]}/>}
 
                     <ProfileQrCode id={id}/>
