@@ -2,20 +2,9 @@ import React from 'react';
 import {  View, Text, StyleSheet, useWindowDimensions,} from 'react-native';
 import LabelWithTextField from '../LabelWithTextField/LabelWithTextField';
 
-interface Field {
-    label: string;
-    type?: 'default' | 'numeric' | 'email-address' | 'phone-pad';
-    id?: string;
-    value: string;
-    setter: (value: string) => void;
-    placeholder?: string;
-    secureTextEntry?: boolean;
-    multiline?: boolean;
-}
-
 interface TitleAndFieldsProps {
     title: string;
-    fields?: Field[];
+    fields?: any[];
 }
 
 const TitleAndFields = ({ title, fields = [] }: TitleAndFieldsProps) => {

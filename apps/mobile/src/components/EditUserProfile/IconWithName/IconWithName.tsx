@@ -6,7 +6,7 @@ interface IconWithNameProps {
     id: string;
     name: string;
     iconName: string;
-    setter: (links: any[]) => void;
+    setter:  React.Dispatch<React.SetStateAction<any[]>>;
     fontSize?: number;
     iconSize?: number;
 }
@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
         gap: 12,
         paddingVertical: 8,
         paddingHorizontal: 12,
-        backgroundColor: '#f8f9fa',
+        // backgroundColor: '#f8f9fa',
         borderRadius: 8,
         marginVertical: 4,
     },

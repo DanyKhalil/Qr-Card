@@ -71,6 +71,14 @@ const UserProfilePage = () => {
         return contactLinks;
     };
 
+    function normalizeUrl(url: string) {
+        if (!url) return null;
+        if (url.startsWith("http://") || url.startsWith("https://")) {
+            return url;
+        }
+        return "https://" + url;
+    }
+    
     // constructing the conect links
     const processConnectLinks = () => {
         if (!userData?.social_media_links) 
@@ -78,11 +86,17 @@ const UserProfilePage = () => {
 
         return userData.social_media_links.map((link: any) => {
             try {
-                const url = link.url || link;
+                let rawUrl = link.url || link;
+
+                const url = normalizeUrl(rawUrl);
+
                 const hostname = new URL(url).hostname.replace("www.", "");
                 const icon = hostname.split(".")[0];
+
                 const username = url.split("/").filter(Boolean).pop();
+
                 return {
+                    id: link.id,
                     iconName: icon,
                     name: `@${username}`,
                     link: url

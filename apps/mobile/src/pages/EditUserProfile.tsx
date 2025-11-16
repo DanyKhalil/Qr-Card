@@ -38,6 +38,15 @@ const EditUserProfilePage = () => {
         }
     }, [id, qrScan]);
 
+
+    function normalizeUrl(url: string) {
+        if (!url) return null;
+        if (url.startsWith("http://") || url.startsWith("https://")) {
+            return url;
+        }
+        return "https://" + url;
+    }
+
     // constructing contact links array becuase it is not an array in the respone of the backend
     const processContactLinks = () => {
         if (!userData) 
@@ -63,10 +72,15 @@ const EditUserProfilePage = () => {
 
         return userData.social_media_links.map((link: any) => {
             try {
-                const url = link.url || link;
+                let rawUrl = link.url || link;
+
+                const url = normalizeUrl(rawUrl);
+
                 const hostname = new URL(url).hostname.replace("www.", "");
                 const icon = hostname.split(".")[0];
+
                 const username = url.split("/").filter(Boolean).pop();
+
                 return {
                     id: link.id,
                     iconName: icon,

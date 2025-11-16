@@ -7,6 +7,8 @@ import ProfileQrCode from '../UserProfile/ProfileQrCode/ProfileQrCode';
 import { router } from 'expo-router';
 import TitleAndFields from './TitleAndFields/TitleAndFields';
 import TitleAndLinks from './TitleAndLinks/TitleAndLinks';
+import YoutubeVideos from './YoutubeVideos/YoutubeVideos';
+import AddressCards from './AddressCards/AddressCards';
 
 interface EditUserProfileProps {
     coverPhoto?: string;
@@ -119,6 +121,21 @@ const EditUserProfile = ({
                         links={connectLinksInput} 
                         setter={setConnectLinksInput} 
                         // addAction={()=>addSocialMediaModalVisibiltySetter(true)}
+                    />
+
+                    <YoutubeVideos 
+                        videos={videosInput}
+                        setter={setVideosInput}
+                        // addAction={()=>addVideoModalVisibiltySetter(true)}
+                        // updateAction={()=>updateVideoModalVisibiltySetter(true)}
+                        // objectSetter={videoObjectUnderUpdateSetter}
+                    />
+                    <AddressCards
+                        addresses={locationsInput}
+                        setter={setLocationsInput}
+                        // addAction={()=>addLocationModalVisibiltySetter(true)}
+                        // updateAction={()=>updateLocationModalVisibiltySetter(true)}
+                        // objectSetter={locationObjectUnderUpdateSetter}
                     />
 
                     <ProfileQrCode id={id}/>
