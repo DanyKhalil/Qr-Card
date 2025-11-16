@@ -1,23 +1,20 @@
 // import { useLocalSearchParams } from 'expo-router';
-import React, { useEffect, useRef, useState } from 'react';
-import {View,Text,  ActivityIndicator,  Alert,ScrollView } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import {View,Text,  ActivityIndicator,  } from 'react-native';
 import {useLocalSearchParams } from 'expo-router';
-import UserProfileComponent from '../components/UserProfile/UserProfile';
+import EditUserProfileComponent from '../components/EditUserProfile/EditUserProfile';
 import { userApi } from '../services/userApi';
-import { profileAnalyticsApi} from '../services/profileAnalyticsApi';
 import Button from '../components/UserProfile/Button/Button';
 import { DEVELOPMENT_CONFIG } from '../config/development';
 
 
 
-const UserProfilePage = () => {
+const EditUserProfilePage = () => {
     const { id, qrScan } = useLocalSearchParams();
     const [userData, setUserData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     
-    const hasVisited = useRef(false);
-
     const fetchUserProfile = async (userId: string) => {
         try {
             setLoading(true);
@@ -32,24 +29,12 @@ const UserProfilePage = () => {
         }
     };
 
-    const visitProfile = async (userId: string, isQrScan: boolean) => {
-        if (!hasVisited.current) {
-            hasVisited.current = true;
-            try {
-                await profileAnalyticsApi.visitUserProfile(userId, isQrScan);
-            } catch (err) {
-                console.error('Error in visitProfile:', err);
-            }
-        }
-    };
-
     useEffect(() => {
         if (id) {
             const userId = Array.isArray(id) ? id[0] : id;
             const isQrScan = qrScan === 'true';
             
             fetchUserProfile(userId);
-            visitProfile(userId, isQrScan);
         }
     }, [id, qrScan]);
 
@@ -83,6 +68,7 @@ const UserProfilePage = () => {
                 const icon = hostname.split(".")[0];
                 const username = url.split("/").filter(Boolean).pop();
                 return {
+                    id: link.id,
                     iconName: icon,
                     name: `@${username}`,
                     link: url
@@ -137,7 +123,7 @@ const UserProfilePage = () => {
     const connectLinks = processConnectLinks();
 
     return (
-        <UserProfileComponent
+        <EditUserProfileComponent
             coverPhoto={transformImageUrl(userData.cover_photo_url)}
             profilePic={transformImageUrl(userData.profile_pic_url)}
             userName={userData.name}
@@ -154,4 +140,4 @@ const UserProfilePage = () => {
     );
 };
 
-export default UserProfilePage;
+export default EditUserProfilePage;

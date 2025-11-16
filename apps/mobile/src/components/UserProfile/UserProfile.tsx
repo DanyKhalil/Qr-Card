@@ -1,5 +1,5 @@
 import React from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import CoverPhoto from './CoverPhoto/CoverPhoto';
 import ProfilePic from './ProfilePIc/ProfilePic';
 import Headline from './Headline/Headline';
@@ -7,9 +7,9 @@ import Button from './Button/Button';
 import DescriptionText from './DescriptionText/DescriptionText';
 import YouTubeVideos from './YoutubeVideos/YoutubeVideos';
 import Locations from './Locations/Locations';
-import IconWithName from './IconWithName/IconWithName';
 import TitleAndLinks from './TitleAndLinks/TitleAndLinks';
 import ProfileQrCode from './ProfileQrCode/ProfileQrCode';
+import { router } from 'expo-router';
 
 
 interface UserProfileProps {
@@ -41,7 +41,6 @@ const UserProfile = ({
         locations = [],
         id = "User001",
     }: UserProfileProps) => {
-        console.log('Profile Pic in User Profile COmponent: ', profilePic)
         return (
                 <ScrollView style={{ flex: 1 }}>
                     <CoverPhoto photo={coverPhoto} height={150} />
@@ -57,7 +56,7 @@ const UserProfile = ({
                             <Button 
                                 text="Edit Profile"
                                 color="coral"
-                                onPress={() => console.log('Edit Profile')}
+                                onPress={() => router.push(`/(stack)/edit-profile/${id}`)}
                                 width={180}
                                 style={{ marginTop: 12 }}
                             />

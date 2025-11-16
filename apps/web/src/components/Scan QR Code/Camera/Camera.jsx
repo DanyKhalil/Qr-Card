@@ -83,7 +83,7 @@ const Camera = () => {
                 return false;
             }
         } catch (error) {
-            console.log('Invalid URL format:', error);
+            console.error('Invalid URL format:', error);
             return false;
         }
     };

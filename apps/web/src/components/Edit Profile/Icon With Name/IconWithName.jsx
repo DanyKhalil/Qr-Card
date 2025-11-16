@@ -56,7 +56,7 @@ const IconWithName = ({
                 onClick={handleRemoveClick}
                 title="Remove"
             >
-                ×
+                x
             </button>
             {iconSrc && (
                 <div className="icon-container">
