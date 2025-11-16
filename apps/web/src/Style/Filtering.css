@@ -1,0 +1,52 @@
+/* Container for the entire page */
+.filtering-page {
+  padding-top: 120px; /* space for header */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+/* Search bar styling */
+.search-bar-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+  gap: 8px;
+  width: 100%;
+  max-width: 900px; /* matches grid width */
+  z-index: 10;
+}
+
+.search-input {
+  width: 750px;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.search-button {
+  padding: 8px 16px;
+  background-color: #56c596;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: opacity 0.2s ease;
+}
+
+.search-button:hover {
+  opacity: 0.85;
+}
+
+/* Profile cards grid */
+.profile-cards-container {
+  display: grid;
+  grid-template-columns: repeat(3, 260px); /* 3 cards fixed width */
+  gap: 12px; /* space between cards */
+  justify-content: center; /* center the grid */
+  padding: 1rem;
+}

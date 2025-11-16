@@ -2,6 +2,7 @@ import { User } from '../models/index.js';
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import dotenv from "dotenv";
+import { sendVerificationEmail } from "../utils/sendEmail.js"; // ✅ added
 
 dotenv.config();
 
@@ -13,10 +14,19 @@ export const loginUser = async (req, res) => {
     const user = await User.findOne({ where: { email } });
     if (!user) return res.status(404).json({ error: "User not found" });
 
+    // ✅ Block login if email not verified
+    if (!user.verified) {
+      return res.status(403).json({ error: "Please verify your email before logging in." });
+    }
+
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) return res.status(400).json({ error: "Invalid password" });
 
-    const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: "1h" });
+    const token = jwt.sign(
+      { id: user.id, email: user.email },
+      JWT_SECRET,
+      { expiresIn: "1h" }
+    );
 
     res.json({
       message: "Login successful",
@@ -42,15 +52,29 @@ export const registerUser = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const newUser = await User.create({ name, email, password: hashedPassword, role });
+    // ✅ Set verified = false initially
+    const newUser = await User.create({
+      name,
+      email,
+      password: hashedPassword,
+      role,
+      verified: false
+    });
 
-    const token = jwt.sign({ id: newUser.id, email }, JWT_SECRET, { expiresIn: "1h" });
+    // ✅ Create verification token (1 hour)
+    const verifyToken = jwt.sign(
+      { id: newUser.id },
+      JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    // ✅ Send verification email
+    await sendVerificationEmail(email, verifyToken);
 
     res.status(201).json({
-      message: "User registered successfully",
-      token,
-      user: { id: newUser.id, email: newUser.email, name: newUser.name, role: newUser.role }
+      message: "Registration successful. Check your email to verify your account."
     });
+
   } catch (error) {
     console.error("Register error:", error);
     res.status(500).json({ error: "Server error" });
