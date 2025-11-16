@@ -154,8 +154,6 @@ export const updateUserProfile = async (req, res) => {
     const parsedVideos = videos ? JSON.parse(videos) : [];
     const parsedLocations = locations ? JSON.parse(locations) : [];
     
-    console.log('Parsed connectLinks:', parsedConnectLinks); // Debug log
-
 
     // handling cover and profile picture changes
     let finalProfilePhotoPath = profilePhotoPath;
@@ -166,7 +164,6 @@ export const updateUserProfile = async (req, res) => {
       const profileFile = req.files.profilePicture[0];
       // finalProfilePhotoPath = `/uploads/profiles/${profileFile.filename}`;
       finalProfilePhotoPath = `http://localhost:5050/uploads/profiles/${profileFile.filename}`;
-      console.log('New profile picture uploaded:', finalProfilePhotoPath);
     } else {
       finalProfilePhotoPath = profilePhotoPath || null;
     }
@@ -175,7 +172,6 @@ export const updateUserProfile = async (req, res) => {
       const coverFile = req.files.coverPhoto[0];
       // finalCoverPhotoPath = `/uploads/covers/${coverFile.filename}`;
       finalCoverPhotoPath = `http://localhost:5050/uploads/covers/${coverFile.filename}`;
-      console.log('New cover photo uploaded:', finalCoverPhotoPath);
     } else {
       finalCoverPhotoPath = coverPhotoPath || null;
     }

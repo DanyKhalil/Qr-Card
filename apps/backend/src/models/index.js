@@ -4,13 +4,15 @@ import Profile from './profileModel.js';
 import SocialMedia from './socialMediaModel.js';
 import Video from './videoModel.js';
 import Location from './locationModel.js';
+import ProfileAnalytics from './profileAnalytics.js'
 
 const models = {
   User,
   Profile,
   SocialMedia,
   Video,
-  Location
+  Location,
+  ProfileAnalytics
 };
 
 // Set up associations
@@ -20,4 +22,4 @@ Object.keys(models).forEach(modelName => {
   }
 });
 
-export { sequelize, User, Profile, SocialMedia, Video, Location };
+export { sequelize, User, Profile, SocialMedia, Video, Location, ProfileAnalytics };

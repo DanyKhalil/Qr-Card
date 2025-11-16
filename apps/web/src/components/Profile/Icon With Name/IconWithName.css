@@ -8,7 +8,7 @@
     display: flex;
     align-items: center;
     width: 100%;
-    gap: 8px; /* Default gap, can be overridden by prop */
+    gap: 8px;
 }
 
 .icon-container {

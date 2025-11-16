@@ -66,6 +66,10 @@ Profile.associate = function(models) {
         foreignKey: 'profile_id',
         as: 'locations'
     });
+    Profile.hasMany(models.ProfileAnalytics, {
+        foreignKey: 'profile_id',
+        as: 'analytics' // visits made to this profile
+    });
 };
 
 export default Profile;

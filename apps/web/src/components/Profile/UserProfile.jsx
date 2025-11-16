@@ -26,7 +26,7 @@ const UserProfile = ({
 ) => {
   return (    
     <div>
-      <Header/>
+      <Header activeIndex={2}/>
       <CoverPhoto photo={coverPhoto} height={300} paddingTop={80}/>
       <ProfilePhotoAndHeadline  photo={profilePic} 
                                 name={userName}

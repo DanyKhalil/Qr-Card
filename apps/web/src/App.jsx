@@ -13,6 +13,8 @@ import RegistrationForm from './pages/Registration.jsx';
 import VerifyEmail from './pages/VerifyEmail.jsx';
 import Filtering from './pages/Filtering.jsx';
 import WelcomePage from './pages/WelcomePage.jsx';
+import ScanQrCode from './pages/ScanQrCode.jsx';
+import ProfileAnalytics from './pages/ProfileAnalytics.jsx';
 
 function App() {
   return (    
@@ -24,6 +26,8 @@ function App() {
       <Route path="/verify-email/:token" element={<VerifyEmail />} />
       <Route path="/Filtering" element={<Filtering/>}></Route>
       <Route path="/" element={<WelcomePage/>}></Route>
+      <Route path="/scan-qr-code/:id" element={<ScanQrCode/>}/>
+      <Route path="/profile-analytics/:id" element={<ProfileAnalytics/>}/>
     </Routes>
   )
 }

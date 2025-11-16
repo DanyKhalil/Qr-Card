@@ -7,7 +7,6 @@ const EditVideoModal = ({ videoObject ,visible, onClose, setter }) => {
     const [videoUrl, setVideoUrl] = useState(videoObject.video_url);
     const [videoTitle, setVideoTitle] = useState(videoObject.title);
     const [videoDescription, setVideoDescription] = useState(videoObject.description);
-    console.log(videoObject);
 
     useEffect(() => {
         setVideoUrl(videoObject.video_url);

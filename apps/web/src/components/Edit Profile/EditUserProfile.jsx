@@ -195,7 +195,7 @@ const EditUserProfile = ({
 
   return (    
     <div>
-      <Header/>
+      <Header activeIndex={2} />
       <CoverPhoto photo={coverPhotoInput} height={300} paddingTop={80}/>
       <ProfilePhotoAndHeadline
         photo={profilePicInput}

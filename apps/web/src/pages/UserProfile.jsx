@@ -1,16 +1,23 @@
-import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { useParams, useSearchParams } from 'react-router-dom';
 
 import UserProfileComponent from '../components/Profile/UserProfile.jsx';
 import { userApi } from '../services/userApi.js';
+import { profileAnalyticsApi } from '../services/profileAnalyticsApi.js';
 
 
 const UserProfile = () => {
+    const [searchParams] = useSearchParams();
+
     const { id } = useParams();
+    const qrScan = searchParams.get('qrScan') === 'true';
 
     const [userData, setUserData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+
+    // this one because it is getting visited two times automatically
+    const hasVisited = useRef(false);
 
     const fetchUserProfile = async (id) => {
         try {
@@ -25,6 +32,16 @@ const UserProfile = () => {
             setLoading(false);
         }
     };
+    const visitProfile = async (id, qrScan) => {
+        if (!hasVisited.current) {
+            hasVisited.current = true;
+            try {
+                let res = await profileAnalyticsApi.visitUserProfile(id, qrScan);
+            } catch (err) {
+                console.error('Error in visitProfile:', err);
+            }
+        }
+    };
 
     // the use effect, is to when the component mount, it will call something automatically
     useEffect(() => {
@@ -32,7 +49,8 @@ const UserProfile = () => {
         // 1. URL parameters (if using React Router)
         // 2. Authentication context
         fetchUserProfile(id);
-    }, []);
+        visitProfile(id, qrScan);
+    }, [id, qrScan]);
 
     if (loading) {
         return (
