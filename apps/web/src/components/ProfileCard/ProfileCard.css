@@ -1,0 +1,52 @@
+.profile-card {
+  width: 260px;
+  background-color: #ffffff;
+  border: 1px solid #56c596;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px;
+}
+
+.profile-image {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 12px;
+}
+
+.profile-name {
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 4px;
+  text-align: center;
+}
+
+.profile-title {
+  font-size: 14px;
+  color: #6b7280;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.profile-button {
+  background: linear-gradient(to right, #a8e6cf, #56c596);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 24px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  width: 200px;
+}
+
+.profile-button:hover {
+  opacity: 0.85;
+  transform: scale(1.05);
+}

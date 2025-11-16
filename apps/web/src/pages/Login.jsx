@@ -39,8 +39,8 @@ const Form = () => {
       localStorage.setItem("user", JSON.stringify(res.data.user));
 
       // redirect
-      window.location.href = "/login"; 
-      alert("user logged in");
+       alert("user logged in");
+       window.location.href = "/Filtering"; 
     } catch (err) {
       setError(err.response?.data?.error || "Login failed");
     }

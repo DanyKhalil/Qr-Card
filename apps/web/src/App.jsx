@@ -8,12 +8,22 @@ import TwoColumnLayout from './components/Profile/Two Column Layout/TwoColumnLay
 import Footer from './components/Footer/Footer.jsx';
 import UserProfile from './pages/UserProfile.jsx';
 import EditUserProfile from './pages/EditUserProfile.jsx';
+import Login from './pages/Login.jsx';
+import RegistrationForm from './pages/Registration.jsx';
+import VerifyEmail from './pages/VerifyEmail.jsx';
+import Filtering from './pages/Filtering.jsx';
+import WelcomePage from './pages/WelcomePage.jsx';
 
 function App() {
   return (    
     <Routes>
       <Route path="/profile/:id" element={<UserProfile/>}/>
       <Route path="/edit-profile/:id" element={<EditUserProfile/>}/>
+      <Route path="/login" element={<Login/>}/>
+      <Route path="/registration" element={<RegistrationForm/>}/>
+      <Route path="/verify-email/:token" element={<VerifyEmail />} />
+      <Route path="/Filtering" element={<Filtering/>}></Route>
+      <Route path="/" element={<WelcomePage/>}></Route>
     </Routes>
   )
 }

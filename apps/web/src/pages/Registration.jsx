@@ -12,12 +12,11 @@ const TitleLogin = () => (
 
 const Image = () => (
   <div className="ImagePosition2">
-    <img src={backround} alt="Example" className="rounded-2xl shadow-md" />
+    <img src={backround} alt="Background" className="rounded-2xl shadow-md" />
   </div>
 );
 
 const RegistrationForm = () => {
-
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -28,17 +27,17 @@ const RegistrationForm = () => {
     e.preventDefault();
 
     try {
-      const res = await axios.post("http://localhost:5050/api/auth/register", {
+      await axios.post("http://localhost:5050/api/auth/register", {
         name,
         email,
         password,
         role
       });
 
-      localStorage.setItem("token", res.data.token);
-      setMessage("Registration successful!");
+      // ✅ No token storage here — wait for email verification
+      setMessage("✅ Registration successful! Please check your email to verify your account.");
     } catch (err) {
-      console.error(err); 
+      console.error(err);
       setMessage(err.response?.data?.error || "Registration failed");
     }
   };
@@ -54,6 +53,7 @@ const RegistrationForm = () => {
           placeholder="Full Name"
           value={name}
           onChange={(e) => setName(e.target.value)}
+          required
         />
 
         <input
@@ -62,6 +62,7 @@ const RegistrationForm = () => {
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          required
         />
 
         <input
@@ -70,12 +71,14 @@ const RegistrationForm = () => {
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          required
         />
 
         <select
           className="dropdown-input"
           value={role}
           onChange={(e) => setRole(e.target.value)}
+          required
         >
           <option value="" disabled>Select Role</option>
           <option value="client">Client</option>
