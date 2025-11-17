@@ -13,6 +13,8 @@ import AddressCards from './AddressCards/AddressCards';
 import AddSocialMediaModal from './Modals/AddSocialMediaModal/AddSocialMediaModel';
 import AddVideoModal from './Modals/AddVideoModal/AddVideoModal';
 import AddLocationModal from './Modals/AddLocationModal/AddLOcationModal';
+import EditLocationModal from './Modals/EditLocationModal/EditLocationModal';
+import EditVideoModal from './Modals/EditVideoModal/EditVideoModal';
 
 interface EditUserProfileProps {
     coverPhoto?: string;
@@ -83,6 +85,12 @@ const EditUserProfile = ({
         const [addSocialMediaModalIsVisible, setAddSocialMediaModalIsVisible] = useState(false);
         const [addVideoModalIsVisible, setaddVideoModalIsVisible] = useState(false);
         const [addLocationModalIsVisible, setAddLocationModalIsVisible] = useState(false);
+
+        const [updateVideoModalIsVisible, setUpdateVideoModalIsVisible] = useState(false);
+        const [updateAdressModalIsVisible, setUpdateAdressModalIsVisible] = useState(false);
+
+        const [videoObjectUnderUpdate, setVideoObjectUnderUpdate] = useState({id:'', title:'', description:'', video_url:''})
+        const [locationObjectUnderUpdate, setLocationObjectUnderUpdate] = useState({id:'', title:'', floor:'', building:'', street:'', city:'', state:'', country:'', maps_url:''})
 
 
 
@@ -172,15 +180,15 @@ const EditUserProfile = ({
                         videos={videosInput}
                         setter={setVideosInput}
                         addAction={()=>setaddVideoModalIsVisible(true)}
-                        // updateAction={()=>updateVideoModalVisibiltySetter(true)}
-                        // objectSetter={videoObjectUnderUpdateSetter}
+                        updateAction={()=>setUpdateVideoModalIsVisible(true)}
+                        objectSetter={setVideoObjectUnderUpdate}
                     />
                     <AddressCards
                         addresses={locationsInput}
                         setter={setLocationsInput}
                         addAction={()=>setAddLocationModalIsVisible(true)}
-                        // updateAction={()=>updateLocationModalVisibiltySetter(true)}
-                        // objectSetter={locationObjectUnderUpdateSetter}
+                        updateAction={()=>setUpdateAdressModalIsVisible(true)}
+                        objectSetter={setLocationObjectUnderUpdate}
                     />
 
                     <ProfileQrCode id={id}/>
@@ -199,6 +207,18 @@ const EditUserProfile = ({
                     <AddLocationModal 
                         visible={addLocationModalIsVisible}
                         onClose={() => setAddLocationModalIsVisible(false)}
+                        setter={setLocationsInput}
+                    />
+                    <EditVideoModal
+                        videoObject={videoObjectUnderUpdate}
+                        visible={updateVideoModalIsVisible}
+                        onClose={() => setUpdateVideoModalIsVisible(false)}
+                        setter={setVideosInput}
+                    />
+                    <EditLocationModal
+                        locationObject={locationObjectUnderUpdate}
+                        visible={updateAdressModalIsVisible}
+                        onClose={() => setUpdateAdressModalIsVisible(false)}
                         setter={setLocationsInput}
                     />
                     
