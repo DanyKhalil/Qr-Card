@@ -76,10 +76,10 @@ const EditUserProfilePage = () => {
 
                 const url = normalizeUrl(rawUrl);
 
-                const hostname = new URL(url).hostname.replace("www.", "");
-                const icon = hostname.split(".")[0];
+                const hostname = url ? new URL(url).hostname.replace("www.", "") : null;
+                const icon = hostname ? hostname.split(".")[0] : null;
 
-                const username = url.split("/").filter(Boolean).pop();
+                const username = url ? url.split("/").filter(Boolean).pop() : null;
 
                 return {
                     id: link.id,

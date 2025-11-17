@@ -10,6 +10,8 @@ import TitleAndLinks from './TitleAndLinks/TitleAndLinks';
 import YoutubeVideos from './YoutubeVideos/YoutubeVideos';
 import AddressCards from './AddressCards/AddressCards';
 
+import AddSocialMediaModal from './Modals/AddSocialMediaModal/AddSocialMediaModel';
+
 interface EditUserProfileProps {
     coverPhoto?: string;
     profilePic?: string;
@@ -72,6 +74,12 @@ const EditUserProfile = ({
     
         const [locationsInput, setLocationsInput] = useState(locations);
         const [locationsInputErrorMessage, setLocationsInputErrorMessage] = useState('');
+
+
+
+        /// for modals
+        const [addSocialMediaModalIsVisible, setAddSocialMediaModalIsVisible] = useState(false);
+
 
 
         let personalInformationFields = [
@@ -153,7 +161,7 @@ const EditUserProfile = ({
                         title="Social Media" 
                         links={processConnectLinks(connectLinksInput)} 
                         setter={setConnectLinksInput} 
-                        // addAction={()=>addSocialMediaModalVisibiltySetter(true)}
+                        addAction={()=>setAddSocialMediaModalIsVisible(true)}
                     />
 
                     <YoutubeVideos 
@@ -172,6 +180,13 @@ const EditUserProfile = ({
                     />
 
                     <ProfileQrCode id={id}/>
+
+
+                    <AddSocialMediaModal 
+                        visible={addSocialMediaModalIsVisible}
+                        onClose={() => setAddSocialMediaModalIsVisible(false)}
+                        setter={setConnectLinksInput}
+                    />
                     
                     
                 </ScrollView>
