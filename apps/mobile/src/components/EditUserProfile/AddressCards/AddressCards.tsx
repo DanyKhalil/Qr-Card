@@ -49,7 +49,7 @@ const AddressCards = ({
                 text="Add Location"
                 color="green"
                 width="100%"
-                action={addAction}
+                onPress={addAction}
                 style={{ marginTop: 16 }}
             />
         </View>

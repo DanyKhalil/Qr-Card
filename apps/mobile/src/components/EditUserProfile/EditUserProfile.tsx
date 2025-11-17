@@ -12,6 +12,7 @@ import AddressCards from './AddressCards/AddressCards';
 
 import AddSocialMediaModal from './Modals/AddSocialMediaModal/AddSocialMediaModel';
 import AddVideoModal from './Modals/AddVideoModal/AddVideoModal';
+import AddLocationModal from './Modals/AddLocationModal/AddLOcationModal';
 
 interface EditUserProfileProps {
     coverPhoto?: string;
@@ -80,7 +81,8 @@ const EditUserProfile = ({
 
         /// for modals
         const [addSocialMediaModalIsVisible, setAddSocialMediaModalIsVisible] = useState(false);
-        const [addVideoMediaModalIsVisible, setAddVideoMediaModalIsVisible] = useState(false);
+        const [addVideoModalIsVisible, setaddVideoModalIsVisible] = useState(false);
+        const [addLocationModalIsVisible, setAddLocationModalIsVisible] = useState(false);
 
 
 
@@ -169,14 +171,14 @@ const EditUserProfile = ({
                     <YoutubeVideos 
                         videos={videosInput}
                         setter={setVideosInput}
-                        addAction={()=>setAddVideoMediaModalIsVisible(true)}
+                        addAction={()=>setaddVideoModalIsVisible(true)}
                         // updateAction={()=>updateVideoModalVisibiltySetter(true)}
                         // objectSetter={videoObjectUnderUpdateSetter}
                     />
                     <AddressCards
                         addresses={locationsInput}
                         setter={setLocationsInput}
-                        // addAction={()=>addLocationModalVisibiltySetter(true)}
+                        addAction={()=>setAddLocationModalIsVisible(true)}
                         // updateAction={()=>updateLocationModalVisibiltySetter(true)}
                         // objectSetter={locationObjectUnderUpdateSetter}
                     />
@@ -190,9 +192,14 @@ const EditUserProfile = ({
                         setter={setConnectLinksInput}
                     />
                     <AddVideoModal 
-                        visible={addVideoMediaModalIsVisible}
-                        onClose={() => setAddVideoMediaModalIsVisible(false)}
+                        visible={addVideoModalIsVisible}
+                        onClose={() => setaddVideoModalIsVisible(false)}
                         setter={setVideosInput}
+                    />
+                    <AddLocationModal 
+                        visible={addLocationModalIsVisible}
+                        onClose={() => setAddLocationModalIsVisible(false)}
+                        setter={setLocationsInput}
                     />
                     
                     
