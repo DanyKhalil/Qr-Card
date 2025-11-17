@@ -144,7 +144,8 @@ const EditUserProfilePage = () => {
             dob={userData.dob}
             headline={userData.headline}
             contactLinks={contactLinks}
-            connectLinks={connectLinks}
+            // connectLinks={connectLinks}
+            connectLinks={userData.social_media_links}
             websiteLink={userData.website_link}
             bio={userData.bio}
             videos={userData.videos_links}

@@ -88,7 +88,40 @@ const EditUserProfile = ({
         let websiteFields = [{label:"URL", type:"text", id: "website_url", value: websiteLinkInput, setter:setWebsiteLinkInput}]
 
 
+        function normalizeUrl(url: string) {
+            if (!url) return null;
+            if (url.startsWith("http://") || url.startsWith("https://")) {
+                return url;
+            }
+            return "https://" + url;
+        }
+        const processConnectLinks = (connectLinksInput) => {
+            if (!connectLinksInput) 
+                return [];
 
+            return connectLinksInput.map((link: any) => {
+                try {
+                    let rawUrl = link.url || link;
+
+                    const url = normalizeUrl(rawUrl);
+
+                    const hostname = new URL(url).hostname.replace("www.", "");
+                    const icon = hostname.split(".")[0];
+
+                    const username = url.split("/").filter(Boolean).pop();
+
+                    return {
+                        id: link.id,
+                        iconName: icon,
+                        name: `@${username}`,
+                        link: url
+                    };
+                } catch (error) {
+                    console.error("Invalid URL:", link.url);
+                    return null;
+                }
+            }).filter(Boolean);
+        };
 
         return (
                 <ScrollView style={{ flex: 1 }}>
@@ -118,7 +151,7 @@ const EditUserProfile = ({
 
                     <TitleAndLinks 
                         title="Social Media" 
-                        links={connectLinksInput} 
+                        links={processConnectLinks(connectLinksInput)} 
                         setter={setConnectLinksInput} 
                         // addAction={()=>addSocialMediaModalVisibiltySetter(true)}
                     />
