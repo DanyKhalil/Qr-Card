@@ -44,7 +44,7 @@ const YoutubeVideos = ({
                 text="Add Video Link"
                 color="green"
                 width="100%"
-                action={addAction}
+                onPress={addAction}
                 style={{ marginTop: 16 }}
             />
         </View>

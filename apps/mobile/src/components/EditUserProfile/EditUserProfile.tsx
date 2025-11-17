@@ -11,6 +11,7 @@ import YoutubeVideos from './YoutubeVideos/YoutubeVideos';
 import AddressCards from './AddressCards/AddressCards';
 
 import AddSocialMediaModal from './Modals/AddSocialMediaModal/AddSocialMediaModel';
+import AddVideoModal from './Modals/AddVideoModal/AddVideoModal';
 
 interface EditUserProfileProps {
     coverPhoto?: string;
@@ -79,6 +80,7 @@ const EditUserProfile = ({
 
         /// for modals
         const [addSocialMediaModalIsVisible, setAddSocialMediaModalIsVisible] = useState(false);
+        const [addVideoMediaModalIsVisible, setAddVideoMediaModalIsVisible] = useState(false);
 
 
 
@@ -167,7 +169,7 @@ const EditUserProfile = ({
                     <YoutubeVideos 
                         videos={videosInput}
                         setter={setVideosInput}
-                        // addAction={()=>addVideoModalVisibiltySetter(true)}
+                        addAction={()=>setAddVideoMediaModalIsVisible(true)}
                         // updateAction={()=>updateVideoModalVisibiltySetter(true)}
                         // objectSetter={videoObjectUnderUpdateSetter}
                     />
@@ -186,6 +188,11 @@ const EditUserProfile = ({
                         visible={addSocialMediaModalIsVisible}
                         onClose={() => setAddSocialMediaModalIsVisible(false)}
                         setter={setConnectLinksInput}
+                    />
+                    <AddVideoModal 
+                        visible={addVideoMediaModalIsVisible}
+                        onClose={() => setAddVideoMediaModalIsVisible(false)}
+                        setter={setVideosInput}
                     />
                     
                     
