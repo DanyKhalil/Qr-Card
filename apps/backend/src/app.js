@@ -6,6 +6,7 @@ import authRoutes from "./routes/authRoutes.js";
 import user2Routes from "./routes/user2Routes.js";
 import path from 'path';
 import { fileURLToPath } from 'url';
+import adminUsersRoutes from './routes/adminUsers.js';
 
 const app = express();
 
@@ -39,7 +40,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/users2", user2Routes);
 app.use("/api/profile-analytics", profileAnalyticsRoutes)
-
+app.use("/api/users3", adminUsersRoutes);
 
 if (app._router) {
   app._router.stack.forEach((middleware) => {

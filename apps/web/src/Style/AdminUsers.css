@@ -1,0 +1,174 @@
+/* Page container */
+.admin-users-page {
+    font-family: 'Arial', sans-serif;
+    background-color: #ffffff;
+    min-height: 100vh;
+    padding-top: 100px; /* space for header */
+    padding-bottom: 60px; /* space for footer */
+    color: #333;
+}
+
+/* Main content container */
+.admin-users-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    border-radius: 16px;
+    padding: 32px;
+    box-shadow: 0 6px 30px rgba(0,0,0,0.1);
+    background-color: #fff;
+    border: 1px solid hsl(16, 100%, 67%);
+}
+
+/* Page title */
+.admin-users-container h1 {
+    font-size: clamp(28px, 5vw, 36px);
+    text-align: center;
+    margin-bottom: 32px;
+    color: #BCF4CB;
+    -webkit-text-stroke: 1px black;
+    paint-order: stroke fill;
+}
+
+/* Search + Add button container */
+.admin-search-add-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+}
+
+/* Search box */
+.admin-search {
+    flex: 1;
+    min-width: 200px;
+    max-width: 400px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: 2px solid hsl(16, 100%, 67%);
+    font-size: 16px;
+    outline: none;
+    transition: all 0.3s ease-in-out;
+}
+
+.admin-search:focus {
+    box-shadow: 0 0 10px rgba(255,111,60,0.3);
+    border-color: hsl(16, 100%, 67%);
+}
+
+/* Add User button */
+.admin-add-button {
+    padding: 12px 24px;
+    background-color: #BCF4CB;
+    font-weight: bold;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+}
+
+.admin-add-button:hover {
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Users table */
+.admin-users-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 16px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    background-color: #fff;
+    border: 3px solid hsl(16, 100%, 67%);
+}
+
+/* Table header */
+.admin-users-table th {
+    background-color: hsl(16, 100%, 67%);
+    color: #fff;
+    font-weight: bold;
+    padding: 12px 16px;
+    text-align: left;
+}
+
+/* Table cells */
+.admin-users-table td {
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+/* Row hover effect */
+.admin-users-table tbody tr:hover {
+    background-color: rgba(255,111,60,0.1);
+}
+
+/* Profile image */
+.admin-profile-pic {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #BCF4CB;
+}
+
+/* Buttons */
+.admin-update-button,
+.admin-delete-button {
+    padding: 6px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: bold;
+    border: none;
+    transition: all 0.3s ease-in-out;
+}
+
+.admin-update-button {
+    background-color: #4caf50;
+    color: #fff;
+}
+
+.admin-update-button:hover {
+    background-color: #45a049;
+}
+
+.admin-delete-button {
+    background-color: #f44336;
+    color: #fff;
+}
+
+.admin-delete-button:hover {
+    background-color: #da190b;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+    .admin-users-container {
+        padding: 24px;
+    }
+
+    .admin-users-table td,
+    .admin-users-table th {
+        padding: 10px;
+    }
+
+    .admin-add-button {
+        width: auto;
+    }
+}
+
+@media (max-width: 768px) {
+    .admin-users-table td,
+    .admin-users-table th {
+        font-size: 14px;
+        padding: 8px;
+    }
+
+    .admin-profile-pic {
+        width: 40px;
+        height: 40px;
+    }
+}

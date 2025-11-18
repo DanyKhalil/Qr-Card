@@ -38,9 +38,13 @@ const Form = () => {
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("user", JSON.stringify(res.data.user));
 
-      // redirect
-       alert("user logged in");
-       window.location.href = "/Filtering"; 
+      // redirect based on role
+      if (res.data.user.role === "admin") {
+        window.location.href = "/admin"; // admin page
+      } else {
+        window.location.href = "/Filtering"; // normal user page
+      }
+
     } catch (err) {
       setError(err.response?.data?.error || "Login failed");
     }
@@ -51,7 +55,6 @@ const Form = () => {
       <TitleLogin />
 
       <form className='login-form' onSubmit={handleLogin}>
-        
         {error && <p style={{ color:"red" }}>{error}</p>}
 
         <input 
