@@ -4,17 +4,19 @@ import CoverPhoto from '../UserProfile/CoverPhoto/CoverPhoto';
 import ProfilePic from '../UserProfile/ProfilePIc/ProfilePic';
 import Button from '../UserProfile/Button/Button';
 import ProfileQrCode from '../UserProfile/ProfileQrCode/ProfileQrCode';
-import { router } from 'expo-router';
+import { router, useRouter } from 'expo-router';
 import TitleAndFields from './TitleAndFields/TitleAndFields';
 import TitleAndLinks from './TitleAndLinks/TitleAndLinks';
 import YoutubeVideos from './YoutubeVideos/YoutubeVideos';
 import AddressCards from './AddressCards/AddressCards';
+import { userApi } from '@/src/services/userApi';
 
 import AddSocialMediaModal from './Modals/AddSocialMediaModal/AddSocialMediaModel';
 import AddVideoModal from './Modals/AddVideoModal/AddVideoModal';
-import AddLocationModal from './Modals/AddLocationModal/AddLOcationModal';
+import AddLocationModal from './Modals/AddLocationModal/AddLocationModal';
 import EditLocationModal from './Modals/EditLocationModal/EditLocationModal';
 import EditVideoModal from './Modals/EditVideoModal/EditVideoModal';
+import { useNavigation } from '@react-navigation/native';
 
 interface EditUserProfileProps {
     coverPhoto?: string;
@@ -46,11 +48,14 @@ const EditUserProfile = ({
         id = "User001",
     }: EditUserProfileProps) => {
 
-        const [coverPhotoInput, setCoverPhotoInput] = useState(coverPhoto);
-        const [coverPhotoInputErrorMessage, setCoverPhotoInputErrorMessage] = useState('');
-    
-        const [profilePicInput, setProfilePicInput] = useState(profilePic);
-        const [profilePicInputErrorMessage, setProfilePicInputErrorMessage] = useState('');
+        // const [coverPhotoInput, setCoverPhotoInput] = useState(coverPhoto);
+        // const [coverPhotoFile, setCoverPhotoFile] = useState<any>(null);
+
+        // const [profilePicInput, setProfilePicInput] = useState(profilePic);
+        // const [profilePicFile, setProfilePicFile] = useState<any>(null);
+
+        // const [coverPhotoInputErrorMessage, setCoverPhotoInputErrorMessage] = useState('');
+        // const [profilePicInputErrorMessage, setProfilePicInputErrorMessage] = useState('');
     
         const [userNameInput, setUserNameInput] = useState(userName);
         const [userNameInputErrorMessage, setUserNameInputErrorMessage] = useState('');
@@ -143,6 +148,84 @@ const EditUserProfile = ({
             }).filter(Boolean);
         };
 
+
+
+
+
+
+        // for profile pic and cover
+        // const handleProfilePicChange = (file: any) => {
+        //     setProfilePicFile(file);
+        //     setProfilePicInput(file.uri || file);
+        // };
+
+        // const handleCoverPhotoChange = (file: any) => {
+        //     setCoverPhotoFile(file);
+        //     setCoverPhotoInput(file.uri || file);
+        // };
+
+        // const handleRemoveProfilePic = () => {
+        //     setProfilePicFile(null);
+        //     setProfilePicInput(null);
+        // };
+
+        // const handleRemoveCoverPhoto = () => {
+        //     setCoverPhotoFile(null);
+        //     setCoverPhotoInput(null);
+        // };
+
+
+        const [isUpdating, setIsUpdating] = useState(false);
+        const [updateMessage, setUpdateMessage] = useState('');
+        // const navigate = useNavigate()
+        const router = useRouter();
+
+        // for sending save request put
+        const handleUserProfileUpdate = async (newUserName, newDob, newPhoneNumber, newHeadline, newBio, newWebsite, newSocialMediaLinks, newVideos, newLocations) => {
+            setIsUpdating(true);
+            setUpdateMessage('');
+
+            try {
+                const result = await userApi.updateUserProfile({
+                    userId: id,
+                    userName: userNameInput,
+                    dob: dobInput,
+                    phoneNumber: phoneNumberInput,
+                    headline: headlineInput,
+                    bio: bioInput,
+                    website: websiteLinkInput,
+                    connectLinks: connectLinksInput,
+                    videos: videosInput,
+                    locations: locationsInput,
+                    // profilePicFile,
+                    // coverPhotoFile,
+                    // profilePicInput,
+                    // coverPhotoInput,
+                });
+
+                if (result.success) {
+                    // setProfilePicFile(null);
+                    // setCoverPhotoFile(null);
+                    setUpdateMessage('User updated successfully!');
+                    setTimeout(() => {
+                        setUpdateMessage('');
+                        // navigate(`/user-profile/${id}`);
+                        // router.push(`/user-profile/${id}`);
+                        router.back();
+                    }, 2000);
+                }
+            } catch (error) {
+                setUpdateMessage(`Error: ${error.message || 'Network Error'}`);
+                setTimeout(() => setUpdateMessage(''), 5000);
+            } finally {
+                setIsUpdating(false);
+            }
+        };
+    
+        const handleSaveChanges = () => {
+            handleUserProfileUpdate(userNameInput, dobInput, phoneNumberInput, headlineInput, bioInput, websiteLinkInput, connectLinksInput, videosInput, locationsInput);
+        };
+
         return (
                 <ScrollView style={{ flex: 1 }}>
                     <CoverPhoto photo={coverPhoto} height={150} />
@@ -152,7 +235,7 @@ const EditUserProfile = ({
                             <Button 
                                 text="Save"
                                 color="green"
-                                onPress={() => console.log('Profile Saved.')}
+                                onPress={() => handleSaveChanges()}
                                 width={180}
                             />
                             <Button 

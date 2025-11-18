@@ -331,3 +331,159 @@ export const updateUserProfile = async (req, res) => {
     })
   }
 }
+
+
+export const updateUserProfileMobile = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      userName, dob, phoneNumber,
+      headline, bio, websiteUrl,
+      connectLinks = [], videos = [], locations = [],
+      coverPhotoPath, profilePhotoPath
+    } = req.body;
+
+    if (!id) {
+      return res.status(403).json({
+        success: false,
+        message: 'Unauthorized User'
+      });
+    }
+
+    // Find user and profile
+    const user = await User.findOne({ where: { id } });
+    const profile = await Profile.findOne({ where: { user_id: id } });
+
+    if (!user || !profile) {
+      return res.status(404).json({
+        success: false,
+        message: "User or profile not found"
+      });
+    }
+
+    // Handle profile/cover photo if uploaded
+    let finalProfilePhotoPath = profilePhotoPath || null;
+    let finalCoverPhotoPath = coverPhotoPath || null;
+
+    if (req.files?.profilePicture) {
+      finalProfilePhotoPath = `http://localhost:5050/uploads/profiles/${req.files.profilePicture[0].filename}`;
+    }
+
+    if (req.files?.coverPhoto) {
+      finalCoverPhotoPath = `http://localhost:5050/uploads/covers/${req.files.coverPhoto[0].filename}`;
+    }
+
+    // Update user and profile
+    await user.update({ name: userName.trim() });
+    await profile.update({
+      headline: headline?.trim(),
+      dob,
+      phone_number: phoneNumber,
+      bio,
+      website: websiteUrl,
+      cover_pic_url: finalCoverPhotoPath,
+      profile_pic_url: finalProfilePhotoPath,
+    });
+
+    // --- Update social media links ---
+    const existingLinks = await SocialMedia.findAll({ where: { profile_id: profile.id } });
+
+    // Delete removed
+    for (let link of existingLinks) {
+      if (!connectLinks.some(l => l.id === link.id)) {
+        await SocialMedia.destroy({ where: { id: link.id } });
+      }
+    }
+
+    // Update or create
+    for (let link of connectLinks) {
+      if (link.id) {
+        const existing = existingLinks.find(l => l.id === link.id);
+        if (existing) {
+          await existing.update({ url: link.url });
+        }
+      } else if (link.url) {
+        await SocialMedia.create({ profile_id: profile.id, url: link.url });
+      }
+    }
+
+    // --- Update videos ---
+    const existingVideos = await Video.findAll({ where: { profile_id: profile.id } });
+
+    for (let v of existingVideos) {
+      if (!videos.some(vid => vid.id === v.id)) {
+        await Video.destroy({ where: { id: v.id } });
+      }
+    }
+
+    for (let v of videos) {
+      if (v.id) {
+        const existing = existingVideos.find(ev => ev.id === v.id);
+        if (existing) {
+          await existing.update({
+            video_url: v.video_url,
+            title: v.title,
+            description: v.description
+          });
+        }
+      } else if (v.video_url) {
+        await Video.create({
+          profile_id: profile.id,
+          video_url: v.video_url,
+          title: v.title,
+          description: v.description
+        });
+      }
+    }
+
+    // --- Update locations ---
+    const existingLocations = await Location.findAll({ where: { profile_id: profile.id } });
+
+    for (let loc of existingLocations) {
+      if (!locations.some(l => l.id === loc.id)) {
+        await Location.destroy({ where: { id: loc.id } });
+      }
+    }
+
+    for (let loc of locations) {
+      if (loc.id) {
+        const existing = existingLocations.find(el => el.id === loc.id);
+        if (existing) {
+          await existing.update({
+            title: loc.title,
+            country: loc.country,
+            state: loc.state,
+            city: loc.city,
+            street: loc.street,
+            building: loc.building,
+            floor: loc.floor,
+            maps_url: loc.maps_url || ''
+          });
+        }
+      } else if (loc.title) {
+        await Location.create({
+          profile_id: profile.id,
+          title: loc.title,
+          country: loc.country,
+          state: loc.state,
+          city: loc.city,
+          street: loc.street,
+          building: loc.building,
+          floor: loc.floor,
+          maps_url: loc.maps_url || ''
+        });
+      }
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Profile updated successfully (mobile)'
+    });
+  } catch (error) {
+    console.error('Error in updateUserProfileMobile:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
