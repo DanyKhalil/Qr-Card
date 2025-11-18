@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
-import CoverPhoto from '../UserProfile/CoverPhoto/CoverPhoto';
-import ProfilePic from '../UserProfile/ProfilePIc/ProfilePic';
+import CoverPhoto from './CoverPhoto/CoverPhoto';
+import ProfilePic from './ProfilePIc/ProfilePic';
 import Button from '../UserProfile/Button/Button';
 import ProfileQrCode from '../UserProfile/ProfileQrCode/ProfileQrCode';
 import { router, useRouter } from 'expo-router';
@@ -10,6 +10,8 @@ import TitleAndLinks from './TitleAndLinks/TitleAndLinks';
 import YoutubeVideos from './YoutubeVideos/YoutubeVideos';
 import AddressCards from './AddressCards/AddressCards';
 import { userApi } from '@/src/services/userApi';
+import * as ImagePicker from 'expo-image-picker';
+import { Alert } from 'react-native';
 
 import AddSocialMediaModal from './Modals/AddSocialMediaModal/AddSocialMediaModel';
 import AddVideoModal from './Modals/AddVideoModal/AddVideoModal';
@@ -48,11 +50,11 @@ const EditUserProfile = ({
         id = "User001",
     }: EditUserProfileProps) => {
 
-        // const [coverPhotoInput, setCoverPhotoInput] = useState(coverPhoto);
-        // const [coverPhotoFile, setCoverPhotoFile] = useState<any>(null);
+        const [coverPhotoInput, setCoverPhotoInput] = useState(coverPhoto);
+        const [coverPhotoFile, setCoverPhotoFile] = useState<any>(null);
 
-        // const [profilePicInput, setProfilePicInput] = useState(profilePic);
-        // const [profilePicFile, setProfilePicFile] = useState<any>(null);
+        const [profilePicInput, setProfilePicInput] = useState(profilePic);
+        const [profilePicFile, setProfilePicFile] = useState<any>(null);
 
         // const [coverPhotoInputErrorMessage, setCoverPhotoInputErrorMessage] = useState('');
         // const [profilePicInputErrorMessage, setProfilePicInputErrorMessage] = useState('');
@@ -152,27 +154,83 @@ const EditUserProfile = ({
 
 
 
+        // Profile and Cover change and remoev functions
+        const handleProfilePicChange = async () => {
+            try {
+                const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+                if (!permissionResult.granted) {
+                    Alert.alert('Permission Required', 'Please allow access to your photo library to change profile picture.');
+                    return;
+                }
 
-        // for profile pic and cover
-        // const handleProfilePicChange = (file: any) => {
-        //     setProfilePicFile(file);
-        //     setProfilePicInput(file.uri || file);
-        // };
+                const result = await ImagePicker.launchImageLibraryAsync({
+                    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                    allowsEditing: true,
+                    aspect: [1, 1],
+                    quality: 0.8,
+                });
 
-        // const handleCoverPhotoChange = (file: any) => {
-        //     setCoverPhotoFile(file);
-        //     setCoverPhotoInput(file.uri || file);
-        // };
+                if (!result.canceled && result.assets[0]) {
+                    setProfilePicInput(result.assets[0].uri);
+                }
+            } catch (error) {
+                Alert.alert('Error', 'Failed to pick image');
+            }
+        };
 
-        // const handleRemoveProfilePic = () => {
-        //     setProfilePicFile(null);
-        //     setProfilePicInput(null);
-        // };
+        const handleRemoveProfilePic = () => {
+            Alert.alert(
+                'Remove Profile Picture',
+                'Are you sure you want to remove your profile picture?',
+                [
+                    { text: 'Cancel', style: 'cancel' },
+                    { 
+                        text: 'Remove', 
+                        style: 'destructive',
+                        onPress: () => setProfilePicInput('')
+                    }
+                ]
+            );
+        };
 
-        // const handleRemoveCoverPhoto = () => {
-        //     setCoverPhotoFile(null);
-        //     setCoverPhotoInput(null);
-        // };
+        // Cover Photo Functions
+        const handleCoverPhotoChange = async () => {
+            try {
+                const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+                if (!permissionResult.granted) {
+                    Alert.alert('Permission Required', 'Please allow access to your photo library to change cover photo.');
+                    return;
+                }
+
+                const result = await ImagePicker.launchImageLibraryAsync({
+                    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                    allowsEditing: true,
+                    aspect: [3, 1],
+                    quality: 0.8,
+                });
+
+                if (!result.canceled && result.assets[0]) {
+                    setCoverPhotoInput(result.assets[0].uri);
+                }
+            } catch (error) {
+                Alert.alert('Error', 'Failed to pick image');
+            }
+        };
+
+        const handleRemoveCoverPhoto = () => {
+            Alert.alert(
+                'Remove Cover Photo',
+                'Are you sure you want to remove your cover photo?',
+                [
+                    { text: 'Cancel', style: 'cancel' },
+                    { 
+                        text: 'Remove', 
+                        style: 'destructive',
+                        onPress: () => setCoverPhotoInput('')
+                    }
+                ]
+            );
+        };
 
 
         const [isUpdating, setIsUpdating] = useState(false);
@@ -228,9 +286,19 @@ const EditUserProfile = ({
 
         return (
                 <ScrollView style={{ flex: 1 }}>
-                    <CoverPhoto photo={coverPhoto} height={150} />
+                    <CoverPhoto 
+                        photo={coverPhotoInput} 
+                        height={150} 
+                        onCoverChange={handleCoverPhotoChange}
+                        onCoverRemove={handleRemoveCoverPhoto}
+                    />
                     <View style={styles.profileSection}>
-                        <ProfilePic photo={profilePic} size="xxlarge" />
+                        <ProfilePic 
+                            photo={profilePicInput} 
+                            size="xxlarge" 
+                            onProfileChange = {handleProfilePicChange}
+                            onProfileRemove = {handleRemoveProfilePic}
+                        />
                         <View style={styles.buttonsColumn}>
                             <Button 
                                 text="Save"
