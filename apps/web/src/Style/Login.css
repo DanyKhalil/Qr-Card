@@ -114,13 +114,33 @@
   position: absolute;
   top: 0;
   left: 0;
-  height: 100vh;       
-  display: flex;
-  align-items: center;  
-  justify-content: flex-end;
+  height: 100vh; 
+
+  margin: 0;         /* remove any extra spacing */
+  padding: 0;
 }
 
 .ImagePosition2 img {
-  width: 500px;         
-  height: auto;
+  display: block;    /* remove inline image gap */
+  width: 500px;      /* or 100% if you want it responsive */
+  height: 100%;
 }
+
+
+.register-title {
+  cursor: pointer;
+}
+
+body, html {
+  margin: 0;
+  padding: 0;
+}
+
+
+
+
+
+
+
+
+
