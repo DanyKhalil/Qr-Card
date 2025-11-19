@@ -255,6 +255,8 @@ const EditUserProfile = ({
                     connectLinks: connectLinksInput,
                     videos: videosInput,
                     locations: locationsInput,
+                    profilePicInput: profilePicInput,
+                    coverPhotoInput: coverPhotoInput,
                     // profilePicFile,
                     // coverPhotoFile,
                     // profilePicInput,

@@ -1,4 +1,6 @@
 import api from './api';
+import { DEVELOPMENT_CONFIG } from '../config/development';
+
 
 export const userApi = {
     getUserProfile: async (userId: string) => {
@@ -92,24 +94,59 @@ export const userApi = {
         connectLinks,
         videos,
         locations,
+        profilePicInput,
+        coverPhotoInput,
     }) => {
         try {
-            const payload = {
-                userName: userName || '',
-                dob: dob || '',
-                phoneNumber: phoneNumber || '',
-                headline: headline || '',
-                bio: bio || '',
-                websiteUrl: website || '',
-                connectLinks: connectLinks || [],
-                videos: videos || [],
-                locations: locations || [],
-            };
+            const formData = new FormData();
 
-            console.log('Payload to send:', payload);
+            formData.append('userName', userName || '');
+            formData.append('dob', dob || '');
+            formData.append('phoneNumber', phoneNumber || '');
+            formData.append('headline', headline || '');
+            formData.append('bio', bio || '');
+            formData.append('websiteUrl', website || '');
+            formData.append('coverPhotoPath', coverPhotoInput || '');
+            formData.append('profilePhotoPath', profilePicInput || '');
 
-            const response = await api.put(`/users/${userId}/mobile`, payload);
-            return response.data;
+            formData.append('connectLinks', JSON.stringify(connectLinks || []));
+            formData.append('videos', JSON.stringify(videos || []));
+            formData.append('locations', JSON.stringify(locations || []));
+
+            if (profilePicInput && profilePicInput.startsWith('file://')) {
+                const filename = profilePicInput.split('/').pop();
+                formData.append('profilePicture', {
+                    uri: profilePicInput,
+                    type: 'image/jpeg',
+                    name: filename || 'profile.jpg',
+                });
+            }
+
+            if (coverPhotoInput && coverPhotoInput.startsWith('file://')) {
+                const filename = coverPhotoInput.split('/').pop();
+                formData.append('coverPhoto', {
+                    uri: coverPhotoInput,
+                    type: 'image/jpeg',
+                    name: filename || 'cover.jpg',
+                });
+            }
+
+            console.log('FormData contents:', formData);
+
+            const response = await fetch(`${DEVELOPMENT_CONFIG.backendBaseUrl}/api/users/${userId}`, {
+                method: 'PUT',
+                body: formData,
+                headers: {
+                    'Accept': 'application/json',
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            return result;
         } catch (error) {
             console.error('Error updating user profile:', error.message || error);
             throw error;
