@@ -1,7 +1,7 @@
 // import { useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import {View,Text,  ActivityIndicator,  Alert,ScrollView } from 'react-native';
-import {useLocalSearchParams } from 'expo-router';
+import {useFocusEffect, useLocalSearchParams } from 'expo-router';
 import UserProfileComponent from '../components/UserProfile/UserProfile';
 import { userApi } from '../services/userApi';
 import { profileAnalyticsApi} from '../services/profileAnalyticsApi';
@@ -17,6 +17,13 @@ const UserProfilePage = () => {
     const [error, setError] = useState<string | null>(null);
     
     const hasVisited = useRef(false);
+
+    useFocusEffect(
+        React.useCallback(() => {
+            // This will run every time the screen comes into focus
+            fetchUserProfile(Array.isArray(id) ? id[0] : id);
+        }, [id])
+    );
 
     const fetchUserProfile = async (userId: string) => {
         try {

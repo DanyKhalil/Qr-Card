@@ -12,6 +12,8 @@ import AddressCards from './AddressCards/AddressCards';
 import { userApi } from '@/src/services/userApi';
 import * as ImagePicker from 'expo-image-picker';
 import { Alert } from 'react-native';
+import { Modal, ActivityIndicator, Text } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
 import AddSocialMediaModal from './Modals/AddSocialMediaModal/AddSocialMediaModel';
 import AddVideoModal from './Modals/AddVideoModal/AddVideoModal';
@@ -49,6 +51,7 @@ const EditUserProfile = ({
         locations = [],
         id = "User001",
     }: EditUserProfileProps) => {
+        // for files
 
         const [coverPhotoInput, setCoverPhotoInput] = useState(coverPhoto);
         const [coverPhotoFile, setCoverPhotoFile] = useState<any>(null);
@@ -235,6 +238,10 @@ const EditUserProfile = ({
 
         const [isUpdating, setIsUpdating] = useState(false);
         const [updateMessage, setUpdateMessage] = useState('');
+        const [showSuccessModal, setShowSuccessModal] = useState(false);
+
+
+
         // const navigate = useNavigate()
         const router = useRouter();
 
@@ -264,21 +271,18 @@ const EditUserProfile = ({
                 });
 
                 if (result.success) {
-                    // setProfilePicFile(null);
-                    // setCoverPhotoFile(null);
-                    setUpdateMessage('User updated successfully!');
+                    setIsUpdating(false);
+                    setShowSuccessModal(true);
+                    
                     setTimeout(() => {
-                        setUpdateMessage('');
-                        // navigate(`/user-profile/${id}`);
-                        // router.push(`/user-profile/${id}`);
+                        setShowSuccessModal(false);
                         router.back();
                     }, 2000);
                 }
             } catch (error) {
+                setIsUpdating(false);
                 setUpdateMessage(`Error: ${error.message || 'Network Error'}`);
                 setTimeout(() => setUpdateMessage(''), 5000);
-            } finally {
-                setIsUpdating(false);
             }
         };
     
@@ -287,6 +291,7 @@ const EditUserProfile = ({
         };
 
         return (
+            <>
                 <ScrollView style={{ flex: 1 }}>
                     <CoverPhoto 
                         photo={coverPhotoInput} 
@@ -374,9 +379,44 @@ const EditUserProfile = ({
                         onClose={() => setUpdateAdressModalIsVisible(false)}
                         setter={setLocationsInput}
                     />
-                    
-                    
                 </ScrollView>
+
+                {/* Suuccess and waiting modasl */}
+                <Modal
+                    visible={isUpdating}
+                    transparent={true}
+                    animationType="fade"
+                >
+                    <View style={styles.modalOverlay}>
+                        <View style={styles.loadingModal}>
+                            <ActivityIndicator size="large" color="#4CAF50" />
+                            <Text style={styles.loadingText}>Updating Profile...</Text>
+                        </View>
+                    </View>
+                </Modal>
+
+                <Modal
+                    visible={showSuccessModal}
+                    transparent={true}
+                    animationType="fade"
+                >
+                    <View style={styles.modalOverlay}>
+                        <View style={styles.successModal}>
+                            <View style={styles.successIcon}>
+                                <Ionicons name="checkmark-circle" size={60} color="#4CAF50" />
+                            </View>
+                            <Text style={styles.successTitle}>Success!</Text>
+                            <Text style={styles.successMessage}>Profile updated successfully</Text>
+                        </View>
+                    </View>
+                </Modal>
+
+                {updateMessage ? (
+                    <View style={styles.errorContainer}>
+                        <Text style={styles.errorText}>{updateMessage}</Text>
+                    </View>
+                ) : null}
+            </>
         );
 };
 
@@ -393,6 +433,59 @@ const styles = StyleSheet.create({
     buttonsColumn: {
         marginLeft: 20,
         justifyContent: 'flex-start',
+    },
+
+
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    loadingModal: {
+        backgroundColor: 'white',
+        padding: 30,
+        borderRadius: 15,
+        alignItems: 'center',
+        minWidth: 200,
+    },
+    loadingText: {
+        marginTop: 15,
+        fontSize: 16,
+        color: '#333',
+    },
+    successModal: {
+        backgroundColor: 'white',
+        padding: 30,
+        borderRadius: 15,
+        alignItems: 'center',
+        minWidth: 250,
+    },
+    successIcon: {
+        marginBottom: 15,
+    },
+    successTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#333',
+        marginBottom: 8,
+    },
+    successMessage: {
+        fontSize: 16,
+        color: '#666',
+        textAlign: 'center',
+    },
+    errorContainer: {
+        backgroundColor: '#ffebee',
+        padding: 15,
+        margin: 20,
+        borderRadius: 8,
+        borderLeftWidth: 4,
+        borderLeftColor: '#f44336',
+    },
+    errorText: {
+        color: '#d32f2f',
+        fontSize: 14,
     },
 });
 
