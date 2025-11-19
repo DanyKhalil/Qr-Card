@@ -26,7 +26,7 @@ export const getAllUsers = async (req, res) => {
         {
           model: Profile,
           as: "profile",
-          attributes: ["profile_pic_url"],
+          attributes: ["profile_pic_url", "cover_pic_url", "bio", "headline", "website"],
         },
       ],
       order: [["name", "ASC"]],
@@ -39,7 +39,7 @@ export const getAllUsers = async (req, res) => {
   }
 };
 
-// POST new user
+// POST new user (Admin)
 export const createUser = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
@@ -61,6 +61,16 @@ export const createUser = async (req, res) => {
       verified: true, // Admin-created users are automatically verified
     });
 
+    // ✅ Automatically create a Profile for the new user with default values
+    await Profile.create({
+      user_id: newUser.id,
+      profile_pic_url: null,
+      cover_pic_url: null,
+      bio: "",
+      headline: "",
+      website: ""
+    });
+
     res.status(201).json({ message: "User created successfully", user: newUser });
   } catch (error) {
     console.error("POST /api/users error:", error);
@@ -77,23 +87,14 @@ export const updateUser = async (req, res) => {
     const user = await User.findByPk(userId);
     if (!user) return res.status(404).json({ error: "User not found" });
 
-    // Get the logged-in user from the token
     const authHeader = req.headers.authorization;
     if (!authHeader) return res.status(401).json({ error: "Unauthorized" });
     const token = authHeader.split(" ")[1];
     const decoded = jwt.verify(token, process.env.JWT_SECRET || "SECRET_KEY");
 
-    // Prevent updating self
-    if (decoded.id === user.id) {
-      return res.status(403).json({ error: "You cannot update yourself" });
-    }
+    if (decoded.id === user.id) return res.status(403).json({ error: "You cannot update yourself" });
+    if (user.role === "admin") return res.status(403).json({ error: "You cannot update another admin" });
 
-    // Prevent updating another admin
-    if (user.role === "admin") {
-      return res.status(403).json({ error: "You cannot update another admin" });
-    }
-
-    // Update fields if provided
     user.name = name || user.name;
     user.email = email || user.email;
     user.role = role || user.role;
@@ -115,21 +116,13 @@ export const deleteUser = async (req, res) => {
     const user = await User.findByPk(userId);
     if (!user) return res.status(404).json({ error: "User not found" });
 
-    // Get the logged-in user from the token
     const authHeader = req.headers.authorization;
     if (!authHeader) return res.status(401).json({ error: "Unauthorized" });
     const token = authHeader.split(" ")[1];
     const decoded = jwt.verify(token, process.env.JWT_SECRET || "SECRET_KEY");
 
-    // Prevent deleting self
-    if (decoded.id === user.id) {
-      return res.status(403).json({ error: "You cannot delete yourself" });
-    }
-
-    // Prevent deleting another admin
-    if (user.role === "admin") {
-      return res.status(403).json({ error: "You cannot delete another admin" });
-    }
+    if (decoded.id === user.id) return res.status(403).json({ error: "You cannot delete yourself" });
+    if (user.role === "admin") return res.status(403).json({ error: "You cannot delete another admin" });
 
     await user.destroy();
     res.json({ message: "User deleted successfully" });

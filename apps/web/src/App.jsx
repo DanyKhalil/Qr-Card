@@ -16,6 +16,7 @@ import WelcomePage from './pages/WelcomePage.jsx';
 import ScanQrCode from './pages/ScanQrCode.jsx';
 import ProfileAnalytics from './pages/ProfileAnalytics.jsx';
 import Admin from './pages/AdminUsers.jsx';
+import AddUserPage from './pages/AddUserPage.jsx';
 
 function App() {
   return (    
@@ -30,6 +31,7 @@ function App() {
       <Route path="/scan-qr-code/:id" element={<ScanQrCode/>}/>
       <Route path="/profile-analytics/:id" element={<ProfileAnalytics/>}/>
       <Route path="/admin" element={<Admin/>}/>
+      <Route path="/admin/add-user" element={<AddUserPage/>}/>
     </Routes>
   )
 }
