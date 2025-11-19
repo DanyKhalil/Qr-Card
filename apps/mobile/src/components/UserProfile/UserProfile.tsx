@@ -40,7 +40,11 @@ const UserProfile = ({
         videos = [],
         locations = [],
         id = "User001",
+        // saveContactFunction,
+        // phoneNumber,
+        // email,
     }: UserProfileProps) => {
+        // console.log(userName, email, phoneNumber)
         return (
                 <ScrollView style={{ flex: 1 }}>
                     <CoverPhoto photo={coverPhoto} height={150} />
@@ -73,6 +77,16 @@ const UserProfile = ({
                     <Locations locations={locations}/>
 
                     <TitleAndLinks title="Contact" links={contactLinks}/>
+                    {/* <Button 
+                        text="Save as Contact"
+                        color="green"
+                        onPress={() => saveContactFunction({nameInput: userName,
+                                                            phoneInput: phoneNumber,
+                                                            emailInput: email})}
+                        width={180}
+                        style={{ marginTop: 12 }}
+                    /> */}
+
                     <TitleAndLinks title="Connect" links={connectLinks}/>
                     {websiteLink && <TitleAndLinks title="Website" links={[{name:websiteLink, iconName:"web"}]}/>}
 
