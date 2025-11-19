@@ -41,18 +41,24 @@ const TwoColumnLayout = ({
     function formatSocialLinks(links) {
         return links.map(({ id, url }) => {
             try {
-            const hostname = new URL(url).hostname.replace("www.", "");
-            const icon = hostname.split(".")[0];
-            const username = url.split("/").filter(Boolean).pop();
-            return {
-                id: id,
-                iconName: icon,
-                name: `@${username}`,
-                link: url
-            };
+                let formattedUrl = url;
+                if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                    formattedUrl = 'https://' + url;
+                }
+                
+                const hostname = new URL(formattedUrl).hostname.replace("www.", "");
+                const icon = hostname.split(".")[0];
+                const username = formattedUrl.split("/").filter(Boolean).pop();
+                
+                return {
+                    id: id,
+                    iconName: icon,
+                    name: `@${username}`,
+                    link: formattedUrl
+                };
             } catch (error) {
-            console.error("Invalid URL:", url, error);
-            return null;
+                console.error("Invalid URL:", url, error);
+                return null;
             }
         }).filter(Boolean);
     }

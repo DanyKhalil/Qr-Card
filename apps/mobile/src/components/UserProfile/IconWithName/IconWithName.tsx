@@ -55,8 +55,8 @@ const IconWithName = ({
                         break;
 
                     case 'phone':
-                        const number = (link || name)?.replace(/\s|-/g, '') || '';
-                        url = `tel:${number}`;
+                        const raw = link ?? name;
+                        url = `tel:${raw}`;
                         break;
 
                     case 'whatsapp':

@@ -1,5 +1,5 @@
 import React from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import CoverPhoto from './CoverPhoto/CoverPhoto';
 import ProfilePic from './ProfilePIc/ProfilePic';
 import Headline from './Headline/Headline';
@@ -7,9 +7,9 @@ import Button from './Button/Button';
 import DescriptionText from './DescriptionText/DescriptionText';
 import YouTubeVideos from './YoutubeVideos/YoutubeVideos';
 import Locations from './Locations/Locations';
-import IconWithName from './IconWithName/IconWithName';
 import TitleAndLinks from './TitleAndLinks/TitleAndLinks';
 import ProfileQrCode from './ProfileQrCode/ProfileQrCode';
+import { router } from 'expo-router';
 
 
 interface UserProfileProps {
@@ -40,8 +40,11 @@ const UserProfile = ({
         videos = [],
         locations = [],
         id = "User001",
+        // saveContactFunction,
+        // phoneNumber,
+        // email,
     }: UserProfileProps) => {
-        console.log('Profile Pic in User Profile COmponent: ', profilePic)
+        // console.log(userName, email, phoneNumber)
         return (
                 <ScrollView style={{ flex: 1 }}>
                     <CoverPhoto photo={coverPhoto} height={150} />
@@ -57,7 +60,7 @@ const UserProfile = ({
                             <Button 
                                 text="Edit Profile"
                                 color="coral"
-                                onPress={() => console.log('Edit Profile')}
+                                onPress={() => router.push(`/(stack)/edit-profile/${id}`)}
                                 width={180}
                                 style={{ marginTop: 12 }}
                             />
@@ -74,6 +77,16 @@ const UserProfile = ({
                     <Locations locations={locations}/>
 
                     <TitleAndLinks title="Contact" links={contactLinks}/>
+                    {/* <Button 
+                        text="Save as Contact"
+                        color="green"
+                        onPress={() => saveContactFunction({nameInput: userName,
+                                                            phoneInput: phoneNumber,
+                                                            emailInput: email})}
+                        width={180}
+                        style={{ marginTop: 12 }}
+                    /> */}
+
                     <TitleAndLinks title="Connect" links={connectLinks}/>
                     {websiteLink && <TitleAndLinks title="Website" links={[{name:websiteLink, iconName:"web"}]}/>}
 

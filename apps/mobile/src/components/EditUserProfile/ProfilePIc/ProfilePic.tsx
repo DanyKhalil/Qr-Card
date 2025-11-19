@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Image, TouchableOpacity, StyleSheet, Dimensions, Animated, Modal, TouchableWithoutFeedback, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { BlurView } from 'expo-blur'
+import { BlurView } from 'expo-blur';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -11,6 +11,8 @@ interface ProfilePicProps {
     size?: 'small' | 'medium' | 'large' | 'xlarge' | 'xxlarge' | 'default';
     onPress?: () => void;
     className?: string;
+    onProfileChange?: () => void;
+    onProfileRemove?: () => void;
 }
 
 const ProfilePic = ({
@@ -19,6 +21,8 @@ const ProfilePic = ({
     size = 'default',
     onPress,
     className = "",
+    onProfileChange,
+    onProfileRemove
 }: ProfilePicProps) => {
 
     // this is for profile pic animation when holded
@@ -75,6 +79,28 @@ const ProfilePic = ({
         }
     };
 
+    const getButtonSize = () => {
+        switch (size) {
+            case 'small': return 20;
+            case 'medium': return 25;
+            case 'large': return 30;
+            case 'xlarge': return 35;
+            case 'xxlarge': return 40;
+            default: return 40;
+        }
+    };
+
+    const getButtonGap = () => {
+        switch (size) {
+            case 'small': return 4;
+            case 'medium': return 6;
+            case 'large': return 8;
+            case 'xlarge': return 10;
+            case 'xxlarge': return 12;
+            default: return 12;
+        }
+    };
+
 
     //and this is some naimation and functionality for when the usr holds th eprofile pic
     const handleLongPress = () => {
@@ -101,56 +127,87 @@ const ProfilePic = ({
     const borderWidth = getBorderWidth();
     const innerSize = containerSize - (borderWidth * 2);
     const marginTop = getMarginTop();
+    const buttonSize = getButtonSize();
+    const buttonGap = getButtonGap();
 
     const ContainerComponent = TouchableOpacity;
+    
+    // Calculate total width of buttons container
+    const buttonsContainerWidth = (buttonSize * 2) + buttonGap;
 
     return (
         <>
-            <ContainerComponent
-                style={[
-                    styles.container,
-                    {
-                        width: containerSize,
-                        height: containerSize,
-                        borderWidth: borderWidth,
-                        marginTop: marginTop,
-                        marginLeft: 0,
-                    },
-                ]}
-                onPress={onPress}
-                onLongPress={handleLongPress}
-                activeOpacity={0.8}
-                delayLongPress={300}
-            >
+            <View style={styles.outerContainer}>
+                <ContainerComponent
+                    style={[
+                        styles.container,
+                        {
+                            width: containerSize,
+                            height: containerSize,
+                            borderWidth: borderWidth,
+                            marginTop: marginTop,
+                            marginLeft: 0,
+                        },
+                    ]}
+                    onPress={onPress}
+                    onLongPress={handleLongPress}
+                    activeOpacity={0.8}
+                    delayLongPress={300}
+                >
+                    <View style={[
+                        styles.innerCircle,
+                        { 
+                            width: innerSize, 
+                            height: innerSize,
+                            borderRadius: innerSize / 2,
+                        }
+                    ]}>
+                        {photo ? (
+                            <Image
+                                source={{ uri: photo }}
+                                style={[
+                                styles.profileImage,
+                                { 
+                                    width: innerSize, 
+                                    height: innerSize,
+                                    borderRadius: innerSize / 2,
+                                }
+                                ]}
+                                resizeMode="cover"
+                                accessibilityLabel={alt}
+                            />
+                        ) : (
+                        renderDefaultIcon()
+                        )}
+                    </View>
+                </ContainerComponent>
+                
                 <View style={[
-                    styles.innerCircle,
+                    styles.buttonsContainer,
                     { 
-                        width: innerSize, 
-                        height: innerSize,
-                        borderRadius: innerSize / 2,
+                        top: 80, 
+                        width: buttonsContainerWidth,
+                        left: (containerSize - buttonsContainerWidth) / 2,
+                        gap: 20,
                     }
                 ]}>
-                    {photo ? (
-                        <Image
-                            source={{ uri: photo }}
-                            style={[
-                            styles.profileImage,
-                            { 
-                                width: innerSize, 
-                                height: innerSize,
-                                borderRadius: innerSize / 2,
-                            }
-                            ]}
-                            resizeMode="cover"
-                            accessibilityLabel={alt}
-                        />
-                    ) : (
-                    renderDefaultIcon()
+                    <TouchableOpacity
+                        onPress={onProfileChange}
+                        style={[styles.button, styles.editButton, { width: buttonSize, height: buttonSize }]}
+                    >
+                        <Ionicons name="pencil" size={buttonSize * 0.5} color="white" />
+                    </TouchableOpacity>
+                    {photo && ( 
+                        <TouchableOpacity
+                            onPress={onProfileRemove}
+                            style={[styles.button, styles.removeButton, { width: buttonSize, height: buttonSize }]}
+                        >
+                            <Ionicons name="trash" size={buttonSize * 0.5} color="white" />
+                        </TouchableOpacity>
                     )}
                 </View>
-            </ContainerComponent>
+            </View>
 
-            {/* Full Screen Modal */}
             <Modal
                 visible={isModalVisible}
                 transparent={true}
@@ -159,10 +216,8 @@ const ProfilePic = ({
             >
                 <TouchableWithoutFeedback onPress={closeModal}>
                     <View style={styles.modalOverlay}>
-                        {/* Blur Background */}
                         <BlurView intensity={80} style={StyleSheet.absoluteFill} />
                         
-                        {/* Enlarged Profile Picture */}
                         <Animated.View 
                             style={[
                                 styles.enlargedContainer,
@@ -189,7 +244,6 @@ const ProfilePic = ({
                             )}
                         </Animated.View>
 
-                        {/* Close Hint */}
                         <View style={styles.closeHint}>
                             <Ionicons name="close-circle" size={24} color="white" />
                             <Text style={styles.closeText}>Tap anywhere to close</Text>
@@ -202,6 +256,10 @@ const ProfilePic = ({
 };
 
 const styles = StyleSheet.create({
+    outerContainer: {
+        position: 'relative',
+        alignSelf: 'flex-start',
+    },
     container: {
         borderRadius: 1000,
         borderColor: '#82C294',
@@ -230,7 +288,31 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     
-    // Modal Styles
+    buttonsContainer: {
+        position: 'absolute',
+        flexDirection: 'row',
+        justifyContent: 'center',
+    },
+    button: {
+        borderRadius: 20,
+        justifyContent: 'center',
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.15,
+        shadowRadius: 4,
+        elevation: 3,
+    },
+    editButton: {
+        backgroundColor: '#4CAF50',
+    },
+    removeButton: {
+        backgroundColor: '#FF6B6B',
+    },
+    
     modalOverlay: {
         flex: 1,
         backgroundColor: 'rgba(0, 0, 0, 0.8)',
