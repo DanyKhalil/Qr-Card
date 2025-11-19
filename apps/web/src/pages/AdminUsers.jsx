@@ -3,6 +3,7 @@ import axios from "axios";
 import "../Style/AdminUsers.css";
 import Header from "../components/Header/Header";
 import Footer from "../components/Footer/Footer";
+import { useNavigate } from "react-router-dom"; // ✅ import
 
 const AdminUsers = () => {
   const [users, setUsers] = useState([]);
@@ -10,10 +11,9 @@ const AdminUsers = () => {
   const [editingUserId, setEditingUserId] = useState(null);
   const [editForm, setEditForm] = useState({ name: "", email: "", role: "", verified: false });
 
-  // Get token from localStorage
   const token = localStorage.getItem("token");
+  const navigate = useNavigate(); // ✅ initialize navigate
 
-  // Fetch users whenever 'search' changes
   useEffect(() => {
     fetchUsers();
   }, [search]);
@@ -21,7 +21,7 @@ const AdminUsers = () => {
   const fetchUsers = async () => {
     try {
       const res = await axios.get(`http://localhost:5050/api/users3?search=${search}`, {
-        headers: { Authorization: `Bearer ${token}` } // <-- send token
+        headers: { Authorization: `Bearer ${token}` },
       });
       setUsers(res.data);
     } catch (err) {
@@ -30,13 +30,12 @@ const AdminUsers = () => {
     }
   };
 
-  // Delete user
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this user?")) return;
 
     try {
       await axios.delete(`http://localhost:5050/api/users3/${id}`, {
-        headers: { Authorization: `Bearer ${token}` } // <-- send token
+        headers: { Authorization: `Bearer ${token}` },
       });
       setUsers(users.filter((user) => user.id !== id));
       alert("User deleted successfully");
@@ -46,7 +45,6 @@ const AdminUsers = () => {
     }
   };
 
-  // Start editing a user
   const handleEdit = (user) => {
     setEditingUserId(user.id);
     setEditForm({
@@ -57,7 +55,6 @@ const AdminUsers = () => {
     });
   };
 
-  // Handle input changes in the edit form
   const handleEditChange = (e) => {
     const { name, value, type, checked } = e.target;
     setEditForm((prev) => ({
@@ -66,11 +63,10 @@ const AdminUsers = () => {
     }));
   };
 
-  // Submit update
   const handleUpdate = async (id) => {
     try {
       const res = await axios.put(`http://localhost:5050/api/users3/${id}`, editForm, {
-        headers: { Authorization: `Bearer ${token}` } // <-- send token
+        headers: { Authorization: `Bearer ${token}` },
       });
       setUsers(users.map((user) => (user.id === id ? res.data.user : user)));
       setEditingUserId(null);
@@ -96,13 +92,19 @@ const AdminUsers = () => {
             onChange={(e) => setSearch(e.target.value)}
             className="admin-search"
           />
-          <button className="admin-add-button">Add User</button>
+          {/* ✅ Navigate to AddUserPage */}
+          <button
+            className="admin-add-button"
+            onClick={() => navigate("/admin/add-user")}
+          >
+            Add User
+          </button>
         </div>
 
         <table className="admin-users-table">
           <thead>
             <tr>
-              <th>Profile</th>
+              <th>ID</th>
               <th>Name</th>
               <th>Email</th>
               <th>Role</th>
@@ -110,109 +112,99 @@ const AdminUsers = () => {
               <th>Actions</th>
             </tr>
           </thead>
+
           <tbody>
-            {users.map((user) => (
-              <tr key={user.id}>
-                <td>
-                  {user.profile?.profile_pic_url ? (
-                    <img
-                      src={
-                        user.profile.profile_pic_url.startsWith("http")
-                          ? user.profile.profile_pic_url
-                          : `http://localhost:5050${user.profile.profile_pic_url}`
-                      }
-                      alt={user.name}
-                      className="admin-profile-pic"
-                    />
-                  ) : (
-                    "No Image"
-                  )}
-                </td>
-                <td>
-                  {editingUserId === user.id ? (
-                    <input
-                      type="text"
-                      name="name"
-                      value={editForm.name}
-                      onChange={handleEditChange}
-                    />
-                  ) : (
-                    user.name
-                  )}
-                </td>
-                <td>
-                  {editingUserId === user.id ? (
-                    <input
-                      type="email"
-                      name="email"
-                      value={editForm.email}
-                      onChange={handleEditChange}
-                    />
-                  ) : (
-                    user.email
-                  )}
-                </td>
-                <td>
-                  {editingUserId === user.id ? (
-                    <input
-                      type="text"
-                      name="role"
-                      value={editForm.role}
-                      onChange={handleEditChange}
-                    />
-                  ) : (
-                    user.role
-                  )}
-                </td>
-                <td>
-                  {editingUserId === user.id ? (
-                    <input
-                      type="checkbox"
-                      name="verified"
-                      checked={editForm.verified}
-                      onChange={handleEditChange}
-                    />
-                  ) : user.verified ? (
-                    "Yes"
-                  ) : (
-                    "No"
-                  )}
-                </td>
-                <td>
-                  {editingUserId === user.id ? (
-                    <>
-                      <button
-                        className="admin-update-button"
-                        onClick={() => handleUpdate(user.id)}
-                      >
-                        Save
-                      </button>
-                      <button
-                        className="admin-delete-button"
-                        onClick={() => setEditingUserId(null)}
-                      >
-                        Cancel
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <button
-                        className="admin-update-button"
-                        onClick={() => handleEdit(user)}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        className="admin-delete-button"
-                        onClick={() => handleDelete(user.id)}
-                      >
-                        Delete
-                      </button>
-                    </>
-                  )}
-                </td>
-              </tr>
-            ))}
+            {users.map((user) => {
+              const isEditing = editingUserId === user.id;
+              return (
+                <tr key={user.id}>
+                  <td>{user.id}</td>
+                  <td>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        name="name"
+                        value={editForm.name}
+                        onChange={handleEditChange}
+                      />
+                    ) : (
+                      user.name
+                    )}
+                  </td>
+                  <td>
+                    {isEditing ? (
+                      <input
+                        type="email"
+                        name="email"
+                        value={editForm.email}
+                        onChange={handleEditChange}
+                      />
+                    ) : (
+                      user.email
+                    )}
+                  </td>
+                  <td>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        name="role"
+                        value={editForm.role}
+                        onChange={handleEditChange}
+                      />
+                    ) : (
+                      user.role
+                    )}
+                  </td>
+                  <td>
+                    {isEditing ? (
+                      <input
+                        type="checkbox"
+                        name="verified"
+                        checked={editForm.verified}
+                        onChange={handleEditChange}
+                      />
+                    ) : user.verified ? (
+                      "Yes"
+                    ) : (
+                      "No"
+                    )}
+                  </td>
+                  <td>
+                    {isEditing ? (
+                      <>
+                        <button
+                          className="admin-update-button"
+                          onClick={() => handleUpdate(user.id)}
+                        >
+                          Save
+                        </button>
+                        <button
+                          className="admin-delete-button"
+                          onClick={() => setEditingUserId(null)}
+                        >
+                          Cancel
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          className="admin-update-button"
+                          onClick={() => handleEdit(user)}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          className="admin-delete-button"
+                          onClick={() => handleDelete(user.id)}
+                        >
+                          Delete
+                        </button>
+                      </>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

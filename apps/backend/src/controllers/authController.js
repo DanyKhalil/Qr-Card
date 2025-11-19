@@ -1,8 +1,8 @@
-import { User } from '../models/index.js';
+import { User, Profile } from '../models/index.js';
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import dotenv from "dotenv";
-import { sendVerificationEmail } from "../utils/sendEmail.js"; // ✅ added
+import { sendVerificationEmail } from "../utils/sendEmail.js";
 
 dotenv.config();
 
@@ -14,7 +14,7 @@ export const loginUser = async (req, res) => {
     const user = await User.findOne({ where: { email } });
     if (!user) return res.status(404).json({ error: "User not found" });
 
-    // ✅ Block login if email not verified
+    // Block login if email not verified
     if (!user.verified) {
       return res.status(403).json({ error: "Please verify your email before logging in." });
     }
@@ -52,7 +52,7 @@ export const registerUser = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // ✅ Set verified = false initially
+    // Create user (verified=false initially)
     const newUser = await User.create({
       name,
       email,
@@ -61,14 +61,20 @@ export const registerUser = async (req, res) => {
       verified: false
     });
 
-    // ✅ Create verification token (1 hour)
-    const verifyToken = jwt.sign(
-      { id: newUser.id },
-      JWT_SECRET,
-      { expiresIn: "1h" }
-    );
+    // ✅ Automatically create a Profile linked to this user
+    await Profile.create({
+      user_id: newUser.id,
+      profile_pic_url: null,
+      cover_pic_url: null,
+      bio: "",
+      headline: "",
+      website: ""
+    });
 
-    // ✅ Send verification email
+    // Create verification token
+    const verifyToken = jwt.sign({ id: newUser.id }, JWT_SECRET, { expiresIn: "1h" });
+
+    // Send verification email
     await sendVerificationEmail(email, verifyToken);
 
     res.status(201).json({
