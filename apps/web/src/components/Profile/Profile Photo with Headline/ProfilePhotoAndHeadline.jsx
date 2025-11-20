@@ -10,10 +10,10 @@ const ProfilePhotoAndHeadline = ({photo, name, dob, headline,}) => {
     const { id } = useParams();
 
     const handleAnalytics = () => {
-        navigate(`/profile-analytics/${id}`);
+        navigate(`/profile-analytics`);
     };
     const handleUpdate = () => {
-        navigate(`/edit-profile/${id}`);
+        navigate(`/edit-profile`);
     };
 
 

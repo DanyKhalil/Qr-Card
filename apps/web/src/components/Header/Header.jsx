@@ -8,14 +8,14 @@ import profileIcon from "../../assets/images/icons/profile-icon-white.png"
 import { useNavigate, useParams } from 'react-router-dom';
 
 const Header = ({activeIndex}) => {
-    const { id } = useParams();
     const navigate = useNavigate();
-    const goToProfile = () => {navigate(`/profile/${id}`)}
-    const goToScanQrCode = () => {navigate(`/scan-qr-code/${id}`)}
+    const goToProfile = () => {navigate(`/profile`)}
+    const goToScanQrCode = () => {navigate(`/scan-qr-code`)}
+    const goToSearch = () => {navigate(`/Filtering`)}
 
     let companyName = "QR CARD";
     let menuItems = [
-        {name: "Search", icon: searchIcon, active:(activeIndex === 0)},
+        {name: "Search", icon: searchIcon, action:goToSearch, active:(activeIndex === 0)},
         {name: "Scan QR", icon: scanQrIcon, action: goToScanQrCode, active:(activeIndex === 1)},
         {name: "My Profile", icon: profileIcon, action: goToProfile, active:(activeIndex === 2)},
     ];

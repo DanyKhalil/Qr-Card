@@ -21,15 +21,17 @@ import AddUserPage from './pages/AddUserPage.jsx';
 function App() {
   return (    
     <Routes>
-      <Route path="/profile/:id" element={<UserProfile/>}/>
+      <Route path="/profile" element={<UserProfile/>}/> {/* for a user own profile */}
+      <Route path="/profile/:id" element={<UserProfile/>}/> {/* for another user profile */}
+      <Route path="/edit-profile" element={<EditUserProfile/>}/>
       <Route path="/edit-profile/:id" element={<EditUserProfile/>}/>
       <Route path="/login" element={<Login/>}/>
       <Route path="/registration" element={<RegistrationForm/>}/>
       <Route path="/verify-email/:token" element={<VerifyEmail />} />
       <Route path="/Filtering" element={<Filtering/>}></Route>
       <Route path="/" element={<WelcomePage/>}></Route>
-      <Route path="/scan-qr-code/:id" element={<ScanQrCode/>}/>
-      <Route path="/profile-analytics/:id" element={<ProfileAnalytics/>}/>
+      <Route path="/scan-qr-code" element={<ScanQrCode/>}/>
+      <Route path="/profile-analytics" element={<ProfileAnalytics/>}/>
       <Route path="/admin" element={<Admin/>}/>
       <Route path="/admin/add-user" element={<AddUserPage/>}/>
     </Routes>

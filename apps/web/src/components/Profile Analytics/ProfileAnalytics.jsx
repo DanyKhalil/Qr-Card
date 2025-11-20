@@ -9,7 +9,6 @@ import ScanTypeChart from './Charts/ScanTypeChart.jsx';
 import './ProfileAnalytics.css';
 
 const ProfileAnalytics = () => {
-  const { id } = useParams();
   const [analyticsData, setAnalyticsData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -17,6 +16,31 @@ const ProfileAnalytics = () => {
   const [dateRange, setDateRange] = useState('7days');
   const [viewsChartType, setViewsChartType] = useState('bar');
   const [scanChartType, setScanChartType] = useState('pie');
+
+  // this function returns the token of the logged in user
+    const getToken = () => {
+        return localStorage.getItem("token");
+    };
+    // and this returns the user logged in
+    const getCurrentUser = () => {
+        const userStr = localStorage.getItem("user");
+        if (!userStr) return null;
+        
+        try {
+            return JSON.parse(userStr);
+        } catch (error) {
+            console.error("Error parsing user data:", error);
+            return null;
+        }
+    };
+    
+    const currentLoggedInUser = getCurrentUser();
+    const { id: urlId } = useParams(); // get visiting user id 
+    const id = urlId || currentLoggedInUser?.id; // either a visiting id or a current logged in id
+    if (!id) {
+        window.location.href = "/login";
+        return null;
+    }
 
   const fetchProfileAnalytics = async (id) => {
     try {

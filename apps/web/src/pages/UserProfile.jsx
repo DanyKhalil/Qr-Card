@@ -7,9 +7,33 @@ import { profileAnalyticsApi } from '../services/profileAnalyticsApi.js';
 
 
 const UserProfile = () => {
-    const [searchParams] = useSearchParams();
+    // this function returns the token of the logged in user
+    const getToken = () => {
+        return localStorage.getItem("token");
+    };
+    // and this returns the user logged in
+    const getCurrentUser = () => {
+        const userStr = localStorage.getItem("user");
+        if (!userStr) return null;
+        
+        try {
+            return JSON.parse(userStr);
+        } catch (error) {
+            console.error("Error parsing user data:", error);
+            return null;
+        }
+    };
 
-    const { id } = useParams();
+    const [searchParams] = useSearchParams();
+    
+    const currentLoggedInUser = getCurrentUser();
+    const { id: urlId } = useParams(); // get visiting user id 
+    const id = urlId || currentLoggedInUser?.id; // either a visiting id or a current logged in id
+    if (!id) {
+        window.location.href = "/login";
+        return null;
+    }
+
     const qrScan = searchParams.get('qrScan') === 'true';
 
     const [userData, setUserData] = useState(null);
@@ -45,11 +69,13 @@ const UserProfile = () => {
 
     // the use effect, is to when the component mount, it will call something automatically
     useEffect(() => {
-        // We can get the user ID from:
-        // 1. URL parameters (if using React Router)
-        // 2. Authentication context
-        fetchUserProfile(id);
-        visitProfile(id, qrScan);
+        if (id) {
+            fetchUserProfile(id);
+            visitProfile(id, qrScan);
+        } else {
+            setError("User not authenticated");
+            setLoading(false);
+        }
     }, [id, qrScan]);
 
     if (loading) {

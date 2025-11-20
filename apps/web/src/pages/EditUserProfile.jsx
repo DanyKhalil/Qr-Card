@@ -6,11 +6,37 @@ import EditUserProfileComponent from "../components/Edit Profile/EditUserProfile
 
 
 const EditUserProfile = () => {
-    const { id } = useParams();
 
     const [userData, setUserData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+
+    // this function returns the token of the logged in user
+    const getToken = () => {
+        return localStorage.getItem("token");
+    };
+    // and this returns the user logged in
+    const getCurrentUser = () => {
+        const userStr = localStorage.getItem("user");
+        if (!userStr) return null;
+        
+        try {
+            return JSON.parse(userStr);
+        } catch (error) {
+            console.error("Error parsing user data:", error);
+            return null;
+        }
+    };
+
+    
+
+    const currentLoggedInUser = getCurrentUser();
+    const { id: urlId } = useParams(); // get visiting user id 
+    const id = urlId || currentLoggedInUser?.id; // either a visiting id or a current logged in id
+    if (!id) {
+        window.location.href = "/login";
+        return null;
+    }
 
     const fetchUserProfile = async (id) => {
         try {
@@ -28,10 +54,15 @@ const EditUserProfile = () => {
 
     // the use effect, is to when the component mount, it will call something automatically
     useEffect(() => {
-        // We can get the user ID from:
-        // 1. URL parameters (if using React Router)
-        // 2. Authentication context
-        fetchUserProfile(id);
+        if (id == currentLoggedInUser?.id){
+            fetchUserProfile(id);
+        } else if (id != currentLoggedInUser?.id && currentLoggedInUser?.role === 'admin') {
+            fetchUserProfile(id);
+        }
+        else {
+            setError("You are not authorized to enter this page.");
+            setLoading(false);
+        }
     }, []);
 
     if (loading) {

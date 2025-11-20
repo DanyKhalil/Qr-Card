@@ -29,7 +29,7 @@ const Filtering = () => {
 
   return (
     <>
-      <Header />
+      <Header activeIndex={0}/>
       <main className="filtering-page">
         <div className="search-bar-container">
           <input
