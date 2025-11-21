@@ -1,21 +1,22 @@
 import '../Style/Login.css';
-import backround from '../assets/images/icons/Backround.png';
+import backround from '../assets/images/icons/man-woman-qr.png';
 import { useState } from "react";
 import axios from "axios";
+import { useNavigate } from 'react-router-dom';
 
-const TitleLogin = () => (
-  <div className="login-title-border">
-    <h1 className="login-title">Login</h1>
-    <h1 className="register-title">Sign up</h1>
+const TitleLogin = ({ onSignUpClick }) => (
+  <div className="tab-container">
+    <h1 className="tab-active">Login</h1>
+    <h1 className="tab-inactive" onClick={onSignUpClick}>Sign up</h1>
   </div>
 );
 
 const Image = () => (
-  <div className='ImagePosition'>
+  <div className='image-container'>
     <img 
       src={backround}
       alt="Example"
-      className="rounded-2xl shadow-md"
+      className="form-image"
     />
   </div>
 );
@@ -24,6 +25,11 @@ const Form = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const navigate = useNavigate();
+
+  const handleSignUpClick = () => {
+    navigate('/registration');
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -51,36 +57,40 @@ const Form = () => {
   };
 
   return (
-    <div className='login-body'>
-      <TitleLogin />
+    <div className='page-container'>
+      <div className='content-wrapper'>
+        <div className="form-section">
+          <TitleLogin onSignUpClick={handleSignUpClick} />
 
-      <form className='login-form' onSubmit={handleLogin}>
-        {error && <p style={{ color:"red" }}>{error}</p>}
+          <form className='form-container' onSubmit={handleLogin}>
+            {error && <p className="error-message">{error}</p>}
 
-        <input 
-          className='login-input'
-          type='text'
-          placeholder="Email or phone number"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+            <input 
+              className='form-input'
+              type='text'
+              placeholder="Email or phone number"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
 
-        <input
-          className='login-input'
-          type='password'
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+            <input
+              className='form-input'
+              type='password'
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
 
-        <button className='login-button' type='submit'>
-          Login
-        </button>
-
-        <div>
-          <Image />
+            <button className='primary-button' type='submit'>
+              Login
+            </button>
+          </form>
         </div>
-      </form>
+
+        <Image />
+      </div>
     </div>
   );
 };
