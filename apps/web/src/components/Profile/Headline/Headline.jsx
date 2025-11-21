@@ -28,7 +28,7 @@ const Headline = ({
         <div className={containerClasses}>
             <div className="name-age-container">
                 <span className='name'>{name}</span>
-                <span className="age">{age} years old</span>
+                {dob && (<span className="age">{age} years old</span>)}
             </div>
             
             <p className="headline">{headline}</p>

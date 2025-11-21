@@ -2,11 +2,12 @@ import React from 'react';
 import './TitleAndLinks.css';
 import IconWithName from '../Icon With Name/IconWithName';
 import Button from '../../Profile/Button/Button';
+import { IoPencil, IoTrash, IoAnalytics, IoSave, IoClose, IoAdd } from "react-icons/io5";
 
 const TitleAndLinks = ({ title, links, setter, addAction }) => {
-  if (!links || !Array.isArray(links) || links.length === 0) {
-    return null;
-  }
+  // if (!links || !Array.isArray(links) || links.length === 0) {
+  //   return null;
+  // }
 
   return (
     <div className="social-section">
@@ -29,6 +30,7 @@ const TitleAndLinks = ({ title, links, setter, addAction }) => {
         color="green"
         width="150px"
         action={addAction}
+        icon={<IoAdd size={18} />}
       />
     </div>
   );

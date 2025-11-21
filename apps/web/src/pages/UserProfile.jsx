@@ -101,10 +101,10 @@ const UserProfile = () => {
         );
     }
 
-    let contactLinks =  [
-                            {name:userData.email, iconName: "email", link:userData.email}, 
-                            {name:userData.phone_number, iconName:"phone", link:userData.phone_number}
-                        ];
+    let contactLinks = [
+        {name: userData?.email, iconName: "email", link: userData?.email}, 
+        {name: userData?.phone_number, iconName: "phone", link: userData?.phone_number}
+    ].filter(link => link.name && String(link.name).trim() !== '');
 
     return (    
         <div className="App">

@@ -217,9 +217,15 @@ export const updateUserProfile = async (req, res) => {
     const updateUser = await user.update({
       name: userName.trim()
     })
+
+    let cleanDob = null;
+    if (dob && !isNaN(new Date(dob).getTime())) {
+      cleanDob = new Date(dob).toISOString().split("T")[0]; // YYYY-MM-DD
+    }
+
     const updateProfile = await profile.update({
       headline: headline.trim(),
-      dob: dob,
+      dob: cleanDob,
       phone_number: phoneNumber,
       bio: bio,
       website: websiteUrl,

@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import "./ProfilePhotoAndHeadline.css";
 import ProfilePic from '../../Profile/Profile Pic/ProfilePic.jsx';
 import Button from '../../Profile/Button/Button.jsx';
+import { IoPencil, IoTrash, IoAnalytics, IoSave, IoClose, IoAdd } from "react-icons/io5";
 
 const ProfilePhotoAndHeadline = ({ 
     photo, 
@@ -19,7 +20,7 @@ const ProfilePhotoAndHeadline = ({
     const coverFileInputRef = useRef(null);
 
     const handleCancel = () => {
-        navigate(`/profile/${id}`);
+        navigate(`/profile`);
     };
     const handleSave = () => {
         saveAction();
@@ -95,8 +96,8 @@ const ProfilePhotoAndHeadline = ({
                 <div className="profile-section__pic-and-buttons">
                     <ProfilePic photo={photo} borderColor="#82C294" />
                     <div className="profile-section__vertical-buttons">
-                        <Button text="Change" color="green" action={handleUpload} width={100}/>
-                        <Button text="Remove" color="coral" action={handleRemove} width={100}/>
+                        <Button text="Change" color="green" action={handleUpload} width={120} icon={<IoPencil size={18} />}/>
+                        <Button text="Remove" color="coral" action={handleRemove} width={120} icon={<IoTrash size={18} />} />
                     </div>
                 </div>
             </div>
@@ -104,13 +105,13 @@ const ProfilePhotoAndHeadline = ({
             {/* RIGHT SIDE */}
             <div className="profile-section__right" style={{marginBottom:"-40px"}}>
                 <div className="profile-section__top-buttons">
-                    <Button text="Change" color="green" action={handleChangeCover} width={100}/>
-                    <Button text="Remove" color="coral" action={handleRemoveCover} width={100}/>
+                    <Button text="Change" color="green" action={handleChangeCover} width={120} icon={<IoPencil size={18} />}/>
+                    <Button text="Remove" color="coral" action={handleRemoveCover} width={120} icon={<IoTrash size={18} />} />
                 </div>
                 <br/>
 
-                <Button text="Save Changes" color="green" bold action={handleSave} />
-                <Button text="Cancel" color="coral" bold action={handleCancel} />
+                <Button text="Save Changes" color="green" bold action={handleSave} icon={<IoSave size={18} />}/>
+                <Button text="Cancel" color="coral" bold action={handleCancel} icon={<IoClose size={18} />} />
             </div>
         </div>
     );

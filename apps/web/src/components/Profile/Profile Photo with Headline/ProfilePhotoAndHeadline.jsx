@@ -4,10 +4,10 @@ import "./ProfilePhotoAndHeadline.css"
 import ProfilePic from "../Profile Pic/ProfilePic.jsx"
 import Headline from "../Headline/Headline.jsx"
 import Button from '../Button/Button.jsx';
+import { IoPencil, IoTrash, IoAnalytics, IoSave, IoClose, IoAdd } from "react-icons/io5";
 
 const ProfilePhotoAndHeadline = ({photo, name, dob, headline,}) => {
     const navigate = useNavigate();
-    const { id } = useParams();
 
     const handleAnalytics = () => {
         navigate(`/profile-analytics`);
@@ -30,12 +30,14 @@ const ProfilePhotoAndHeadline = ({photo, name, dob, headline,}) => {
                     color="green"
                     bold
                     action={handleAnalytics}
+                    icon={<IoAnalytics size={18} />}
                 />
                 <Button
                     text="Edit Profile"
                     color="coral"
                     bold
                     action={handleUpdate}
+                    icon={<IoPencil size={18} />} 
                 />
             </div>
         </div>

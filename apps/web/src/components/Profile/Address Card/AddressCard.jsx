@@ -9,7 +9,7 @@ const AddressCard = ({
     city,
     state,
     country,
-    mapsLink,
+    maps_url,
     className = "",
     borderColor = "#47855B",
     borderWidth = "4px"
@@ -19,8 +19,8 @@ const AddressCard = ({
     }
 
     const handleMapsClick = () => {
-        if (mapsLink) {
-        window.open(mapsLink, '_blank', 'noopener,noreferrer');
+        if (maps_url) {
+        window.open(maps_url, '_blank', 'noopener,noreferrer');
         }
     };
 
@@ -84,7 +84,7 @@ const AddressCard = ({
                 </div>
                 )}
             </div>
-            {mapsLink && (
+            {maps_url && (
                 <button 
                 className="maps-button"
                 onClick={handleMapsClick}

@@ -2,6 +2,7 @@ import React from 'react';
 import './AddressCards.css';
 import AddressCard from '../Address Card/AddressCard';
 import Button from '../../Profile/Button/Button';
+import { IoPencil, IoTrash, IoAnalytics, IoSave, IoClose, IoAdd } from "react-icons/io5";
 
 const AddressCards = ({ 
     addresses = [],
@@ -12,9 +13,9 @@ const AddressCards = ({
     updateAction,
     objectSetter
 }) => {
-    if (!addresses || addresses.length === 0) {
-        return null;
-    }
+    // if (!addresses || addresses.length === 0) {
+    //     return null;
+    // }
 
     return (
         <div className={`user-videos-section ${className}`}>
@@ -46,7 +47,7 @@ const AddressCards = ({
                 ))}
             </div>
             <br></br>
-            <Button text='Add Location' color='green' width='100%' action={addAction}/>
+            <Button text='Add Location' color='green' width='100%' action={addAction} icon={<IoAdd size={18} />}/>
         </div>
     );
 };
