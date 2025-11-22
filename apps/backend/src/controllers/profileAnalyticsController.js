@@ -24,16 +24,37 @@ export const getUserProfileAnalytics = async (req, res) => {
 
     const profileId = user.profile.id;
 
-    // get all the user visit for this profile
+    // Get all the user visits for this profile with visitor information
     const analytics = await ProfileAnalytics.findAll({
       where: { profile_id: profileId },
-      attributes: { 
-        exclude: ['visitor_user_id'] // removing visitor id for security in front end
-      },
+      include: [{
+        model: User,
+        as: 'visitor',
+        attributes: ['id', 'name'],
+        include: [{
+          model: Profile,
+          as: 'profile',
+          attributes: ['id', 'profile_pic_url']
+        }]
+      }],
       order: [['visit_date_time', 'DESC']]
     });
 
-    res.json(analytics);
+    // Format the response to include visitor information
+    const formattedAnalytics = analytics.map(visit => ({
+      id: visit.id,
+      profile_id: visit.profile_id,
+      qr_scan: visit.qr_scan,
+      visit_date_time: visit.visit_date_time,
+      created_at: visit.created_at,
+      visitor: visit.visitor ? {
+        user_id: visit.visitor.id,
+        name: visit.visitor.name,
+        profile_pic_url: visit.visitor.profile?.profile_pic_url
+      } : null
+    }));
+
+    res.json(formattedAnalytics);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

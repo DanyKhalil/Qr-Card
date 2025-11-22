@@ -27,7 +27,6 @@ const Filtering = () => {
     return () => clearTimeout(delay);
   }, [search]);
 
-console.log(users);
   return (
     <>
       <Header activeIndex={0}/>

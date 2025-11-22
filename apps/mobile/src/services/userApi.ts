@@ -131,7 +131,6 @@ export const userApi = {
                 });
             }
 
-            console.log('FormData contents:', formData);
 
             const response = await fetch(`${DEVELOPMENT_CONFIG.backendBaseUrl}/api/users/${userId}`, {
                 method: 'PUT',

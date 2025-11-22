@@ -1,6 +1,6 @@
 import '../Style/Login.css';
 import backround from "../assets/images/icons/Background2.png";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from 'react-router-dom';
 
@@ -23,7 +23,25 @@ const RegistrationForm = () => {
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("");
   const [message, setMessage] = useState("");
+  const [isChecking, setIsChecking] = useState(true);
   const navigate = useNavigate();
+
+  // Check if user is already logged in
+  useEffect(() => {
+    const checkAuth = () => {
+      const token = localStorage.getItem("token");
+      const user = localStorage.getItem("user");
+      
+      if (token && user) {
+        // User is logged in, redirect to filtering
+        navigate('/Filtering');
+      } else {
+        setIsChecking(false);
+      }
+    };
+
+    checkAuth();
+  }, [navigate]);
 
   const handleLoginClick = () => {
     navigate('/login');
@@ -40,12 +58,25 @@ const RegistrationForm = () => {
         role
       });
 
-      setMessage("✅ Registration successful! Please check your email to verify your account.");
+      setMessage("Registration successful! Please check your email to verify your account.");
     } catch (err) {
       console.error(err);
       setMessage(err.response?.data?.error || "Registration failed");
     }
   };
+
+  // Show loading while checking authentication
+  if (isChecking) {
+    return (
+      <div className="page-container">
+        <div className="content-wrapper">
+          <div className="form-section">
+            <p>Checking authentication...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="page-container">
@@ -99,7 +130,7 @@ const RegistrationForm = () => {
             </button>
           </form>
 
-          <p className={message.includes("✅") ? "success-message" : "error-message"}>
+          <p className={message.includes("successful") ? "success-message" : "error-message"}>
             {message}
           </p>
         </div>

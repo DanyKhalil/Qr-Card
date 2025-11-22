@@ -27,19 +27,19 @@ const UserProfile = ({
   const getToken = () => {
         return localStorage.getItem("token");
     };
-    const getCurrentUser = () => {
-        const userStr = localStorage.getItem("user");
-        if (!userStr) return null;
-        
-        try {
-            return JSON.parse(userStr);
-        } catch (error) {
-            console.error("Error parsing user data:", error);
-            return null;
-        }
-    };
+  const getCurrentUser = () => {
+      const userStr = localStorage.getItem("user");
+      if (!userStr) return null;
+      
+      try {
+          return JSON.parse(userStr);
+      } catch (error) {
+          console.error("Error parsing user data:", error);
+          return null;
+      }
+  };
 
-    let activeIndex = getCurrentUser()?.id === id ? 2 : null;
+  let activeIndex = getCurrentUser()?.id === id ? 2 : null;
 
   return (    
     <div>

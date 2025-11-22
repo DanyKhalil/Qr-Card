@@ -44,7 +44,6 @@ const UserProfile = ({
         // phoneNumber,
         // email,
     }: UserProfileProps) => {
-        // console.log(userName, email, phoneNumber)
         return (
                 <ScrollView style={{ flex: 1 }}>
                     <CoverPhoto photo={coverPhoto} height={150} />

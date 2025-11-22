@@ -49,7 +49,6 @@ export const profileAnalyticsApi = {
             // Optional: Check if visiting own profile to avoid API call
             const currentUser = JSON.parse(localStorage.getItem("user"));
             if (currentUser && currentUser.id === id) {
-                console.log('Skipping profile visit - own profile');
                 return { message: 'Skipped self-visit' };
             }
             

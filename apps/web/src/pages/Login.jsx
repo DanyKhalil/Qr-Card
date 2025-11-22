@@ -1,6 +1,6 @@
 import '../Style/Login.css';
 import backround from '../assets/images/icons/man-woman-qr.png';
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from 'react-router-dom';
 
@@ -25,7 +25,25 @@ const Form = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isChecking, setIsChecking] = useState(true);
   const navigate = useNavigate();
+
+  // Check if user is already logged in
+  useEffect(() => {
+    const checkAuth = () => {
+      const token = localStorage.getItem("token");
+      const user = localStorage.getItem("user");
+      
+      if (token && user) {
+        // User is logged in, redirect to filtering
+        navigate('/Filtering');
+      } else {
+        setIsChecking(false);
+      }
+    };
+
+    checkAuth();
+  }, [navigate]);
 
   const handleSignUpClick = () => {
     navigate('/registration');
@@ -46,15 +64,28 @@ const Form = () => {
 
       // redirect based on role
       if (res.data.user.role === "admin") {
-        window.location.href = "/admin"; // admin page
+        navigate("/admin");
       } else {
-        window.location.href = "/Filtering"; // normal user page
+        navigate("/Filtering");
       }
 
     } catch (err) {
       setError(err.response?.data?.error || "Login failed");
     }
   };
+
+  // Show loading while checking authentication
+  if (isChecking) {
+    return (
+      <div className='page-container'>
+        <div className='content-wrapper'>
+          <div className="form-section">
+            <p>Checking authentication...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className='page-container'>

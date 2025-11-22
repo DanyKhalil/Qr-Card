@@ -9,6 +9,22 @@ import logoutIcon from "../../assets/images/icons/logout-icon.png"
 import { useNavigate, useParams } from 'react-router-dom';
 
 const Header = ({activeIndex}) => {
+    const getToken = () => {
+        return localStorage.getItem("token");
+    };
+    const getCurrentUser = () => {
+        const userStr = localStorage.getItem("user");
+        if (!userStr) return null;
+        
+        try {
+            return JSON.parse(userStr);
+        } catch (error) {
+            console.error("Error parsing user data:", error);
+            return null;
+        }
+    };
+
+
     const navigate = useNavigate();
     const goToProfile = () => {navigate(`/profile`)}
     const goToScanQrCode = () => {navigate(`/scan-qr-code`)}
@@ -24,8 +40,8 @@ const Header = ({activeIndex}) => {
         {name: "Search", icon: searchIcon, action:goToSearch, active:(activeIndex === 0)},
         {name: "Scan QR", icon: scanQrIcon, action: goToScanQrCode, active:(activeIndex === 1)},
         {name: "My Profile", icon: profileIcon, action: goToProfile, active:(activeIndex === 2)},
-        {name: "Logout", icon: logoutIcon, action: logout, active:(activeIndex === 3)},
-    ];
+        getCurrentUser()?.id ? {name: "Logout", icon: logoutIcon, action: logout, active:(activeIndex === 3)} : null ,
+    ].filter((obj) => obj !== null);
     return (
         <div className="header">
         <div className="header-left">
