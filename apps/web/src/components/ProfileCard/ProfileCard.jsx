@@ -7,23 +7,21 @@ const ProfileCard = ({ id, name, title, imageUrl }) => {
   const navigate = useNavigate();
   return (
     <div className="profile-card">
-      {name != null ? (
-        <img
-          src={imageUrl || "https://via.placeholder.com/80"} // fallback if no profile pic
-          alt={name}
-          className="profile-image"
-        />
-      ) : (
-        <div className="anonymous-avatar">
-            <IoPersonOutline />
-        </div>
-      )}
+      <div className="profile-image">
+        {imageUrl ? (
+          <img
+            src={imageUrl}
+            alt={name}
+          />
+        ) : (
+          <IoPersonOutline size={40} />
+        )}
+      </div>
       <h2 className="profile-name">{name}</h2>
       <p className="profile-title">{title}</p>
       <button className="profile-button" onClick={()=>navigate(`/profile/${id}`)}>View Profile</button>
     </div>
   );
 };
-
 
 export default ProfileCard;

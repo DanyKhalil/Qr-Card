@@ -52,7 +52,7 @@ const Filtering = () => {
                 id={user.id}
                 name={user.name}
                 title={user.role}
-                imageUrl={user.profile?.profile_pic_url || "https://via.placeholder.com/80"}
+                imageUrl={user.profile?.profile_pic_url || null}
               />
             ))
           ) : (
