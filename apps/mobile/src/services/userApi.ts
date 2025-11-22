@@ -106,47 +106,51 @@ export const userApi = {
             formData.append('headline', headline || '');
             formData.append('bio', bio || '');
             formData.append('websiteUrl', website || '');
-            formData.append('coverPhotoPath', coverPhotoInput || '');
-            formData.append('profilePhotoPath', profilePicInput || '');
 
             formData.append('connectLinks', JSON.stringify(connectLinks || []));
             formData.append('videos', JSON.stringify(videos || []));
             formData.append('locations', JSON.stringify(locations || []));
 
-            if (profilePicInput && profilePicInput.startsWith('file://')) {
+            if (profilePicInput?.startsWith('file://')) {
                 const filename = profilePicInput.split('/').pop();
                 formData.append('profilePicture', {
                     uri: profilePicInput,
                     type: 'image/jpeg',
                     name: filename || 'profile.jpg',
                 });
+            } else {
+                // send existing URL (or null)
+                formData.append('profilePhotoPath', profilePicInput || '');
             }
 
-            if (coverPhotoInput && coverPhotoInput.startsWith('file://')) {
+            // same logic for cover photo
+            if (coverPhotoInput?.startsWith('file://')) {
                 const filename = coverPhotoInput.split('/').pop();
                 formData.append('coverPhoto', {
                     uri: coverPhotoInput,
                     type: 'image/jpeg',
                     name: filename || 'cover.jpg',
                 });
+            } else {
+                formData.append('coverPhotoPath', coverPhotoInput || '');
             }
 
-            console.log('FormData contents:', formData);
-
-            const response = await fetch(`${DEVELOPMENT_CONFIG.backendBaseUrl}/api/users/${userId}`, {
-                method: 'PUT',
-                body: formData,
-                headers: {
-                    'Accept': 'application/json',
-                },
-            });
+            const response = await fetch(
+                `${DEVELOPMENT_CONFIG.backendBaseUrl}/api/users/${userId}`,
+                {
+                    method: 'PUT',
+                    body: formData,
+                    headers: {
+                        Accept: 'application/json',
+                    },
+                }
+            );
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
-            const result = await response.json();
-            return result;
+            return await response.json();
         } catch (error) {
             console.error('Error updating user profile:', error.message || error);
             throw error;

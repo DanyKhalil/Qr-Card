@@ -2,6 +2,7 @@ import React from 'react';
 import './YoutubeVideos.css';
 import YouTubeCard from '../Youtube Card/YoutubeCard';
 import Button from '../../Profile/Button/Button';
+import { IoPencil, IoTrash, IoAnalytics, IoSave, IoClose, IoAdd } from "react-icons/io5";
 
 const YoutubeVideos = ({ 
     videos = [],
@@ -12,9 +13,9 @@ const YoutubeVideos = ({
     updateAction,
     objectSetter
 }) => {
-    if (!videos || videos.length === 0) {
-        return null;
-    }
+    // if (!videos || videos.length === 0) {
+    //     return null;
+    // }
 
     return (
         <div className={`user-videos-section ${className}`}>
@@ -41,7 +42,7 @@ const YoutubeVideos = ({
                 ))}
             </div>
             <br></br>
-            <Button text='Add Video Link' color='green' width='100%' action={addAction}/>
+            <Button text='Add Video Link' color='green' width='100%' action={addAction} icon={<IoAdd size={18} />}/>
         </div>
     );
 };

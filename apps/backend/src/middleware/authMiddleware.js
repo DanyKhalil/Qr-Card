@@ -33,3 +33,35 @@ export const isAdmin = (req, res, next) => {
   }
   next();
 };
+
+
+// this is not a strict middleware, it only sets a userId if the user is logged in
+export const authenticateOptional = async (req, res, next) => {
+  try {
+    const authHeader = req.headers.authorization;
+    
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      req.user = null;
+      req.userId = null;
+      return next();
+    }
+
+    const token = authHeader.split(" ")[1];
+    const decoded = jwt.verify(token, JWT_SECRET);
+
+    const user = await User.findByPk(decoded.id);
+    if (!user) {
+      req.user = null;
+      req.userId = null;
+      return next();
+    }
+
+    req.user = user;
+    req.userId = user.id;
+    next();
+  } catch (error) {
+    req.user = null;
+    req.userId = null;
+    next();
+  }
+};

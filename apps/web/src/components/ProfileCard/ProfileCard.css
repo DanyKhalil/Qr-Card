@@ -16,9 +16,26 @@
   border-radius: 50%;
   object-fit: cover;
   margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f3f4f6; /* Light gray background for anonymous users */
+  border: 2px solid #e5e7eb; /* Subtle border */
+}
+
+.profile-image img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.profile-image svg {
+  color: #9ca3af; /* Gray color for the icon */
 }
 
 .profile-name {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;;
   font-size: 18px;
   font-weight: 600;
   color: #111827;

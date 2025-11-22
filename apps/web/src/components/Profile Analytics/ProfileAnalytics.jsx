@@ -7,9 +7,9 @@ import Footer from '../Footer/Footer.jsx';
 import ProfileViewsChart from './Charts/ProfileViewsChart.jsx';
 import ScanTypeChart from './Charts/ScanTypeChart.jsx';
 import './ProfileAnalytics.css';
+import ProfileVisitsTable from './ProfileVisitsTable/ProfileVisitsTable.jsx';
 
 const ProfileAnalytics = () => {
-  const { id } = useParams();
   const [analyticsData, setAnalyticsData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -17,6 +17,31 @@ const ProfileAnalytics = () => {
   const [dateRange, setDateRange] = useState('7days');
   const [viewsChartType, setViewsChartType] = useState('bar');
   const [scanChartType, setScanChartType] = useState('pie');
+
+  // this function returns the token of the logged in user
+    const getToken = () => {
+        return localStorage.getItem("token");
+    };
+    // and this returns the user logged in
+    const getCurrentUser = () => {
+        const userStr = localStorage.getItem("user");
+        if (!userStr) return null;
+        
+        try {
+            return JSON.parse(userStr);
+        } catch (error) {
+            console.error("Error parsing user data:", error);
+            return null;
+        }
+    };
+    
+    const currentLoggedInUser = getCurrentUser();
+    const { id: urlId } = useParams(); // get visiting user id 
+    const id = urlId || currentLoggedInUser?.id; // either a visiting id or a current logged in id
+    if (!id) {
+        window.location.href = "/login";
+        return null;
+    }
 
   const fetchProfileAnalytics = async (id) => {
     try {
@@ -36,9 +61,39 @@ const ProfileAnalytics = () => {
     fetchProfileAnalytics(id);
   }, [id]);
 
+  const filterVisitsByDateRange = (visits, range) => {
+    const now = new Date();
+    let startDate = new Date();
+
+    switch (range) {
+      case 'today':
+        startDate.setHours(0, 0, 0, 0);
+        break;
+      case '7days':
+        startDate.setDate(now.getDate() - 7);
+        break;
+      case '30days':
+        startDate.setDate(now.getDate() - 30);
+        break;
+      case 'year':
+        startDate.setFullYear(now.getFullYear() - 1);
+        break;
+      default:
+        startDate.setDate(now.getDate() - 7);
+    }
+
+    return visits.filter(visit => 
+      new Date(visit.visit_date_time) >= startDate
+    );
+  };
+
   const processedViewsData = processDateRangeData(analyticsData, dateRange);
   const processedScanData = processScanTypeData(analyticsData, dateRange);
+  const filteredVisits = filterVisitsByDateRange(analyticsData, dateRange);
 
+  console.log(analyticsData);
+
+  
   if (loading) {
     return (
       <div className="profile-analytics">
@@ -127,6 +182,8 @@ const ProfileAnalytics = () => {
           />
         </div>
       </div>
+
+      <ProfileVisitsTable visits={filteredVisits} dateRange={dateRange}/>
       
       <Footer />
     </div>

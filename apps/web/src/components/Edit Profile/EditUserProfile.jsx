@@ -52,7 +52,7 @@ const EditUserProfile = ({
   const [headlineInput, setHeadlineInput] = useState(headline);
   const [headlineInputErrorMessage, setHeadlineInputErrorMessage] = useState('');
 
-  const [phoneNumberInput, setPhoneNumberInput] = useState(contactLinks[1].name[0]);
+  const [phoneNumberInput, setPhoneNumberInput] = useState(contactLinks[1].name[0]==null || contactLinks[1].name[0]=='' ? '' : contactLinks[1].name[0]);
   const [phoneNumberInputErrorMessage, setPhoneNumberInputErrorMessage] = useState('');
 
   const [connectLinksInput, setConnectLinksInput] = useState(connectLinks);
@@ -84,7 +84,6 @@ const EditUserProfile = ({
   // updating Modal Objecst
   const [videoObjectUnderUpdate, setVideoObjectUnderUpdate] = useState({id:'', title:'', description:'', video_url:''})
   const [locationObjectUnderUpdate, setLocationObjectUnderUpdate] = useState({id:'', title:'', floor:'', building:'', street:'', city:'', state:'', country:'', maps_url:''})
-
 
 
 
@@ -146,7 +145,14 @@ const EditUserProfile = ({
       const formData = new FormData();
       
       formData.append('userName', newUserName);
-      formData.append('dob', newDob);
+      
+      let cleanDob = null;
+      if (newDob && !(newDob=='') && !isNaN(new Date(newDob).getTime())) {
+        // valid date → convert to YYYY-MM-DD
+        cleanDob = new Date(newDob).toISOString().split("T")[0];
+      }
+      formData.append('dob', cleanDob);
+
       formData.append('phoneNumber', newPhoneNumber);
       formData.append('headline', newHeadline);
       formData.append('bio', newBio);
@@ -177,7 +183,7 @@ const EditUserProfile = ({
         setTimeout(() => {
           setUpdateMessage(''); 
           navigate(`/profile/${id}`);
-        }, 2000);
+        }, 1000);
       }
     } catch (error) {
       console.error('Failed to update userprofile:', error);
@@ -220,6 +226,22 @@ const EditUserProfile = ({
           border: `1px solid ${updateMessage.includes('Error') ? '#ffcdd2' : '#c8e6c9'}`
         }}>
           {updateMessage}
+        </div>
+      )}
+      {isUpdating && (
+        <div style={{
+          fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+          position: "fixed",
+          right: "10px",
+          top: "100px",
+          display: "inline",
+          borderRadius: '15px',
+          padding: '20px',
+          backgroundColor: updateMessage.includes('Error') ? '#ffebee' : '#ebdf5fff',
+          color: updateMessage.includes('Error') ? '#c62828' : '#000000ff',
+          border: `1px solid ${updateMessage.includes('Error') ? '#ffcdd2' : '#c8e6c9'}`
+        }}>
+          Updating...
         </div>
       )}
       <TwoColumnLayout 

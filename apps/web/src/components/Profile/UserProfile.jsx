@@ -24,14 +24,32 @@ const UserProfile = ({
   id = "User001",
 }
 ) => {
+  const getToken = () => {
+        return localStorage.getItem("token");
+    };
+  const getCurrentUser = () => {
+      const userStr = localStorage.getItem("user");
+      if (!userStr) return null;
+      
+      try {
+          return JSON.parse(userStr);
+      } catch (error) {
+          console.error("Error parsing user data:", error);
+          return null;
+      }
+  };
+
+  let activeIndex = getCurrentUser()?.id === id ? 2 : null;
+
   return (    
     <div>
-      <Header activeIndex={2}/>
+      <Header activeIndex={activeIndex}/>
       <CoverPhoto photo={coverPhoto} height={300} paddingTop={80}/>
       <ProfilePhotoAndHeadline  photo={profilePic} 
                                 name={userName}
                                 dob={dob}
                                 headline={headline}
+                                id={id}
       />
       <TwoColumnLayout 
               separatorWidth="3px"

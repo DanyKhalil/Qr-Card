@@ -29,7 +29,7 @@ const Filtering = () => {
 
   return (
     <>
-      <Header />
+      <Header activeIndex={0}/>
       <main className="filtering-page">
         <div className="search-bar-container">
           <input
@@ -49,9 +49,10 @@ const Filtering = () => {
             users.map((user) => (
               <ProfileCard
                 key={user.id}
+                id={user.id}
                 name={user.name}
                 title={user.role}
-                imageUrl={user.profile?.profile_pic_url || "https://via.placeholder.com/80"}
+                imageUrl={user.profile?.profile_pic_url || null}
               />
             ))
           ) : (

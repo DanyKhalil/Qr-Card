@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect } from "react";
 import { QRCodeCanvas } from "qrcode.react";
 import "./ProfileQrCode.css";
 import Button from "../Button/Button";
+import { IoDownload } from "react-icons/io5";
 
 const ProfileQrCode = ({ profileUrl }) => {
     // it takes a sparameter the profile Url which will be localhose//1557//profile/id
@@ -54,6 +55,7 @@ const ProfileQrCode = ({ profileUrl }) => {
                 bold
                 action={handleDownload}
                 width={qrSize}
+                icon={<IoDownload size={18} />} 
             />
         </div>
     );
