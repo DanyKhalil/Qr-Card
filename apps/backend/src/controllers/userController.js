@@ -1,4 +1,4 @@
-import { User, Profile, SocialMedia, Video, Location } from '../models/index.js';
+import { User, Profile, SocialMedia, Video, Location, CustomContentType, CustomContentItem, CustomContentField, CustomContentValue } from '../models/index.js';
 
 // ---- To get all the users ----
 export const getUsers = async (req, res) => {
@@ -67,8 +67,47 @@ export const getUserProfile = async (req, res) => {
               model: Location,
               as: 'locations',
               attributes: [
-                'id', 'title', 'country', 'state', 'city', 'street', 'building', 
-                'floor', 'maps_url', 'latitude', 'longitude'
+                'id', 'title', 'country', 'state', 'city', 'street',
+                'building', 'floor', 'maps_url', 'latitude', 'longitude'
+              ]
+            },
+            {
+              model: CustomContentType,
+              as: 'custom_types',
+              include: [
+                {
+                  model: CustomContentField,
+                  as: 'fields',
+                  attributes: [
+                    'id', 'field_name', 'label', 'field_key',
+                    'field_type', 'required', 'display_order', 'config'
+                  ]
+                },
+                {
+                  model: CustomContentItem,
+                  as: 'items',
+                  attributes: [
+                    'id', 'title', 'visibility', 'created_at'
+                  ],
+                  include: [
+                    {
+                      model: CustomContentValue,
+                      as: 'values',
+                      attributes: [
+                        'id', 'value_text', 'value_json'
+                      ],
+                      include: [
+                        {
+                          model: CustomContentField,
+                          as: 'field',
+                          attributes: [
+                            'id', 'field_key', 'field_name', 'label', 'field_type'
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
               ]
             }
           ]
@@ -84,7 +123,7 @@ export const getUserProfile = async (req, res) => {
       return res.status(404).json({ error: "Profile not found for this user" });
     }
 
-    //  if all are alright, we format the json, so the front end can use it directky
+    // Format Profile Base Info
     const userProfile = {
       name: user.name,
       cover_photo_url: user.profile.cover_pic_url,
@@ -94,12 +133,14 @@ export const getUserProfile = async (req, res) => {
       bio: user.profile.bio,
       phone_number: user.profile.phone_number ? [user.profile.phone_number] : [],
       email: user.email ? [user.email] : [],
+      website_link: user.profile.website,
+
       social_media_links: user.profile.social_media?.map(sm => ({
         id: sm.id,
         url: sm.url,
         display_order: sm.display_order
       })) || [],
-      website_link: user.profile.website,
+
       videos_links: user.profile.videos?.map(video => ({
         id: video.id,
         video_url: video.video_url,
@@ -107,24 +148,60 @@ export const getUserProfile = async (req, res) => {
         description: video.description,
         display_order: video.display_order
       })) || [],
-      locations: user.profile.locations?.map(location => ({
-        id: location.id,
-        title: location.title,
-        country: location.country,
-        state: location.state,
-        city: location.city,
-        street: location.street,
-        building: location.building,
-        floor: location.floor,
-        maps_url: location.maps_url,
-        coordinates: location.latitude && location.longitude ? {
-          latitude: location.latitude,
-          longitude: location.longitude
-        } : null
+
+      locations: user.profile.locations?.map(loc => ({
+        id: loc.id,
+        title: loc.title,
+        country: loc.country,
+        state: loc.state,
+        city: loc.city,
+        street: loc.street,
+        building: loc.building,
+        floor: loc.floor,
+        maps_url: loc.maps_url,
+        coordinates:
+          loc.latitude && loc.longitude
+            ? { latitude: loc.latitude, longitude: loc.longitude }
+            : null
+      })) || [],
+
+      // ⭐ CUSTOM CONTENT RESPONSE ⭐
+      custom_content: user.profile.custom_types?.map(type => ({
+        id: type.id,
+        name: type.name,
+        slug: type.slug,
+        description: type.description,
+
+        fields: type.fields?.map(f => ({
+          id: f.id,
+          name: f.field_name,
+          label: f.label,
+          key: f.field_key,
+          type: f.field_type,
+          required: f.required,
+          display_order: f.display_order,
+          config: f.config
+        })) || [],
+
+        items: type.items?.map(item => ({
+          id: item.id,
+          title: item.title,
+          visibility: item.visibility,
+
+          values: item.values?.map(v => ({
+            field_id: v.field.id,
+            field_key: v.field.field_key,
+            field_name: v.field.field_name,
+            field_label: v.field.label,
+            field_type: v.field.field_type,
+            value: v.value_json ?? v.value_text
+          })) || []
+        })) || []
       })) || []
     };
 
     res.json(userProfile);
+
   } catch (error) {
     console.error('Error in getUserProfile:', error);
     res.status(500).json({ error: error.message });
