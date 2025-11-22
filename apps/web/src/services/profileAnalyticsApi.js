@@ -46,6 +46,13 @@ export const profileAnalyticsApi = {
     },
     visitUserProfile: async (id, qrScan = false) => {
         try {
+            // Optional: Check if visiting own profile to avoid API call
+            const currentUser = JSON.parse(localStorage.getItem("user"));
+            if (currentUser && currentUser.id === id) {
+                console.log('Skipping profile visit - own profile');
+                return { message: 'Skipped self-visit' };
+            }
+            
             const response = await api.post(`/profile-analytics/${id}`, {
                 qr_scan: qrScan
             });
@@ -56,5 +63,3 @@ export const profileAnalyticsApi = {
         }
     }
 };
-
-export default api;

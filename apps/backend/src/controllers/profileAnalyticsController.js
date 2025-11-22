@@ -45,6 +45,14 @@ export const createProfileVisit = async (req, res) => {
     const { id } = req.params;
     const { qr_scan = false } = req.body;
 
+    // Get the visitor user ID from the bearer token (if available)
+    const visitorUserId = req.userId || null;
+
+    // If the visitor is trying to visit their own profile, don't create a visit
+    if (visitorUserId && visitorUserId === id) {
+      return res.status(200).json({ message: 'Cannot create visit for your own profile' });
+    }
+
     // First, get the user's profile ID
     const user = await User.findOne({
       where: { id: id },
@@ -65,13 +73,10 @@ export const createProfileVisit = async (req, res) => {
 
     const profileId = user.profile.id;
 
-    // getting the currntly logged in user. the middelware should have put it as userId
-    const visitorUserId = req.userId || null;
-
     // Create the new visit record
     const newVisit = await ProfileAnalytics.create({
       profile_id: profileId,
-      visitor_user_id: visitorUserId,
+      visitor_user_id: visitorUserId, // This will be null if no bearer token
       qr_scan: qr_scan
     });
 
