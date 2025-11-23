@@ -30,6 +30,7 @@ const EditUserProfile = ({
           ],
   locations = [],
   id = "User001",
+  customContent
 }
 ) => {
 
@@ -69,6 +70,8 @@ const EditUserProfile = ({
 
   const [locationsInput, setLocationsInput] = useState(locations);
   const [locationsInputErrorMessage, setLocationsInputErrorMessage] = useState('');
+
+  const [customContentInput, setCustomContentInput] = useState(customContent || []);
 
 
 
@@ -137,7 +140,7 @@ const EditUserProfile = ({
   const [isUpdating, setIsUpdating] = useState(false);
   const [updateMessage, setUpdateMessage] = useState('');
 
-  const handleUserProfileUpdate = async (newUserName, newDob, newPhoneNumber, newHeadline, newBio, newWebsite, newSocialMediaLinks, newVideos, newLocations) => {
+  const handleUserProfileUpdate = async (newUserName, newDob, newPhoneNumber, newHeadline, newBio, newWebsite, newSocialMediaLinks, newVideos, newLocations, newCustomContent) => {
     setIsUpdating(true);
     setUpdateMessage('');
 
@@ -160,6 +163,7 @@ const EditUserProfile = ({
       formData.append('connectLinks', JSON.stringify(newSocialMediaLinks));
       formData.append('videos', JSON.stringify(newVideos));
       formData.append('locations', JSON.stringify(newLocations));
+      formData.append('customContent', JSON.stringify(newCustomContent))
       
       if (profilePicFile) {
         formData.append('profilePicture', profilePicFile);
@@ -195,7 +199,7 @@ const EditUserProfile = ({
   };
 
   const handleSaveChanges = () => {
-    handleUserProfileUpdate(userNameInput, dobInput, phoneNumberInput, headlineInput, bioInput, websiteLinkInput, connectLinksInput, videosInput, locationsInput);
+    handleUserProfileUpdate(userNameInput, dobInput, phoneNumberInput, headlineInput, bioInput, websiteLinkInput, connectLinksInput, videosInput, locationsInput, customContentInput );
   };
 
 
@@ -257,6 +261,7 @@ const EditUserProfile = ({
               videos = {videosInput} videosSetter = {setVideosInput}
               locations = {locationsInput} locationSetter={setLocationsInput}
               id = {id}
+              customContent={customContentInput} customContentSetter={setCustomContentInput}
 
               addSocialMediaModalVisibiltySetter = {setAddSocialMediaModalIsVisible}
 
