@@ -1,6 +1,7 @@
 import React from 'react';
 import './AddressCard.css';
 import Button from '../../Profile/Button/Button';
+import { IoPencil, IoTrash } from 'react-icons/io5';
 
 const AddressCard = ({ 
     id,
@@ -88,8 +89,8 @@ const AddressCard = ({
                 </div>
 
                 <div className="location-card__buttons">
-                    <Button text="Edit" color="green" action={()=>{updateAction(); objectSetter(locationObject)}} width="100px"/>
-                    <Button text="Remove" color="coral" action={handleDeleteLocation} width="100px"/>
+                    <Button text="Edit" color="green" action={()=>{updateAction(); objectSetter(locationObject)}} width="120px" icon={<IoPencil size={18}/>}/>
+                    <Button text="Remove" color="coral" action={handleDeleteLocation} width="120px" icon={<IoTrash size={18}/>}/>
                 </div>
             </div>
         </div>

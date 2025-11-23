@@ -1,16 +1,16 @@
 /* CustomContentDisplay.css */
 .custom-content-section {
-    padding: 2rem 1rem;
+    padding: 40px 20px;
     max-width: 800px; /* optional, center content */
-    margin: 0 auto;
+    margin: 0 0;
 }
 
 .custom-content-title {
-    font-size: 2rem;
+    font-size: 40px;
     font-weight: 700;
     margin-bottom: 2rem;
     color: #1f2937;
-    text-align: center;
+    text-align: left;
 }
 
 .custom-cards-grid {
