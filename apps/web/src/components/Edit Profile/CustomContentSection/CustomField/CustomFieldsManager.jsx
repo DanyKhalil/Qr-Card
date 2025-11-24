@@ -11,6 +11,7 @@ const CustomFieldsManager = ({ visible, onClose, contentType, onUpdateFields }) 
   const [editFieldModalVisible, setEditFieldModalVisible] = useState(false);
   const [currentField, setCurrentField] = useState(null);
 
+  console.log(fields)
   useEffect(() => {
     if (contentType && visible) {
       setFields([...contentType.fields]);
@@ -108,11 +109,11 @@ const CustomFieldsManager = ({ visible, onClose, contentType, onUpdateFields }) 
               <div key={field.id} className="field-item">
                 <div className="field-info">
                   <div className="field-main">
-                    <span className="field-name">{field.field_name}</span>
-                    <span className="field-key">({field.field_key})</span>
+                    {/* <span className="field-name">{field.field_name}</span> */}
+                    {/* <span className="field-key">({field.field_key})</span> */}
                   </div>
                   <div className="field-details">
-                    <span className="field-type">{fieldTypes.find(t => t.value === field.field_type)?.label}</span>
+                    <span className="field-type">{fieldTypes.find(t => t.value === field.type)?.label}</span>
                     {field.required && <span className="field-required">Required</span>}
                   </div>
                   {field.label && <div className="field-label">{field.label}</div>}

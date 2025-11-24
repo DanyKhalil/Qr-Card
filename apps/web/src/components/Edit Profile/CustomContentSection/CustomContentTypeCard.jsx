@@ -3,6 +3,7 @@ import './CustomContentTypeCard.css';
 import CustomFieldsManager from './CustomField/CustomFieldsManager';
 import CustomItemsManager from './CustomItemManager/CustomItemsManager';
 import EditCustomTypeModal from './CustomType/EditCustomTypeModal';
+import { IoAlbumsOutline, IoGitBranchOutline, IoLayersOutline, IoListOutline, IoPencil, IoTrash } from 'react-icons/io5';
 
 const CustomContentTypeCard = ({ 
   contentType, 
@@ -25,8 +26,18 @@ const CustomContentTypeCard = ({
     <div className="content-type-card">
       <div className="content-type-header">
         <div className="content-type-info">
-          <h3 className="type-name">{contentType.name}</h3>
-          <p className="type-slug">{contentType.slug}</p>
+          <h3 className="type-name">
+            {contentType.name} 
+            <button 
+              className="action-btn edit-btn"
+              onClick={() => setEditTypeModalVisible(true)}
+              title="Edit Type"
+              style={{marginLeft:"5px", maxWidth: "40px", maxHeight:"40px", minWidth: "40px", border:"none", backgroundColor:"transparent"}}
+            >
+              <IoPencil size={20}/>
+            </button>
+          </h3>
+          {/* <p className="type-slug">{contentType.slug}</p> */}
           {contentType.description && (
             <p className="type-description">{contentType.description}</p>
           )}
@@ -39,32 +50,25 @@ const CustomContentTypeCard = ({
 
         <div className="content-type-actions">
           <button 
-            className="action-btn edit-btn"
-            onClick={() => setEditTypeModalVisible(true)}
-            title="Edit Type"
-          >
-            ✏️
-          </button>
-          <button 
             className="action-btn fields-btn"
             onClick={() => setManageFieldsModalVisible(true)}
             title="Manage Fields"
           >
-            📋
+            <IoListOutline size={20}/>
           </button>
           <button 
             className="action-btn items-btn"
             onClick={() => setManageItemsModalVisible(true)}
             title="Manage Items"
           >
-            📝
+            <IoAlbumsOutline size={20}/>
           </button>
           <button 
             className="action-btn delete-btn"
             onClick={handleDelete}
             title="Delete Type"
           >
-            🗑️
+            <IoTrash size={18}/>
           </button>
         </div>
       </div>

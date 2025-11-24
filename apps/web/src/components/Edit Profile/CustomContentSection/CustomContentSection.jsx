@@ -11,8 +11,16 @@ const CustomContentSection = ({
   const [addTypeModalVisible, setAddTypeModalVisible] = useState(false);
 
   const handleAddType = (newType) => {
-    const newTypeWithId = {
+  const slug = newType.name
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, '') // Remove special chars except spaces and hyphens
+    .replace(/\s+/g, '-') // Replace spaces with hyphens
+    .replace(/-+/g, '-'); // Replace multiple hyphens with single hyphen
+
+  const newTypeWithId = {
       ...newType,
+      slug: slug,
       id: `temp-${Date.now()}`,
       fields: [],
       items: []
@@ -22,7 +30,11 @@ const CustomContentSection = ({
 
   const handleUpdateType = (typeId, updatedType) => {
     setCustomContent(customContent.map(type => 
-      type.id === typeId ? { ...type, ...updatedType } : type
+      type.id === typeId ? { 
+        ...type, 
+        name: updatedType.name,
+        description: updatedType.description 
+      } : type
     ));
   };
 

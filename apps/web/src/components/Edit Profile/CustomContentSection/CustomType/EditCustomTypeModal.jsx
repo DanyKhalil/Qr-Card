@@ -54,7 +54,7 @@ const EditCustomTypeModal = ({ visible, onClose, contentType, onUpdate }) => {
           />
         </div>
 
-        <div className="form-content">
+        {/* <div className="form-content">
           <label htmlFor="edit-type-slug" className="form-label">
             Slug *
           </label>
@@ -67,7 +67,7 @@ const EditCustomTypeModal = ({ visible, onClose, contentType, onUpdate }) => {
             className="form-input"
             required
           />
-        </div>
+        </div> */}
 
         <div className="form-content">
           <label htmlFor="edit-type-description" className="form-label">

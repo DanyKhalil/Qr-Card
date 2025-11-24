@@ -71,7 +71,7 @@ const AddCustomTypeModal = ({ visible, onClose, onAdd }) => {
           />
         </div>
 
-        <div className="form-content">
+        {/* <div className="form-content">
           <label htmlFor="type-slug" className="form-label">
             Slug *
           </label>
@@ -85,7 +85,7 @@ const AddCustomTypeModal = ({ visible, onClose, onAdd }) => {
             required
           />
           <div className="slug-hint">Used in URLs. Only lowercase letters, numbers, and hyphens.</div>
-        </div>
+        </div> */}
 
         <div className="form-content">
           <label htmlFor="type-description" className="form-label">

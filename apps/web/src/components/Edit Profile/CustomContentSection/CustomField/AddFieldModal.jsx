@@ -3,47 +3,44 @@ import Modal from '../../Modals/Modal/Modal';
 import Button from '../../../Profile/Button/Button';
 
 const AddFieldModal = ({ visible, onClose, onAdd, existingFields, fieldTypes }) => {
-  const [fieldName, setFieldName] = useState('');
-  const [fieldKey, setFieldKey] = useState('');
   const [fieldLabel, setFieldLabel] = useState('');
   const [fieldType, setFieldType] = useState('text');
   const [required, setRequired] = useState(false);
 
   useEffect(() => {
     if (visible) {
-      setFieldName('');
-      setFieldKey('');
       setFieldLabel('');
       setFieldType('text');
       setRequired(false);
     }
   }, [visible]);
 
-  const handleFieldNameChange = (e) => {
-    const name = e.target.value;
-    setFieldName(name);
-    // Auto-generate field key from name
-    if (!fieldKey || fieldKey === fieldName.toLowerCase().replace(/[^a-z0-9_]/g, '_')) {
-      setFieldKey(name.toLowerCase().replace(/[^a-z0-9_]/g, '_'));
-    }
-  };
-
-  const handleFieldKeyChange = (e) => {
-    setFieldKey(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '_'));
+  const handleFieldLabelChange = (e) => {
+    setFieldLabel(e.target.value);
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (fieldName.trim() && fieldKey.trim()) {
+    if (fieldLabel.trim()) {
+      // Auto-generate field name and key from label
+      const fieldName = fieldLabel
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9\s_]/g, '') // Remove special chars except spaces and underscores
+        .replace(/\s+/g, '_') // Replace spaces with underscores
+        .replace(/_+/g, '_'); // Replace multiple underscores with single underscore
+
+      const fieldKey = fieldName; // Use same value for both
+
       // Check if field key is unique
       if (existingFields.some(field => field.field_key === fieldKey)) {
-        alert('Field key must be unique. Please choose a different key.');
+        alert('A field with this name already exists. Please choose a different name.');
         return;
       }
 
       onAdd({
-        field_name: fieldName.trim(),
-        field_key: fieldKey.trim(),
+        field_name: fieldName,
+        field_key: fieldKey,
         label: fieldLabel.trim(),
         field_type: fieldType,
         required: required,
@@ -61,50 +58,22 @@ const AddFieldModal = ({ visible, onClose, onAdd, existingFields, fieldTypes }) 
     >
       <form onSubmit={handleSubmit} className="custom-type-form">
         <div className="form-content">
-          <label htmlFor="field-name" className="form-label">
-            Field Name *
-          </label>
-          <input
-            id="field-name"
-            type="text"
-            value={fieldName}
-            onChange={handleFieldNameChange}
-            placeholder="e.g., Cooking Time, Ingredients, Description"
-            className="form-input"
-            autoFocus
-            required
-          />
-        </div>
-
-        <div className="form-content">
-          <label htmlFor="field-key" className="form-label">
-            Field Key *
-          </label>
-          <input
-            id="field-key"
-            type="text"
-            value={fieldKey}
-            onChange={handleFieldKeyChange}
-            placeholder="e.g., cooking_time, ingredients"
-            className="form-input"
-            required
-          />
-          <div className="slug-hint">Used in database. Only lowercase letters, numbers, and underscores.</div>
-        </div>
-
-        <div className="form-content">
           <label htmlFor="field-label" className="form-label">
-            Display Label
+            Field Label *
           </label>
           <input
             id="field-label"
             type="text"
             value={fieldLabel}
-            onChange={(e) => setFieldLabel(e.target.value)}
-            placeholder="e.g., Cooking Time (minutes)"
+            onChange={handleFieldLabelChange}
+            placeholder="e.g., Cooking Time, Ingredients, Description"
             className="form-input"
+            autoFocus
+            required
           />
-          <div className="slug-hint">User-friendly label (optional)</div>
+          <div className="slug-hint">
+            Field name will be auto-generated: {fieldLabel ? fieldLabel.toLowerCase().replace(/[^a-z0-9\s_]/g, '').replace(/\s+/g, '_') : '...'}
+          </div>
         </div>
 
         <div className="form-content">
@@ -148,7 +117,7 @@ const AddFieldModal = ({ visible, onClose, onAdd, existingFields, fieldTypes }) 
             text="Add Field"
             color="green"
             action={handleSubmit}
-            disabled={!fieldName.trim() || !fieldKey.trim()}
+            disabled={!fieldLabel.trim()}
             className="form-submit-btn"
           />
         </div>

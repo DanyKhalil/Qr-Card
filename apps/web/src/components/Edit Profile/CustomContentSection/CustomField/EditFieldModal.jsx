@@ -3,17 +3,13 @@ import Modal from '../../Modals/Modal/Modal';
 import Button from '../../../Profile/Button/Button';
 
 const EditFieldModal = ({ visible, onClose, field, onUpdate, fieldTypes }) => {
-  const [fieldName, setFieldName] = useState('');
-  const [fieldKey, setFieldKey] = useState('');
   const [fieldLabel, setFieldLabel] = useState('');
   const [fieldType, setFieldType] = useState('text');
   const [required, setRequired] = useState(false);
 
   useEffect(() => {
     if (field && visible) {
-      setFieldName(field.field_name || '');
-      setFieldKey(field.field_key || '');
-      setFieldLabel(field.label || '');
+      setFieldLabel(field.label || field.field_name || '');
       setFieldType(field.field_type || 'text');
       setRequired(field.required || false);
     }
@@ -21,13 +17,12 @@ const EditFieldModal = ({ visible, onClose, field, onUpdate, fieldTypes }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (fieldName.trim() && fieldKey.trim() && field) {
+    if (fieldLabel.trim() && field) {
       onUpdate(field.id, {
-        field_name: fieldName.trim(),
-        field_key: fieldKey.trim(),
         label: fieldLabel.trim(),
         field_type: fieldType,
         required: required
+        // field_name and field_key remain unchanged for existing fields
       });
       onClose();
     }
@@ -41,48 +36,22 @@ const EditFieldModal = ({ visible, onClose, field, onUpdate, fieldTypes }) => {
     >
       <form onSubmit={handleSubmit} className="custom-type-form">
         <div className="form-content">
-          <label htmlFor="edit-field-name" className="form-label">
-            Field Name *
-          </label>
-          <input
-            id="edit-field-name"
-            type="text"
-            value={fieldName}
-            onChange={(e) => setFieldName(e.target.value)}
-            placeholder="e.g., Cooking Time, Ingredients, Description"
-            className="form-input"
-            autoFocus
-            required
-          />
-        </div>
-
-        <div className="form-content">
-          <label htmlFor="edit-field-key" className="form-label">
-            Field Key *
-          </label>
-          <input
-            id="edit-field-key"
-            type="text"
-            value={fieldKey}
-            onChange={(e) => setFieldKey(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '_'))}
-            placeholder="e.g., cooking_time, ingredients"
-            className="form-input"
-            required
-          />
-        </div>
-
-        <div className="form-content">
           <label htmlFor="edit-field-label" className="form-label">
-            Display Label
+            Field Label *
           </label>
           <input
             id="edit-field-label"
             type="text"
             value={fieldLabel}
             onChange={(e) => setFieldLabel(e.target.value)}
-            placeholder="e.g., Cooking Time (minutes)"
+            placeholder="e.g., Cooking Time, Ingredients, Description"
             className="form-input"
+            autoFocus
+            required
           />
+          <div className="slug-hint">
+            Field name: {field?.field_name || '...'}
+          </div>
         </div>
 
         <div className="form-content">
@@ -126,7 +95,7 @@ const EditFieldModal = ({ visible, onClose, field, onUpdate, fieldTypes }) => {
             text="Save Changes"
             color="green"
             action={handleSubmit}
-            disabled={!fieldName.trim() || !fieldKey.trim()}
+            disabled={!fieldLabel.trim()}
             className="form-submit-btn"
           />
         </div>
