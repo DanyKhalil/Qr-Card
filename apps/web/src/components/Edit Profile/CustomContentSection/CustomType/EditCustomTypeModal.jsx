@@ -48,7 +48,7 @@ const EditCustomTypeModal = ({ visible, onClose, contentType, onUpdate }) => {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="e.g., Projects, Recipes, Portfolio"
-            className="form-input"
+            className="custom-form-input"
             autoFocus
             required
           />
@@ -64,7 +64,7 @@ const EditCustomTypeModal = ({ visible, onClose, contentType, onUpdate }) => {
             value={slug}
             onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
             placeholder="e.g., projects, recipes"
-            className="form-input"
+            className="custom-form-input"
             required
           />
         </div> */}

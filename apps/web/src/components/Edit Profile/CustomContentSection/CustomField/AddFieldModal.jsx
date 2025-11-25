@@ -67,7 +67,7 @@ const AddFieldModal = ({ visible, onClose, onAdd, existingFields, fieldTypes }) 
             value={fieldLabel}
             onChange={handleFieldLabelChange}
             placeholder="e.g., Cooking Time, Ingredients, Description"
-            className="form-input"
+            className="custom-form-input"
             autoFocus
             required
           />
@@ -84,7 +84,7 @@ const AddFieldModal = ({ visible, onClose, onAdd, existingFields, fieldTypes }) 
             id="field-type"
             value={fieldType}
             onChange={(e) => setFieldType(e.target.value)}
-            className="form-input"
+            className="custom-form-input"
           >
             {fieldTypes.map(type => (
               <option key={type.value} value={type.value}>

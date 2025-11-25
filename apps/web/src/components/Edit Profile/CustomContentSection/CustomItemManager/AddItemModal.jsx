@@ -195,7 +195,7 @@ const AddItemModal = ({ visible, onClose, onAdd, contentType }) => {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Enter item title..."
-              className="form-input"
+              className="custom-form-input"
               autoFocus
               required
             />

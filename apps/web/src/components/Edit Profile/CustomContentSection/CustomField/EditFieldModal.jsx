@@ -44,7 +44,7 @@ const EditFieldModal = ({ visible, onClose, field, onUpdate, fieldTypes }) => {
             value={fieldLabel}
             onChange={(e) => setFieldLabel(e.target.value)}
             placeholder="e.g., Cooking Time, Ingredients, Description"
-            className="form-input"
+            className="custom-form-input"
             autoFocus
             required
           />
@@ -61,7 +61,7 @@ const EditFieldModal = ({ visible, onClose, field, onUpdate, fieldTypes }) => {
             id="edit-field-type"
             value={fieldType}
             onChange={(e) => setFieldType(e.target.value)}
-            className="form-input"
+            className="custom-form-input"
           >
             {fieldTypes.map(type => (
               <option key={type.value} value={type.value}>

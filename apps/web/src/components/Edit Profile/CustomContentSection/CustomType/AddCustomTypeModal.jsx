@@ -65,7 +65,7 @@ const AddCustomTypeModal = ({ visible, onClose, onAdd }) => {
             value={name}
             onChange={handleNameChange}
             placeholder="e.g., Projects, Recipes, Portfolio"
-            className="form-input"
+            className="custom-form-input"
             autoFocus
             required
           />
