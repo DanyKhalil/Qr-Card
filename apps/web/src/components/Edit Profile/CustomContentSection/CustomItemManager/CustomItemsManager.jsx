@@ -11,6 +11,7 @@ const CustomItemsManager = ({ visible, onClose, contentType, onUpdateItems }) =>
   const [editItemModalVisible, setEditItemModalVisible] = useState(false);
   const [currentItem, setCurrentItem] = useState(null);
 
+  console.log(items)
   useEffect(() => {
     if (contentType && visible) {
       setItems([...contentType.items]);

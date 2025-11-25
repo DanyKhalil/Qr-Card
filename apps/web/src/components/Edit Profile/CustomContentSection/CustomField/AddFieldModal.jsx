@@ -39,8 +39,8 @@ const AddFieldModal = ({ visible, onClose, onAdd, existingFields, fieldTypes }) 
       }
 
       onAdd({
-        field_name: fieldName,
-        field_key: fieldKey,
+        name: fieldName,
+        key: fieldKey,
         label: fieldLabel.trim(),
         type: fieldType,
         required: required,
