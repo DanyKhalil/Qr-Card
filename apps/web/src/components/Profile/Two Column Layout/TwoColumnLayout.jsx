@@ -23,7 +23,6 @@ const TwoColumnLayout = ({
     customContent,
 }) => {
 
-    console.log(customContent)
 
     function formatSocialLinks(links) {
         return links.map(({ id, url }) => {

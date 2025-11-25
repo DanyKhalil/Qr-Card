@@ -11,7 +11,6 @@ const CustomFieldsManager = ({ visible, onClose, contentType, onUpdateFields }) 
   const [editFieldModalVisible, setEditFieldModalVisible] = useState(false);
   const [currentField, setCurrentField] = useState(null);
 
-  console.log(fields)
   useEffect(() => {
     if (contentType && visible) {
       setFields([...contentType.fields]);

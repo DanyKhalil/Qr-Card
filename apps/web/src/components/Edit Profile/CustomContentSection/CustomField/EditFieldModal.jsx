@@ -20,9 +20,8 @@ const EditFieldModal = ({ visible, onClose, field, onUpdate, fieldTypes }) => {
     if (fieldLabel.trim() && field) {
       onUpdate(field.id, {
         label: fieldLabel.trim(),
-        field_type: fieldType,
+        type: fieldType,
         required: required
-        // field_name and field_key remain unchanged for existing fields
       });
       onClose();
     }

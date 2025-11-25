@@ -7,6 +7,7 @@ const AddItemModal = ({ visible, onClose, onAdd, contentType }) => {
   const [title, setTitle] = useState('');
   const [visibility, setVisibility] = useState(true);
   const [fieldValues, setFieldValues] = useState({});
+  console.log(contentType.fields)
 
   useEffect(() => {
     if (visible && contentType) {
@@ -15,7 +16,7 @@ const AddItemModal = ({ visible, onClose, onAdd, contentType }) => {
       // Initialize field values based on content type fields
       const initialValues = {};
       contentType.fields?.forEach(field => {
-        initialValues[field.field_key] = getDefaultValue(field.field_type);
+        initialValues[field.key] = getDefaultValue(field.type); // Use field.key and field.type
       });
       setFieldValues(initialValues);
     }
@@ -46,23 +47,23 @@ const AddItemModal = ({ visible, onClose, onAdd, contentType }) => {
     // Validate required fields
     const requiredFields = contentType.fields?.filter(field => field.required) || [];
     const missingRequired = requiredFields.filter(field => {
-      const value = fieldValues[field.field_key];
+      const value = fieldValues[field.key]; // Use field.key
       return value === '' || value === null || value === undefined;
     });
 
     if (missingRequired.length > 0) {
-      alert(`Please fill in all required fields: ${missingRequired.map(f => f.field_name).join(', ')}`);
+      alert(`Please fill in all required fields: ${missingRequired.map(f => f.name || f.label).join(', ')}`);
       return;
     }
 
     const valuesArray = Object.entries(fieldValues).map(([field_key, value]) => {
-      const field = contentType.fields?.find(f => f.field_key === field_key);
+      const field = contentType.fields?.find(f => f.key === field_key); // Use field.key
       return {
         field_id: field?.id,
         field_key: field_key,
-        field_name: field?.field_name,
+        field_name: field?.name, // Use field.name
         field_label: field?.label,
-        field_type: field?.field_type,
+        field_type: field?.type, // Use field.type
         value: value
       };
     });
@@ -76,17 +77,18 @@ const AddItemModal = ({ visible, onClose, onAdd, contentType }) => {
   };
 
   const renderFieldInput = (field) => {
-    const value = fieldValues[field.field_key] || getDefaultValue(field.field_type);
+    const value = fieldValues[field.key] || getDefaultValue(field.type); // Use field.key and field.type
+    const fieldName = field.name || field.label || field.key; // Use field.name
 
-    switch (field.field_type) {
+    switch (field.type) { // Use field.type
       case 'text':
         return (
           <input
             type="text"
             value={value}
-            onChange={(e) => handleFieldChange(field.field_key, e.target.value)}
+            onChange={(e) => handleFieldChange(field.key, e.target.value)} // Use field.key
             className="field-input"
-            placeholder={`Enter ${field.field_name.toLowerCase()}...`}
+            placeholder={`Enter ${fieldName.toLowerCase()}...`}
             required={field.required}
           />
         );
@@ -95,9 +97,9 @@ const AddItemModal = ({ visible, onClose, onAdd, contentType }) => {
         return (
           <textarea
             value={value}
-            onChange={(e) => handleFieldChange(field.field_key, e.target.value)}
+            onChange={(e) => handleFieldChange(field.key, e.target.value)} // Use field.key
             className="field-textarea"
-            placeholder={`Enter ${field.field_name.toLowerCase()}...`}
+            placeholder={`Enter ${fieldName.toLowerCase()}...`}
             rows="4"
             required={field.required}
           />
@@ -108,9 +110,9 @@ const AddItemModal = ({ visible, onClose, onAdd, contentType }) => {
           <input
             type="number"
             value={value}
-            onChange={(e) => handleFieldChange(field.field_key, e.target.value)}
+            onChange={(e) => handleFieldChange(field.key, e.target.value)} // Use field.key
             className="field-input"
-            placeholder={`Enter ${field.field_name.toLowerCase()}...`}
+            placeholder={`Enter ${fieldName.toLowerCase()}...`}
             required={field.required}
           />
         );
@@ -121,10 +123,10 @@ const AddItemModal = ({ visible, onClose, onAdd, contentType }) => {
             <input
               type="checkbox"
               checked={value}
-              onChange={(e) => handleFieldChange(field.field_key, e.target.checked)}
+              onChange={(e) => handleFieldChange(field.key, e.target.checked)} // Use field.key
               className="field-checkbox"
             />
-            <span className="checkbox-label">{field.label || field.field_name}</span>
+            <span className="checkbox-label">{field.label || field.name}</span>
           </label>
         );
       
@@ -133,7 +135,7 @@ const AddItemModal = ({ visible, onClose, onAdd, contentType }) => {
           <input
             type="date"
             value={value}
-            onChange={(e) => handleFieldChange(field.field_key, e.target.value)}
+            onChange={(e) => handleFieldChange(field.key, e.target.value)} // Use field.key
             className="field-input"
             required={field.required}
           />
@@ -146,9 +148,9 @@ const AddItemModal = ({ visible, onClose, onAdd, contentType }) => {
             onChange={(e) => {
               try {
                 const parsedValue = JSON.parse(e.target.value);
-                handleFieldChange(field.field_key, parsedValue);
+                handleFieldChange(field.key, parsedValue); // Use field.key
               } catch {
-                handleFieldChange(field.field_key, e.target.value);
+                handleFieldChange(field.key, e.target.value); // Use field.key
               }
             }}
             className="field-textarea"
@@ -163,9 +165,9 @@ const AddItemModal = ({ visible, onClose, onAdd, contentType }) => {
           <input
             type="text"
             value={value}
-            onChange={(e) => handleFieldChange(field.field_key, e.target.value)}
+            onChange={(e) => handleFieldChange(field.key, e.target.value)} // Use field.key
             className="field-input"
-            placeholder={`Enter ${field.field_name.toLowerCase()}...`}
+            placeholder={`Enter ${fieldName.toLowerCase()}...`}
             required={field.required}
           />
         );
@@ -220,12 +222,12 @@ const AddItemModal = ({ visible, onClose, onAdd, contentType }) => {
                 .sort((a, b) => (a.display_order || 0) - (b.display_order || 0))
                 .map((field) => (
                 <div key={field.id} className="field-group">
-                  <label htmlFor={`field-${field.field_key}`} className="field-label">
-                    {field.label || field.field_name}
+                  <label htmlFor={`field-${field.key}`} className="field-label"> {/* Use field.key */}
+                    {field.label || field.name} {/* Use field.name */}
                     {field.required && <span className="required-star"> *</span>}
                   </label>
                   <div className="field-type-hint">
-                    {field.field_type}
+                    {field.type} {/* Use field.type */}
                   </div>
                   {renderFieldInput(field)}
                 </div>

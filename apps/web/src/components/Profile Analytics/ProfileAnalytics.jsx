@@ -91,8 +91,6 @@ const ProfileAnalytics = () => {
   const processedScanData = processScanTypeData(analyticsData, dateRange);
   const filteredVisits = filterVisitsByDateRange(analyticsData, dateRange);
 
-  console.log(analyticsData);
-
   
   if (loading) {
     return (
