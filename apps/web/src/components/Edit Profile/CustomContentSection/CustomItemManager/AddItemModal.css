@@ -71,7 +71,8 @@
 .field-textarea {
   width: 100%;
   padding: 14px 16px;     /* larger inputs */
-  border: 2px solid #e5e5e5;
+  border: 1px solid #FF8559;
+  background-color: #fdf2ee;
   border-radius: 8px;     /* more modern */
   font-size: 1rem;
   transition: border-color 0.2s, box-shadow 0.2s;

@@ -26,7 +26,8 @@
   width: 100%;
   max-width: 100%;        /* NEW: ensure full width */
   padding: 14px 18px;     /* slightly larger */
-  border: 2px solid #e5e5e5;
+  border: 1px solid #FF8559;
+  background-color: #fdf2ee;
   border-radius: 8px;
   font-size: 1rem;
   transition: border-color 0.2s, box-shadow 0.2s;

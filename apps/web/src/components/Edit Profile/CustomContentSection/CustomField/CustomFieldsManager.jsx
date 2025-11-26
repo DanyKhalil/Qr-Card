@@ -4,6 +4,8 @@ import Button from '../../../Profile/Button/Button';
 import './CustomFieldsManager.css';
 import AddFieldModal from './AddFieldModal';
 import EditFieldModal from './EditFieldModal';
+import { IoAlbumsOutline, IoGitBranchOutline, IoLayersOutline, IoListOutline, IoPencil, IoTrash } from 'react-icons/io5';
+import { IoIosArrowDown, IoIosArrowUp } from 'react-icons/io';
 
 const CustomFieldsManager = ({ visible, onClose, contentType, onUpdateFields }) => {
   const [fields, setFields] = useState([]);
@@ -125,7 +127,7 @@ const CustomFieldsManager = ({ visible, onClose, contentType, onUpdateFields }) 
                     disabled={index === 0}
                     title="Move up"
                   >
-                    ↑
+                    <IoIosArrowUp size={18} />
                   </button>
                   <button 
                     className="field-action-btn move-btn"
@@ -133,7 +135,7 @@ const CustomFieldsManager = ({ visible, onClose, contentType, onUpdateFields }) 
                     disabled={index === fields.length - 1}
                     title="Move down"
                   >
-                    ↓
+                    <IoIosArrowDown size={18} />
                   </button>
                   <button 
                     className="field-action-btn edit-btn"
@@ -143,14 +145,14 @@ const CustomFieldsManager = ({ visible, onClose, contentType, onUpdateFields }) 
                     }}
                     title="Edit field"
                   >
-                    ✏️
+                    <IoPencil size={18}/>
                   </button>
                   <button 
                     className="field-action-btn delete-btn"
                     onClick={() => handleDeleteField(field.id)}
                     title="Delete field"
                   >
-                    🗑️
+                    <IoTrash size={18}/>
                   </button>
                 </div>
               </div>

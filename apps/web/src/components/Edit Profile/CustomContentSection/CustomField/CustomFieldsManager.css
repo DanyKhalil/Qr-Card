@@ -23,7 +23,7 @@
 }
 
 .add-field-btn {
-  background: #4CAF50;
+  background: #82c294;
   color: white;
   border: none;
   padding: 8px 16px;
@@ -36,7 +36,7 @@
 }
 
 .add-field-btn:hover {
-  background: #45a049;
+  background: #56ae6f;
 }
 
 .fields-list {
@@ -58,7 +58,8 @@
   align-items: center;
   padding: 1rem;
   margin-bottom: 0.75rem;
-  background: #f8f9fa;
+  border: 1px solid #FF8559;
+  background-color: #fdf2ee;
   border: 1px solid #e9ecef;
   border-radius: 8px;
   transition: background-color 0.2s;
@@ -152,9 +153,12 @@
   cursor: not-allowed;
 }
 
+.edit-btn { background: #e3f2fd; border-color: #2196f3; }
+.delete-btn { background: #f3a7b2; border-color: #f44336; }
+
 .move-btn:hover { background: #e3f2fd; border-color: #2196f3; }
-.edit-btn:hover { background: #fff3e0; border-color: #ff9800; }
-.delete-btn:hover { background: #ffebee; border-color: #f44336; }
+.edit-btn:hover { background: #e3f2fd; border-color: #2196f3; }
+.delete-btn:hover { background: #ea6d80; border-color: #f44336; }
 
 .fields-manager-actions {
   display: flex;

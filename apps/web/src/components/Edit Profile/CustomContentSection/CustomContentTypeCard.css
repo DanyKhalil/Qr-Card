@@ -1,6 +1,6 @@
 .content-type-card {
-  background: #f8f9fa;
-  border: 1px solid #e9ecef;
+  border: 1px solid #FF8559;
+  background-color: #fdf2ee;
   border-radius: 8px;
   padding: 1.5rem;
   transition: box-shadow 0.2s;
@@ -87,7 +87,12 @@
   border-color: #adb5bd;
 }
 
+.edit-btn { background: #e3f2fd; border-color: #2196f3; }
+.fields-btn { background: #9cdaa7; border-color: #9c27b0; }
+.items-btn { background: #c0dafa; border-color: #4caebb; }
+.delete-btn { background: #f3a7b2; border-color: #f44336; }
+
 .edit-btn:hover { background: #e3f2fd; border-color: #2196f3; }
-.fields-btn:hover { background: #f3e5f5; border-color: #9c27b0; }
-.items-btn:hover { background: #e8f5e8; border-color: #4caf50; }
-.delete-btn:hover { background: #ffebee; border-color: #f44336; }
+.fields-btn:hover { background: #78d688; border-color: #9c27b0; }
+.items-btn:hover { background: #a0c3ed; border-color: #4caebb; }
+.delete-btn:hover { background: #ea6d80; border-color: #f44336; }

@@ -201,7 +201,7 @@ const AddItemModal = ({ visible, onClose, onAdd, contentType }) => {
             />
           </div>
 
-          <div className="form-content">
+          {/* <div className="form-content">
             <label className="form-label checkbox-label">
               <input
                 type="checkbox"
@@ -211,7 +211,7 @@ const AddItemModal = ({ visible, onClose, onAdd, contentType }) => {
               />
               Visible to visitors
             </label>
-          </div>
+          </div> */}
         </div>
 
         {contentType?.fields && contentType.fields.length > 0 && (

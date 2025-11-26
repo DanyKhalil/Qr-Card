@@ -4,6 +4,7 @@ import Button from '../../../Profile/Button/Button';
 import './CustomItemsManager.css';
 import AddItemModal from './AddItemModal';
 import EditItemModal from './EditItemModal';
+import { IoPencil, IoTrash } from 'react-icons/io5';
 
 const CustomItemsManager = ({ visible, onClose, contentType, onUpdateItems }) => {
   const [items, setItems] = useState([]);
@@ -11,7 +12,6 @@ const CustomItemsManager = ({ visible, onClose, contentType, onUpdateItems }) =>
   const [editItemModalVisible, setEditItemModalVisible] = useState(false);
   const [currentItem, setCurrentItem] = useState(null);
 
-  console.log(items)
   useEffect(() => {
     if (contentType && visible) {
       setItems([...contentType.items]);
@@ -90,23 +90,23 @@ const CustomItemsManager = ({ visible, onClose, contentType, onUpdateItems }) =>
                   <div className="item-title-section">
                     <h4 className="item-title">{item.title || 'Untitled Item'}</h4>
                     <div className="item-meta">
-                      <span className={`item-visibility ${item.visibility ? 'visible' : 'hidden'}`}>
+                      {/* <span className={`item-visibility ${item.visibility ? 'visible' : 'hidden'}`}>
                         {item.visibility ? 'Visible' : 'Hidden'}
                       </span>
                       <span className="item-date">
                         {new Date(item.created_at).toLocaleDateString()}
-                      </span>
+                      </span> */}
                     </div>
                   </div>
                   
                   <div className="item-actions">
-                    <button 
+                    {/* <button 
                       className="item-action-btn visibility-btn"
                       onClick={() => handleToggleVisibility(item.id)}
                       title={item.visibility ? 'Hide item' : 'Show item'}
                     >
                       {item.visibility ? '👁️' : '👁️‍🗨️'}
-                    </button>
+                    </button> */}
                     <button 
                       className="item-action-btn edit-btn"
                       onClick={() => {
@@ -115,14 +115,14 @@ const CustomItemsManager = ({ visible, onClose, contentType, onUpdateItems }) =>
                       }}
                       title="Edit item"
                     >
-                      ✏️
+                      <IoPencil size={18}/>
                     </button>
                     <button 
                       className="item-action-btn delete-btn"
                       onClick={() => handleDeleteItem(item.id)}
                       title="Delete item"
                     >
-                      🗑️
+                      <IoTrash size={18}/>
                     </button>
                   </div>
                 </div>
