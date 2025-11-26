@@ -1,4 +1,4 @@
-import { User, Profile, SocialMedia, Video, Location } from '../models/index.js';
+import { User, Profile, SocialMedia, Video, Location, CustomContentType, CustomContentItem, CustomContentField, CustomContentValue } from '../models/index.js';
 
 // ---- To get all the users ----
 export const getUsers = async (req, res) => {
@@ -67,8 +67,47 @@ export const getUserProfile = async (req, res) => {
               model: Location,
               as: 'locations',
               attributes: [
-                'id', 'title', 'country', 'state', 'city', 'street', 'building', 
-                'floor', 'maps_url', 'latitude', 'longitude'
+                'id', 'title', 'country', 'state', 'city', 'street',
+                'building', 'floor', 'maps_url', 'latitude', 'longitude'
+              ]
+            },
+            {
+              model: CustomContentType,
+              as: 'custom_types',
+              include: [
+                {
+                  model: CustomContentField,
+                  as: 'fields',
+                  attributes: [
+                    'id', 'field_name', 'label', 'field_key',
+                    'field_type', 'required', 'display_order', 'config'
+                  ]
+                },
+                {
+                  model: CustomContentItem,
+                  as: 'items',
+                  attributes: [
+                    'id', 'title', 'visibility', 'created_at'
+                  ],
+                  include: [
+                    {
+                      model: CustomContentValue,
+                      as: 'values',
+                      attributes: [
+                        'id', 'value_text', 'value_json'
+                      ],
+                      include: [
+                        {
+                          model: CustomContentField,
+                          as: 'field',
+                          attributes: [
+                            'id', 'field_key', 'field_name', 'label', 'field_type'
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
               ]
             }
           ]
@@ -84,7 +123,7 @@ export const getUserProfile = async (req, res) => {
       return res.status(404).json({ error: "Profile not found for this user" });
     }
 
-    //  if all are alright, we format the json, so the front end can use it directky
+    // Format Profile Base Info
     const userProfile = {
       name: user.name,
       cover_photo_url: user.profile.cover_pic_url,
@@ -94,12 +133,14 @@ export const getUserProfile = async (req, res) => {
       bio: user.profile.bio,
       phone_number: user.profile.phone_number ? [user.profile.phone_number] : [],
       email: user.email ? [user.email] : [],
+      website_link: user.profile.website,
+
       social_media_links: user.profile.social_media?.map(sm => ({
         id: sm.id,
         url: sm.url,
         display_order: sm.display_order
       })) || [],
-      website_link: user.profile.website,
+
       videos_links: user.profile.videos?.map(video => ({
         id: video.id,
         video_url: video.video_url,
@@ -107,24 +148,60 @@ export const getUserProfile = async (req, res) => {
         description: video.description,
         display_order: video.display_order
       })) || [],
-      locations: user.profile.locations?.map(location => ({
-        id: location.id,
-        title: location.title,
-        country: location.country,
-        state: location.state,
-        city: location.city,
-        street: location.street,
-        building: location.building,
-        floor: location.floor,
-        maps_url: location.maps_url,
-        coordinates: location.latitude && location.longitude ? {
-          latitude: location.latitude,
-          longitude: location.longitude
-        } : null
+
+      locations: user.profile.locations?.map(loc => ({
+        id: loc.id,
+        title: loc.title,
+        country: loc.country,
+        state: loc.state,
+        city: loc.city,
+        street: loc.street,
+        building: loc.building,
+        floor: loc.floor,
+        maps_url: loc.maps_url,
+        coordinates:
+          loc.latitude && loc.longitude
+            ? { latitude: loc.latitude, longitude: loc.longitude }
+            : null
+      })) || [],
+
+      // ⭐ CUSTOM CONTENT RESPONSE ⭐
+      custom_content: user.profile.custom_types?.map(type => ({
+        id: type.id,
+        name: type.name,
+        slug: type.slug,
+        description: type.description,
+
+        fields: type.fields?.map(f => ({
+          id: f.id,
+          name: f.field_name,
+          label: f.label,
+          key: f.field_key,
+          type: f.field_type,
+          required: f.required,
+          display_order: f.display_order,
+          config: f.config
+        })) || [],
+
+        items: type.items?.map(item => ({
+          id: item.id,
+          title: item.title,
+          visibility: item.visibility,
+
+          values: item.values?.map(v => ({
+            field_id: v.field.id,
+            field_key: v.field.field_key,
+            field_name: v.field.field_name,
+            field_label: v.field.label,
+            field_type: v.field.field_type,
+            value: v.value_json ?? v.value_text
+          })) || []
+        })) || []
       })) || []
     };
 
     res.json(userProfile);
+
   } catch (error) {
     console.error('Error in getUserProfile:', error);
     res.status(500).json({ error: error.message });
@@ -138,7 +215,7 @@ export const updateUserProfile = async (req, res) => {
     const {
       userName, dob, phoneNumber, 
       headline, bio, websiteUrl, 
-      connectLinks, videos, locations,
+      connectLinks, videos, locations, customContent,
       coverPhotoPath, profilePhotoPath
     } = req.body;
 
@@ -149,20 +226,20 @@ export const updateUserProfile = async (req, res) => {
       })
     }
 
-    // parsee JSON strings
+    // Parse JSON strings
     const parsedConnectLinks = connectLinks ? JSON.parse(connectLinks) : [];
     const parsedVideos = videos ? JSON.parse(videos) : [];
     const parsedLocations = locations ? JSON.parse(locations) : [];
+    const parsedCustomContent = customContent ? JSON.parse(customContent) : [];
     
 
-    // handling cover and profile picture changes
+    // Handling cover and profile picture changes
     let finalProfilePhotoPath = profilePhotoPath;
     let finalCoverPhotoPath = coverPhotoPath;
 
     // Check if new profile picture was uploaded
     if (req.files && req.files.profilePicture) {
       const profileFile = req.files.profilePicture[0];
-      // finalProfilePhotoPath = `/uploads/profiles/${profileFile.filename}`;
       finalProfilePhotoPath = `http://localhost:5050/uploads/profiles/${profileFile.filename}`;
     } else {
       finalProfilePhotoPath = profilePhotoPath || null;
@@ -170,7 +247,6 @@ export const updateUserProfile = async (req, res) => {
     // Check if new cover photo was uploaded
     if (req.files && req.files.coverPhoto) {
       const coverFile = req.files.coverPhoto[0];
-      // finalCoverPhotoPath = `/uploads/covers/${coverFile.filename}`;
       finalCoverPhotoPath = `http://localhost:5050/uploads/covers/${coverFile.filename}`;
     } else {
       finalCoverPhotoPath = coverPhotoPath || null;
@@ -190,6 +266,23 @@ export const updateUserProfile = async (req, res) => {
     })
     const userLocations = await Location.findAll({
       where: {profile_id: profile.id}
+    })
+    const existingCustomTypes = await CustomContentType.findAll({
+      where: {profile_id: profile.id},
+      include: [
+        {
+          model: CustomContentField,
+          as: 'fields'
+        },
+        {
+          model: CustomContentItem,
+          as: 'items',
+          include: [{
+            model: CustomContentValue,
+            as: 'values'
+          }]
+        }
+      ]
     }) 
 
     if (!user || !profile){
@@ -233,7 +326,7 @@ export const updateUserProfile = async (req, res) => {
       profile_pic_url: finalProfilePhotoPath,
     })
 
-    // social media links uodate
+    // Social media links update
     for (let link of socialMediaLinks) {
       let deleted = checkIfDeleted(link.id, parsedConnectLinks);
       if (deleted) {
@@ -248,10 +341,9 @@ export const updateUserProfile = async (req, res) => {
         }
       }
     }
-    for (let link of parsedConnectLinks) { // CHANGED
+    for (let link of parsedConnectLinks) {
       let newLink = checkIfNew(link.id, socialMediaLinks);
       if (newLink) {
-        // ADD NULL CHECK
         if (link.url) {
           await SocialMedia.create({
             profile_id: profile.id,
@@ -261,7 +353,7 @@ export const updateUserProfile = async (req, res) => {
       }
     }
 
-    // vidoes links update
+    // Videos links update
     for (let link of userVideos) {
       let deleted = checkIfDeleted(link.id, parsedVideos);
       if (deleted) {
@@ -288,7 +380,7 @@ export const updateUserProfile = async (req, res) => {
       }
     }
 
-    // locations update
+    // Locations update
     for (let link of userLocations) {
       let deleted = checkIfDeleted(link.id, parsedLocations);
       if (deleted) {
@@ -325,9 +417,214 @@ export const updateUserProfile = async (req, res) => {
       }
     }
 
+    // CUSTOM CONTENT UPDATE - Fixed handling with field ID mapping
+    for (let incomingType of parsedCustomContent) {
+      let existingType = existingCustomTypes.find(type => type.id === incomingType.id);
+      
+      if (!existingType) {
+        // CREATE NEW TYPE
+        const newTypeRecord = await CustomContentType.create({
+          profile_id: profile.id,
+          name: incomingType.name,
+          slug: incomingType.slug,
+          description: incomingType.description
+        });
+
+        // Create field mapping for temporary IDs
+        const fieldIdMap = {};
+        
+        // Add fields for the new type
+        for (let incomingField of incomingType.fields || []) {
+          const newField = await CustomContentField.create({
+            content_type_id: newTypeRecord.id,
+            field_name: incomingField.name,
+            label: incomingField.label,
+            field_key: incomingField.key,
+            field_type: incomingField.type,
+            required: incomingField.required,
+            display_order: incomingField.display_order,
+            config: incomingField.config
+          });
+          // Map temporary frontend ID to real backend ID
+          fieldIdMap[incomingField.id] = newField.id;
+        }
+
+        // Add items for the new type
+        for (let incomingItem of incomingType.items || []) {
+          const newItemRecord = await CustomContentItem.create({
+            content_type_id: newTypeRecord.id,
+            profile_id: profile.id,
+            title: incomingItem.title,
+            visibility: incomingItem.visibility
+          });
+
+          // Add values for the new item
+          for (let incomingValue of incomingItem.values || []) {
+            const realFieldId = fieldIdMap[incomingValue.field_id];
+            if (realFieldId) {
+              await CustomContentValue.create({
+                content_item_id: newItemRecord.id,
+                content_field_id: realFieldId,
+                value_text: ['longtext', 'text'].includes(incomingValue.field_type) ? incomingValue.value : null,
+                value_json: !['longtext', 'text'].includes(incomingValue.field_type) ? incomingValue.value : null
+              });
+            }
+          }
+        }
+      } else {
+        // UPDATE EXISTING TYPE
+        await existingType.update({
+          name: incomingType.name,
+          slug: incomingType.slug,
+          description: incomingType.description
+        });
+
+        // Handle fields for this type - with ID mapping
+        const fieldIdMap = {};
+        const existingFields = existingType.fields || [];
+
+        for (let incomingField of incomingType.fields || []) {
+          let existingField = existingFields.find(f => f.id === incomingField.id);
+          
+          if (!existingField) {
+            // CREATE NEW FIELD
+            const newField = await CustomContentField.create({
+              content_type_id: existingType.id,
+              field_name: incomingField.name,
+              label: incomingField.label,
+              field_key: incomingField.key,
+              field_type: incomingField.type,
+              required: incomingField.required,
+              display_order: incomingField.display_order,
+              config: incomingField.config
+            });
+            fieldIdMap[incomingField.id] = newField.id;
+          } else {
+            // UPDATE EXISTING FIELD
+            await existingField.update({
+              field_name: incomingField.name,
+              label: incomingField.label,
+              field_key: incomingField.key,
+              field_type: incomingField.type,
+              required: incomingField.required,
+              display_order: incomingField.display_order,
+              config: incomingField.config
+            });
+            fieldIdMap[incomingField.id] = existingField.id;
+          }
+        }
+
+        // Delete fields that were removed
+        for (let existingField of existingFields) {
+          let fieldExists = incomingType.fields?.find(f => f.id === existingField.id);
+          if (!fieldExists) {
+            await CustomContentField.destroy({ where: { id: existingField.id } });
+          }
+        }
+
+        // Handle items for this type
+        const existingItems = existingType.items || [];
+
+        for (let incomingItem of incomingType.items || []) {
+          let existingItem = existingItems.find(it => it.id === incomingItem.id);
+          
+          if (!existingItem) {
+            // CREATE NEW ITEM
+            const newItemRecord = await CustomContentItem.create({
+              content_type_id: existingType.id,
+              profile_id: profile.id,
+              title: incomingItem.title,
+              visibility: incomingItem.visibility
+            });
+
+            // Add values for the new item
+            for (let incomingValue of incomingItem.values || []) {
+              const realFieldId = fieldIdMap[incomingValue.field_id] || incomingValue.field_id;
+              const fieldExists = await CustomContentField.findOne({
+                where: { id: realFieldId, content_type_id: existingType.id }
+              });
+              
+              if (fieldExists) {
+                await CustomContentValue.create({
+                  content_item_id: newItemRecord.id,
+                  content_field_id: realFieldId,
+                  value_text: ['longtext', 'text'].includes(incomingValue.field_type) ? incomingValue.value : null,
+                  value_json: !['longtext', 'text'].includes(incomingValue.field_type) ? incomingValue.value : null
+                });
+              }
+            }
+          } else {
+            // UPDATE EXISTING ITEM
+            await existingItem.update({
+              title: incomingItem.title,
+              visibility: incomingItem.visibility
+            });
+
+            // Handle values for this item
+            const existingValues = existingItem.values || [];
+
+            // Update or create values
+            for (let incomingValue of incomingItem.values || []) {
+              const realFieldId = fieldIdMap[incomingValue.field_id] || incomingValue.field_id;
+              let existingValue = existingValues.find(v => v.content_field_id === realFieldId);
+
+              if (existingValue) {
+                // UPDATE EXISTING VALUE
+                await existingValue.update({
+                  value_text: ['longtext', 'text'].includes(incomingValue.field_type) ? incomingValue.value : null,
+                  value_json: !['longtext', 'text'].includes(incomingValue.field_type) ? incomingValue.value : null
+                });
+              } else {
+                // CREATE NEW VALUE
+                const fieldExists = await CustomContentField.findOne({
+                  where: { id: realFieldId, content_type_id: existingType.id }
+                });
+                
+                if (fieldExists) {
+                  await CustomContentValue.create({
+                    content_item_id: existingItem.id,
+                    content_field_id: realFieldId,
+                    value_text: ['longtext', 'text'].includes(incomingValue.field_type) ? incomingValue.value : null,
+                    value_json: !['longtext', 'text'].includes(incomingValue.field_type) ? incomingValue.value : null
+                  });
+                }
+              }
+            }
+
+            // Delete values that were removed
+            for (let existingValue of existingValues) {
+              let valueExists = incomingItem.values?.find(v => {
+                const realFieldId = fieldIdMap[v.field_id] || v.field_id;
+                return realFieldId === existingValue.content_field_id;
+              });
+              if (!valueExists) {
+                await CustomContentValue.destroy({ where: { id: existingValue.id } });
+              }
+            }
+          }
+        }
+
+        // Delete items that were removed
+        for (let existingItem of existingItems) {
+          let itemExists = incomingType.items?.find(it => it.id === existingItem.id);
+          if (!itemExists) {
+            await CustomContentItem.destroy({ where: { id: existingItem.id } });
+          }
+        }
+      }
+    }
+
+    // Delete types that were removed
+    for (let existingType of existingCustomTypes) {
+      let typeExists = parsedCustomContent.find(type => type.id === existingType.id);
+      if (!typeExists) {
+        await CustomContentType.destroy({ where: { id: existingType.id } });
+      }
+    }
+
     res.status(200).json({
       success: true,
-      message: 'Profile updated succesffully',
+      message: 'Profile updated successfully',
     })
   } catch (error) {
     console.error(error)

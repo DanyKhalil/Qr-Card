@@ -1,6 +1,7 @@
 import React from 'react';
 import './YouTubeCard.css';
 import Button from '../../Profile/Button/Button';
+import { IoPencil, IoTrash } from 'react-icons/io5';
 
 const YouTubeCard = ({ 
     id,
@@ -45,8 +46,8 @@ const YouTubeCard = ({
                 </div>
 
                 <div className="youtube-card__buttons">
-                    <Button text="Edit" color="green" action={()=>{updateAction(); objectSetter(videoObject)}} width="100px"/>
-                    <Button text="Remove" color="coral" action={handleDeleteVideo} width="100px"/>
+                    <Button text="Edit" color="green" action={()=>{updateAction(); objectSetter(videoObject)}} width="120px" icon={<IoPencil size={18}/>}/>
+                    <Button text="Remove" color="coral" action={handleDeleteVideo} width="120px" icon={<IoTrash size={18}/>} />
                 </div>
             </div>
         </div>

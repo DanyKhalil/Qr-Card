@@ -1,0 +1,20 @@
+/* CustomContentDisplay.css */
+.custom-content-section {
+    padding: 40px 20px;
+    max-width: 800px; /* optional, center content */
+    margin: 0 0;
+}
+
+.custom-content-title {
+    font-size: 40px;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    color: #1f2937;
+    text-align: left;
+}
+
+.custom-cards-grid {
+    display: flex;
+    flex-direction: column; /* stack cards vertically */
+    gap: 1.5rem; /* spacing between cards */
+}

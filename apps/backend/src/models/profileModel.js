@@ -70,6 +70,15 @@ Profile.associate = function(models) {
         foreignKey: 'profile_id',
         as: 'analytics' // visits made to this profile
     });
+    Profile.hasMany(models.CustomContentType, {
+        foreignKey: "profile_id",
+        as: "custom_types"
+    });
+
+    Profile.hasMany(models.CustomContentItem, {
+        foreignKey: "profile_id",
+        as: "custom_items"
+    });
 };
 
 export default Profile;

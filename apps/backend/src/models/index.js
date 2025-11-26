@@ -5,6 +5,10 @@ import SocialMedia from './socialMediaModel.js';
 import Video from './videoModel.js';
 import Location from './locationModel.js';
 import ProfileAnalytics from './profileAnalytics.js'
+import CustomContentType from './customeContentType.js';
+import CustomContentItem from './customContentItem.js';
+import CustomContentField from './customContentField.js';
+import CustomContentValue from './customContentValue.js';
 
 const models = {
   User,
@@ -12,7 +16,11 @@ const models = {
   SocialMedia,
   Video,
   Location,
-  ProfileAnalytics
+  ProfileAnalytics,
+  CustomContentType,
+  CustomContentItem,
+  CustomContentField,
+  CustomContentValue
 };
 
 // Set up associations
@@ -22,4 +30,6 @@ Object.keys(models).forEach(modelName => {
   }
 });
 
-export { sequelize, User, Profile, SocialMedia, Video, Location, ProfileAnalytics };
+export { sequelize, User, Profile, SocialMedia, Video, Location, ProfileAnalytics,  
+        CustomContentType, CustomContentItem, CustomContentField, CustomContentValue,
+};

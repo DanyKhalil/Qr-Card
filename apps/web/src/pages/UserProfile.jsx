@@ -106,6 +106,7 @@ const UserProfile = () => {
         {name: userData?.phone_number, iconName: "phone", link: userData?.phone_number}
     ].filter(link => link.name && String(link.name).trim() !== '');
 
+
     return (    
         <div className="App">
             <UserProfileComponent 
@@ -121,6 +122,7 @@ const UserProfile = () => {
                 videos = {userData.videos_links}
                 locations = {userData.locations}
                 id = {id}
+                customContent = {userData.custom_content}
             />
         </div>
     );

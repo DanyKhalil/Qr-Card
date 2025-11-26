@@ -11,6 +11,7 @@ import TitleAndFields from '../Title With Fields/TitleAndFields';
 import LabelWithTextArea from '../Label With Text Area/LabelWithTextArea';
 import YouTubeCard from '../Youtube Card/YoutubeCard';
 import AddressCards from '../Address Cards/AddressCards';
+import CustomContentSection from '../CustomContentSection/CustomContentSection';
 
 const TwoColumnLayout = ({ 
     className = "",
@@ -23,12 +24,15 @@ const TwoColumnLayout = ({
     videos = [],
     locations = [],
     id = "User001",
+    customContent=[],
     headlineSetter,
     connectLinksSetter,
     websiteLinkSetter,
     bioSetter,
     videosSetter,
     locationSetter,
+    customContentSetter,
+
     addSocialMediaModalVisibiltySetter,
     addVideoModalVisibiltySetter,
     updateVideoModalVisibiltySetter,
@@ -110,6 +114,11 @@ const TwoColumnLayout = ({
                     addAction={()=>addLocationModalVisibiltySetter(true)}
                     updateAction={()=>updateLocationModalVisibiltySetter(true)}
                     objectSetter={locationObjectUnderUpdateSetter}
+                />
+
+                <CustomContentSection
+                    customContent={customContent}
+                    setCustomContent={customContentSetter}
                 />
 
             </div>

@@ -7,6 +7,7 @@ import YoutubeVideos from '../Youtube Videos/YoutubeVideos';
 import AddressCard from '../Address Card/AddressCard';
 import Locations from '../Locations/Locations';
 import ProfileQrCode from '../Qr Code/ProfileQrCode';
+import CustomContentDisplay from '../CustomContentDisplay/CustomContentDisplay';
 
 const TwoColumnLayout = ({ 
     className = "",
@@ -19,7 +20,9 @@ const TwoColumnLayout = ({
     videos = [],
     locations = [],
     id = "User001",
+    customContent,
 }) => {
+
 
     function formatSocialLinks(links) {
         return links.map(({ id, url }) => {
@@ -77,6 +80,13 @@ const TwoColumnLayout = ({
                 <Locations
                     locations={locations}
                 />
+
+
+                <div>
+                    {customContent.map((content) => (
+                        <CustomContentDisplay key={content.id} customContent={content} />
+                    ))}
+                </div>
 
             </div>
         </div>
