@@ -10,10 +10,19 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { DEVELOPMENT_CONFIG } from '../../../config/development';
+
 
 const ProfileVisitsTable = ({ visits, dateRange }) => {
   const router = useRouter();
   const { width } = Dimensions.get('window');
+
+  const transformImageUrl = (url: string) => {
+      if (!url) 
+          return url;
+      let transformedUrl = url.replace('http://localhost:5050', DEVELOPMENT_CONFIG.backendBaseUrl)
+      return transformedUrl;
+  };
 
   const formatVisitTime = (dateString) => {
     const visitDate = new Date(dateString);
@@ -97,11 +106,12 @@ const ProfileVisitsTable = ({ visits, dateRange }) => {
             {visit.visitor ? (
               <View style={[styles.visitorInfo, responsiveStyles.visitorInfo]}>
                 {visit.visitor.profile_pic_url != null ? (
-                  <Image 
-                    source={{ uri: visit.visitor.profile_pic_url }} 
-                    style={[styles.visitorAvatar, responsiveStyles.visitorAvatar]}
-                    defaultSource={require('./avatar-default.svg')}
-                  />
+                    <Image 
+                      source={{ uri: transformImageUrl(visit.visitor.profile_pic_url) }} 
+                      style={[styles.visitorAvatar, responsiveStyles.visitorAvatar]}
+                      defaultSource={require('./avatar-default.svg')}
+                      onError={(e) => console.log('Image load error:', e.nativeEvent.error)}
+                    />
                  ) : (
                   <View style={[styles.anonymousAvatar, responsiveStyles.anonymousAvatar]}>
                     <Ionicons name="person-outline" size={20} color="#718096" />
@@ -177,7 +187,6 @@ const getResponsiveStyles = (width: number) => {
       gap: 8,
     };
     responsiveStyles.visitorDetails = {
-      alignItems: 'center',
       marginLeft: 0,
     };
     responsiveStyles.visitorName = { textAlign: 'center' };
