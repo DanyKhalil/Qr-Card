@@ -1,0 +1,349 @@
+import React from 'react';
+import { 
+  View, 
+  Text, 
+  TouchableOpacity, 
+  Image, 
+  ScrollView, 
+  StyleSheet,
+  Dimensions 
+} from 'react-native';
+import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+
+const ProfileVisitsTable = ({ visits, dateRange }) => {
+  const router = useRouter();
+  const { width } = Dimensions.get('window');
+
+  const formatVisitTime = (dateString) => {
+    const visitDate = new Date(dateString);
+    const now = new Date();
+    const diffMs = now - visitDate;
+    const diffMinutes = diffMs / (1000 * 60);
+    const diffHours = diffMs / (1000 * 60 * 60);
+    const diffDays = diffHours / 24;
+
+    if (diffMinutes < 60) {
+      return 'Less than an hour ago';
+    } else if (diffHours < 24) {
+      const hours = Math.floor(diffHours);
+      return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+    } else if (diffDays < 7) {
+      const days = Math.floor(diffDays);
+      return `${days} day${days > 1 ? 's' : ''} ago`;
+    } else {
+      return visitDate.toLocaleDateString('en-US', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+      });
+    }
+  };
+
+  const getDateRangeText = () => {
+    switch (dateRange) {
+      case 'today':
+        return 'Today';
+      case '7days':
+        return 'Last 7 Days';
+      case '30days':
+        return 'Last 30 Days';
+      case 'year':
+        return 'Last Year';
+      default:
+        return 'Recent';
+    }
+  };
+
+  const handleProfileClick = (userId) => {
+    router.push(`/profile/${userId}`);
+  };
+
+  const handleViewProfileClick = (userId) => {
+    router.push(`/profile/${userId}`);
+  };
+
+  if (!visits || visits.length === 0) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.title}>Profile Visits - {getDateRangeText()}</Text>
+        <View style={styles.noVisits}>
+          <Text style={styles.noVisitsText}>
+            No profile visits in {getDateRangeText().toLowerCase()}
+          </Text>
+        </View>
+      </View>
+    );
+  }
+
+  // Responsive styles based on screen width
+  const responsiveStyles = getResponsiveStyles(width);
+
+  return (
+    <View style={[styles.container, responsiveStyles.container]}>
+      <View style={styles.tableHeader}>
+        <Text style={styles.title}>Profile Visits - {getDateRangeText()}</Text>
+        <View style={styles.visitsCount}>
+          <Text style={styles.visitsCountText}>{visits.length} visits</Text>
+        </View>
+      </View>
+      
+      <ScrollView 
+        style={styles.visitsContainer}
+        showsVerticalScrollIndicator={false}
+      >
+        {visits.map((visit) => (
+          <View key={visit.id} style={[styles.visitCard, responsiveStyles.visitCard]}>
+            {visit.visitor ? (
+              <>
+                <TouchableOpacity 
+                  style={[styles.visitorInfo, responsiveStyles.visitorInfo]}
+                  onPress={() => handleProfileClick(visit.visitor.user_id)}
+                >
+                  {visit.visitor.profile_pic_url != null ? (
+                    <Image 
+                      source={{ uri: visit.visitor.profile_pic_url }} 
+                      style={[styles.visitorAvatar, responsiveStyles.visitorAvatar]}
+                      defaultSource={require('./avatar-default.svg')}
+                    />
+                   ) : (
+                    <View style={[styles.anonymousAvatar, responsiveStyles.anonymousAvatar]}>
+                      <Ionicons name="person-outline" size={20} color="#718096" />
+                    </View>
+                  )}
+                  <View style={[styles.visitorDetails, responsiveStyles.visitorDetails]}>
+                    <Text style={styles.visitorName} numberOfLines={1}>
+                      {visit.visitor.name}
+                    </Text>
+                    <Text style={styles.visitTime}>
+                      {formatVisitTime(visit.visit_date_time)}
+                    </Text>
+                    {visit.qr_scan && (
+                      <View style={styles.qrBadge}>
+                        <Text style={styles.qrBadgeText}>QR Scan</Text>
+                      </View>
+                    )}
+                  </View>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  style={[styles.viewProfileBtn, responsiveStyles.viewProfileBtn]}
+                  onPress={() => handleViewProfileClick(visit.visitor.user_id)}
+                >
+                  <Text style={styles.viewProfileBtnText}>View Profile</Text>
+                </TouchableOpacity>
+              </>
+            ) : (
+              <View style={[styles.anonymousVisit, responsiveStyles.anonymousVisit]}>
+                <View style={[styles.anonymousAvatar, responsiveStyles.anonymousAvatar]}>
+                  <Ionicons name="person-outline" size={20} color="#718096" />
+                </View>
+                <View style={[styles.visitorDetails, responsiveStyles.visitorDetails]}>
+                  <Text style={styles.visitorName}>Anonymous Visitor</Text>
+                  <Text style={styles.visitTime}>
+                    {formatVisitTime(visit.visit_date_time)}
+                  </Text>
+                  {visit.qr_scan && (
+                    <View style={styles.qrBadge}>
+                      <Text style={styles.qrBadgeText}>QR Scan</Text>
+                    </View>
+                  )}
+                </View>
+              </View>
+            )}
+          </View>
+        ))}
+      </ScrollView>
+    </View>
+  );
+};
+
+const getResponsiveStyles = (width: number) => {
+  const responsiveStyles: any = {};
+
+  if (width >= 1200) {
+    responsiveStyles.container = { maxWidth: 900 };
+    responsiveStyles.visitCard = { padding: 20 };
+  }
+
+  if (width <= 768) {
+    responsiveStyles.container = {
+      padding: 16,
+      marginTop: 20,
+      maxWidth: '100%'
+    };
+    responsiveStyles.visitCard = {
+      flexDirection: 'column',
+      alignItems: 'flex-start',
+      gap: 12,
+    };
+    responsiveStyles.viewProfileBtn = {
+      alignSelf: 'flex-end',
+      marginLeft: 0,
+      marginTop: 8,
+    };
+    responsiveStyles.visitorInfo = {
+      width: '100%',
+    };
+  }
+
+  if (width <= 480) {
+    responsiveStyles.visitorInfo = {
+      flexDirection: 'column',
+      alignItems: 'center',
+      gap: 8,
+    };
+    responsiveStyles.visitorDetails = {
+      alignItems: 'center',
+      marginLeft: 0,
+    };
+    responsiveStyles.visitorName = { textAlign: 'center' };
+    responsiveStyles.visitTime = { textAlign: 'center' };
+  }
+
+  if (width <= 360) {
+    responsiveStyles.container = { padding: 12 };
+    responsiveStyles.visitCard = { padding: 12 };
+    responsiveStyles.visitorAvatar = { width: 40, height: 40 };
+    responsiveStyles.anonymousAvatar = { width: 40, height: 40 };
+  }
+
+  return responsiveStyles;
+};
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    padding: 24,
+    margin: 10,
+    marginTop: 30,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
+    maxWidth: 1000,
+    width: Dimensions.get('window').width - 20,
+    alignSelf: 'center',
+  },
+  tableHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#2d3748',
+    margin: 0,
+  },
+  visitsCount: {
+    backgroundColor: '#e2e8f0',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 16,
+  },
+  visitsCountText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#4a5568',
+  },
+  visitsContainer: {
+    flexDirection: 'column',
+    gap: 16,
+  },
+  visitCard: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    borderRadius: 8,
+    maxWidth: '100%',
+  },
+  visitorInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    minWidth: 0,
+  },
+  visitorAvatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    borderWidth: 2,
+    borderColor: '#f7fafc',
+  },
+  anonymousAvatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#f7fafc',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: '#e2e8f0',
+  },
+  visitorDetails: {
+    flex: 1,
+    minWidth: 0,
+    marginLeft: 12,
+  },
+  visitorName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#2d3748',
+    marginBottom: 4,
+  },
+  visitTime: {
+    fontSize: 14,
+    color: '#718096',
+    marginBottom: 4,
+  },
+  qrBadge: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#e6fffa',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 12,
+  },
+  qrBadgeText: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#234e52',
+  },
+  viewProfileBtn: {
+    backgroundColor: '#64A377',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 6,
+    marginLeft: 16,
+  },
+  viewProfileBtnText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  anonymousVisit: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    minWidth: 0,
+  },
+  noVisits: {
+    alignItems: 'center',
+    padding: 40,
+  },
+  noVisitsText: {
+    fontSize: 16,
+    color: '#718096',
+    textAlign: 'center',
+  },
+});
+
+export default ProfileVisitsTable;
