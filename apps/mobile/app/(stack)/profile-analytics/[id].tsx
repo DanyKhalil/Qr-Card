@@ -6,8 +6,8 @@ export default function UserProfileScreen() {
     const { id } = useLocalSearchParams();
     
     return (
-        <View style={{ flex: 1, padding: 20 }}>
+        // <View style={{ flex: 1, padding: 20 }}>
             <ProfileAnalytics userId={id} />
-        </View>
+        // </View>
     );
 }

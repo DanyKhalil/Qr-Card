@@ -106,7 +106,6 @@ const ProfileAnalytics = ({ userId }) => {
       
       <ScrollView style={styles.scrollContainer}>
         <View style={styles.analyticsContainer}>
-          <Text style={styles.title}>Profile Analytics</Text>
           
           {/* Filters Section */}
           <View style={styles.filtersSection}>
@@ -241,8 +240,8 @@ const styles = StyleSheet.create({
   },
   analyticsContainer: {
     flex: 1,
-    padding: 20,
-    paddingTop: 100,
+    // padding: 20,
+    // paddingTop: 100,
   },
   title: {
     fontSize: 24,
@@ -375,8 +374,8 @@ if (width <= 768) {
   
   styles.analyticsContainer = {
     ...styles.analyticsContainer,
-    padding: 16,
-    paddingTop: 100,
+    // padding: 16,
+    // paddingTop: 100,
   };
   
   styles.filtersSection = {

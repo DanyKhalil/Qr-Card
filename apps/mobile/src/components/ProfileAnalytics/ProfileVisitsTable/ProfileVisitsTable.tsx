@@ -56,17 +56,13 @@ const ProfileVisitsTable = ({ visits, dateRange }) => {
   };
 
   const handleProfileClick = (userId) => {
-    router.push(`/profile/${userId}`);
-  };
-
-  const handleViewProfileClick = (userId) => {
-    router.push(`/profile/${userId}`);
+    router.push(`/user-profile/${userId}`);
   };
 
   if (!visits || visits.length === 0) {
     return (
       <View style={styles.container}>
-        <Text style={styles.title}>Profile Visits - {getDateRangeText()}</Text>
+        <Text style={styles.title}>Visitors - {getDateRangeText()}</Text>
         <View style={styles.noVisits}>
           <Text style={styles.noVisitsText}>
             No profile visits in {getDateRangeText().toLowerCase()}
@@ -82,7 +78,7 @@ const ProfileVisitsTable = ({ visits, dateRange }) => {
   return (
     <View style={[styles.container, responsiveStyles.container]}>
       <View style={styles.tableHeader}>
-        <Text style={styles.title}>Profile Visits - {getDateRangeText()}</Text>
+        <Text style={styles.title}>Visitors - {getDateRangeText()}</Text>
         <View style={styles.visitsCount}>
           <Text style={styles.visitsCountText}>{visits.length} visits</Text>
         </View>
@@ -93,45 +89,38 @@ const ProfileVisitsTable = ({ visits, dateRange }) => {
         showsVerticalScrollIndicator={false}
       >
         {visits.map((visit) => (
-          <View key={visit.id} style={[styles.visitCard, responsiveStyles.visitCard]}>
+          <TouchableOpacity 
+            key={visit.id} 
+            style={[styles.visitCard, responsiveStyles.visitCard]}
+            onPress={() => visit.visitor && handleProfileClick(visit.visitor.user_id)}
+          >
             {visit.visitor ? (
-              <>
-                <TouchableOpacity 
-                  style={[styles.visitorInfo, responsiveStyles.visitorInfo]}
-                  onPress={() => handleProfileClick(visit.visitor.user_id)}
-                >
-                  {visit.visitor.profile_pic_url != null ? (
-                    <Image 
-                      source={{ uri: visit.visitor.profile_pic_url }} 
-                      style={[styles.visitorAvatar, responsiveStyles.visitorAvatar]}
-                      defaultSource={require('./avatar-default.svg')}
-                    />
-                   ) : (
-                    <View style={[styles.anonymousAvatar, responsiveStyles.anonymousAvatar]}>
-                      <Ionicons name="person-outline" size={20} color="#718096" />
+              <View style={[styles.visitorInfo, responsiveStyles.visitorInfo]}>
+                {visit.visitor.profile_pic_url != null ? (
+                  <Image 
+                    source={{ uri: visit.visitor.profile_pic_url }} 
+                    style={[styles.visitorAvatar, responsiveStyles.visitorAvatar]}
+                    defaultSource={require('./avatar-default.svg')}
+                  />
+                 ) : (
+                  <View style={[styles.anonymousAvatar, responsiveStyles.anonymousAvatar]}>
+                    <Ionicons name="person-outline" size={20} color="#718096" />
+                  </View>
+                )}
+                <View style={[styles.visitorDetails, responsiveStyles.visitorDetails]}>
+                  <Text style={styles.visitorName} numberOfLines={1}>
+                    {visit.visitor.name}
+                  </Text>
+                  <Text style={styles.visitTime}>
+                    {formatVisitTime(visit.visit_date_time)}
+                  </Text>
+                  {visit.qr_scan && (
+                    <View style={styles.qrBadge}>
+                      <Text style={styles.qrBadgeText}>QR Scan</Text>
                     </View>
                   )}
-                  <View style={[styles.visitorDetails, responsiveStyles.visitorDetails]}>
-                    <Text style={styles.visitorName} numberOfLines={1}>
-                      {visit.visitor.name}
-                    </Text>
-                    <Text style={styles.visitTime}>
-                      {formatVisitTime(visit.visit_date_time)}
-                    </Text>
-                    {visit.qr_scan && (
-                      <View style={styles.qrBadge}>
-                        <Text style={styles.qrBadgeText}>QR Scan</Text>
-                      </View>
-                    )}
-                  </View>
-                </TouchableOpacity>
-                <TouchableOpacity 
-                  style={[styles.viewProfileBtn, responsiveStyles.viewProfileBtn]}
-                  onPress={() => handleViewProfileClick(visit.visitor.user_id)}
-                >
-                  <Text style={styles.viewProfileBtnText}>View Profile</Text>
-                </TouchableOpacity>
-              </>
+                </View>
+              </View>
             ) : (
               <View style={[styles.anonymousVisit, responsiveStyles.anonymousVisit]}>
                 <View style={[styles.anonymousAvatar, responsiveStyles.anonymousAvatar]}>
@@ -150,7 +139,7 @@ const ProfileVisitsTable = ({ visits, dateRange }) => {
                 </View>
               </View>
             )}
-          </View>
+          </TouchableOpacity>
         ))}
       </ScrollView>
     </View>
@@ -172,14 +161,9 @@ const getResponsiveStyles = (width: number) => {
       maxWidth: '100%'
     };
     responsiveStyles.visitCard = {
-      flexDirection: 'column',
+      flexDirection: 'row',
       alignItems: 'flex-start',
       gap: 12,
-    };
-    responsiveStyles.viewProfileBtn = {
-      alignSelf: 'flex-end',
-      marginLeft: 0,
-      marginTop: 8,
     };
     responsiveStyles.visitorInfo = {
       width: '100%',
@@ -188,7 +172,7 @@ const getResponsiveStyles = (width: number) => {
 
   if (width <= 480) {
     responsiveStyles.visitorInfo = {
-      flexDirection: 'column',
+      flexDirection: 'row',
       alignItems: 'center',
       gap: 8,
     };
@@ -212,19 +196,10 @@ const getResponsiveStyles = (width: number) => {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#ffffff',
     borderRadius: 12,
     padding: 24,
     margin: 10,
     marginTop: 30,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
     maxWidth: 1000,
     width: Dimensions.get('window').width - 20,
     alignSelf: 'center',
@@ -290,7 +265,7 @@ const styles = StyleSheet.create({
     borderColor: '#e2e8f0',
   },
   visitorDetails: {
-    flex: 1,
+    paddingLeft: 10,
     minWidth: 0,
     marginLeft: 12,
   },
@@ -316,18 +291,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '500',
     color: '#234e52',
-  },
-  viewProfileBtn: {
-    backgroundColor: '#64A377',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 6,
-    marginLeft: 16,
-  },
-  viewProfileBtnText: {
-    color: 'white',
-    fontSize: 14,
-    fontWeight: '500',
   },
   anonymousVisit: {
     flexDirection: 'row',

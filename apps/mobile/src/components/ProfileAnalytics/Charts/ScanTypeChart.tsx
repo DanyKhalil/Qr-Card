@@ -105,18 +105,20 @@ const ScanTypeChart = ({ data, chartType }) => {
 
 const styles = {
     container: {
-        backgroundColor: '#ffffff',
+        // backgroundColor: '#ffffff',
         borderRadius: 12,
         padding: 20,
         margin: 10,
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.1,
-        shadowRadius: 3.84,
-        elevation: 5,
+        marginVertical: 20,
+        paddingBottom: 70,
+        // shadowColor: '#000',
+        // shadowOffset: {
+        //     width: 0,
+        //     height: 2,
+        // },
+        // shadowOpacity: 0.1,
+        // shadowRadius: 3.84,
+        // elevation: 5,
     },
     title: {
         fontSize: 18,

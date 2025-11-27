@@ -3,21 +3,34 @@ import { View, Text, Dimensions, ScrollView } from 'react-native';
 import { LineChart, BarChart } from 'react-native-chart-kit';
 
 const ProfileViewsChart = ({ data, chartType, dateRange }) => {
-    const screenWidth = Dimensions.get('window').width - 40; // accounting for padding
+    const screenWidth = Dimensions.get('window').width - 40;
 
     const getChartTitle = () => {
         const titles = {
-            'today': 'Profile Views Today (Hourly)',
-            '7days': 'Profile Views - Last 7 Days',
-            '30days': 'Profile Views - Last 30 Days',
-            'year': 'Profile Views - Last Year'
+            'today': 'Profile Visits Today (Hourly)',
+            '7days': 'Profile Visits - Last 7 Days',
+            '30days': 'Profile Visits - Last 30 Days',
+            'year': 'Profile Visits - Last Year'
         };
         return titles[dateRange] || 'Profile Views';
     };
 
-    // Transform data for react-native-chart-kit
+    // Smart label formatting to prevent overlap
+    const formatLabels = (labels) => {
+        if (labels.length <= 8) return labels;
+        
+        // Show fewer labels for better readability
+        return labels.map((label, index) => {
+            if (index % Math.ceil(labels.length / 6) === 0) {
+                // Shorten long labels
+                return label.length > 8 ? label.substring(0, 6) + '..' : label;
+            }
+            return '';
+        });
+    };
+
     const chartData = {
-        labels: data.map(item => item.name),
+        labels: formatLabels(data.map(item => item.name)),
         datasets: [
             {
                 data: data.map(item => item.visits || 0),
@@ -26,11 +39,12 @@ const ProfileViewsChart = ({ data, chartType, dateRange }) => {
     };
 
     const chartConfig = {
-        backgroundColor: '#ffffff',
-        backgroundGradientFrom: '#ffffff',
-        backgroundGradientTo: '#ffffff',
+        backgroundColor: '#f8f9fb',
+        backgroundGradientFrom: '#f8f9fb',
+        backgroundGradientTo: '#f8f9fb',
+        backgrounColor: "transparent",
         decimalPlaces: 0,
-        color: (opacity = 1) => `rgba(255, 133, 89, ${opacity})`, // #FF8559
+        color: (opacity = 1) => `rgba(255, 133, 89, ${opacity})`,
         labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
         style: {
             borderRadius: 16,
@@ -41,12 +55,13 @@ const ProfileViewsChart = ({ data, chartType, dateRange }) => {
             stroke: '#FF8559',
         },
         propsForLabels: {
-            fontSize: 10,
+            fontSize: 9,
         },
+        barPercentage: data.length > 10 ? 0.3 : 0.6,
     };
 
-    // Calculate height based on data length for better visibility
-    const chartHeight = Math.max(300, data.length * 20);
+    const chartHeight = Math.max(320, data.length * 25); // Extra height for labels
+    const chartWidth = Math.max(screenWidth, data.length * 70);
 
     return (
         <View style={styles.container}>
@@ -56,12 +71,13 @@ const ProfileViewsChart = ({ data, chartType, dateRange }) => {
                 horizontal={true} 
                 showsHorizontalScrollIndicator={true}
                 style={styles.chartScrollView}
+                contentContainerStyle={styles.scrollContent}
             >
                 <View style={styles.chartContainer}>
                     {chartType === 'bar' ? (
                         <BarChart
                             data={chartData}
-                            width={Math.max(screenWidth, data.length * 50)} // Dynamic width based on data points
+                            width={chartWidth}
                             height={chartHeight}
                             yAxisLabel=""
                             yAxisSuffix=""
@@ -69,18 +85,22 @@ const ProfileViewsChart = ({ data, chartType, dateRange }) => {
                             style={styles.chart}
                             showValuesOnTopOfBars={true}
                             fromZero={true}
+                            withHorizontalLabels={true}
+                            withVerticalLabels={true}
                         />
                     ) : (
                         <LineChart
                             data={chartData}
-                            width={Math.max(screenWidth, data.length * 50)} // Dynamic width based on data points
+                            width={chartWidth}
                             height={chartHeight}
                             yAxisLabel=""
                             yAxisSuffix=""
                             chartConfig={chartConfig}
                             style={styles.chart}
-                            bezier // Smooth lines
+                            bezier
                             fromZero={true}
+                            withHorizontalLabels={true}
+                            withVerticalLabels={true}
                         />
                     )}
                 </View>
@@ -91,18 +111,9 @@ const ProfileViewsChart = ({ data, chartType, dateRange }) => {
 
 const styles = {
     container: {
-        backgroundColor: '#ffffff',
         borderRadius: 12,
         padding: 20,
-        margin: 10,
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.1,
-        shadowRadius: 3.84,
-        elevation: 5,
+        marginVertical: 20,
     },
     title: {
         fontSize: 18,
@@ -114,12 +125,14 @@ const styles = {
     chartScrollView: {
         borderRadius: 8,
     },
+    scrollContent: {
+        paddingRight: 20,
+    },
     chartContainer: {
         alignItems: 'center',
     },
     chart: {
-        marginVertical: 8,
-        borderRadius: 16,
+        marginRight: 10,
     },
 };
 
