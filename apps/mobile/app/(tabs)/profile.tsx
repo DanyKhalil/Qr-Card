@@ -26,17 +26,17 @@ export default function ProfileTab() {
             onPress: () => router.push(`/(stack)/profile-analytics/${user?.id}`),
             iconName: 'bar-chart-outline',
         },
-        {
-            title: 'Settings',
-            description: 'App preferences and configuration',
-            onPress: () => router.push('/modal'), // Using your existing modal
-            iconName: 'settings-outline',
-        },
+        // {
+        //     title: 'Settings',
+        //     description: 'App preferences and configuration',
+        //     onPress: () => router.push('/modal'), // Using your existing modal
+        //     iconName: 'settings-outline',
+        // },
     ];
 
     return (
         <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 20 }}>
-            <Text style={{ color: '#666', marginBottom: 30 }}>Manage your account and settings</Text>
+            <Text style={{ color: '#666', marginBottom: 30 }}>Manage your account</Text>
 
             {menuItems.map((item, index) => (
                 <Pressable

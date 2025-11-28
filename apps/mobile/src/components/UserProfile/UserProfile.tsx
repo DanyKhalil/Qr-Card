@@ -53,7 +53,7 @@ const UserProfile = ({
                             <Button 
                                 text="Profile Analytics"
                                 color="green"
-                                onPress={() => console.log('Profile Analytics')}
+                                onPress={() => router.push(`/(stack)/profile-analytics/${id}`)}
                                 width={180}
                             />
                             <Button 
