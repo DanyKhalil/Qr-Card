@@ -138,8 +138,8 @@ const EditUserProfilePage = () => {
 
     return (
         <EditUserProfileComponent
-            coverPhoto={transformImageUrl(userData.cover_photo_url)}
-            profilePic={transformImageUrl(userData.profile_pic_url)}
+            coverPhoto={userData.cover_photo_url}
+            profilePic={userData.profile_pic_url}
             userName={userData.name}
             dob={userData.dob}
             headline={userData.headline}

@@ -60,7 +60,6 @@ const Camera = () => {
 
   const handleManualRedirect = (url = scanResult) => {
     if (url && isValidUrl(url)) {
-        console.log('Navigating to:', url);
         
         if (url.startsWith('exp://') || url.startsWith('/--/')) {
         let path = url;
@@ -78,7 +77,6 @@ const Camera = () => {
         const separator = path.includes('?') ? '&' : '?';
         const pathWithParam = `/${path}${separator}qrScan=true`;
         
-        console.log('Cleaned path for navigation:', pathWithParam);
         
         router.push(pathWithParam);
         

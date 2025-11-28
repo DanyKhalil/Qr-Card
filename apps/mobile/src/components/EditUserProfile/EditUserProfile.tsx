@@ -21,6 +21,7 @@ import AddLocationModal from './Modals/AddLocationModal/AddLocationModal';
 import EditLocationModal from './Modals/EditLocationModal/EditLocationModal';
 import EditVideoModal from './Modals/EditVideoModal/EditVideoModal';
 import { useNavigation } from '@react-navigation/native';
+import { DEVELOPMENT_CONFIG } from '../../config/development';
 
 interface EditUserProfileProps {
     coverPhoto?: string;
@@ -240,6 +241,13 @@ const EditUserProfile = ({
         const [updateMessage, setUpdateMessage] = useState('');
         const [showSuccessModal, setShowSuccessModal] = useState(false);
 
+        const transformImageUrl = (url: string) => {
+            if (!url) 
+                return url;
+            let transformedUrl = url.replace('http://localhost:5050', DEVELOPMENT_CONFIG.backendBaseUrl)
+            return transformedUrl;
+        };
+
 
 
         // const navigate = useNavigate()
@@ -294,14 +302,14 @@ const EditUserProfile = ({
             <>
                 <ScrollView style={{ flex: 1 }}>
                     <CoverPhoto 
-                        photo={coverPhotoInput} 
+                        photo={transformImageUrl(coverPhotoInput)} 
                         height={150} 
                         onCoverChange={handleCoverPhotoChange}
                         onCoverRemove={handleRemoveCoverPhoto}
                     />
                     <View style={styles.profileSection}>
                         <ProfilePic 
-                            photo={profilePicInput} 
+                            photo={transformImageUrl(profilePicInput)} 
                             size="xxlarge" 
                             onProfileChange = {handleProfilePicChange}
                             onProfileRemove = {handleRemoveProfilePic}
