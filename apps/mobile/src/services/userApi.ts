@@ -96,6 +96,7 @@ export const userApi = {
         locations,
         profilePicInput,
         coverPhotoInput,
+        customContent,
     }) => {
         try {
             const formData = new FormData();
@@ -110,6 +111,7 @@ export const userApi = {
             formData.append('connectLinks', JSON.stringify(connectLinks || []));
             formData.append('videos', JSON.stringify(videos || []));
             formData.append('locations', JSON.stringify(locations || []));
+            formData.append('customContent', JSON.stringify(customContent))
 
             if (profilePicInput?.startsWith('file://')) {
                 const filename = profilePicInput.split('/').pop();

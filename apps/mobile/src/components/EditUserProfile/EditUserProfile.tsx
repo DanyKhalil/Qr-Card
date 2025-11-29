@@ -22,6 +22,7 @@ import EditLocationModal from './Modals/EditLocationModal/EditLocationModal';
 import EditVideoModal from './Modals/EditVideoModal/EditVideoModal';
 import { useNavigation } from '@react-navigation/native';
 import { DEVELOPMENT_CONFIG } from '../../config/development';
+import CustomContentSection from './CustomContentSection/CustomContentSection';
 
 interface EditUserProfileProps {
     coverPhoto?: string;
@@ -36,6 +37,7 @@ interface EditUserProfileProps {
     videos?: any[];
     locations?: any[];
     id?: string;
+    customContent?: any[];
 }
 
 const EditUserProfile = ({
@@ -51,6 +53,7 @@ const EditUserProfile = ({
         videos = [],
         locations = [],
         id = "User001",
+        customContent = [],
     }: EditUserProfileProps) => {
         // for files
 
@@ -89,6 +92,8 @@ const EditUserProfile = ({
     
         const [locationsInput, setLocationsInput] = useState(locations);
         const [locationsInputErrorMessage, setLocationsInputErrorMessage] = useState('');
+
+        const [customContentInput, setCustomContentInput] = useState(customContent || []);
 
 
 
@@ -254,7 +259,7 @@ const EditUserProfile = ({
         const router = useRouter();
 
         // for sending save request put
-        const handleUserProfileUpdate = async (newUserName, newDob, newPhoneNumber, newHeadline, newBio, newWebsite, newSocialMediaLinks, newVideos, newLocations) => {
+        const handleUserProfileUpdate = async (newUserName, newDob, newPhoneNumber, newHeadline, newBio, newWebsite, newSocialMediaLinks, newVideos, newLocations, newCustomContent) => {
             setIsUpdating(true);
             setUpdateMessage('');
 
@@ -272,6 +277,7 @@ const EditUserProfile = ({
                     locations: locationsInput,
                     profilePicInput: profilePicInput,
                     coverPhotoInput: coverPhotoInput,
+                    customContent: customContentInput,
                     // profilePicFile,
                     // coverPhotoFile,
                     // profilePicInput,
@@ -295,7 +301,7 @@ const EditUserProfile = ({
         };
     
         const handleSaveChanges = () => {
-            handleUserProfileUpdate(userNameInput, dobInput, phoneNumberInput, headlineInput, bioInput, websiteLinkInput, connectLinksInput, videosInput, locationsInput);
+            handleUserProfileUpdate(userNameInput, dobInput, phoneNumberInput, headlineInput, bioInput, websiteLinkInput, connectLinksInput, videosInput, locationsInput, customContentInput);
         };
 
         return (
@@ -355,6 +361,11 @@ const EditUserProfile = ({
                         addAction={()=>setAddLocationModalIsVisible(true)}
                         updateAction={()=>setUpdateAdressModalIsVisible(true)}
                         objectSetter={setLocationObjectUnderUpdate}
+                    />
+
+                    <CustomContentSection
+                        customContent={customContentInput}
+                        setCustomContent={setCustomContentInput}
                     />
 
                     <ProfileQrCode id={id}/>

@@ -151,6 +151,7 @@ const EditUserProfilePage = () => {
             videos={userData.videos_links}
             locations={userData.locations}
             id={Array.isArray(id) ? id[0] : id || 'User001'}
+            customContent={userData.custom_content}
         />
     );
 };
