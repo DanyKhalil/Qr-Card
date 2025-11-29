@@ -10,6 +10,7 @@ import Locations from './Locations/Locations';
 import TitleAndLinks from './TitleAndLinks/TitleAndLinks';
 import ProfileQrCode from './ProfileQrCode/ProfileQrCode';
 import { router } from 'expo-router';
+import CustomContentDisplay from './CustomContentDisplay/CustomContentDisplay';
 
 
 interface UserProfileProps {
@@ -40,6 +41,7 @@ const UserProfile = ({
         videos = [],
         locations = [],
         id = "User001",
+        customContent = [],
         // saveContactFunction,
         // phoneNumber,
         // email,
@@ -74,6 +76,13 @@ const UserProfile = ({
                         videos={videos}
                     />
                     <Locations locations={locations}/>
+
+                    <View>
+                        {customContent.map((content) => (
+                            <CustomContentDisplay key={content.id} customContent={content} />
+                        ))}
+                    </View>
+
 
                     <TitleAndLinks title="Contact" links={contactLinks}/>
                     {/* <Button 
