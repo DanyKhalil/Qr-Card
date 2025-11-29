@@ -126,16 +126,18 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top',
   },
   formActions: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     justifyContent: 'flex-end',
     gap: 12,
     paddingTop: 20,
     borderTopWidth: 1,
     borderTopColor: '#e5e5e5',
     marginTop: 20,
+    width: '100%',
   },
   actionBtn: {
     minWidth: 150,
+    width: '100%',
   },
 });
 

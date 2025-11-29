@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   contentTypeHeader: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     gap: 12,
@@ -129,6 +129,8 @@ const styles = StyleSheet.create({
   },
   typeNameContainer: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
     alignItems: 'center',
     marginBottom: 4,
   },
@@ -153,6 +155,8 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   contentTypeStats: {
+    display: 'flex',
+    flexDirection: 'row',
     gap: 4,
     minWidth: 80,
   },
@@ -161,8 +165,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#dee2e6',
     borderRadius: 12,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
     alignItems: 'center',
   },
   statText: {
@@ -171,14 +175,16 @@ const styles = StyleSheet.create({
   },
   contentTypeActions: {
     flexDirection: 'row',
-    gap: 6,
+    width: '100%',
+    justifyContent: 'flex-end',
+    gap: 20,
   },
   actionBtn: {
     backgroundColor: 'white',
     borderWidth: 1,
     borderColor: '#dee2e6',
     borderRadius: 6,
-    padding: 8,
+    padding: 12,
     minWidth: 40,
     alignItems: 'center',
     justifyContent: 'center',

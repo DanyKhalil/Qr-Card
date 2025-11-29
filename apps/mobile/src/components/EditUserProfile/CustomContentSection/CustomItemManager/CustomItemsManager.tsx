@@ -3,7 +3,6 @@ import {
   View, 
   Text, 
   TouchableOpacity, 
-  ScrollView, 
   Alert,
   StyleSheet 
 } from 'react-native';
@@ -105,7 +104,8 @@ const CustomItemsManager = ({ visible, onClose, contentType, onUpdateItems }) =>
           </TouchableOpacity>
         </View>
 
-        <ScrollView style={styles.itemsList}>
+        {/* Removed ScrollView - using View instead */}
+        <View style={styles.itemsContent}>
           {items.length === 0 ? (
             <View style={styles.emptyItems}>
               <Text style={styles.emptyItemsText}>No items yet. Add your first item to get started.</Text>
@@ -185,7 +185,7 @@ const CustomItemsManager = ({ visible, onClose, contentType, onUpdateItems }) =>
               </View>
             ))
           )}
-        </ScrollView>
+        </View>
 
         <View style={styles.itemsManagerActions}>
           <Button 
@@ -216,8 +216,7 @@ const CustomItemsManager = ({ visible, onClose, contentType, onUpdateItems }) =>
 
 const styles = StyleSheet.create({
   itemsManager: {
-    flex: 1,
-    maxHeight: 700,
+    minHeight: 400,
   },
   itemsHeader: {
     flexDirection: 'row',
@@ -246,8 +245,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
   },
-  itemsList: {
-    flex: 1,
+  itemsContent: {
     marginBottom: 16,
   },
   emptyItems: {

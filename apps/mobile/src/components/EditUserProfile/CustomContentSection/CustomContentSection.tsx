@@ -97,14 +97,15 @@ const CustomContentSection = ({
 
 const styles = StyleSheet.create({
   customContentSection: {
-    marginVertical: 20,
+    marginVertical: 80,
+    marginHorizontal: 20,
     padding: 20,
     backgroundColor: '#fff',
     borderRadius: 12,
   },
   customContentHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
     alignItems: 'center',
     marginBottom: 16,
     paddingBottom: 16,
@@ -114,7 +115,7 @@ const styles = StyleSheet.create({
   customContentTitle: {
     fontSize: 24,
     fontWeight: '700',
-    marginBottom: 40,
+    marginBottom: 10,
     color: '#333',
     lineHeight: 32,
   },

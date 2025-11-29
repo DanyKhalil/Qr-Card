@@ -3,7 +3,6 @@ import {
   View, 
   Text, 
   TouchableOpacity, 
-  ScrollView, 
   Alert,
   StyleSheet 
 } from 'react-native';
@@ -79,11 +78,14 @@ const CustomFieldsManager = ({ visible, onClose, contentType, onUpdateFields }) 
     }
 
     const newFields = [...fields];
-    const newIndex = direction === 'up' ? index - 1 : index + 1;
+    const newIndex = direction === 'up' ? index - 1 : direction === 'down' ? index + 1 : index;
     
-    [newFields[index].display_order, newFields[newIndex].display_order] = 
-    [newFields[newIndex].display_order, newFields[index].display_order];
+    // Swap the display_order values
+    const tempOrder = newFields[index].display_order;
+    newFields[index].display_order = newFields[newIndex].display_order;
+    newFields[newIndex].display_order = tempOrder;
     
+    // Swap the array positions
     [newFields[index], newFields[newIndex]] = [newFields[newIndex], newFields[index]];
     
     setFields(newFields);
@@ -95,11 +97,14 @@ const CustomFieldsManager = ({ visible, onClose, contentType, onUpdateFields }) 
     onClose();
   };
 
+  // Create sorted fields for display
+  const sortedFields = [...fields].sort((a, b) => a.display_order - b.display_order);
+
   return (
     <Modal 
       visible={visible} 
       onClose={onClose}
-      title={`Manage Fields - ${contentType?.name}`}
+      title={`Manage Fields - ${contentType?.name || 'Unknown'}`}
     >
       <View style={styles.fieldsManager}>
         <View style={styles.fieldsHeader}>
@@ -114,22 +119,23 @@ const CustomFieldsManager = ({ visible, onClose, contentType, onUpdateFields }) 
           </TouchableOpacity>
         </View>
 
-        <ScrollView style={styles.fieldsList}>
-          {fields.length === 0 ? (
-            <View style={styles.emptyFields}>
-              <Text style={styles.emptyFieldsText}>No fields yet. Add your first field to get started.</Text>
-            </View>
-          ) : (
-            fields.sort((a, b) => a.display_order - b.display_order).map((field, index) => (
+        {fields.length === 0 ? (
+          <View style={styles.emptyFields}>
+            <Text style={styles.emptyFieldsText}>No fields yet. Add your first field to get started.</Text>
+          </View>
+        ) : (
+          <View style={styles.fieldsContent}>
+            {sortedFields.map((field, index) => (
               <View key={field.id} style={styles.fieldItem}>
                 <View style={styles.fieldInfo}>
                   <View style={styles.fieldDetails}>
                     <Text style={styles.fieldType}>
-                      {fieldTypes.find(t => t.value === field.type)?.label}
+                      {fieldTypes.find(t => t.value === field.type)?.label || field.type}
                     </Text>
                     {field.required && <Text style={styles.fieldRequired}>Required</Text>}
                   </View>
-                  {field.label && <Text style={styles.fieldLabel}>{field.label}</Text>}
+                  <Text style={styles.fieldLabel}>{field.label || field.name || 'Unnamed Field'}</Text>
+                  <Text style={styles.fieldKey}>Key: {field.key}</Text>
                 </View>
                 
                 <View style={styles.fieldActions}>
@@ -141,11 +147,11 @@ const CustomFieldsManager = ({ visible, onClose, contentType, onUpdateFields }) 
                     <Ionicons name="chevron-up" size={18} color={index === 0 ? "#999" : "#333"} />
                   </TouchableOpacity>
                   <TouchableOpacity 
-                    style={[styles.fieldActionBtn, styles.moveBtn, index === fields.length - 1 && styles.disabledBtn]}
+                    style={[styles.fieldActionBtn, styles.moveBtn, index === sortedFields.length - 1 && styles.disabledBtn]}
                     onPress={() => handleReorder(field.id, 'down')}
-                    disabled={index === fields.length - 1}
+                    disabled={index === sortedFields.length - 1}
                   >
-                    <Ionicons name="chevron-down" size={18} color={index === fields.length - 1 ? "#999" : "#333"} />
+                    <Ionicons name="chevron-down" size={18} color={index === sortedFields.length - 1 ? "#999" : "#333"} />
                   </TouchableOpacity>
                   <TouchableOpacity 
                     style={[styles.fieldActionBtn, styles.editBtn]}
@@ -164,9 +170,9 @@ const CustomFieldsManager = ({ visible, onClose, contentType, onUpdateFields }) 
                   </TouchableOpacity>
                 </View>
               </View>
-            ))
-          )}
-        </ScrollView>
+            ))}
+          </View>
+        )}
 
         <View style={styles.fieldsManagerActions}>
           <Button 
@@ -198,8 +204,7 @@ const CustomFieldsManager = ({ visible, onClose, contentType, onUpdateFields }) 
 
 const styles = StyleSheet.create({
   fieldsManager: {
-    flex: 1,
-    maxHeight: 600,
+    minHeight: 300,
   },
   fieldsHeader: {
     flexDirection: 'row',
@@ -228,13 +233,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
   },
-  fieldsList: {
-    flex: 1,
+  fieldsContent: {
     marginBottom: 16,
   },
   emptyFields: {
     alignItems: 'center',
     padding: 32,
+    marginBottom: 16,
   },
   emptyFieldsText: {
     color: '#666',
@@ -254,11 +259,13 @@ const styles = StyleSheet.create({
   },
   fieldInfo: {
     flex: 1,
+    marginRight: 12,
   },
   fieldDetails: {
     flexDirection: 'row',
     gap: 8,
     marginBottom: 4,
+    flexWrap: 'wrap',
   },
   fieldType: {
     fontSize: 12,
@@ -279,9 +286,15 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   fieldLabel: {
-    fontSize: 14,
-    color: '#555',
-    fontStyle: 'italic',
+    fontSize: 16,
+    color: '#333',
+    fontWeight: '500',
+    marginBottom: 4,
+  },
+  fieldKey: {
+    fontSize: 12,
+    color: '#666',
+    fontFamily: 'monospace',
   },
   fieldActions: {
     flexDirection: 'row',
@@ -297,8 +310,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  moveBtn: {
-  },
+  moveBtn: {},
   editBtn: {
     backgroundColor: '#e3f2fd',
     borderColor: '#2196f3',

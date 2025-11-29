@@ -350,16 +350,18 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   formActions: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     justifyContent: 'flex-end',
     gap: 12,
     paddingTop: 20,
     borderTopWidth: 1,
     borderTopColor: '#e5e5e5',
     marginTop: 20,
+    width: '100%',
   },
   actionBtn: {
     minWidth: 120,
+    width: '100%',
   },
 });
 
