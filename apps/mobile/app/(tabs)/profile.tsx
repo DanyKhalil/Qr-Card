@@ -26,12 +26,12 @@ export default function ProfileTab() {
             onPress: () => router.push(`/(stack)/profile-analytics/${user?.id}`),
             iconName: 'bar-chart-outline',
         },
-        // {
-        //     title: 'Settings',
-        //     description: 'App preferences and configuration',
-        //     onPress: () => router.push('/modal'), // Using your existing modal
-        //     iconName: 'settings-outline',
-        // },
+        {
+            title: 'Logout',
+            description: 'App preferences and configuration',
+            onPress: () => router.replace('/(auth)'),
+            iconName: 'log-out-outline',
+        },
     ];
 
     return (
