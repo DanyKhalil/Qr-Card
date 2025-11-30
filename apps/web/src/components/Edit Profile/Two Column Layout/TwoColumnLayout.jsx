@@ -28,6 +28,9 @@ const TwoColumnLayout = ({
     headlineSetter,
     connectLinksSetter,
     websiteLinkSetter,
+    websiteLinkOnChange,
+    websiteLinkOnBlur,
+    websiteLinkErrorMessage,
     bioSetter,
     videosSetter,
     locationSetter,
@@ -97,7 +100,7 @@ const TwoColumnLayout = ({
                 <LabelWithTextArea label="Description" id="bio" value={bio} setter={bioSetter}/>
                 <TitleAndFields 
                     title="Website" 
-                    fields={[{label:"URL", type:"text", id: "website_url", value: websiteLink, setter:websiteLinkSetter}]}
+                    fields={[{label:"URL", type:"text", id: "website_url", value: websiteLink, setter:websiteLinkSetter, onChange:websiteLinkOnChange, onBlur: websiteLinkOnBlur, errorMessage: websiteLinkErrorMessage}]}
                 />
 
                 <YoutubeVideos 

@@ -39,37 +39,150 @@ const EditUserProfile = ({
   // here ill put  the inputs properties, and case they are not euqal the above anymore, ill sedn
   // a update request to the backend logic
   const [coverPhotoInput, setCoverPhotoInput] = useState(coverPhoto);
-  const [coverPhotoInputErrorMessage, setCoverPhotoInputErrorMessage] = useState('');
 
   const [profilePicInput, setProfilePicInput] = useState(profilePic);
-  const [profilePicInputErrorMessage, setProfilePicInputErrorMessage] = useState('');
 
+  // USER NAME INPUTT
   const [userNameInput, setUserNameInput] = useState(userName);
   const [userNameInputErrorMessage, setUserNameInputErrorMessage] = useState('');
+  const [userNameInputIsTouched, setUserNameInputIsTouched] = useState(false);
+  const validateUserName = (value) => {
+    const trimmedValue = value.trim();
+    if (trimmedValue === '')
+      return 'Name cannot be empty';
+    if (trimmedValue.length < 2)
+      return 'Name must be at least 2 characters long';
+    if (trimmedValue.length > 50)
+      return 'Name must be less than 50 characters';
+    if (!/^[a-zA-ZÀ-ÿ\s'-]+$/.test(trimmedValue))
+      return 'Name can only contain letters, spaces, hyphens, and apostrophes';
+    return '';
+  };
+  const handleUserNameChange = (e) => {
+    const value = e.target.value;
+    setUserNameInput(value);
+    if (userNameInputIsTouched) {
+      const error = validateUserName(value);
+      setUserNameInputErrorMessage(error);
+    }
+  };
+  const handleUserNameBlur = () => {
+    setUserNameInputIsTouched(true);
+    const error = validateUserName(userNameInput);
+    setUserNameInputErrorMessage(error);
+  };
 
   const [dobInput, setDobInput] = useState(dob);
   const [dobInputErrorMessage, setDobInputErrorMessage] = useState('');
+  const [dobInputIsTouched, setDobInputIsTouched] = useState(false);
+  const validateDob = (value) => {
+    const trimmedValue = value.trim();
+    if (trimmedValue === '') {
+      return '';
+    }
+    const dobDate = new Date(trimmedValue);
+    if (isNaN(dobDate.getTime())) {
+      return 'Please enter a valid date';
+    }
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (dobDate > today) {
+      return 'Date of birth cannot be in the future';
+    }
+    const minDate = new Date();
+    minDate.setFullYear(today.getFullYear() - 150);
+    if (dobDate < minDate) {
+      return 'Please enter a valid date of birth';
+    }
+    return '';
+  };
+  const handleDobChange = (e) => {
+    const value = e.target.value;
+    setDobInput(value);
+    if (dobInputIsTouched) {
+      const error = validateDob(value);
+      setDobInputErrorMessage(error);
+    }
+  };
+  const handleDobBlur = () => {
+    setDobInputIsTouched(true);
+    const error = validateDob(dobInput);
+    setDobInputErrorMessage(error);
+  };
 
   const [headlineInput, setHeadlineInput] = useState(headline);
   const [headlineInputErrorMessage, setHeadlineInputErrorMessage] = useState('');
 
   const [phoneNumberInput, setPhoneNumberInput] = useState(contactLinks[1].name[0]==null || contactLinks[1].name[0]=='' ? '' : contactLinks[1].name[0]);
   const [phoneNumberInputErrorMessage, setPhoneNumberInputErrorMessage] = useState('');
+  const [phoneNumberInputIsTouched, setPhoneNumberInputIsTouched] = useState(false);
+  const validatePhoneNumber = (value) => {
+    const trimmedValue = value.trim();
+    if (trimmedValue === '') {
+      return '';
+    }
+    const cleanValue = trimmedValue.replace(/[\s+\-]/g, '');
+    if (!/^[\d\s+\-()]+$/.test(trimmedValue)) {
+      return 'Phone number can only contain numbers, spaces, +, -, and parentheses';
+    }
+    if (cleanValue.length < 7) {
+      return 'Phone number must have at least 7 digits';
+    }
+    if (cleanValue.length > 15) {
+      return 'Phone number is too long';
+    }
+    return '';
+  };
+  const handlePhoneNumberChange = (e) => {
+    const value = e.target.value;
+    setPhoneNumberInput(value);
+    if (phoneNumberInputIsTouched) {
+      const error = validatePhoneNumber(value);
+      setPhoneNumberInputErrorMessage(error);
+    }
+  };
+  const handlePhoneNumberBlur = () => {
+    setPhoneNumberInputIsTouched(true);
+    const error = validatePhoneNumber(phoneNumberInput);
+    setPhoneNumberInputErrorMessage(error);
+  };
 
   const [connectLinksInput, setConnectLinksInput] = useState(connectLinks);
-  const [connectLinksInputErrorMessage, setConnectLinksInputErrorMessage] = useState('');
 
   const [websiteLinkInput, setWebsiteLinkInput] = useState(websiteLink);
   const [websiteLinkInputErrorMessage, setWebsiteLinkInputErrorMessage] = useState('');
+  const [websiteLinkInputIsTouched, setWebsiteLinkInputIsTouched] = useState(false);
+  const validateWebsiteLink = (value) => {
+    const trimmedValue = value.trim();
+    if (trimmedValue === '') {
+      return '';
+    }
+    const urlPattern = /^(https?:\/\/)?(www\.)?[a-zA-Z0-9-]+\.[a-zA-Z]{2,}(\/[a-zA-Z0-9-._~:/?#[\]@!$&'()*+,;=%]*)?$/;
+    if (!urlPattern.test(trimmedValue)) {
+      return 'Please enter a valid website URL (e.g., example.com, www.example.com, https://example.com)';
+    }
+    return '';
+  };
+  const handleWebsiteLinkChange = (e) => {
+    const value = e.target.value;
+    setWebsiteLinkInput(value);
+    if (websiteLinkInputIsTouched) {
+      const error = validateWebsiteLink(value);
+      setWebsiteLinkInputErrorMessage(error);
+    }
+  };
+  const handleWebsiteLinkBlur = () => {
+    setWebsiteLinkInputIsTouched(true);
+    const error = validateWebsiteLink(websiteLinkInput);
+    setWebsiteLinkInputErrorMessage(error);
+  };
 
   const [bioInput, setBioInput] = useState(bio);
   const [bioInputErrorMessage, setBioInputErrorMessage] = useState('');
 
   const [videosInput, setVideosInput] = useState(videos);
-  const [videosInputErrorMessage, setVideosInputErrorMessage] = useState('');
 
   const [locationsInput, setLocationsInput] = useState(locations);
-  const [locationsInputErrorMessage, setLocationsInputErrorMessage] = useState('');
 
   const [customContentInput, setCustomContentInput] = useState(customContent || []);
 
@@ -128,9 +241,9 @@ const EditUserProfile = ({
 
 
   let personalInformationFields = [
-    {label:"Name", type: "text", id: "name", value: userNameInput, setter: setUserNameInput},
-    {label:"Date of Birth", type: "date", id: "dob", value: dobInput, setter: setDobInput},
-    {label:"Phone No.", type: "text", id: "phone_number", value: phoneNumberInput, setter: setPhoneNumberInput}
+    {label:"Name", type: "text", id: "name", value: userNameInput, setter: setUserNameInput, onChange: handleUserNameChange , onBlur: handleUserNameBlur, errorMessage: userNameInputErrorMessage},
+    {label:"Date of Birth", type: "date", id: "dob", value: dobInput, setter: setDobInput, onChange: handleDobChange, onBlur: handleDobBlur, errorMessage: dobInputErrorMessage},
+    {label:"Phone No.", type: "text", id: "phone_number", value: phoneNumberInput, setter: setPhoneNumberInput, onChange: handlePhoneNumberChange, onBlur: handlePhoneNumberBlur, errorMessage: phoneNumberInputErrorMessage}
   ];
 
 
@@ -256,7 +369,7 @@ const EditUserProfile = ({
               personalInformationFields = {personalInformationFields}
               headline={headlineInput} headlineSetter = {setHeadlineInput}
               connectLinks = {connectLinksInput} connectLinksSetter = {setConnectLinksInput}
-              websiteLink = {websiteLinkInput} websiteLinkSetter = {setWebsiteLinkInput}
+              websiteLink = {websiteLinkInput} websiteLinkSetter = {setWebsiteLinkInput} websiteLinkOnChange = {handleWebsiteLinkChange} websiteLinkOnBlur = {handleWebsiteLinkBlur} websiteLinkErrorMessage = {websiteLinkInputErrorMessage}
               bio = {bioInput} bioSetter = {setBioInput}
               videos = {videosInput} videosSetter = {setVideosInput}
               locations = {locationsInput} locationSetter={setLocationsInput}

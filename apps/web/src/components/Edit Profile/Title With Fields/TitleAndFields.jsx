@@ -17,6 +17,9 @@ const TitleAndFields = ({ title, fields }) => {
             id={field.id}
             value={field.value}
             setter={field.setter}
+            onChange={field.onChange}
+            onBlur={field.onBlur}
+            errorMessage={field.errorMessage}
           />
         ))}
       </div>
