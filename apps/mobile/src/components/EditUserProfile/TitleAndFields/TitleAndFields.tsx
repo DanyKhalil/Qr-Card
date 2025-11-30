@@ -39,6 +39,9 @@ const TitleAndFields = ({ title, fields = [] }: TitleAndFieldsProps) => {
                         id={field.id}
                         value={field.value}
                         setter={field.setter}
+                        onChange={field.onChange}
+                        errorMessage={field.errorMessage}
+                        onBlur={field.onBlur}
                         placeholder={field.placeholder}
                         secureTextEntry={field.secureTextEntry}
                         multiline={field.multiline}
