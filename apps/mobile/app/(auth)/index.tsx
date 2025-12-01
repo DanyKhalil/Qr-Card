@@ -8,6 +8,8 @@ import {
   ScrollView,
 } from "react-native";
 import { router } from "expo-router";
+import Welcome1 from "../../assets/images/Welcome1.png";
+import Welcome2 from "../../assets/images/Welcome2.png";
 
 const WelcomePage = ({ navigation }) => {
   const handleGetStarted = () => {
@@ -18,10 +20,10 @@ const WelcomePage = ({ navigation }) => {
     <View style={styles.container}>
       {/* Top Image */}
       
-      {/* <Image
-        source={require("../assets/images/icons/TopRightImage.png")}
+      { <Image
+        source={Welcome1}
         style={styles.topImage}
-      /> */}
+      /> }
 
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.title}>QR CARD</Text>
@@ -44,81 +46,83 @@ const WelcomePage = ({ navigation }) => {
       </ScrollView>
 
       {/* Bottom Image */}
-      {/* <Image
-        source={require("../assets/images/icons/WelcomeBackground.png")}
+      { <Image
+        source={Welcome2}
         style={styles.bottomImage}
-      /> */}
+      /> }
     </View>
   );
 };
 
 export default WelcomePage;
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "white",
+    display: 'flex',
+    flexDirection: 'column',
     justifyContent: "space-between",
     alignItems: "center",
   },
 
   topImage: {
     width: "100%",
-    height: 180,
-    resizeMode: "contain",
-    marginTop: 20,
+    height: undefined,
+    aspectRatio: 1.27, // adjust based on image ratio
+    resizeMode: "cover",
+    marginTop: 0,
   },
 
   content: {
     paddingHorizontal: 25,
-    paddingTop: 10,
+    paddingTop: 5,
     alignItems: "center",
   },
 
   title: {
-    fontSize: 42,
+    fontSize: 32, // smaller than before
     fontWeight: "700",
     color: "#3a9a60",
     textAlign: "center",
   },
 
   subtitle: {
-    fontSize: 22,
+    fontSize: 18, // smaller
     fontWeight: "500",
     color: "#3a9a60",
     textAlign: "center",
-    marginTop: 10,
-    lineHeight: 30,
+    marginTop: 5,
+    lineHeight: 24, // reduced
   },
 
   description: {
-    fontSize: 16,
+    fontSize: 14, // smaller
     color: "#333",
     textAlign: "center",
-    lineHeight: 24,
-    marginTop: 20,
-    maxWidth: 500,
+    lineHeight: 20, // reduced
+    marginTop: 10, // reduced spacing
+    maxWidth: 400,
   },
 
   button: {
     backgroundColor: "#3a9a60",
-    paddingVertical: 14,
-    paddingHorizontal: 40,
+    paddingVertical: 12,
+    paddingHorizontal: 35,
     borderRadius: 12,
-    marginTop: 25,
+    marginTop: 15,
     elevation: 4,
   },
 
   buttonText: {
     color: "white",
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "600",
   },
 
   bottomImage: {
     width: "100%",
-    height: 250,
-    resizeMode: "contain",
-    marginBottom: -10,
+    height: undefined,
+    aspectRatio: 2, // adjust based on image ratio
+    resizeMode: "cover",
+    marginTop: 0,
   },
 });
