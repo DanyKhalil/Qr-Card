@@ -11,7 +11,7 @@ const TitleAndLinks = ({ title, links, setter, addAction }) => {
 
   return (
     <div className="social-section">
-      <h2 className="section-title">{title}</h2>
+      <h2 className="title-section-title">{title}</h2>
       <div className="social-links">
         {links.map((social, index) => (
           <IconWithName 

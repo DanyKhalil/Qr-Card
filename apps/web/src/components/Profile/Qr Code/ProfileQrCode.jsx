@@ -41,7 +41,7 @@ const ProfileQrCode = ({ profileUrl }) => {
 
     return (
         <div className="qr-container" ref={qrRef}>
-            <h2 className="section-title">Share Profile</h2>
+            <h2 className="title-section-title">Share Profile</h2>
             <QRCodeCanvas 
                 value={profileUrl} 
                 size={qrSize}

@@ -87,6 +87,15 @@ Profile.associate = function(models) {
         foreignKey: "following_profile_id",
         as: "followers"
     });
+    Profile.hasMany(models.CustomContentType, {
+        foreignKey: "profile_id",
+        as: "custom_types"
+    });
+
+    Profile.hasMany(models.CustomContentItem, {
+        foreignKey: "profile_id",
+        as: "custom_items"
+    });
 };
 
 export default Profile;

@@ -27,16 +27,16 @@ export default function ProfileTab() {
             iconName: 'bar-chart-outline',
         },
         {
-            title: 'Settings',
+            title: 'Logout',
             description: 'App preferences and configuration',
-            onPress: () => router.push('/modal'), // Using your existing modal
-            iconName: 'settings-outline',
+            onPress: () => router.replace('/(auth)'),
+            iconName: 'log-out-outline',
         },
     ];
 
     return (
         <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 20 }}>
-            <Text style={{ color: '#666', marginBottom: 30 }}>Manage your account and settings</Text>
+            <Text style={{ color: '#666', marginBottom: 30 }}>Manage your account</Text>
 
             {menuItems.map((item, index) => (
                 <Pressable

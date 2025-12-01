@@ -15,7 +15,7 @@ const YoutubeVideos = ({
     return (
         <div className={`user-videos-section ${className}`}>
             <h2 className="user-videos-title">
-                Videos of <span className="user-name">{userName}</span>
+                Videos{/* Videos of <span className="user-name">{userName}</span> */}
             </h2>
             
             <div 

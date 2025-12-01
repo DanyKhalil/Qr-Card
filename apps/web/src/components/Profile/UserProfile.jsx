@@ -24,6 +24,7 @@ const UserProfile = ({
   followers = [],
   following = [],
   id = "User001",
+  customContent,
 }
 ) => {
   const getToken = () => {
@@ -68,6 +69,7 @@ const UserProfile = ({
               videos = {videos}
               locations = {locations}
               id = {id}
+              customContent = {customContent}
       >
       </TwoColumnLayout>
       <Footer />

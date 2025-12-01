@@ -108,6 +108,7 @@ const EditUserProfile = () => {
                 videos = {userData.videos_links}
                 locations = {userData.locations}
                 id = {id}
+                customContent={userData.custom_content}
             />
         </div>
     );
