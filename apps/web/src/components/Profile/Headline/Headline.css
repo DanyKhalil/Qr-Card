@@ -61,3 +61,27 @@
         padding: 1.25rem 0;
     }
 }
+
+.follow-stats {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.5rem;
+    font-weight: bold;
+    font-size: clamp(0.875rem, 2.5vw, 1rem);
+    color: #4a5568;
+}
+
+.follow-stats .followers {
+    color: #85c697; /* green like age */
+}
+
+.follow-stats .following {
+    color: #4a5568; /* normal text color */
+}
+
+@media (max-width: 480px) {
+    .follow-stats {
+        gap: 0.5rem;
+        font-size: 0.875rem;
+    }
+}

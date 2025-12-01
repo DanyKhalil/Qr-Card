@@ -21,6 +21,8 @@ const UserProfile = ({
             "https://youtu.be/video3"
           ],
   locations = [],
+  followers = [],
+  following = [],
   id = "User001",
 }
 ) => {
@@ -50,6 +52,8 @@ const UserProfile = ({
                                 dob={dob}
                                 headline={headline}
                                 id={id}
+                                followers={followers}
+                                following={following}
       />
       <TwoColumnLayout 
               separatorWidth="3px"
