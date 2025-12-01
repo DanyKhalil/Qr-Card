@@ -5,6 +5,7 @@ import SocialMedia from './socialMediaModel.js';
 import Video from './videoModel.js';
 import Location from './locationModel.js';
 import ProfileAnalytics from './profileAnalytics.js'
+import ProfileFollow from './ProfileFollow.js';
 
 const models = {
   User,
@@ -12,7 +13,8 @@ const models = {
   SocialMedia,
   Video,
   Location,
-  ProfileAnalytics
+  ProfileAnalytics,
+  ProfileFollow,
 };
 
 // Set up associations
@@ -22,4 +24,4 @@ Object.keys(models).forEach(modelName => {
   }
 });
 
-export { sequelize, User, Profile, SocialMedia, Video, Location, ProfileAnalytics };
+export { sequelize, User, Profile, SocialMedia, Video, Location, ProfileAnalytics, ProfileFollow };
