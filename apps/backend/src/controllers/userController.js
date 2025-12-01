@@ -1,4 +1,4 @@
-import { User, Profile, SocialMedia, Video, Location } from '../models/index.js';
+import { User, Profile, SocialMedia, Video, Location, ProfileFollow } from '../models/index.js';
 
 // ---- To get all the users ----
 export const getUsers = async (req, res) => {
@@ -40,12 +40,11 @@ export const deleteUser = async (req, res) => {
   }
 };
 
-// ---- To get user profile with all its detials ----
 export const getUserProfile = async (req, res) => {
   try {
     const { id } = req.params;
 
-    /// here i am findng a user using hid id
+    // find user and profile
     const user = await User.findOne({
       where: { id },
       include: [
@@ -67,8 +66,8 @@ export const getUserProfile = async (req, res) => {
               model: Location,
               as: 'locations',
               attributes: [
-                'id', 'title', 'country', 'state', 'city', 'street', 'building', 
-                'floor', 'maps_url', 'latitude', 'longitude'
+                'id', 'title', 'country', 'state', 'city', 'street',
+                'building', 'floor', 'maps_url', 'latitude', 'longitude'
               ]
             }
           ]
@@ -76,15 +75,57 @@ export const getUserProfile = async (req, res) => {
       ]
     });
 
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
+    if (!user) return res.status(404).json({ error: "User not found" });
+    if (!user.profile) return res.status(404).json({ error: "Profile not found for this user" });
 
-    if (!user.profile) {
-      return res.status(404).json({ error: "Profile not found for this user" });
-    }
+    const profileId = user.profile.id;
 
-    //  if all are alright, we format the json, so the front end can use it directky
+    // ---------------------------------------
+    // ⭐ ADD FOLLOWERS & FOLLOWING WITH USER INFO
+    // ---------------------------------------
+
+    // Followers: profiles that FOLLOW this profile
+    const followers = await ProfileFollow.findAll({
+      where: { following_profile_id: profileId },
+      include: [
+        {
+          model: Profile,
+          as: "follower",
+          attributes: ["id", "profile_pic_url", "headline", "bio"],
+          include: [
+            {
+              model: User,
+              as: "user",
+              attributes: ["id", "name"]
+            }
+          ]
+        }
+      ]
+    });
+
+    // Following: profiles this profile is FOLLOWING
+    const following = await ProfileFollow.findAll({
+      where: { follower_profile_id: profileId },
+      include: [
+        {
+          model: Profile,
+          as: "following",
+          attributes: ["id", "profile_pic_url", "headline", "bio"],
+          include: [
+            {
+              model: User,
+              as: "user",
+              attributes: ["id", "name"]
+            }
+          ]
+        }
+      ]
+    });
+
+    // ---------------------------------------
+    // format to JSON-friendly structure
+    // ---------------------------------------
+
     const userProfile = {
       name: user.name,
       cover_photo_url: user.profile.cover_pic_url,
@@ -94,34 +135,57 @@ export const getUserProfile = async (req, res) => {
       bio: user.profile.bio,
       phone_number: user.profile.phone_number ? [user.profile.phone_number] : [],
       email: user.email ? [user.email] : [],
-      social_media_links: user.profile.social_media?.map(sm => ({
-        id: sm.id,
-        url: sm.url,
-        display_order: sm.display_order
-      })) || [],
+      social_media_links:
+        user.profile.social_media?.map(sm => ({
+          id: sm.id,
+          url: sm.url,
+          display_order: sm.display_order
+        })) || [],
       website_link: user.profile.website,
-      videos_links: user.profile.videos?.map(video => ({
-        id: video.id,
-        video_url: video.video_url,
-        title: video.title,
-        description: video.description,
-        display_order: video.display_order
-      })) || [],
-      locations: user.profile.locations?.map(location => ({
-        id: location.id,
-        title: location.title,
-        country: location.country,
-        state: location.state,
-        city: location.city,
-        street: location.street,
-        building: location.building,
-        floor: location.floor,
-        maps_url: location.maps_url,
-        coordinates: location.latitude && location.longitude ? {
-          latitude: location.latitude,
-          longitude: location.longitude
-        } : null
-      })) || []
+      videos_links:
+        user.profile.videos?.map(video => ({
+          id: video.id,
+          video_url: video.video_url,
+          title: video.title,
+          description: video.description,
+          display_order: video.display_order
+        })) || [],
+      locations:
+        user.profile.locations?.map(location => ({
+          id: location.id,
+          title: location.title,
+          country: location.country,
+          state: location.state,
+          city: location.city,
+          street: location.street,
+          building: location.building,
+          floor: location.floor,
+          maps_url: location.maps_url,
+          coordinates:
+            location.latitude && location.longitude
+              ? { latitude: location.latitude, longitude: location.longitude }
+              : null
+        })) || [],
+
+      followers: followers.map(f => ({
+        follow_id: f.id,
+        profile_id: f.follower?.id,
+        user_id: f.follower?.user?.id,
+        name: f.follower?.user?.name,
+        profile_pic_url: f.follower?.profile_pic_url,
+        headline: f.follower?.headline,
+        bio: f.follower?.bio
+      })),
+
+      following: following.map(f => ({
+        follow_id: f.id,
+        profile_id: f.following?.id,
+        user_id: f.following?.user?.id,
+        name: f.following?.user?.name,
+        profile_pic_url: f.following?.profile_pic_url,
+        headline: f.following?.headline,
+        bio: f.following?.bio
+      }))
     };
 
     res.json(userProfile);
