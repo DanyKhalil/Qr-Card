@@ -54,21 +54,38 @@ Profile.associate = function(models) {
         foreignKey: 'user_id',
         as: 'user'
     });
+
     Profile.hasMany(models.SocialMedia, {
         foreignKey: 'profile_id',
         as: 'social_media'
     });
+
     Profile.hasMany(models.Video, {
         foreignKey: 'profile_id',
         as: 'videos'
     });
+
     Profile.hasMany(models.Location, {
         foreignKey: 'profile_id',
         as: 'locations'
     });
+
     Profile.hasMany(models.ProfileAnalytics, {
         foreignKey: 'profile_id',
-        as: 'analytics' // visits made to this profile
+        as: 'analytics'
+    });
+
+
+    // Profiles *following* other profiles
+    Profile.hasMany(models.ProfileFollow, {
+        foreignKey: "follower_profile_id",
+        as: "following"
+    });
+
+    // Profiles *being followed* by others
+    Profile.hasMany(models.ProfileFollow, {
+        foreignKey: "following_profile_id",
+        as: "followers"
     });
 };
 
