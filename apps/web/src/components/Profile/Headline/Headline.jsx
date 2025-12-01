@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Headline.css';
 import FollowButton from '../FollowButton/FollowButton';
 
@@ -9,8 +10,10 @@ const Headline = ({
     headline,
     followers = [],
     following = [],
-    onProfileRefresh // Add this prop to refresh profile data
+    onProfileRefresh // callback to refresh profile data
 }) => {
+
+    const navigate = useNavigate();
 
     const getCurrentUser = () => {
         const userStr = localStorage.getItem("user");
@@ -39,6 +42,15 @@ const Headline = ({
 
     const age = calculateAge(dob);
 
+    // Navigate to profile list page
+    const handleFollowersClick = () => {
+        navigate('/profile-list', { state: { title: 'Followers', profiles: followers } });
+    };
+
+    const handleFollowingClick = () => {
+        navigate('/profile-list', { state: { title: 'Following', profiles: following } });
+    };
+
     return (
         <div className="profile-header">
             <div className="name-age-container">
@@ -49,8 +61,12 @@ const Headline = ({
             <p className="headline">{headline}</p>
 
             <div className="follow-stats">
-                <span className="followers">{followers.length} Follower{followers.length !== 1 ? 's' : ''}</span>
-                <span className="following">{following.length} Following</span>
+                <span className="followers" onClick={handleFollowersClick} style={{cursor: 'pointer'}}>
+                    {followers.length} Follower{followers.length !== 1 ? 's' : ''}
+                </span>
+                <span className="following" onClick={handleFollowingClick} style={{cursor: 'pointer'}}>
+                    {following.length} Following
+                </span>
             </div>
 
             {loggedInUserId && loggedInUserId !== id && (
@@ -59,7 +75,7 @@ const Headline = ({
                     profileId={id}
                     followers={followers}
                     following={following}
-                    onFollowUpdate={onProfileRefresh} // Pass refresh callback
+                    onFollowUpdate={onProfileRefresh} // callback to refresh profile
                 />
             )}
         </div>
