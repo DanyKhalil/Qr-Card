@@ -5,6 +5,7 @@ import SocialMedia from './socialMediaModel.js';
 import Video from './videoModel.js';
 import Location from './locationModel.js';
 import ProfileAnalytics from './profileAnalytics.js'
+import ProfileFollow from './ProfileFollow.js';
 import CustomContentType from './customeContentType.js';
 import CustomContentItem from './customContentItem.js';
 import CustomContentField from './customContentField.js';
@@ -17,6 +18,7 @@ const models = {
   Video,
   Location,
   ProfileAnalytics,
+  ProfileFollow,
   CustomContentType,
   CustomContentItem,
   CustomContentField,
@@ -30,6 +32,6 @@ Object.keys(models).forEach(modelName => {
   }
 });
 
-export { sequelize, User, Profile, SocialMedia, Video, Location, ProfileAnalytics,  
+export { sequelize, User, Profile, SocialMedia, Video, Location, ProfileAnalytics,  ProfileFollow,
         CustomContentType, CustomContentItem, CustomContentField, CustomContentValue,
 };

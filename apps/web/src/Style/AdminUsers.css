@@ -1,48 +1,56 @@
 /* Page container */
 .admin-users-page {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
     font-family: 'Arial', sans-serif;
     background-color: #ffffff;
-    min-height: 100vh;
-    padding-top: 100px; /* space for header */
-    padding-bottom: 60px; /* space for footer */
+    padding-top: 100px;
     color: #333;
 }
 
-/* Main content container */
+
+
+
+/* Main content container — UPDATED */
 .admin-users-container {
     max-width: 1200px;
     margin: 0 auto;
-    border-radius: 16px;
     padding: 32px;
+    margin-bottom: 20px;
+    margin-top:15px;
+    border-radius: 16px;
     box-shadow: 0 6px 30px rgba(0,0,0,0.1);
     background-color: #fff;
     border: 1px solid hsl(16, 100%, 67%);
+    height: auto;          /* 💚 grow with content */
+    width: 100%;           /* keep full width */
+    box-sizing: border-box;
 }
+
 
 /* Page title */
 .admin-users-container h1 {
     font-size: clamp(28px, 5vw, 36px);
     text-align: center;
     margin-bottom: 32px;
-    color: #BCF4CB;
-    -webkit-text-stroke: 1px black;
+    color: #ff7f50;
     paint-order: stroke fill;
 }
 
 /* Search + Add button container */
 .admin-search-add-container {
     display: flex;
-    justify-content: center;
+    justify-content: space-between; /* search left, button right */
     align-items: center;
-    gap: 16px;
-    flex-wrap: wrap;
     margin-bottom: 24px;
+    flex-wrap: wrap; /* wrap on smaller screens */
+    gap: 16px;
 }
 
 /* Search box */
 .admin-search {
-    flex: 1;
-    min-width: 200px;
+    flex: 1 1 300px; /* grow/shrink, minimum width 300px */
     max-width: 400px;
     padding: 12px 16px;
     border-radius: 12px;
@@ -57,6 +65,14 @@
     border-color: hsl(16, 100%, 67%);
 }
 
+
+.admin-add-button-container {
+    display: flex;
+    justify-content: flex-end; /* align button to the right */
+    margin-top: 24px;          /* space above the button */
+}
+
+
 /* Add User button */
 .admin-add-button {
     padding: 12px 24px;
@@ -66,6 +82,8 @@
     border-radius: 12px;
     cursor: pointer;
     transition: all 0.3s ease-in-out;
+    
+    
 }
 
 .admin-add-button:hover {
@@ -74,15 +92,21 @@
 }
 
 /* Users table */
+.admin-users-table-container {
+    overflow-x: auto; /* allow horizontal scroll on small screens */
+    border-radius: 12px;
+    border: 3px solid hsl(16, 100%, 67%);
+}
+
 .admin-users-table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate; /* allow border radius to work */
+    border-spacing: 0;
     font-size: 16px;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     background-color: #fff;
-    border: 3px solid hsl(16, 100%, 67%);
+    border-radius: 12px;      /* round corners */
+    overflow: hidden;         /* clip the corners */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
 
 /* Table header */
@@ -106,6 +130,29 @@
     background-color: rgba(255,111,60,0.1);
 }
 
+/* Highlight editing row */
+.admin-users-table tbody tr.editing {
+    background-color: rgba(188, 244, 203, 0.3);
+}
+
+/* Table input fields */
+.admin-users-table input[type="text"],
+.admin-users-table input[type="email"],
+.admin-users-table input[type="checkbox"] {
+    padding: 6px 8px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    width: 100%;
+    box-sizing: border-box;
+    transition: border 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.admin-users-table input:focus {
+    border-color: hsl(16, 100%, 67%);
+    box-shadow: 0 0 5px rgba(255,111,60,0.4);
+    outline: none;
+}
+
 /* Profile image */
 .admin-profile-pic {
     width: 50px;
@@ -123,7 +170,8 @@
     cursor: pointer;
     font-weight: bold;
     border: none;
-    transition: all 0.3s ease-in-out;
+    margin-right: 6px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 .admin-update-button {
@@ -133,6 +181,7 @@
 
 .admin-update-button:hover {
     background-color: #45a049;
+    transform: translateY(-1px);
 }
 
 .admin-delete-button {
@@ -142,6 +191,14 @@
 
 .admin-delete-button:hover {
     background-color: #da190b;
+    transform: translateY(-1px);
+}
+
+/* Disabled button state */
+.admin-update-button:disabled,
+.admin-delete-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 
 /* Responsive adjustments */
@@ -171,4 +228,23 @@
         width: 40px;
         height: 40px;
     }
+
+    /* Stack search above button */
+    .admin-search-add-container {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .admin-add-button {
+        margin-left: 0;
+        width: 100%;
+    }
+}
+
+.admin-users-count {
+    font-size: 19px;
+    font-weight: bold;       /* medium weight */
+    color: #000;             /* clean black */
+    margin-bottom: 18px;
+    color:#ff7f50 ;  /* spacing from search bar */
 }

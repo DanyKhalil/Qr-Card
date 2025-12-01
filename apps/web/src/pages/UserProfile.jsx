@@ -121,6 +121,8 @@ const UserProfile = () => {
                 bio = {userData.bio}
                 videos = {userData.videos_links}
                 locations = {userData.locations}
+                followers = {userData.followers}
+                following = {userData.following}
                 id = {id}
                 customContent = {userData.custom_content}
             />
