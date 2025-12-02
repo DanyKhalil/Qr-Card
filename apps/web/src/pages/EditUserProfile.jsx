@@ -109,6 +109,7 @@ const EditUserProfile = () => {
                 locations = {userData.locations}
                 id = {id}
                 customContent={userData.custom_content}
+                QrCodeColor = {userData.qr_code_color}
             />
         </div>
     );

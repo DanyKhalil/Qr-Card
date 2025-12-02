@@ -278,7 +278,8 @@ export const updateUserProfile = async (req, res) => {
       userName, dob, phoneNumber, 
       headline, bio, websiteUrl, 
       connectLinks, videos, locations, customContent,
-      coverPhotoPath, profilePhotoPath
+      coverPhotoPath, profilePhotoPath,
+      qrCodeColor
     } = req.body;
 
     if (!id) {
@@ -386,6 +387,7 @@ export const updateUserProfile = async (req, res) => {
       website: websiteUrl,
       cover_pic_url: finalCoverPhotoPath,
       profile_pic_url: finalProfilePhotoPath,
+      qr_code_color: qrCodeColor || "#000000"
     })
 
     // Social media links update

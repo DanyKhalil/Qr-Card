@@ -6,7 +6,7 @@ import YoutubePreview from '../../Profile/Youtube Preview/YoutubePreview';
 import YoutubeVideos from '../Youtube Videos/YoutubeVideos';
 import AddressCard from '../../Profile/Address Card/AddressCard';
 import Locations from '../../Profile/Locations/Locations';
-import ProfileQrCode from '../../Profile/Qr Code/ProfileQrCode';
+import ProfileQrCode from '../Qr Code/ProfileQrCode';
 import TitleAndFields from '../Title With Fields/TitleAndFields';
 import LabelWithTextArea from '../Label With Text Area/LabelWithTextArea';
 import YouTubeCard from '../Youtube Card/YoutubeCard';
@@ -35,7 +35,7 @@ const TwoColumnLayout = ({
     videosSetter,
     locationSetter,
     customContentSetter,
-    QrCodeColor="#000",
+    QrCodeColor="#000", QrCodeColorSetter,
 
     addSocialMediaModalVisibiltySetter,
     addVideoModalVisibiltySetter,
@@ -83,7 +83,7 @@ const TwoColumnLayout = ({
                     setter={connectLinksSetter} 
                     addAction={()=>addSocialMediaModalVisibiltySetter(true)}
                 />
-                <ProfileQrCode profileUrl={profileUrlForQrCode} color={QrCodeColor}/>
+                <ProfileQrCode profileUrl={profileUrlForQrCode} color={QrCodeColor} setter={QrCodeColorSetter}/>
             </div>
             
             <div 
