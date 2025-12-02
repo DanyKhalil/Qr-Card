@@ -125,6 +125,7 @@ const UserProfile = () => {
                 following = {userData.following}
                 id = {id}
                 customContent = {userData.custom_content}
+                fetchUserProfile = {fetchUserProfile}
             />
         </div>
     );

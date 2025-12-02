@@ -25,6 +25,7 @@ const UserProfile = ({
   following = [],
   id = "User001",
   customContent,
+  fetchUserProfile,
 }
 ) => {
   const getToken = () => {
@@ -55,6 +56,7 @@ const UserProfile = ({
                                 id={id}
                                 followers={followers}
                                 following={following}
+                                fetchUserProfile={fetchUserProfile}
       />
       <TwoColumnLayout 
               separatorWidth="3px"

@@ -11,8 +11,8 @@
 }
 
 .profile-image {
-  width: 80px;
-  height: 80px;
+  width: 150px;
+  height: 150px;
   border-radius: 50%;
   object-fit: cover;
   margin-bottom: 12px;
@@ -39,7 +39,7 @@
   font-size: 18px;
   font-weight: 600;
   color: #111827;
-  margin-bottom: 4px;
+  margin-bottom: 10px;
   text-align: center;
 }
 

@@ -14,11 +14,11 @@ const ProfileCard = ({ id, name, title, imageUrl }) => {
             alt={name}
           />
         ) : (
-          <IoPersonOutline size={40} />
+          <IoPersonOutline size={80} />
         )}
       </div>
       <h2 className="profile-name">{name}</h2>
-      <p className="profile-title">{title}</p>
+      {/* <p className="profile-title">{title}</p> */}
       <button className="profile-button" onClick={()=>navigate(`/profile/${id}`)}>View Profile</button>
     </div>
   );

@@ -10,7 +10,8 @@ const Headline = ({
     headline,
     followers = [],
     following = [],
-    onProfileRefresh // callback to refresh profile data
+    onProfileRefresh, // callback to refresh profile data
+    fetchUserProfile,
 }) => {
 
     const navigate = useNavigate();
@@ -76,6 +77,7 @@ const Headline = ({
                     followers={followers}
                     following={following}
                     onFollowUpdate={onProfileRefresh} // callback to refresh profile
+                    fetchUserProfile={fetchUserProfile}
                 />
             )}
         </div>

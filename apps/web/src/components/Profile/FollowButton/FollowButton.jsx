@@ -7,7 +7,8 @@ const FollowButton = ({
   profileId,
   followers = [],
   following = [],
-  onFollowUpdate // Add callback prop to refresh parent component
+  onFollowUpdate, // Add callback prop to refresh parent component
+  fetchUserProfile,
 }) => {
   const [isFollower, setIsFollower] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
@@ -65,8 +66,11 @@ const FollowButton = ({
       }
       
       // Call the callback to refresh parent component data
-      if (onFollowUpdate) {
-        onFollowUpdate();
+      // if (onFollowUpdate) {
+      //   onFollowUpdate();
+      // }
+      if (fetchUserProfile) {
+        fetchUserProfile(profileId)
       }
       
     } catch (error) {
