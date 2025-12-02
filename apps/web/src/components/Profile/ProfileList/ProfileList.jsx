@@ -1,14 +1,149 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { IoPersonOutline } from "react-icons/io5";
-import './ProfileList.css'; // reuse most of your previous styles
+import './ProfileList.css';
 import { useNavigate } from "react-router-dom";
+import { profileFollowApi } from "../../../services/profileFollowApi";
 
 const ProfileList = ({ profiles = [], onProfileClick = () => {} }) => {
   const navigate = useNavigate();
+  
+  // States for current user's follow data
+  const [followers, setFollowers] = useState([]);
+  const [following, setFollowing] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const getCurrentUser = () => {
+    const userStr = localStorage.getItem("user");
+    if (!userStr) return null;
+    try {
+      return JSON.parse(userStr);
+    } catch (error) {
+      console.error("Error parsing user data:", error);
+      return null;
+    }
+  };
+  
+  const loggedInUserId = getCurrentUser()?.id;
+
+  // Fetch current user's followers and following on component mount
+  useEffect(() => {
+    const fetchFollowData = async () => {
+      if (!loggedInUserId) return;
+      
+      setLoading(true);
+      setError(null);
+      
+      try {
+        const data = await profileFollowApi.getUserFollowStatus(loggedInUserId);
+        setFollowers(data.followers || []);
+        setFollowing(data.following || []);
+        console.log("Loaded follow data:", {
+          followersCount: data.followers?.length || 0,
+          followingCount: data.following?.length || 0
+        });
+      } catch (err) {
+        console.error("Error fetching follow data:", err);
+        setError("Failed to load follow data");
+        setFollowers([]);
+        setFollowing([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFollowData();
+  }, [loggedInUserId]);
+
+  // Helper function to check follow relationship for a specific profile
+  const getRelationshipStatus = (profileUserId) => {
+    if (!loggedInUserId || loggedInUserId === profileUserId) return null;
+    
+    // Check if current user follows this profile
+    const isFollowing = following.some(f => f.user_id === profileUserId);
+    // Check if this profile follows current user
+    const isFollower = followers.some(f => f.user_id === profileUserId);
+    
+    return { isFollowing, isFollower };
+  };
+
+  // Determine button label based on relationship
+  const getButtonLabel = (isFollowing, isFollower) => {
+    if (isFollowing && isFollower) return "Friends";
+    if (isFollowing) return "Unfollow";
+    if (isFollower) return "Follow Back";
+    return "Follow";
+  };
+
+  // Handle follow/unfollow action
+  const handleFollowAction = async (profileUserId, currentIsFollowing) => {
+    if (!loggedInUserId) {
+      alert("Please login to follow users");
+      return;
+    }
+
+    try {
+      if (currentIsFollowing) {
+        // Unfollow
+        await profileFollowApi.unfollowUser(loggedInUserId, profileUserId);
+        // Update local state - remove from following
+        setFollowing(prev => prev.filter(f => f.user_id !== profileUserId));
+        // If they were friends, update followers status
+        const wasFollower = followers.some(f => f.user_id === profileUserId);
+        if (wasFollower) {
+          // They still follow us, so just update local state
+          setFollowers(prev => prev.filter(f => f.user_id !== profileUserId));
+        }
+      } else {
+        // Follow
+        await profileFollowApi.followUser(loggedInUserId, profileUserId);
+        // Add to following (we don't have full profile data, so add a placeholder)
+        const profileToFollow = profiles.find(p => p.user_id === profileUserId);
+        if (profileToFollow) {
+          setFollowing(prev => [...prev, {
+            user_id: profileUserId,
+            name: profileToFollow.name,
+            profile_pic_url: profileToFollow.profile_pic_url,
+            headline: profileToFollow.headline
+          }]);
+        }
+      }
+    } catch (err) {
+      console.error("Error in follow action:", err);
+      alert(err.response?.data?.error || "Something went wrong");
+    }
+  };
+
   if (!profiles.length) {
     return (
       <div className="profile-visits-table no-visits">
         <p>No profiles to display</p>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="profile-visits-table">
+        <div className="table-header">
+          <h3>Profiles</h3>
+        </div>
+        <div className="loading-state">
+          <p>Loading follow data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="profile-visits-table">
+        <div className="table-header">
+          <h3>Profiles</h3>
+        </div>
+        <div className="error-state">
+          <p className="error-message">{error}</p>
+        </div>
       </div>
     );
   }
@@ -21,32 +156,49 @@ const ProfileList = ({ profiles = [], onProfileClick = () => {} }) => {
       </div>
 
       <div className="visits-container">
-        {profiles.map((profile) => (
-          <div key={profile.follow_id} className="visit-card">
-            <div 
-              className="visitor-info"
-              onClick={() => navigate(`/profile/${profile.user_id}`)}
-            >
-              {profile.profile_pic_url ? (
-                <img
-                  src={profile.profile_pic_url}
-                  alt={profile.name}
-                  className="visitor-avatar"
-                />
-              ) : (
-                <div className="anonymous-avatar">
-                  <IoPersonOutline />
-                </div>
-              )}
+        {profiles.map((profile) => {
+          const relationship = getRelationshipStatus(profile.user_id);
+          const buttonLabel = relationship ? getButtonLabel(relationship.isFollowing, relationship.isFollower) : null;
+          
+          return (
+            <div key={profile.follow_id || profile.user_id} className="visit-card">
+              <div 
+                className="visitor-info"
+                onClick={() => navigate(`/profile/${profile.user_id}`)}
+              >
+                {profile.profile_pic_url ? (
+                  <img
+                    src={profile.profile_pic_url}
+                    alt={profile.name}
+                    className="visitor-avatar"
+                  />
+                ) : (
+                  <div className="anonymous-avatar">
+                    <IoPersonOutline />
+                  </div>
+                )}
 
-              <div className="visitor-details">
-                <h4 className="visitor-name">{profile.name}</h4>
-                {profile.headline && <p className="visit-time">{profile.headline}</p>}
-                {/* {profile.bio && <p className="qr-badge">{profile.bio}</p>} */}
+                <div className="visitor-details">
+                  <h4 className="visitor-name">{profile.name}</h4>
+                  {profile.headline && <p className="visit-time">{profile.headline}</p>}
+                </div>
               </div>
+              
+              {/* Follow button (only if not viewing own profile) */}
+              {relationship && loggedInUserId !== profile.user_id && (
+                <button
+                  className={`follow-button ${buttonLabel?.toLowerCase().replace(' ', '-')}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleFollowAction(profile.user_id, relationship.isFollowing);
+                  }}
+                >
+                  {buttonLabel}
+                </button>
+              )}
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

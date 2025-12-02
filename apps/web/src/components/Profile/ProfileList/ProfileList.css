@@ -46,6 +46,7 @@
 .visit-card {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   padding: 18px;
   border-radius: 12px;
   border: 1px solid #e2e8f0;
@@ -121,18 +122,115 @@
   white-space: nowrap;
 }
 
+/* Follow button */
+.follow-button {
+  padding: 8px 20px;
+  border-radius: 20px;
+  border: 2px solid transparent;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 110px;
+  text-align: center;
+  margin-left: 15px;
+  flex-shrink: 0;
+}
+
+/* Button states */
+.follow-button.follow {
+  background-color: #64A377; /* Your green color */
+  color: white;
+  border-color: #64A377;
+}
+
+.follow-button.follow:hover {
+  background-color: #4A8D5C;
+  border-color: #4A8D5C;
+}
+
+.follow-button.unfollow {
+  background-color: white;
+  color: #f44336;
+  border-color: #f44336;
+}
+
+.follow-button.unfollow:hover {
+  background-color: #f44336;
+  color: white;
+}
+
+.follow-button.follow-back {
+  background-color: #2196F3;
+  color: white;
+  border-color: #2196F3;
+}
+
+.follow-button.follow-back:hover {
+  background-color: #0b7dda;
+  border-color: #0b7dda;
+}
+
+.follow-button.friends {
+  background-color: #ff9800;
+  color: white;
+  border-color: #ff9800;
+}
+
+.follow-button.friends:hover {
+  background-color: #e68900;
+  border-color: #e68900;
+}
+
+.follow-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Loading and error states */
+.loading-state, 
+.error-state {
+  padding: 40px;
+  text-align: center;
+  color: #666;
+  background: #f8f9fa;
+  border-radius: 12px;
+  margin-top: 20px;
+}
+
+.error-message {
+  color: #f44336;
+  font-weight: 500;
+}
+
 /* Empty state */
 .no-visits {
   text-align: center;
   padding: 50px 20px;
   color: #718096;
   font-size: 16px;
+  background: #f8f9fa;
+  border-radius: 12px;
 }
 
 /* Responsive */
 @media (max-width: 600px) {
   .visit-card {
     padding: 14px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .visitor-info {
+    width: 100%;
+  }
+  
+  .follow-button {
+    margin-left: 0;
+    width: 100%;
+    min-width: auto;
+    margin-top: 10px;
   }
 
   .visitor-info {
@@ -154,14 +252,20 @@
   .visitor-info {
     flex-direction: column;
     text-align: center;
+    gap: 8px;
   }
 
   .visitor-details {
     width: 100%;
+    text-align: center;
   }
 
   .visitor-name,
   .visit-time {
     white-space: normal;
+  }
+  
+  .visit-card {
+    align-items: center;
   }
 }
