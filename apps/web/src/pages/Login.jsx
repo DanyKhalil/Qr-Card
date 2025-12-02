@@ -49,6 +49,10 @@ const Form = () => {
     navigate('/registration');
   };
 
+  const handleContinueWithoutAccount = () => {
+    navigate('/Filtering');
+  };
+
   const handleLogin = async (e) => {
     e.preventDefault();
 
@@ -114,9 +118,20 @@ const Form = () => {
               required
             />
 
-            <button className='primary-button' type='submit'>
-              Login
-            </button>
+            {/* Buttons Container */}
+            <div className="buttons-container">
+              <button className="login-button" type='submit'>
+                Login
+              </button>
+
+              <button 
+                className="continue-button"
+                onClick={handleContinueWithoutAccount}
+                type="button"
+              >
+                Continue without account
+              </button>
+            </div>
           </form>
         </div>
 

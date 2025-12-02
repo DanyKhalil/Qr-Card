@@ -21,9 +21,10 @@ const RegistrationForm = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState("");
   const [isChecking, setIsChecking] = useState(true);
+  const [passwordError, setPasswordError] = useState("");
   const navigate = useNavigate();
 
   // Check if user is already logged in
@@ -47,15 +48,28 @@ const RegistrationForm = () => {
     navigate('/login');
   };
 
+  const handleContinueWithoutAccount = () => {
+    navigate('/Filtering');
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Validate passwords match
+    if (password !== confirmPassword) {
+      setPasswordError("Passwords do not match");
+      return;
+    }
+
+    // Clear any previous password error
+    setPasswordError("");
 
     try {
       await axios.post("http://localhost:5050/api/auth/register", {
         name,
         email,
         password,
-        role
+        role: "client"
       });
 
       setMessage("Registration successful! Please check your email to verify your account.");
@@ -114,20 +128,33 @@ const RegistrationForm = () => {
               required
             />
 
-            <select
-              className="dropdown-input"
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
+            <input
+              className="form-input"
+              type="password"
+              placeholder="Confirm Password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
               required
-            >
-              <option value="" disabled>Select Role</option>
-              <option value="client">Client</option>
-              <option value="company">Company</option>
-            </select>
+            />
 
-            <button className="primary-button" type="submit">
-              Sign up
-            </button>
+            {passwordError && (
+              <p className="error-message">{passwordError}</p>
+            )}
+
+            {/* Buttons Container */}
+            <div className="buttons-container">
+              <button className="signup-button" type="submit">
+                Sign up
+              </button>
+
+              <button 
+                className="continue-button"
+                onClick={handleContinueWithoutAccount}
+                type="button"
+              >
+                Continue without account
+              </button>
+            </div>
           </form>
 
           <p className={message.includes("successful") ? "success-message" : "error-message"}>

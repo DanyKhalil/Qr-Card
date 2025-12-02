@@ -27,8 +27,6 @@ const ProfileQrCode = ({ profileUrl, color="#000000", setter }) => {
 
     // Color change handler
     const handleColorChange = (e) => {
-        console.log("Color changed to:", e.target.value);
-        console.log("Setter function:", setter);
         setter(e.target.value);
     };
 
