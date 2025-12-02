@@ -49,7 +49,7 @@ const TwoColumnLayout = ({
         }).filter(Boolean);
     }
 
-    const profileUrlForQrCode = `${window.location.origin}/profile/${id}`;
+    const profileUrlForQrCode = `${window.location.origin}/profile/${id}?qrScan=true`;
 
     return (
         <div className={`two-column-layout ${className}`}>

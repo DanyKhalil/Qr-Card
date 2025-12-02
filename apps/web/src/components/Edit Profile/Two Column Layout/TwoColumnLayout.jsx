@@ -96,7 +96,7 @@ const TwoColumnLayout = ({
             />
             
             <div className="column right-column">
-                <TitleAndFields title="Profile Summary" fields={[{label:"Headline", type:"text", id: "headline", value: headline, setter: headlineSetter}]}/>
+                <TitleAndFields title="Profile Summary" fields={[{label:"Headline", type:"text", id: "headline", value: headline, setter: headlineSetter, onChange: (e)=> headlineSetter(e.target.value)}]}/>
                 <LabelWithTextArea label="Description" id="bio" value={bio} setter={bioSetter}/>
                 <TitleAndFields 
                     title="Website" 

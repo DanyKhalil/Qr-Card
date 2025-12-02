@@ -1,8 +1,10 @@
 import React from "react";
 import { IoPersonOutline } from "react-icons/io5";
 import './ProfileList.css'; // reuse most of your previous styles
+import { useNavigate } from "react-router-dom";
 
 const ProfileList = ({ profiles = [], onProfileClick = () => {} }) => {
+  const navigate = useNavigate();
   if (!profiles.length) {
     return (
       <div className="profile-visits-table no-visits">
@@ -23,7 +25,7 @@ const ProfileList = ({ profiles = [], onProfileClick = () => {} }) => {
           <div key={profile.follow_id} className="visit-card">
             <div 
               className="visitor-info"
-              onClick={() => onProfileClick(profile.user_id)}
+              onClick={() => navigate(`/profile/${profile.user_id}`)}
             >
               {profile.profile_pic_url ? (
                 <img
@@ -40,7 +42,7 @@ const ProfileList = ({ profiles = [], onProfileClick = () => {} }) => {
               <div className="visitor-details">
                 <h4 className="visitor-name">{profile.name}</h4>
                 {profile.headline && <p className="visit-time">{profile.headline}</p>}
-                {profile.bio && <p className="qr-badge">{profile.bio}</p>}
+                {/* {profile.bio && <p className="qr-badge">{profile.bio}</p>} */}
               </div>
             </div>
           </div>
