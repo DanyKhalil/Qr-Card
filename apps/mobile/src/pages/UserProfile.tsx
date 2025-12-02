@@ -9,11 +9,12 @@ import Button from '../components/UserProfile/Button/Button';
 import { DEVELOPMENT_CONFIG } from '../config/development';
 // import * as Contacts from "expo-contacts";
 import Contacts from 'react-native-contacts'
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 
-const UserProfilePage = () => {
-    const { id, qrScan } = useLocalSearchParams();
+const UserProfilePage = ({id}) => {
+    const { qrScan } = useLocalSearchParams();
     const [userData, setUserData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
