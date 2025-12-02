@@ -1,29 +1,49 @@
 import { View, Text, Pressable, ScrollView } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-// import { useAuth } from '@/hooks/useAuth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useEffect, useState } from 'react';
 
 export default function ProfileTab() {
-    // const { user } = useAuth();  // i must change it later to retrieve logged in usre
-    const user = {id:'User001'}; // jsut for testing
+    const [userId, setUserId] = useState(null);
+    const [loading, setLoading] = useState(true);
     
+    useEffect(() => {
+        async function loadUserFromStorage() {
+            try {
+                const userString = await AsyncStorage.getItem("user");
+                if (userString) {
+                    const user = JSON.parse(userString);
+                    console.log("User from storage (ProfileTab):", user);
+                    setUserId(user.id);
+                }
+            } catch (error) {
+                console.error("Error loading user data from storage:", error);
+            } finally {
+                setLoading(false);
+            }
+        }
+        
+        loadUserFromStorage();
+    }, []);
+
     const menuItems = [
         {
             title: 'View My Profile',
             description: 'See how others see your profile',
-            onPress: () => router.push(`/(stack)/user-profile/${user?.id}`),
+            onPress: () => userId && router.push(`/(stack)/user-profile/${userId}`),
             iconName: 'person-outline',
         },
         {
             title: 'Edit Profile',
             description: 'Update your personal information',
-            onPress: () => router.push(`/(stack)/edit-profile/${user?.id}`),
+            onPress: () => userId && router.push(`/(stack)/edit-profile/${userId}`),
             iconName: 'create-outline',
         },
         {
             title: 'Profile Analytics',
             description: 'View your profile statistics',
-            onPress: () => router.push(`/(stack)/profile-analytics/${user?.id}`),
+            onPress: () => userId && router.push(`/(stack)/profile-analytics/${userId}`),
             iconName: 'bar-chart-outline',
         },
         {
@@ -33,6 +53,14 @@ export default function ProfileTab() {
             iconName: 'log-out-outline',
         },
     ];
+
+    if (loading) {
+        return (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <Text>Loading...</Text>
+            </View>
+        );
+    }
 
     return (
         <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 20 }}>
