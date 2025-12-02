@@ -60,24 +60,22 @@
   position: relative;
   width: 100%;
   max-width: 445px;
-  /* margin-bottom: 30px; */
-  margin-bottom: 0px;
+  margin-bottom: 15px;
 }
 
 .input-icon {
-  position: relative;
+  position: absolute;
   left: 15px;
-  top: 33px;
-  /* transform: translateY(-50%); */
-  color: #64A377; /* Your green color */
+  top: 50%;
+  transform: translateY(-50%);
+  color: #64A377;
   font-size: 20px;
   z-index: 1;
 }
 
 /* Input with icon - override just the padding */
 .form-input.with-icon {
-  padding-left: 50px !important; /* More padding to make room for icon */
-  /* Don't repeat other styles - inherit from .form-input */
+  padding-left: 50px !important;
 }
 
 .dropdown-input {
@@ -129,24 +127,23 @@
 
 /* Continue button - bordered only (not filled) */
 .continue-button {
-  background: white; /* White/empty background */
-  color: #64A377; /* Green text */
+  background: white;
+  color: #64A377;
   width: 100%;
   height: 42px;
   border-radius: 10px;
-  border: 2px solid #64A377; /* Thicker border for emphasis */
+  border: 2px solid #64A377;
   font-family: 'Arial', 'Helvetica', sans-serif;
   font-weight: bold;
   cursor: pointer;
   transition: all 0.3s ease;
-  /* No shadow or less shadow to make it look less important */
   box-shadow: 2px 2px 5px rgba(136, 136, 136, 0.1);
 }
 
 .continue-button:hover {
-  background: #f0f9f2; /* Light green background on hover */
-  border-color: #4A8D5C; /* Darker green border on hover */
-  color: #4A8D5C; /* Darker green text on hover */
+  background: #f0f9f2;
+  border-color: #4A8D5C;
+  color: #4A8D5C;
 }
 
 /* Login button - filled green */
@@ -247,7 +244,7 @@
 
 /* Password error message specific styling */
 .form-container .error-message {
-  margin-top: -20px; /* Pull it closer to the input field */
+  margin-top: -20px;
   margin-bottom: 10px;
   text-align: left;
   padding-left: 10px;
@@ -303,8 +300,8 @@
   
   .tab-active,
   .tab-inactive {
-    font-size: 22px; /* Reduced from 24px */
-    padding: 10px 20px; /* Reduced padding */
+    font-size: 22px;
+    padding: 10px 20px;
   }
   
   .form-container .error-message {
@@ -319,12 +316,6 @@
   
   .input-with-icon {
     max-width: 400px;
-  }
-  .input-icon{
-    position: absolute;
-    top: 8px;
-    left: 15px;
-    /* right: 50%; */
   }
 }
 
@@ -347,8 +338,8 @@
   
   .tab-active,
   .tab-inactive {
-    font-size: 18px; /* Reduced from 20px */
-    padding: 8px 15px; /* Reduced padding */
+    font-size: 18px;
+    padding: 8px 15px;
   }
   
   .form-input,

@@ -159,7 +159,7 @@ const RegistrationForm = () => {
             )}
 
             {/* Buttons Container */}
-            <div className="buttons-container" style={{marginTop: '50px'}}>
+            <div className="buttons-container">
               <button className="signup-button" type="submit">
                 Sign up
               </button>

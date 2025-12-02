@@ -126,7 +126,7 @@ const Form = () => {
             </div>
 
             {/* Buttons Container */}
-            <div className="buttons-container" style={{marginTop: '50px'}}>
+            <div className="buttons-container">
               <button className="login-button" type='submit'>
                 Login
               </button>
