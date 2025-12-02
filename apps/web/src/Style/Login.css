@@ -40,6 +40,7 @@
   max-width: 500px;
 }
 
+/* Base form input style */
 .form-input {
   width: 100%;
   max-width: 445px;
@@ -48,10 +49,35 @@
   border-radius: 10px;
   border-color: hsl(16, 100%, 67%);
   display: block;
-  margin-bottom: 30px;
+  margin-bottom: 5px;
   padding-left: 20px;
   font-family: 'Arial', 'Helvetica', sans-serif;
   box-sizing: border-box;
+}
+
+/* Input with icon wrapper */
+.input-with-icon {
+  position: relative;
+  width: 100%;
+  max-width: 445px;
+  /* margin-bottom: 30px; */
+  margin-bottom: 0px;
+}
+
+.input-icon {
+  position: relative;
+  left: 15px;
+  top: 33px;
+  /* transform: translateY(-50%); */
+  color: #64A377; /* Your green color */
+  font-size: 20px;
+  z-index: 1;
+}
+
+/* Input with icon - override just the padding */
+.form-input.with-icon {
+  padding-left: 50px !important; /* More padding to make room for icon */
+  /* Don't repeat other styles - inherit from .form-input */
 }
 
 .dropdown-input {
@@ -121,6 +147,27 @@
   background: #f0f9f2; /* Light green background on hover */
   border-color: #4A8D5C; /* Darker green border on hover */
   color: #4A8D5C; /* Darker green text on hover */
+}
+
+/* Login button - filled green */
+.login-button {
+  background: linear-gradient(to right, #64A377, #A0E2B3);
+  color: white;
+  width: 100%;
+  height: 42px;
+  border-radius: 10px;
+  border: 1px solid #64A377;
+  font-family: 'Arial', 'Helvetica', sans-serif;
+  box-shadow: 5px 5px 10px rgba(136, 136, 136, 0.3);
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.login-button:hover {
+  background: linear-gradient(to right, #4A8D5C, #8DD09E);
+  box-shadow: 3px 3px 8px rgba(136, 136, 136, 0.4);
+  transform: translateY(-1px);
 }
 
 /* Remove old primary-button styles since we're using new buttons */
@@ -269,6 +316,16 @@
   .buttons-container {
     max-width: 400px;
   }
+  
+  .input-with-icon {
+    max-width: 400px;
+  }
+  .input-icon{
+    position: absolute;
+    top: 8px;
+    left: 15px;
+    /* right: 50%; */
+  }
 }
 
 @media (max-width: 480px) {
@@ -295,7 +352,8 @@
   }
   
   .form-input,
-  .dropdown-input {
+  .dropdown-input,
+  .input-with-icon {
     max-width: 100%;
   }
   
@@ -308,11 +366,11 @@
   }
   
   .signup-button,
-  .continue-button {
+  .continue-button,
+  .login-button {
     width: 100%;
   }
 }
-
 
 @media (max-width: 360px) {
   .tab-active,
@@ -335,24 +393,4 @@ body, html {
 /* Remove old continue-section styles since we're using buttons-container */
 .continue-section {
   display: none;
-}
-
-.login-button {
-  background: linear-gradient(to right, #64A377, #A0E2B3);
-  color: white;
-  width: 100%;
-  height: 42px;
-  border-radius: 10px;
-  border: 1px solid #64A377;
-  font-family: 'Arial', 'Helvetica', sans-serif;
-  box-shadow: 5px 5px 10px rgba(136, 136, 136, 0.3);
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.login-button:hover {
-  background: linear-gradient(to right, #4A8D5C, #8DD09E);
-  box-shadow: 3px 3px 8px rgba(136, 136, 136, 0.4);
-  transform: translateY(-1px);
 }

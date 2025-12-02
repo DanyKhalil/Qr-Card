@@ -3,6 +3,7 @@ import backround from "../assets/images/icons/Background2.png";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from 'react-router-dom';
+import { IoPerson, IoMail, IoLockClosed } from "react-icons/io5";
 
 const TitleLogin = ({ onLoginClick }) => (
   <div className="tab-container">
@@ -101,48 +102,64 @@ const RegistrationForm = () => {
           <TitleLogin onLoginClick={handleLoginClick} />
 
           <form className="form-container" onSubmit={handleSubmit}>
-            <input
-              className="form-input"
-              type="text"
-              placeholder="Full Name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
+            {/* Name field with icon */}
+            <div className="input-with-icon">
+              <IoPerson className="input-icon" />
+              <input
+                className="form-input with-icon"
+                type="text"
+                placeholder="Full Name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+              />
+            </div>
 
-            <input
-              className="form-input"
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
+            {/* Email field with icon */}
+            <div className="input-with-icon">
+              <IoMail className="input-icon" />
+              <input
+                className="form-input with-icon"
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
 
-            <input
-              className="form-input"
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
+            {/* Password field with icon */}
+            <div className="input-with-icon">
+              <IoLockClosed className="input-icon" />
+              <input
+                className="form-input with-icon"
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
 
-            <input
-              className="form-input"
-              type="password"
-              placeholder="Confirm Password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-            />
+            {/* Confirm Password field with icon */}
+            <div className="input-with-icon">
+              <IoLockClosed className="input-icon" />
+              <input
+                className="form-input with-icon"
+                type="password"
+                placeholder="Confirm Password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+              />
+            </div>
 
             {passwordError && (
               <p className="error-message">{passwordError}</p>
             )}
 
             {/* Buttons Container */}
-            <div className="buttons-container">
+            <div className="buttons-container" style={{marginTop: '50px'}}>
               <button className="signup-button" type="submit">
                 Sign up
               </button>
