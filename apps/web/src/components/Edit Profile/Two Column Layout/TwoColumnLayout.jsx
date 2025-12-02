@@ -6,7 +6,7 @@ import YoutubePreview from '../../Profile/Youtube Preview/YoutubePreview';
 import YoutubeVideos from '../Youtube Videos/YoutubeVideos';
 import AddressCard from '../../Profile/Address Card/AddressCard';
 import Locations from '../../Profile/Locations/Locations';
-import ProfileQrCode from '../../Profile/Qr Code/ProfileQrCode';
+import ProfileQrCode from '../Qr Code/ProfileQrCode';
 import TitleAndFields from '../Title With Fields/TitleAndFields';
 import LabelWithTextArea from '../Label With Text Area/LabelWithTextArea';
 import YouTubeCard from '../Youtube Card/YoutubeCard';
@@ -35,6 +35,7 @@ const TwoColumnLayout = ({
     videosSetter,
     locationSetter,
     customContentSetter,
+    QrCodeColor="#000", QrCodeColorSetter,
 
     addSocialMediaModalVisibiltySetter,
     addVideoModalVisibiltySetter,
@@ -82,7 +83,7 @@ const TwoColumnLayout = ({
                     setter={connectLinksSetter} 
                     addAction={()=>addSocialMediaModalVisibiltySetter(true)}
                 />
-                <ProfileQrCode profileUrl={profileUrlForQrCode}/>
+                <ProfileQrCode profileUrl={profileUrlForQrCode} color={QrCodeColor} setter={QrCodeColorSetter}/>
             </div>
             
             <div 
@@ -96,7 +97,7 @@ const TwoColumnLayout = ({
             />
             
             <div className="column right-column">
-                <TitleAndFields title="Profile Summary" fields={[{label:"Headline", type:"text", id: "headline", value: headline, setter: headlineSetter}]}/>
+                <TitleAndFields title="Profile Summary" fields={[{label:"Headline", type:"text", id: "headline", value: headline, setter: headlineSetter, onChange: (e)=> headlineSetter(e.target.value)}]}/>
                 <LabelWithTextArea label="Description" id="bio" value={bio} setter={bioSetter}/>
                 <TitleAndFields 
                     title="Website" 

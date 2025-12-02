@@ -30,7 +30,8 @@ const EditUserProfile = ({
           ],
   locations = [],
   id = "User001",
-  customContent
+  customContent,
+  QrCodeColor,
 }
 ) => {
 
@@ -41,6 +42,8 @@ const EditUserProfile = ({
   const [coverPhotoInput, setCoverPhotoInput] = useState(coverPhoto);
 
   const [profilePicInput, setProfilePicInput] = useState(profilePic);
+
+  const [qrCodeColorInput, setQrCodeColorInput] = useState(QrCodeColor)
 
   // USER NAME INPUTT
   const [userNameInput, setUserNameInput] = useState(userName);
@@ -273,6 +276,7 @@ const EditUserProfile = ({
       formData.append('headline', newHeadline);
       formData.append('bio', newBio);
       formData.append('websiteUrl', newWebsite);
+      formData.append('qrCodeColor', qrCodeColorInput);
       formData.append('connectLinks', JSON.stringify(newSocialMediaLinks));
       formData.append('videos', JSON.stringify(newVideos));
       formData.append('locations', JSON.stringify(newLocations));
@@ -375,6 +379,7 @@ const EditUserProfile = ({
               locations = {locationsInput} locationSetter={setLocationsInput}
               id = {id}
               customContent={customContentInput} customContentSetter={setCustomContentInput}
+              QrCodeColor={qrCodeColorInput} QrCodeColorSetter={setQrCodeColorInput} 
 
               addSocialMediaModalVisibiltySetter = {setAddSocialMediaModalIsVisible}
 

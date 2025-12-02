@@ -21,6 +21,7 @@ const TwoColumnLayout = ({
     locations = [],
     id = "User001",
     customContent,
+    QrCodeColor = "#fff"
 }) => {
 
 
@@ -49,7 +50,7 @@ const TwoColumnLayout = ({
         }).filter(Boolean);
     }
 
-    const profileUrlForQrCode = `${window.location.origin}/profile/${id}`;
+    const profileUrlForQrCode = `${window.location.origin}/profile/${id}?qrScan=true`;
 
     return (
         <div className={`two-column-layout ${className}`}>
@@ -57,7 +58,7 @@ const TwoColumnLayout = ({
                 <TitleAndLinks title="Contact" links={contactLinks}/>
                 <TitleAndLinks title="Connect" links={formatSocialLinks(connectLinks)}/>
                 <TitleAndLinks title="Website" links={[{name:websiteLink, iconName:"web"}].filter(link => link.name && String(link.name).trim() !== '')}/>
-                <ProfileQrCode profileUrl={profileUrlForQrCode}/>
+                <ProfileQrCode profileUrl={profileUrlForQrCode} color={QrCodeColor}/>
             </div>
             
             <div 

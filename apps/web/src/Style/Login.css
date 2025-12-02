@@ -40,6 +40,7 @@
   max-width: 500px;
 }
 
+/* Base form input style */
 .form-input {
   width: 100%;
   max-width: 445px;
@@ -48,10 +49,33 @@
   border-radius: 10px;
   border-color: hsl(16, 100%, 67%);
   display: block;
-  margin-bottom: 30px;
+  margin-bottom: 5px;
   padding-left: 20px;
   font-family: 'Arial', 'Helvetica', sans-serif;
   box-sizing: border-box;
+}
+
+/* Input with icon wrapper */
+.input-with-icon {
+  position: relative;
+  width: 100%;
+  max-width: 445px;
+  margin-bottom: 15px;
+}
+
+.input-icon {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #64A377;
+  font-size: 20px;
+  z-index: 1;
+}
+
+/* Input with icon - override just the padding */
+.form-input.with-icon {
+  padding-left: 50px !important;
 }
 
 .dropdown-input {
@@ -70,23 +94,82 @@
   box-sizing: border-box;
 }
 
-.primary-button {
+/* Buttons container */
+.buttons-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 100%;
+  max-width: 445px;
+  margin-top: 10px;
+}
+
+/* Sign Up button - filled green */
+.signup-button {
   background: linear-gradient(to right, #64A377, #A0E2B3);
   color: white;
-  width: 145px;
+  width: 100%;
   height: 42px;
   border-radius: 10px;
-  border: 1px solid;
-  border-color: #64A377;
-  display: block;
-  margin-left: auto;
-  margin-right: 0;
-  margin-bottom: 10px;
-  margin-top: 10px;
+  border: 1px solid #64A377;
   font-family: 'Arial', 'Helvetica', sans-serif;
-  box-shadow: 5px 5px 10px #888888;
+  box-shadow: 5px 5px 10px rgba(136, 136, 136, 0.3);
   font-weight: bold;
   cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.signup-button:hover {
+  background: linear-gradient(to right, #4A8D5C, #8DD09E);
+  box-shadow: 3px 3px 8px rgba(136, 136, 136, 0.4);
+  transform: translateY(-1px);
+}
+
+/* Continue button - bordered only (not filled) */
+.continue-button {
+  background: white;
+  color: #64A377;
+  width: 100%;
+  height: 42px;
+  border-radius: 10px;
+  border: 2px solid #64A377;
+  font-family: 'Arial', 'Helvetica', sans-serif;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 2px 2px 5px rgba(136, 136, 136, 0.1);
+}
+
+.continue-button:hover {
+  background: #f0f9f2;
+  border-color: #4A8D5C;
+  color: #4A8D5C;
+}
+
+/* Login button - filled green */
+.login-button {
+  background: linear-gradient(to right, #64A377, #A0E2B3);
+  color: white;
+  width: 100%;
+  height: 42px;
+  border-radius: 10px;
+  border: 1px solid #64A377;
+  font-family: 'Arial', 'Helvetica', sans-serif;
+  box-shadow: 5px 5px 10px rgba(136, 136, 136, 0.3);
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.login-button:hover {
+  background: linear-gradient(to right, #4A8D5C, #8DD09E);
+  box-shadow: 3px 3px 8px rgba(136, 136, 136, 0.4);
+  transform: translateY(-1px);
+}
+
+/* Remove old primary-button styles since we're using new buttons */
+.primary-button {
+  display: none;
 }
 
 .tab-container {
@@ -141,17 +224,32 @@
 }
 
 .error-message {
-  color: red;
+  color: #dc3545;
   text-align: center;
   margin-bottom: 15px;
   width: 100%;
+  font-size: 14px;
+  margin-top: 5px;
+  margin-bottom: 10px;
 }
 
 .success-message {
-  color: green;
+  color: #28a745;
   text-align: center;
   margin-bottom: 15px;
   width: 100%;
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+/* Password error message specific styling */
+.form-container .error-message {
+  margin-top: -20px;
+  margin-bottom: 10px;
+  text-align: left;
+  padding-left: 10px;
+  width: 100%;
+  max-width: 445px;
 }
 
 @media (max-width: 1000px) {
@@ -202,8 +300,22 @@
   
   .tab-active,
   .tab-inactive {
-    font-size: 22px; /* Reduced from 24px */
-    padding: 10px 20px; /* Reduced padding */
+    font-size: 22px;
+    padding: 10px 20px;
+  }
+  
+  .form-container .error-message {
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .buttons-container {
+    max-width: 400px;
+  }
+  
+  .input-with-icon {
+    max-width: 400px;
   }
 }
 
@@ -226,16 +338,30 @@
   
   .tab-active,
   .tab-inactive {
-    font-size: 18px; /* Reduced from 20px */
-    padding: 8px 15px; /* Reduced padding */
+    font-size: 18px;
+    padding: 8px 15px;
   }
   
   .form-input,
-  .dropdown-input {
+  .dropdown-input,
+  .input-with-icon {
     max-width: 100%;
   }
+  
+  .form-container .error-message {
+    max-width: 100%;
+  }
+  
+  .buttons-container {
+    max-width: 100%;
+  }
+  
+  .signup-button,
+  .continue-button,
+  .login-button {
+    width: 100%;
+  }
 }
-
 
 @media (max-width: 360px) {
   .tab-active,
@@ -252,4 +378,10 @@
 body, html {
   margin: 0;
   padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Remove old continue-section styles since we're using buttons-container */
+.continue-section {
+  display: none;
 }

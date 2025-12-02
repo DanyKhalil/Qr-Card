@@ -4,7 +4,7 @@ import "./ProfileQrCode.css";
 import Button from "../Button/Button";
 import { IoDownload } from "react-icons/io5";
 
-const ProfileQrCode = ({ profileUrl }) => {
+const ProfileQrCode = ({ profileUrl, color="#000000"}) => {
     // it takes a sparameter the profile Url which will be localhose//1557//profile/id
     // an d return the qr code
 
@@ -46,7 +46,15 @@ const ProfileQrCode = ({ profileUrl }) => {
                 value={profileUrl} 
                 size={qrSize}
                 bgColor="#ffffff"
-                fgColor="#0a0a0a"
+                fgColor={color}
+                // imageSettings={{
+                //     src: "http://localhost:5050/uploads/profiles/profile-1764691817024-481323706.jpg",
+                //     x: null, // Center horizontally
+                //     y: null, // Center vertically
+                //     height: 64,
+                //     width: 64,
+                //     excavate: true, // Cut out background behind logo
+                // }}
             />
             <br></br>
             <Button

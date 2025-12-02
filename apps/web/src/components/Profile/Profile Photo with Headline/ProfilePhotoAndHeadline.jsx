@@ -6,7 +6,7 @@ import Headline from "../Headline/Headline.jsx"
 import Button from '../Button/Button.jsx';
 import { IoPencil, IoTrash, IoAnalytics, IoSave, IoClose, IoAdd } from "react-icons/io5";
 
-const ProfilePhotoAndHeadline = ({id,photo, name, dob, headline, followers, following}) => {
+const ProfilePhotoAndHeadline = ({id,photo, name, dob, headline, followers, following, fetchUserProfile}) => {
     const navigate = useNavigate();
 
     const handleAnalytics = () => {
@@ -37,7 +37,7 @@ const ProfilePhotoAndHeadline = ({id,photo, name, dob, headline, followers, foll
         <div className="profile-section__wrapper">
             <div className="profile-section__left">
                 <ProfilePic photo={photo} borderColor="#82C294" />
-                <Headline id={id} name={name} dob={dob} headline={headline} followers={followers} following={following}/>
+                <Headline id={id} name={name} dob={dob} headline={headline} followers={followers} following={following} fetchUserProfile={fetchUserProfile}/>
             </div>
 
             <div className="profile-section__right">

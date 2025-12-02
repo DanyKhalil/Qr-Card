@@ -78,7 +78,7 @@ const Login = () => {
         {error ? <Text style={styles.error}>{error}</Text> : null}
 
         <TextInput
-          placeholder="Email or phone number"
+          placeholder="Email"
           value={email}
           onChangeText={setEmail}
           style={styles.input}

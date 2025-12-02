@@ -2,6 +2,7 @@ import { useLocation } from 'react-router-dom';
 import ProfileList from "./ProfileList";
 import Header from "../../Header/Header";
 import Footer from "../../Footer/Footer";
+import "./ProfileListPage.css"
 
 const ProfileListPage = () => {
   const location = useLocation();

@@ -25,6 +25,8 @@ const UserProfile = ({
   following = [],
   id = "User001",
   customContent,
+  fetchUserProfile,
+  QrCodeColor="#fff",
 }
 ) => {
   const getToken = () => {
@@ -55,6 +57,7 @@ const UserProfile = ({
                                 id={id}
                                 followers={followers}
                                 following={following}
+                                fetchUserProfile={fetchUserProfile}
       />
       <TwoColumnLayout 
               separatorWidth="3px"
@@ -70,6 +73,7 @@ const UserProfile = ({
               locations = {locations}
               id = {id}
               customContent = {customContent}
+              QrCodeColor={QrCodeColor}
       >
       </TwoColumnLayout>
       <Footer />

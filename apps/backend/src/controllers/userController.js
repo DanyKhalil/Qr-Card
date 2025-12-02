@@ -120,7 +120,6 @@ export const getUserProfile = async (req, res) => {
     const profileId = user.profile.id;
 
     // ---------------------------------------
-    // ⭐ ADD FOLLOWERS & FOLLOWING WITH USER INFO
     // ---------------------------------------
 
     // Followers: profiles that FOLLOW this profile
@@ -170,6 +169,7 @@ export const getUserProfile = async (req, res) => {
       name: user.name,
       cover_photo_url: user.profile.cover_pic_url,
       profile_pic_url: user.profile.profile_pic_url,
+      qr_code_color: user.profile.qr_code_color, 
       dob: user.profile.dob,
       headline: user.profile.headline,
       bio: user.profile.bio,
@@ -278,7 +278,8 @@ export const updateUserProfile = async (req, res) => {
       userName, dob, phoneNumber, 
       headline, bio, websiteUrl, 
       connectLinks, videos, locations, customContent,
-      coverPhotoPath, profilePhotoPath
+      coverPhotoPath, profilePhotoPath,
+      qrCodeColor
     } = req.body;
 
     if (!id) {
@@ -386,6 +387,7 @@ export const updateUserProfile = async (req, res) => {
       website: websiteUrl,
       cover_pic_url: finalCoverPhotoPath,
       profile_pic_url: finalProfilePhotoPath,
+      qr_code_color: qrCodeColor || "#000000"
     })
 
     // Social media links update

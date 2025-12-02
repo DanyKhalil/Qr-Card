@@ -1,5 +1,9 @@
 import express from "express";
-import { followUser, unfollowUser } from "../controllers/profileFollowController.js";
+import { 
+  followUser, 
+  unfollowUser, 
+  getUserFollowStatus 
+} from "../controllers/profileFollowController.js";
 import { authenticate } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
@@ -9,5 +13,8 @@ router.post("/", authenticate, followUser);
 
 // DELETE /follow - unfollow a user
 router.delete("/", authenticate, unfollowUser);
+
+// GET /follow/:userId - get user's followers and following
+router.get("/:userId", authenticate, getUserFollowStatus);
 
 export default router;

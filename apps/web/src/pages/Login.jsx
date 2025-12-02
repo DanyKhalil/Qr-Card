@@ -3,6 +3,7 @@ import backround from '../assets/images/icons/man-woman-qr.png';
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from 'react-router-dom';
+import { IoMail, IoLockClosed } from "react-icons/io5";
 
 const TitleLogin = ({ onSignUpClick }) => (
   <div className="tab-container">
@@ -47,6 +48,10 @@ const Form = () => {
 
   const handleSignUpClick = () => {
     navigate('/registration');
+  };
+
+  const handleContinueWithoutAccount = () => {
+    navigate('/Filtering');
   };
 
   const handleLogin = async (e) => {
@@ -96,27 +101,44 @@ const Form = () => {
           <form className='form-container' onSubmit={handleLogin}>
             {error && <p className="error-message">{error}</p>}
 
-            <input 
-              className='form-input'
-              type='text'
-              placeholder="Email or phone number"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
+            <div className="input-with-icon">
+              <IoMail className="input-icon" />
+              <input 
+                className='form-input with-icon'
+                type='text'
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
 
-            <input
-              className='form-input'
-              type='password'
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
+            <div className="input-with-icon">
+              <IoLockClosed className="input-icon" />
+              <input
+                className='form-input with-icon'
+                type='password'
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
 
-            <button className='primary-button' type='submit'>
-              Login
-            </button>
+            {/* Buttons Container */}
+            <div className="buttons-container">
+              <button className="login-button" type='submit'>
+                Login
+              </button>
+
+              <button 
+                className="continue-button"
+                onClick={handleContinueWithoutAccount}
+                type="button"
+              >
+                Continue without account
+              </button>
+            </div>
           </form>
         </div>
 

@@ -7,7 +7,6 @@ const AddItemModal = ({ visible, onClose, onAdd, contentType }) => {
   const [title, setTitle] = useState('');
   const [visibility, setVisibility] = useState(true);
   const [fieldValues, setFieldValues] = useState({});
-  console.log(contentType.fields)
 
   useEffect(() => {
     if (visible && contentType) {

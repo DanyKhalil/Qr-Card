@@ -45,15 +45,6 @@ export const userApi = {
         }
     },
     updateUserProfile: async (userId, profileData) => {
-        if (profileData instanceof FormData) {
-            console.log("FormData entries:");
-            for (let [key, value] of profileData.entries()) {
-                console.log(`  ${key}:`, value);
-            }
-        } else {
-            console.log("JSON profileData:", JSON.stringify(profileData, null, 2));
-        }
-
         try {
             const config = profileData instanceof FormData 
                 ? {

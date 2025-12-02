@@ -49,5 +49,27 @@ export const profileFollowApi = {
       console.error("Unfollow API error:", error);
       throw error;
     }
+  },
+
+  // New function to get user's followers and following
+  getUserFollowStatus: async (userId) => {
+    try {
+      const response = await api.get(`/follow/${userId}`);
+      return response.data;
+    } catch (error) {
+      console.error("Get follow status API error:", error);
+      throw error;
+    }
+  },
+
+  // Alternative name if you prefer
+  getFollowersAndFollowing: async (userId) => {
+    try {
+      const response = await api.get(`/follow/${userId}`);
+      return response.data;
+    } catch (error) {
+      console.error("Get followers and following API error:", error);
+      throw error;
+    }
   }
 };
