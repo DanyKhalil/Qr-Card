@@ -19,6 +19,10 @@ const Profile = sequelize.define(
         cover_pic_url: {
             type: DataTypes.STRING(500),
         },
+        qr_code_color: {
+            type: DataTypes.STRING(7),
+            defaultValue: '#000000',
+        },
         dob: {
             type: DataTypes.DATE,
         },

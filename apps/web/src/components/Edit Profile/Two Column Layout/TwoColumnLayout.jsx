@@ -35,6 +35,7 @@ const TwoColumnLayout = ({
     videosSetter,
     locationSetter,
     customContentSetter,
+    QrCodeColor="#000",
 
     addSocialMediaModalVisibiltySetter,
     addVideoModalVisibiltySetter,
@@ -82,7 +83,7 @@ const TwoColumnLayout = ({
                     setter={connectLinksSetter} 
                     addAction={()=>addSocialMediaModalVisibiltySetter(true)}
                 />
-                <ProfileQrCode profileUrl={profileUrlForQrCode}/>
+                <ProfileQrCode profileUrl={profileUrlForQrCode} color={QrCodeColor}/>
             </div>
             
             <div 

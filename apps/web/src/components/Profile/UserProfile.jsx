@@ -26,6 +26,7 @@ const UserProfile = ({
   id = "User001",
   customContent,
   fetchUserProfile,
+  QrCodeColor="#fff",
 }
 ) => {
   const getToken = () => {
@@ -72,6 +73,7 @@ const UserProfile = ({
               locations = {locations}
               id = {id}
               customContent = {customContent}
+              QrCodeColor={QrCodeColor}
       >
       </TwoColumnLayout>
       <Footer />
