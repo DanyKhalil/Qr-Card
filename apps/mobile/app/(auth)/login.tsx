@@ -19,48 +19,72 @@ const Login = () => {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    setChecking(false); // simulate auth check
+    const checkAuth = async () => {
+      try {
+        const token = await AsyncStorage.getItem("token");
+        const userString = await AsyncStorage.getItem("user");
+        
+        if (token && userString) {
+          const user = JSON.parse(userString);
+          
+          if (user.role === "admin") {
+            // router.replace("/(tabs)/admin");
+          } else {
+            router.replace("/(tabs)/search");
+          }
+        } else {
+          setChecking(false);
+        }
+      } catch (err) {
+        console.error("Error checking authentication:", err);
+        setChecking(false);
+      }
+    };
+    
+    checkAuth();
   }, []);
 
   const handleLogin = async () => {
+    if (!email.trim() || !password.trim()) {
+      setError("Please enter both email and password");
+      return;
+    }
+    
     try {
       const res = await axios.post(`${DEVELOPMENT_CONFIG.backendBaseUrl}/api/auth/login`, {
         email,
         password,
       });
 
-      // Save token and user in AsyncStorage (like localStorage on web)
       await AsyncStorage.setItem("token", res.data.token);
       await AsyncStorage.setItem("user", JSON.stringify(res.data.user));
 
-      // const token = await AsyncStorage.getItem("token");
-      // const user = JSON.parse(await AsyncStorage.getItem("user"));
-      // console.log(token)
-      // console.log(user)
-
       // Navigate based on user role
       if (res.data.user.role === "admin") {
-        router.replace("/(tabs)/admin");
+        // router.replace("/(tabs)/admin");
       } else {
         router.replace("/(tabs)/search");
       }
     } catch (err) {
-      setError(err.response?.data?.error || "Login failed");
+      setError(err.response?.data?.error || "Login failed. Please check your credentials.");
     }
+  };
+
+  const handleSubmitEditing = () => {
+    handleLogin();
   };
 
   if (checking) {
     return (
       <View style={styles.loading}>
         <ActivityIndicator size="large" color="#64A377" />
-        <Text>Checking authentication...</Text>
+        <Text style={styles.loadingText}>Checking authentication...</Text>
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
-      {/* TABS */}
       <View style={styles.tabContainer}>
         <View style={styles.tabBackground} />
 
@@ -73,7 +97,6 @@ const Login = () => {
         </View>
       </View>
 
-      {/* FORM */}
       <View style={styles.form}>
         {error ? <Text style={styles.error}>{error}</Text> : null}
 
@@ -82,6 +105,9 @@ const Login = () => {
           value={email}
           onChangeText={setEmail}
           style={styles.input}
+          autoCapitalize="none"
+          keyboardType="email-address"
+          autoComplete="email"
         />
 
         <TextInput
@@ -90,6 +116,9 @@ const Login = () => {
           value={password}
           onChangeText={setPassword}
           style={styles.input}
+          autoComplete="password"
+          returnKeyType="done"
+          onSubmitEditing={handleSubmitEditing}
         />
 
         <TouchableOpacity style={styles.primaryButton} onPress={handleLogin}>
@@ -102,9 +131,6 @@ const Login = () => {
 
 export default Login;
 
-/* ─────────────────────────────────────────── */
-/*                    STYLES                   */
-/* ─────────────────────────────────────────── */
 
 const styles = StyleSheet.create({
   container: {
@@ -119,6 +145,13 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: "white",
+  },
+
+  loadingText: {
+    marginTop: 10,
+    color: "#64A377",
+    fontSize: 16,
   },
 
   tabContainer: {
@@ -184,6 +217,7 @@ const styles = StyleSheet.create({
     marginBottom: 25,
     paddingLeft: 15,
     fontSize: 16,
+    backgroundColor: "#FFF",
   },
 
   primaryButton: {
@@ -204,8 +238,24 @@ const styles = StyleSheet.create({
   },
 
   error: {
-    color: "red",
-    marginBottom: 10,
+    color: "#FF3B30",
+    marginBottom: 15,
     textAlign: "center",
+    fontSize: 14,
+    width: "100%",
+    padding: 8,
+    backgroundColor: "#FFE5E5",
+    borderRadius: 8,
+  },
+
+  forgotPasswordButton: {
+    marginTop: 20,
+    padding: 10,
+  },
+
+  forgotPasswordText: {
+    color: "#64A377",
+    fontSize: 14,
+    textDecorationLine: "underline",
   },
 });

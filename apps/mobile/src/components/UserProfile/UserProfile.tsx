@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import CoverPhoto from './CoverPhoto/CoverPhoto';
 import ProfilePic from './ProfilePIc/ProfilePic';
@@ -11,6 +11,7 @@ import TitleAndLinks from './TitleAndLinks/TitleAndLinks';
 import ProfileQrCode from './ProfileQrCode/ProfileQrCode';
 import { router } from 'expo-router';
 import CustomContentDisplay from './CustomContentDisplay/CustomContentDisplay';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 interface UserProfileProps {
@@ -42,32 +43,68 @@ const UserProfile = ({
         locations = [],
         id = "User001",
         customContent = [],
+        followers,
+        following,
+        fetchUserProfile,
+        QrCodeColor,
         // saveContactFunction,
         // phoneNumber,
         // email,
     }: UserProfileProps) => {
+
+        const getLoggedInUserId = async () => {
+            try {
+                const loggedInUserString = await AsyncStorage.getItem("user");
+                if (loggedInUserString) {
+                    const loggedInUser = JSON.parse(loggedInUserString);
+                    return loggedInUser.id || null;
+                }
+                return null;
+            } catch (error) {
+                console.error("Error getting user ID:", error);
+                return null;
+            }
+        }
+
+        const [loggedInUserId, setLoggedInUserId] = useState(null);
+
+        useEffect(() => {
+            const fetchUserId = async () => {
+                const userId = await getLoggedInUserId();
+                setLoggedInUserId(userId);
+            };
+            
+            fetchUserId();
+        }, []);
+
+
         return (
                 <ScrollView style={{ flex: 1 }}>
                     <CoverPhoto photo={coverPhoto} height={150} />
                     <View style={styles.profileSection}>
                         <ProfilePic photo={profilePic} size="xxlarge" />
-                        <View style={styles.buttonsColumn}>
-                            <Button 
-                                text="Profile Analytics"
-                                color="green"
-                                onPress={() => router.push(`/(stack)/profile-analytics/${id}`)}
-                                width={180}
-                            />
-                            <Button 
-                                text="Edit Profile"
-                                color="coral"
-                                onPress={() => router.push(`/(stack)/edit-profile/${id}`)}
-                                width={180}
-                                style={{ marginTop: 12 }}
-                            />
-                        </View>
+                        {( loggedInUserId === id ? 
+                            <View style={styles.buttonsColumn}>
+                                <Button 
+                                    text="Profile Analytics"
+                                    color="green"
+                                    onPress={() => router.push(`/(stack)/profile-analytics/${id}`)}
+                                    width={180}
+                                />
+                                <Button 
+                                    text="Edit Profile"
+                                    color="coral"
+                                    onPress={() => router.push(`/(stack)/edit-profile/${id}`)}
+                                    width={180}
+                                    style={{ marginTop: 12 }}
+                                />
+                            </View>
+                            :
+                            <View style={styles.buttonsColumn}>
+                            </View>
+                        )}
                     </View>
-                    <Headline name={userName} dob={dob} headline={headline} />
+                    <Headline name={userName} dob={dob} headline={headline} id={id} followers={followers} following={following} fetchUserProfile={fetchUserProfile}/>
 
                     <DescriptionText text={bio} />
 

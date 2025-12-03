@@ -46,7 +46,11 @@ const UserProfilePage = ({id}) => {
         if (!hasVisited.current) {
             hasVisited.current = true;
             try {
-                await profileAnalyticsApi.visitUserProfile(userId, isQrScan);
+                const loggedInUserString = await AsyncStorage.getItem("user");
+                const loggedInUser = (loggedInUserString ? JSON.parse(loggedInUserString) : {});
+                if(loggedInUser.id !== userId){
+                    await profileAnalyticsApi.visitUserProfile(userId, isQrScan);
+                }
             } catch (err) {
                 console.error('Error in visitProfile:', err);
             }
@@ -310,8 +314,12 @@ const UserProfilePage = ({id}) => {
             bio={userData.bio}
             videos={userData.videos_links}
             locations={userData.locations}
+            followers = {userData.followers}
+            following = {userData.following}
             id={Array.isArray(id) ? id[0] : id || 'User001'}
             customContent={userData.custom_content}
+            fetchUserProfile = {fetchUserProfile}
+            QrCodeColor = {userData.qr_code_color}
             // saveContactFunction={saveContact}
             // phoneNumber={userData.phone_number[0]}
             // email={userData.email[0]}

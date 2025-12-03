@@ -14,7 +14,6 @@ export default function ProfileTab() {
                 const userString = await AsyncStorage.getItem("user");
                 if (userString) {
                     const user = JSON.parse(userString);
-                    console.log("User from storage (ProfileTab):", user);
                     setUserId(user.id);
                 }
             } catch (error) {
@@ -49,7 +48,11 @@ export default function ProfileTab() {
         {
             title: 'Logout',
             description: 'App preferences and configuration',
-            onPress: () => router.replace('/(auth)'),
+            onPress: async () => {
+                await AsyncStorage.removeItem('token');
+                await AsyncStorage.removeItem('user');
+                router.replace('/(auth)');
+            },
             iconName: 'log-out-outline',
         },
     ];

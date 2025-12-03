@@ -15,10 +15,7 @@ export default function UserProfileScreen() {
                 const userIdFromParams = params.userId || params.id;
                 
                 if (userIdFromParams) {
-                    console.log("User ID from params:", userIdFromParams);
                     setId(String(userIdFromParams));
-                } else {
-                    console.log("No user ID found in params");
                 }
             } catch (error) {
                 console.error("Error parsing user data:", error);
