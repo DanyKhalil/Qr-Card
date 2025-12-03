@@ -46,7 +46,11 @@ const UserProfilePage = ({id}) => {
         if (!hasVisited.current) {
             hasVisited.current = true;
             try {
-                await profileAnalyticsApi.visitUserProfile(userId, isQrScan);
+                const loggedInUserString = await AsyncStorage.getItem("user");
+                const loggedInUser = (loggedInUserString ? JSON.parse(loggedInUserString) : {});
+                if(loggedInUser.id !== userId){
+                    await profileAnalyticsApi.visitUserProfile(userId, isQrScan);
+                }
             } catch (err) {
                 console.error('Error in visitProfile:', err);
             }

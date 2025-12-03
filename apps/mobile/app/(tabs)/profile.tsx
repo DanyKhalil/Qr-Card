@@ -14,7 +14,6 @@ export default function ProfileTab() {
                 const userString = await AsyncStorage.getItem("user");
                 if (userString) {
                     const user = JSON.parse(userString);
-                    console.log("User from storage (ProfileTab):", user);
                     setUserId(user.id);
                 }
             } catch (error) {

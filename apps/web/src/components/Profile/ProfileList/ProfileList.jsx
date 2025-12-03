@@ -38,10 +38,6 @@ const ProfileList = ({ profiles = [], onProfileClick = () => {} }) => {
         const data = await profileFollowApi.getUserFollowStatus(loggedInUserId);
         setFollowers(data.followers || []);
         setFollowing(data.following || []);
-        console.log("Loaded follow data:", {
-          followersCount: data.followers?.length || 0,
-          followingCount: data.following?.length || 0
-        });
       } catch (err) {
         console.error("Error fetching follow data:", err);
         setError("Failed to load follow data");
