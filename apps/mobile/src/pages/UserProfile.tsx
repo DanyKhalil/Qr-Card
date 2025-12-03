@@ -314,8 +314,12 @@ const UserProfilePage = ({id}) => {
             bio={userData.bio}
             videos={userData.videos_links}
             locations={userData.locations}
+            followers = {userData.followers}
+            following = {userData.following}
             id={Array.isArray(id) ? id[0] : id || 'User001'}
             customContent={userData.custom_content}
+            fetchUserProfile = {fetchUserProfile}
+            QrCodeColor = {userData.qr_code_color}
             // saveContactFunction={saveContact}
             // phoneNumber={userData.phone_number[0]}
             // email={userData.email[0]}

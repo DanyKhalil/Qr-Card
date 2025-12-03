@@ -43,6 +43,10 @@ const UserProfile = ({
         locations = [],
         id = "User001",
         customContent = [],
+        followers,
+        following,
+        fetchUserProfile,
+        QrCodeColor,
         // saveContactFunction,
         // phoneNumber,
         // email,
@@ -100,7 +104,7 @@ const UserProfile = ({
                             </View>
                         )}
                     </View>
-                    <Headline name={userName} dob={dob} headline={headline} />
+                    <Headline name={userName} dob={dob} headline={headline} id={id} followers={followers} following={following} fetchUserProfile={fetchUserProfile}/>
 
                     <DescriptionText text={bio} />
 

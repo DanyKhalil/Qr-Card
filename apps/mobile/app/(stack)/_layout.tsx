@@ -27,6 +27,14 @@ export default function StackLayout() {
                 name="profile-analytics/[id]" 
                 options={{ title: 'Analytics' }} 
             />
+            <Stack.Screen 
+                name="followers/[id]" 
+                options={{ title: 'Followers' }} 
+            />
+            <Stack.Screen 
+                name="following/[id]" 
+                options={{ title: 'Following' }} 
+            />
         </Stack>
     );
 }
