@@ -10,6 +10,7 @@ import {
 import axios from "axios";
 import { router } from "expo-router";
 import { DEVELOPMENT_CONFIG } from '../../src/config/development';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Registration = () => {
   const [name, setName] = useState("");
@@ -21,7 +22,28 @@ const Registration = () => {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    setChecking(false); // simulate auth check
+    const checkAuth = async () => {
+      try {
+        const token = await AsyncStorage.getItem("token");
+        const userString = await AsyncStorage.getItem("user");
+        
+        if (token && userString) {
+          const user = JSON.parse(userString);
+          
+          if (user.role === "admin") {
+            router.replace("/(tabs)/admin");
+          } else {
+            router.replace("/(tabs)/search");
+          }
+        } else {
+          setChecking(false);
+        }
+      } catch (err) {
+        setChecking(false);
+      }
+    };
+    
+    checkAuth();
   }, []);
 
   const handleSubmit = async () => {
@@ -33,7 +55,6 @@ const Registration = () => {
         role,
       });
 
-      // Registration success: prompt user to verify email and login
       setMessage("Registration successful! Please verify your email and log in.");
       setError("");
     } catch (err) {
@@ -82,6 +103,7 @@ const Registration = () => {
           onChangeText={setEmail}
           style={styles.input}
           keyboardType="email-address"
+          autoCapitalize="none"
         />
 
         <TextInput
@@ -110,13 +132,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 20,
   },
-
   loading: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
   },
-
   tabContainer: {
     width: 300,
     height: 55,
@@ -128,7 +148,6 @@ const styles = StyleSheet.create({
     position: "relative",
     overflow: "hidden",
   },
-
   tabBackgroundRight: {
     position: "absolute",
     right: 0,
@@ -137,7 +156,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#CFEFD8",
     borderRadius: 50,
   },
-
   tabInner: {
     flexDirection: "row",
     width: "100%",
@@ -146,7 +164,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 20,
   },
-
   tabActive: {
     textAlign: "left",
     fontSize: 20,
@@ -155,7 +172,6 @@ const styles = StyleSheet.create({
     zIndex: 10,
     marginRight: 20,
   },
-
   tabInactive: {
     textAlign: "left",
     fontSize: 20,
@@ -164,13 +180,11 @@ const styles = StyleSheet.create({
     zIndex: 10,
     marginLeft: 35,
   },
-
   form: {
     width: "100%",
     maxWidth: 400,
     alignItems: "center",
   },
-
   input: {
     width: "100%",
     height: 45,
@@ -180,8 +194,8 @@ const styles = StyleSheet.create({
     marginBottom: 25,
     paddingLeft: 15,
     fontSize: 16,
+    backgroundColor: "#FFF",
   },
-
   primaryButton: {
     width: "100%",
     height: 45,
@@ -192,23 +206,30 @@ const styles = StyleSheet.create({
     marginTop: 10,
     elevation: 4,
   },
-
   primaryButtonText: {
     color: "white",
     fontWeight: "bold",
     fontSize: 16,
   },
-
   message: {
-    marginBottom: 10,
+    marginBottom: 15,
     textAlign: "center",
+    width: "100%",
+    padding: 8,
+    borderRadius: 8,
   },
-
   success: {
     color: "green",
+    backgroundColor: "#E5F7E5",
   },
-
   error: {
-    color: "red",
+    color: "#FF3B30",
+    backgroundColor: "#FFE5E5",
+  },
+  loginLink: {
+    marginTop: 20,
+    color: "#64A377",
+    fontSize: 14,
+    textDecorationLine: "underline",
   },
 });

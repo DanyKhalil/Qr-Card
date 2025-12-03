@@ -48,7 +48,11 @@ export default function ProfileTab() {
         {
             title: 'Logout',
             description: 'App preferences and configuration',
-            onPress: () => router.replace('/(auth)'),
+            onPress: async () => {
+                await AsyncStorage.removeItem('token');
+                await AsyncStorage.removeItem('user');
+                router.replace('/(auth)');
+            },
             iconName: 'log-out-outline',
         },
     ];
