@@ -28,7 +28,7 @@ const Login = () => {
           const user = JSON.parse(userString);
           
           if (user.role === "admin") {
-            // router.replace("/(tabs)/admin");
+            router.replace("/(tabs)/search");
           } else {
             router.replace("/(tabs)/search");
           }
@@ -61,7 +61,7 @@ const Login = () => {
 
       // Navigate based on user role
       if (res.data.user.role === "admin") {
-        // router.replace("/(tabs)/admin");
+        router.replace("/(tabs)/search");
       } else {
         router.replace("/(tabs)/search");
       }

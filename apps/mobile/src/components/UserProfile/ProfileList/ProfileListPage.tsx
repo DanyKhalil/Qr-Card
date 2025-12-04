@@ -16,7 +16,7 @@ const ProfileListPage = ({title, profiles}) => {
         contentContainerStyle={styles.scrollContent}
       >
         <View style={styles.content}>
-          <Text style={styles.pageTitle}>{title}</Text>
+          {/* <Text style={styles.pageTitle}>{title}</Text> */}
           
           {profiles.length > 0 ? (
             <View style={styles.profileListWrapper}>
@@ -51,7 +51,7 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     alignItems: "center",
-    paddingTop: 40,
+    paddingTop: 0,
     paddingBottom: 20,
     width: SCREEN_WIDTH,
   },

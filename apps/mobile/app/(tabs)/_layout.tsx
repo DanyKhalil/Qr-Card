@@ -1,39 +1,74 @@
 import { Tabs } from 'expo-router';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { TouchableOpacity, View } from 'react-native';
+import { router } from 'expo-router';
 
 export default function TabLayout() {
-  const insets = useSafeAreaInsets(); // this will help me avoid merging with ui default componentson phones
+  const insets = useSafeAreaInsets();
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    checkAdminStatus();
+  }, []);
+
+  const checkAdminStatus = async () => {
+    try {
+      const userString = await AsyncStorage.getItem("user");
+      if (userString) {
+        const user = JSON.parse(userString);
+        setIsAdmin(user.role === "admin");
+      }
+    } catch (error) {
+      console.error("Error checking admin status:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return null;
+  }
 
   return (
     <Tabs
-      screenOptions={{
-        // hte styling of the bottom bar
+      screenOptions={({ route }) => ({
         tabBarHideOnKeyboard: true,
         animation: 'shift',
         tabBarActiveTintColor: '#FF571A',
-        tabBarActiveBackgroundColor:'#eee',
+        tabBarActiveBackgroundColor: '#eee',
         tabBarInactiveTintColor: '#666666',
         tabBarStyle: {
           backgroundColor: '#FF8559',
           height: 60 + insets.bottom,
-          // paddingBottom: 8 + insets.bottom,
         },
-        
-        // design for top header
         headerShown: true,
         headerStyle: {
           backgroundColor: '#FF8559',
-          elevation: 0, 
-          shadowOpacity: 0, 
+          elevation: 0,
+          shadowOpacity: 0,
         },
-        headerTintColor: '#eee', 
+        headerTintColor: '#eee',
         headerTitleStyle: {
           fontWeight: '600',
           fontSize: 24,
         },
-      }}>
+        // Add conditional header right button for admin
+        ...(route.name === 'profile' && isAdmin ? {
+          headerRight: () => (
+            <TouchableOpacity
+              onPress={() => router.push('/admin-panel')}
+              style={{ marginRight: 15 }}
+            >
+              <Ionicons name="shield-outline" size={24} color="#fff" />
+            </TouchableOpacity>
+          ),
+        } : {}),
+      })}>
+      
       <Tabs.Screen
         name="search"
         options={{
@@ -43,6 +78,7 @@ export default function TabLayout() {
           ),
         }}
       />
+      
       <Tabs.Screen
         name="scan"
         options={{
@@ -52,6 +88,7 @@ export default function TabLayout() {
           ),
         }}
       />
+      
       <Tabs.Screen
         name="profile"
         options={{

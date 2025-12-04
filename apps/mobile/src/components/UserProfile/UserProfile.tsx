@@ -135,7 +135,7 @@ const UserProfile = ({
                     <TitleAndLinks title="Connect" links={connectLinks}/>
                     {websiteLink && <TitleAndLinks title="Website" links={[{name:websiteLink, iconName:"web"}]}/>}
 
-                    <ProfileQrCode id={id}/>
+                    <ProfileQrCode id={id} color={QrCodeColor}/>
                     
                     
                 </ScrollView>

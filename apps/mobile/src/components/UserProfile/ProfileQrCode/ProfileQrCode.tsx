@@ -11,7 +11,7 @@ interface ProfileQrCodeProps {
     profileUrl: string;
 }
 
-const ProfileQrCode = ({ id }: { id: string }) => {
+const ProfileQrCode = ({ id, color="#000000"}: { id: string }) => {
     const expoUrl = getExpoDeepLink(`/(stack)/user-profile/${id}`);
     // const webUrl = `http://192.168.1.100:8081/user-profile/${id}`;
 
@@ -55,7 +55,7 @@ const ProfileQrCode = ({ id }: { id: string }) => {
                 value={expoUrl}
                 size={qrSize}
                 backgroundColor="#ffffff"
-                color="#0a0a0a"
+                color={color}
                 />
             </View>
 

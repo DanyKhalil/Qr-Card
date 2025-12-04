@@ -32,18 +32,21 @@ export default function ProfileTab() {
             description: 'See how others see your profile',
             onPress: () => userId && router.push(`/(stack)/user-profile/${userId}`),
             iconName: 'person-outline',
+            color: '#4C8F66', // Green
         },
         {
             title: 'Edit Profile',
             description: 'Update your personal information',
             onPress: () => userId && router.push(`/(stack)/edit-profile/${userId}`),
             iconName: 'create-outline',
+            color: '#FF8E57', // Orange
         },
         {
             title: 'Profile Analytics',
             description: 'View your profile statistics',
             onPress: () => userId && router.push(`/(stack)/profile-analytics/${userId}`),
             iconName: 'bar-chart-outline',
+            color: '#45B7D1', // Blue
         },
         {
             title: 'Logout',
@@ -54,6 +57,7 @@ export default function ProfileTab() {
                 router.replace('/(auth)');
             },
             iconName: 'log-out-outline',
+            color: '#FF6B6B', // Red
         },
     ];
 
@@ -82,12 +86,21 @@ export default function ProfileTab() {
                         marginBottom: 12,
                     }}
                 >
-                    <Ionicons 
-                        name={item.iconName} 
-                        size={30} 
-                        style={{marginRight: 20, marginLeft: 0}} 
-                        color="#47855B"
-                    />
+                    <View style={{
+                        width: 56,
+                        height: 56,
+                        borderRadius: 12,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        marginRight: 16,
+                        backgroundColor: `${item.color}20`, // Adds 20 opacity (e.g., #4C8F6620)
+                    }}>
+                        <Ionicons 
+                            name={item.iconName} 
+                            size={28} 
+                            color={item.color}
+                        />
+                    </View>
                     <View style={{ flex: 1 }}>
                         <Text style={{ fontSize: 16, fontWeight: '600', marginBottom: 4 }}>
                         {item.title}
@@ -96,7 +109,7 @@ export default function ProfileTab() {
                         {item.description}
                         </Text>
                     </View>
-                    <Text style={{ fontSize: 18 }}>›</Text>
+                    <Ionicons name="chevron-forward" size={24} color="#999" />
                 </Pressable>
             ))}
         </ScrollView>

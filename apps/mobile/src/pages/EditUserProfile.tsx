@@ -152,6 +152,7 @@ const EditUserProfilePage = () => {
             locations={userData.locations}
             id={Array.isArray(id) ? id[0] : id || 'User001'}
             customContent={userData.custom_content}
+            QrCodeColor={userData.qr_code_color}
         />
     );
 };

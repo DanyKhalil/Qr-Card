@@ -97,6 +97,7 @@ export const userApi = {
         profilePicInput,
         coverPhotoInput,
         customContent,
+        qrCodeColor = "#000000",
     }) => {
         try {
             const formData = new FormData();
@@ -112,6 +113,7 @@ export const userApi = {
             formData.append('videos', JSON.stringify(videos || []));
             formData.append('locations', JSON.stringify(locations || []));
             formData.append('customContent', JSON.stringify(customContent))
+            formData.append('qrCodeColor', qrCodeColor);
 
             if (profilePicInput?.startsWith('file://')) {
                 const filename = profilePicInput.split('/').pop();
