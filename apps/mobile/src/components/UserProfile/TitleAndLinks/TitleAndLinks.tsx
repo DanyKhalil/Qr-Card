@@ -67,8 +67,8 @@ const TitleAndLinks = ({ title, links = [] }: TitleAndLinksProps) => {
                             name={social.name}
                             iconName={social.iconName}
                             link={social.link}
-                            fontSize={screenWidth < 480 ? 14 : 16}
-                            iconSize={screenWidth < 480 ? 18 : 20}
+                            fontSize={screenWidth < 480 ? 16 : 18}
+                            iconSize={screenWidth < 480 ? 20 : 22}
                         />
                     </View>
                 ))}

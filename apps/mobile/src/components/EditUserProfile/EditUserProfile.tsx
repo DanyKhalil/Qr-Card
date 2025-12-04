@@ -3,7 +3,7 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 import CoverPhoto from './CoverPhoto/CoverPhoto';
 import ProfilePic from './ProfilePIc/ProfilePic';
 import Button from '../UserProfile/Button/Button';
-import ProfileQrCode from '../UserProfile/ProfileQrCode/ProfileQrCode';
+import ProfileQrCode from './ProfileQrCode/ProfileQrCode';
 import { router, useRouter } from 'expo-router';
 import TitleAndFields from './TitleAndFields/TitleAndFields';
 import TitleAndLinks from './TitleAndLinks/TitleAndLinks';
@@ -54,6 +54,7 @@ const EditUserProfile = ({
         locations = [],
         id = "User001",
         customContent = [],
+        QrCodeColor,
     }: EditUserProfileProps) => {
         // for files
 
@@ -200,6 +201,9 @@ const EditUserProfile = ({
         const [locationsInput, setLocationsInput] = useState(locations);
 
         const [customContentInput, setCustomContentInput] = useState(customContent || []);
+
+        const [qrCodeColorInput, setQrCodeColorInput] = useState(QrCodeColor);
+
 
 
 
@@ -384,6 +388,7 @@ const EditUserProfile = ({
                     profilePicInput: profilePicInput,
                     coverPhotoInput: coverPhotoInput,
                     customContent: customContentInput,
+                    qrCodeColor: qrCodeColorInput
                     // profilePicFile,
                     // coverPhotoFile,
                     // profilePicInput,
@@ -474,7 +479,7 @@ const EditUserProfile = ({
                         setCustomContent={setCustomContentInput}
                     />
 
-                    <ProfileQrCode id={id}/>
+                    <ProfileQrCode id={id} color={qrCodeColorInput} setter={setQrCodeColorInput}/>
 
 
                     <AddSocialMediaModal 
