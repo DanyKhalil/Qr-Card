@@ -74,6 +74,7 @@ const UserProfile = ({
               id = {id}
               customContent = {customContent}
               QrCodeColor={QrCodeColor}
+              profilePic={profilePic}
       >
       </TwoColumnLayout>
       <Footer />

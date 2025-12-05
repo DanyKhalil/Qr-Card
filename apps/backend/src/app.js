@@ -17,9 +17,7 @@ const __dirname = path.dirname(__filename);
 
 app.use(express.json());
 
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
-
-app.use((req, res, next) => {
+const corsMiddleware = (req, res, next) => {
   res.header('Access-Control-Allow-Origin', 'http://localhost:5173');
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept');
@@ -29,7 +27,20 @@ app.use((req, res, next) => {
   }
   
   next();
-});
+};
+
+app.use(corsMiddleware);
+
+app.use('/uploads', corsMiddleware, express.static(path.join(__dirname, '../uploads'), {
+  setHeaders: (res, path) => {
+    res.set('Access-Control-Allow-Origin', 'http://localhost:5173');
+    res.set('Access-Control-Allow-Credentials', 'true');
+    
+    res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.set('Pragma', 'no-cache');
+    res.set('Expires', '0');
+  }
+}));
 
 app.use((req, res, next) => {
   console.log(req.method, req.url);
@@ -44,11 +55,15 @@ app.use("/api/profile-analytics", profileAnalyticsRoutes)
 app.use("/api/users3", adminUsersRoutes);
 app.use("/api/follow", profileFollowRoutes);
 
+app.get('/api/test-cors', (req, res) => {
+  res.json({ message: 'CORS is working!' });
+});
+
 if (app._router) {
   app._router.stack.forEach((middleware) => {
-    if (middleware.route) { // routes registered directly on app
+    if (middleware.route) {
       console.log(`${Object.keys(middleware.route.methods)} ${middleware.route.path}`);
-    } else if (middleware.name === 'router') { // router middleware
+    } else if (middleware.name === 'router') {
       middleware.handle.stack.forEach((handler) => {
         const route = handler.route;
         if (route) {
@@ -58,6 +73,5 @@ if (app._router) {
     }
   });
 }
-
 
 export default app;
