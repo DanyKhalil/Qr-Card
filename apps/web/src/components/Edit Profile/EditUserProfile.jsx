@@ -332,6 +332,11 @@ const EditUserProfile = ({
         onCoverPhotoChange={handleCoverPhotoChange}
         onRemoveProfilePic={handleRemoveProfilePic}
         onRemoveCoverPhoto={handleRemoveCoverPhoto}
+
+        disabledSave={userNameInputErrorMessage != '' 
+                                    || dobInputErrorMessage != '' 
+                                    || phoneNumberInputErrorMessage != '' 
+                                    || websiteLinkInputErrorMessage != ''}
       />
       {updateMessage && (
         <div style={{

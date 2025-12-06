@@ -415,6 +415,7 @@ const EditUserProfile = ({
             handleUserProfileUpdate(userNameInput, dobInput, phoneNumberInput, headlineInput, bioInput, websiteLinkInput, connectLinksInput, videosInput, locationsInput, customContentInput);
         };
 
+
         return (
             <>
                 <ScrollView style={{ flex: 1 }}>
@@ -435,6 +436,10 @@ const EditUserProfile = ({
                             <Button 
                                 text="Save"
                                 color="green"
+                                disabled={userNameInputErrorMessage != '' 
+                                    || dobInputErrorMessage != '' 
+                                    || phoneNumberInputErrorMessage != '' 
+                                    || websiteLinkInputErrorMessage != ''}
                                 onPress={() => handleSaveChanges()}
                                 width={180}
                             />

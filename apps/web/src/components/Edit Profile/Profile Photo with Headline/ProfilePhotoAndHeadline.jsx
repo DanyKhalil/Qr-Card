@@ -12,6 +12,7 @@ const ProfilePhotoAndHeadline = ({
     onCoverPhotoChange,
     onRemoveProfilePic,
     onRemoveCoverPhoto,
+    disabledSave,
 }) => {
     const navigate = useNavigate();
     const { id } = useParams();
@@ -73,6 +74,7 @@ const ProfilePhotoAndHeadline = ({
         }
         event.target.value = '';
     };
+    console.log("disabled", disabledSave)
 
     return (
         <div className="profile-section__wrapper">
@@ -110,7 +112,7 @@ const ProfilePhotoAndHeadline = ({
                 </div>
                 <br/>
 
-                <Button text="Save Changes" color="green" bold action={handleSave} icon={<IoSave size={18} />}/>
+                <Button text="Save Changes" color="green" bold action={handleSave} icon={<IoSave size={18}/>}  disabled={disabledSave}/>
                 <Button text="Cancel" color="coral" bold action={handleCancel} icon={<IoClose size={18} />} />
             </div>
         </div>
