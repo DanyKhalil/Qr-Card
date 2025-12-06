@@ -113,3 +113,127 @@
     height: 70px;
   }
 }
+
+
+/* Style selection modal with previews */
+.style-selection-container {
+  padding: 10px;
+}
+
+.style-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 25px;
+  margin-bottom: 30px;
+}
+
+.style-preview-card {
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.style-preview-card:hover {
+  border-color: #4CAF50;
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.style-preview-card.selected {
+  border-color: #4CAF50;
+  background-color: #f8fff8;
+}
+
+.preview-image-container {
+  height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f9f9f9;
+  overflow: hidden;
+  border-bottom: 1px solid #eee;
+}
+
+.style-preview-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 10px;
+}
+
+.preview-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #888;
+  font-style: italic;
+}
+
+.preview-info {
+  padding: 15px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.preview-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.preview-description {
+  font-size: 12px;
+  color: #666;
+  line-height: 1.5;
+  margin-bottom: 15px;
+  flex: 1;
+}
+
+.preview-select-button {
+  background: #4CAF50;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.3s;
+  font-size: 14px;
+}
+
+.preview-select-button:hover {
+  background: #45a049;
+}
+
+.style-modal-footer {
+  display: flex;
+  justify-content: center;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+
+@media (max-width: 768px) {
+  .style-preview-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .preview-image-container {
+    height: 160px;
+  }
+  
+  .style-preview-card {
+    max-width: 300px;
+    margin: 0 auto;
+  }
+}

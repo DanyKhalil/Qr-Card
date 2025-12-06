@@ -1,9 +1,10 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useCallback } from "react";
 import { QRCodeCanvas } from "qrcode.react";
 import "./ProfileQrCode.css";
 import Button from "../Button/Button";
 import { IoDownload } from "react-icons/io5";
 import IconWithName from "../Icon With Name/IconWithName";
+import Modal from "../../Edit Profile/Modals/Modal/Modal";
 
 // Import your icons directly
 import Whatsapp from "../../../assets/images/icons/whatsapp-icon-black.png";
@@ -23,10 +24,13 @@ const ProfileQrCode = ({
   color = "#000000", 
   name = "",
   userLinks = [],
-  image, // Profile image URL
+  image,
 }) => {
   const qrRef = useRef(null);
   const [qrSize, setQrSize] = useState(180);
+  const [showStyleModal, setShowStyleModal] = useState(false);
+  const [selectedStyle, setSelectedStyle] = useState("classic");
+  const [previewDataUrls, setPreviewDataUrls] = useState({});
 
   if (!profileUrl) return null;
 
@@ -68,11 +72,9 @@ const ProfileQrCode = ({
     web: Web,
   };
 
-  // Load all icon images for canvas rendering
   const loadIconImages = async () => {
     const iconImages = {};
     
-    // Get unique icon types from userLinks
     const uniqueIcons = [...new Set(userLinks.map(link => link.iconName?.toLowerCase()))];
     
     for (const iconName of uniqueIcons) {
@@ -90,89 +92,113 @@ const ProfileQrCode = ({
     return iconImages;
   };
 
-  const handleDownload = async () => {
+  // Function to create QR code preview with specific style
+  const createQRCodePreview = useCallback(async (style) => {
     const canvas = qrRef.current.querySelector("canvas");
-    if (!canvas) return;
+    if (!canvas) return null;
 
-    // Create a larger canvas for the full design
-    const padding = 40;
-    const borderWidth = 2;
-    const profileImageSize = 100; // INCREASED: Larger profile image
-    const imageMargin = 20;
-    const nameHeight = name ? 40 : 0;
-    const qrCodeSize = qrSize * 0.7; // REDUCED: Smaller QR code (70% of original)
+    // Style-specific configurations
+    const styleConfigs = {
+      classic: {
+        profileImageSize: 80,
+        imageMargin: 15,
+        qrCodeSizeFactor: 0.6,
+        nameFont: "bold 22px 'Georgia', serif",
+        socialFont: "12px 'Segoe UI', Arial, sans-serif",
+        borderWidth: 4,
+        showGradient: true,
+        backgroundColor: "#ffffff",
+        borderColor: color,
+      },
+      modern: {
+        profileImageSize: 85,
+        imageMargin: 20,
+        qrCodeSizeFactor: 0.55,
+        nameFont: "bold 24px 'Helvetica', Arial, sans-serif",
+        socialFont: "11px 'Arial', sans-serif",
+        borderWidth: 6,
+        showGradient: false,
+        backgroundColor: "#f9f9f9",
+        borderColor: color,
+      },
+      elegant: {
+        profileImageSize: 75,
+        imageMargin: 25,
+        qrCodeSizeFactor: 0.65,
+        nameFont: "bold 20px 'Lucida Handwriting', cursive",
+        socialFont: "10px 'Lucida Handwriting', cursive",
+        borderWidth: 3,
+        showGradient: true,
+        backgroundColor: "#ffffff",
+        borderColor: "#333333",
+      }
+    };
+
+    const config = styleConfigs[style] || styleConfigs.classic;
     
-    // Calculate layout for vertical icons
-    const maxIconsToShow = Math.min(userLinks.length, 6);
-    const iconItemHeight = 35;
+    // Smaller canvas for preview
+    const padding = 20;
+    const borderWidth = config.borderWidth;
+    const profileImageSize = config.profileImageSize;
+    const imageMargin = config.imageMargin;
+    const nameHeight = name ? 30 : 0;
+    const qrCodeSize = qrSize * config.qrCodeSizeFactor;
+    
+    // Calculate layout for vertical icons (show max 2 for preview)
+    const maxIconsToShow = Math.min(userLinks.length, 2);
+    const iconItemHeight = 25;
     const totalSocialHeight = maxIconsToShow * iconItemHeight;
     
-    // Calculate max width needed for social items
+    // Calculate max width needed
     const iconImages = await loadIconImages();
-    const iconSize = 20;
-    const iconTextSize = 14;
+    const iconSize = 16;
+    const iconTextSize = style === 'elegant' ? 10 : style === 'modern' ? 11 : 12;
     
-    // Measure the longest username to determine canvas width
     const tempCanvas = document.createElement("canvas");
     const tempCtx = tempCanvas.getContext("2d");
     tempCtx.font = `${iconTextSize}px 'Segoe UI', Arial, sans-serif`;
     
     let maxTextWidth = 0;
-    for (let i = 0; i < maxIconsToShow; i++) {
+    for (let i = 0; i < Math.min(maxIconsToShow, userLinks.length); i++) {
       const link = userLinks[i];
       const displayName = link.name || "";
       const textWidth = tempCtx.measureText(displayName).width;
       maxTextWidth = Math.max(maxTextWidth, textWidth);
     }
     
-    // Calculate total content width (icon + spacing + text)
-    const totalContentWidth = iconSize + 15 + maxTextWidth;
-    
-    // Ensure canvas is wide enough for content
+    const totalContentWidth = iconSize + 10 + maxTextWidth;
     const minWidth = Math.max(qrCodeSize + (padding * 2), totalContentWidth + (padding * 2));
     const totalWidth = minWidth;
     
-    // Calculate total height including profile image
     const totalHeight = profileImageSize + imageMargin + nameHeight + qrCodeSize + 
-                        (padding * 2) + totalSocialHeight + 40;
+                        (padding * 2) + totalSocialHeight + 20;
     
-    const downloadCanvas = document.createElement("canvas");
-    downloadCanvas.width = totalWidth;
-    downloadCanvas.height = totalHeight;
-    const ctx = downloadCanvas.getContext("2d");
+    const previewCanvas = document.createElement("canvas");
+    previewCanvas.width = totalWidth;
+    previewCanvas.height = totalHeight;
+    const ctx = previewCanvas.getContext("2d");
 
     // Fill background
-    ctx.fillStyle = "#ffffff";
+    ctx.fillStyle = config.backgroundColor;
     ctx.fillRect(0, 0, totalWidth, totalHeight);
 
     // Draw outer border
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 6; // INCREASED from 2 to 6px for thicker border
+    ctx.strokeStyle = config.borderColor;
+    ctx.lineWidth = borderWidth;
     ctx.strokeRect(
-      3, // Changed from borderWidth/2 (which was 1) to 3 (half of 6)
-      3,
-      totalWidth - 6, // Changed from totalWidth - borderWidth to totalWidth - 6
-      totalHeight - 6
+      borderWidth / 2,
+      borderWidth / 2,
+      totalWidth - borderWidth,
+      totalHeight - borderWidth
     );
 
-    // Draw subtle inner border for design
-    ctx.strokeStyle = "#f0f0f0";
-    ctx.lineWidth = 1;
-    ctx.strokeRect(
-      borderWidth + 10,
-      borderWidth + 10,
-      totalWidth - borderWidth - 20,
-      totalHeight - borderWidth - 20
-    );
-
-    // Draw profile image if provided
+    // Draw profile image
     if (image) {
       try {
         const profileImg = await loadImage(image);
         const imageX = totalWidth / 2 - profileImageSize / 2;
         const imageY = padding;
         
-        // Create rounded image with clipping
         ctx.save();
         ctx.beginPath();
         ctx.arc(
@@ -185,19 +211,10 @@ const ProfileQrCode = ({
         ctx.closePath();
         ctx.clip();
         
-        // Draw the image
-        ctx.drawImage(
-          profileImg,
-          imageX,
-          imageY,
-          profileImageSize,
-          profileImageSize
-        );
-        
-        // Restore context
+        ctx.drawImage(profileImg, imageX, imageY, profileImageSize, profileImageSize);
         ctx.restore();
         
-        // ADD THICK BORDER AROUND IMAGE (4px thick, same as QR color)
+        // Border around image
         ctx.beginPath();
         ctx.arc(
           totalWidth / 2,
@@ -207,25 +224,11 @@ const ProfileQrCode = ({
           Math.PI * 2
         );
         ctx.strokeStyle = color;
-        ctx.lineWidth = 4; // Thick border
-        ctx.stroke();
-        
-        // ADD INNER WHITE BORDER FOR NICE EFFECT
-        ctx.beginPath();
-        ctx.arc(
-          totalWidth / 2,
-          imageY + profileImageSize / 2,
-          profileImageSize / 2 - 2, // Slightly smaller radius
-          0,
-          Math.PI * 2
-        );
-        ctx.strokeStyle = "#ffffff";
-        ctx.lineWidth = 2;
+        ctx.lineWidth = style === 'elegant' ? 2 : 3;
         ctx.stroke();
         
       } catch (error) {
-        console.warn("Failed to load profile image:", error);
-        // Fallback: draw a placeholder circle with thick border
+        // Fallback placeholder
         ctx.beginPath();
         ctx.arc(
           totalWidth / 2,
@@ -236,21 +239,10 @@ const ProfileQrCode = ({
         );
         ctx.fillStyle = "#f0f0f0";
         ctx.fill();
-        
-        // Thick colored border for placeholder
-        ctx.beginPath();
-        ctx.arc(
-          totalWidth / 2,
-          padding + profileImageSize / 2,
-          profileImageSize / 2,
-          0,
-          Math.PI * 2
-        );
         ctx.strokeStyle = color;
-        ctx.lineWidth = 4; // Thick border
+        ctx.lineWidth = 3;
         ctx.stroke();
         
-        // Draw initial letter
         ctx.font = `bold ${profileImageSize/2}px 'Segoe UI', Arial, sans-serif`;
         ctx.fillStyle = "#666";
         ctx.textAlign = "center";
@@ -263,53 +255,332 @@ const ProfileQrCode = ({
       }
     }
 
-    // Draw QR code (centered)
+    // Draw QR code
     const qrY = padding + profileImageSize + imageMargin + nameHeight;
     const qrX = (totalWidth - qrCodeSize) / 2;
     
-    // Draw QR code background with gradient for better look
-    const gradient = ctx.createLinearGradient(
-      qrX - 10, qrY - 10, 
-      qrX + qrCodeSize + 10, qrY + qrCodeSize + 10
+    // QR code background
+    if (config.showGradient) {
+      const gradient = ctx.createLinearGradient(
+        qrX - 8, qrY - 8, 
+        qrX + qrCodeSize + 8, qrY + qrCodeSize + 8
+      );
+      gradient.addColorStop(0, "#f8f8f8");
+      gradient.addColorStop(1, "#f0f0f0");
+      ctx.fillStyle = gradient;
+    } else {
+      ctx.fillStyle = "#f5f5f5";
+    }
+    ctx.fillRect(qrX - 8, qrY - 8, qrCodeSize + 16, qrCodeSize + 16);
+    
+    ctx.strokeStyle = "#e0e0e0";
+    ctx.lineWidth = 1;
+    ctx.strokeRect(qrX - 8, qrY - 8, qrCodeSize + 16, qrCodeSize + 16);
+
+    // Draw QR code
+    ctx.drawImage(canvas, qrX, qrY, qrCodeSize, qrCodeSize);
+
+    // Draw name
+    if (name) {
+      ctx.font = config.nameFont;
+      ctx.fillStyle = style === 'elegant' ? "#222" : style === 'modern' ? "#111" : "#333";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      const nameY = padding + profileImageSize + imageMargin;
+      
+      // Truncate name if too long for preview
+      let displayName = name;
+      if (displayName.length > 15) {
+        displayName = displayName.substring(0, 12) + '...';
+      }
+      
+      ctx.fillText(displayName, totalWidth / 2, nameY);
+    }
+
+    // Draw social media icons (max 2 for preview)
+    if (userLinks.length > 0) {
+      const groupStartX = totalWidth / 2;
+      const groupStartY = qrY + qrCodeSize + 20;
+      
+      for (let i = 0; i < maxIconsToShow; i++) {
+        const link = userLinks[i];
+        const y = groupStartY + (i * iconItemHeight);
+        
+        const displayName = link.name || "";
+        ctx.font = config.socialFont;
+        const textWidth = ctx.measureText(displayName).width;
+        const itemWidth = iconSize + 8 + textWidth;
+        const itemStartX = groupStartX - (itemWidth / 2);
+        
+        // Draw icon
+        const iconName = link.iconName?.toLowerCase();
+        if (iconImages[iconName]) {
+          ctx.drawImage(iconImages[iconName], itemStartX, y - iconSize/2, iconSize, iconSize);
+        } else {
+          ctx.font = `bold ${iconSize}px Arial`;
+          ctx.fillStyle = color;
+          ctx.textAlign = "left";
+          ctx.fillText(iconName?.charAt(0).toUpperCase() || "?", itemStartX, y);
+        }
+        
+        // Draw username (truncated for preview)
+        ctx.font = config.socialFont;
+        ctx.fillStyle = style === 'elegant' ? "#555" : style === 'modern' ? "#444" : "#666";
+        ctx.textAlign = "left";
+        
+        let displayText = displayName;
+        if (displayText && displayText.length > 12) {
+          displayText = displayText.substring(0, 10) + '...';
+        }
+        
+        ctx.fillText(displayText, itemStartX + iconSize + 5, y + 4);
+      }
+    }
+
+    return previewCanvas.toDataURL("image/png");
+  }, [profileUrl, name, userLinks, image, color, qrSize]);
+
+  // Generate previews when modal opens
+  useEffect(() => {
+    if (showStyleModal) {
+      const generatePreviews = async () => {
+        const styles = ['classic', 'modern', 'elegant'];
+        const previews = {};
+        
+        for (const style of styles) {
+          const preview = await createQRCodePreview(style);
+          if (preview) {
+            previews[style] = preview;
+          }
+        }
+        
+        setPreviewDataUrls(previews);
+      };
+      
+      generatePreviews();
+    }
+  }, [showStyleModal, createQRCodePreview]);
+
+  // Function to create QR code with specific style for download
+  const createQRCodeForDownload = async (style) => {
+    const canvas = qrRef.current.querySelector("canvas");
+    if (!canvas) return null;
+
+    // Full size configurations for download
+    const styleConfigs = {
+      classic: {
+        profileImageSize: 100,
+        imageMargin: 20,
+        qrCodeSizeFactor: 0.7,
+        nameFont: "bold 28px 'Georgia', serif",
+        socialFont: "14px 'Segoe UI', Arial, sans-serif",
+        borderWidth: 6,
+        showGradient: true,
+        backgroundColor: "#ffffff",
+        borderColor: color,
+      },
+      modern: {
+        profileImageSize: 110,
+        imageMargin: 25,
+        qrCodeSizeFactor: 0.65,
+        nameFont: "bold 30px 'Helvetica', Arial, sans-serif",
+        socialFont: "13px 'Arial', sans-serif",
+        borderWidth: 8,
+        showGradient: false,
+        backgroundColor: "#f9f9f9",
+        borderColor: color,
+      },
+      elegant: {
+        profileImageSize: 90,
+        imageMargin: 30,
+        qrCodeSizeFactor: 0.75,
+        nameFont: "bold 26px 'Lucida Handwriting', cursive",
+        socialFont: "12px 'Lucida Handwriting', cursive",
+        borderWidth: 4,
+        showGradient: true,
+        backgroundColor: "#ffffff",
+        borderColor: "#333333",
+      }
+    };
+
+    const config = styleConfigs[style] || styleConfigs.classic;
+    
+    const padding = 40;
+    const borderWidth = config.borderWidth;
+    const profileImageSize = config.profileImageSize;
+    const imageMargin = config.imageMargin;
+    const nameHeight = name ? 40 : 0;
+    const qrCodeSize = qrSize * config.qrCodeSizeFactor;
+    
+    const maxIconsToShow = Math.min(userLinks.length, 6);
+    const iconItemHeight = 35;
+    const totalSocialHeight = maxIconsToShow * iconItemHeight;
+    
+    const iconImages = await loadIconImages();
+    const iconSize = 20;
+    const iconTextSize = style === 'elegant' ? 12 : style === 'modern' ? 13 : 14;
+    
+    const tempCanvas = document.createElement("canvas");
+    const tempCtx = tempCanvas.getContext("2d");
+    tempCtx.font = `${iconTextSize}px 'Segoe UI', Arial, sans-serif`;
+    
+    let maxTextWidth = 0;
+    for (let i = 0; i < maxIconsToShow; i++) {
+      const link = userLinks[i];
+      const displayName = link.name || "";
+      const textWidth = tempCtx.measureText(displayName).width;
+      maxTextWidth = Math.max(maxTextWidth, textWidth);
+    }
+    
+    const totalContentWidth = iconSize + 15 + maxTextWidth;
+    const minWidth = Math.max(qrCodeSize + (padding * 2), totalContentWidth + (padding * 2));
+    const totalWidth = minWidth;
+    
+    const totalHeight = profileImageSize + imageMargin + nameHeight + qrCodeSize + 
+                        (padding * 2) + totalSocialHeight + 40;
+    
+    const downloadCanvas = document.createElement("canvas");
+    downloadCanvas.width = totalWidth * 3;
+    downloadCanvas.height = totalHeight * 3;
+    const ctx = downloadCanvas.getContext("2d");
+
+    ctx.scale(3, 3);
+
+    // Fill background
+    ctx.fillStyle = config.backgroundColor;
+    ctx.fillRect(0, 0, totalWidth, totalHeight);
+
+    // Draw outer border
+    ctx.strokeStyle = config.borderColor;
+    ctx.lineWidth = borderWidth;
+    ctx.strokeRect(
+      borderWidth / 2,
+      borderWidth / 2,
+      totalWidth - borderWidth,
+      totalHeight - borderWidth
     );
-    gradient.addColorStop(0, "#f8f8f8");
-    gradient.addColorStop(1, "#f0f0f0");
-    ctx.fillStyle = gradient;
+
+    // Draw subtle inner border
+    ctx.strokeStyle = style === 'elegant' ? "#ddd" : "#f0f0f0";
+    ctx.lineWidth = 1;
+    ctx.strokeRect(
+      borderWidth + 10,
+      borderWidth + 10,
+      totalWidth - borderWidth - 20,
+      totalHeight - borderWidth - 20
+    );
+
+    // Draw profile image
+    if (image) {
+      try {
+        const profileImg = await loadImage(image);
+        const imageX = totalWidth / 2 - profileImageSize / 2;
+        const imageY = padding;
+        
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(
+          imageX + profileImageSize / 2,
+          imageY + profileImageSize / 2,
+          profileImageSize / 2,
+          0,
+          Math.PI * 2
+        );
+        ctx.closePath();
+        ctx.clip();
+        
+        ctx.drawImage(profileImg, imageX, imageY, profileImageSize, profileImageSize);
+        ctx.restore();
+        
+        // Border around image
+        ctx.beginPath();
+        ctx.arc(
+          totalWidth / 2,
+          imageY + profileImageSize / 2,
+          profileImageSize / 2,
+          0,
+          Math.PI * 2
+        );
+        ctx.strokeStyle = color;
+        ctx.lineWidth = style === 'elegant' ? 3 : 4;
+        ctx.stroke();
+        
+      } catch (error) {
+        // Fallback placeholder
+        ctx.beginPath();
+        ctx.arc(
+          totalWidth / 2,
+          padding + profileImageSize / 2,
+          profileImageSize / 2,
+          0,
+          Math.PI * 2
+        );
+        ctx.fillStyle = "#f0f0f0";
+        ctx.fill();
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 4;
+        ctx.stroke();
+        
+        ctx.font = `bold ${profileImageSize/2}px 'Segoe UI', Arial, sans-serif`;
+        ctx.fillStyle = "#666";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(
+          name?.charAt(0).toUpperCase() || "?",
+          totalWidth / 2,
+          padding + profileImageSize / 2
+        );
+      }
+    }
+
+    // Draw QR code
+    const qrY = padding + profileImageSize + imageMargin + nameHeight;
+    const qrX = (totalWidth - qrCodeSize) / 2;
+    
+    // QR code background
+    if (config.showGradient) {
+      const gradient = ctx.createLinearGradient(
+        qrX - 10, qrY - 10, 
+        qrX + qrCodeSize + 10, qrY + qrCodeSize + 10
+      );
+      gradient.addColorStop(0, "#f8f8f8");
+      gradient.addColorStop(1, "#f0f0f0");
+      ctx.fillStyle = gradient;
+    } else {
+      ctx.fillStyle = "#f5f5f5";
+    }
     ctx.fillRect(qrX - 10, qrY - 10, qrCodeSize + 20, qrCodeSize + 20);
     
-    // Draw QR code border
     ctx.strokeStyle = "#e0e0e0";
     ctx.lineWidth = 2;
     ctx.strokeRect(qrX - 10, qrY - 10, qrCodeSize + 20, qrCodeSize + 20);
 
-    // Draw QR code with subtle shadow
+    // Draw QR code with shadow
     ctx.shadowColor = "rgba(0, 0, 0, 0.1)";
     ctx.shadowBlur = 5;
     ctx.shadowOffsetX = 0;
     ctx.shadowOffsetY = 2;
     ctx.drawImage(canvas, qrX, qrY, qrCodeSize, qrCodeSize);
-    ctx.shadowColor = "transparent"; // Reset shadow
+    ctx.shadowColor = "transparent";
 
-    // Draw name if provided (positioned below image)
+    // Draw name
     if (name) {
-      ctx.font = "bold 28px 'Segoe UI', Arial, sans-serif";
-      ctx.fillStyle = "#333333";
+      ctx.font = config.nameFont;
+      ctx.fillStyle = style === 'elegant' ? "#222" : style === 'modern' ? "#111" : "#333";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       const nameY = padding + profileImageSize + imageMargin;
       
-      // Add subtle text shadow for depth
-      ctx.shadowColor = "rgba(0, 0, 0, 0.1)";
-      ctx.shadowBlur = 2;
+      ctx.shadowColor = "rgba(0, 0, 0, 0.08)";
+      ctx.shadowBlur = style === 'elegant' ? 1 : 2;
       ctx.shadowOffsetX = 0;
       ctx.shadowOffsetY = 1;
       ctx.fillText(name, totalWidth / 2, nameY);
-      ctx.shadowColor = "transparent"; // Reset shadow
+      ctx.shadowColor = "transparent";
     }
 
-    // Draw social media icons and usernames if provided
+    // Draw social media icons
     if (userLinks.length > 0) {
-      // Center the group of social links
       const groupStartX = totalWidth / 2;
       const groupStartY = qrY + qrCodeSize + 40;
       
@@ -317,39 +588,23 @@ const ProfileQrCode = ({
         const link = userLinks[i];
         const y = groupStartY + (i * iconItemHeight);
         
-        // Calculate width of this specific item
         const displayName = link.name || "";
-        ctx.font = `${iconTextSize}px 'Segoe UI', Arial, sans-serif`;
+        ctx.font = config.socialFont;
         const textWidth = ctx.measureText(displayName).width;
         const itemWidth = iconSize + 15 + textWidth;
-        
-        // Calculate starting X position to center this item
         const itemStartX = groupStartX - (itemWidth / 2);
         
-        // Draw circular colored background for icon (pretty effect)
+        // Draw icon background
         ctx.beginPath();
-        ctx.arc(
-          itemStartX + iconSize/2,
-          y,
-          iconSize/2 + 4, // Slightly larger than icon
-          0,
-          Math.PI * 2
-        );
-        ctx.fillStyle = `${color}20`; // Color with 20% opacity
+        ctx.arc(itemStartX + iconSize/2, y, iconSize/2 + 4, 0, Math.PI * 2);
+        ctx.fillStyle = style === 'modern' ? `${color}15` : `${color}20`;
         ctx.fill();
         
         // Draw icon
         const iconName = link.iconName?.toLowerCase();
         if (iconImages[iconName]) {
-          ctx.drawImage(
-            iconImages[iconName], 
-            itemStartX, 
-            y - iconSize/2, 
-            iconSize, 
-            iconSize
-          );
+          ctx.drawImage(iconImages[iconName], itemStartX, y - iconSize/2, iconSize, iconSize);
         } else {
-          // Fallback: draw text icon
           ctx.font = `bold ${iconSize}px Arial`;
           ctx.fillStyle = color;
           ctx.textAlign = "left";
@@ -357,11 +612,10 @@ const ProfileQrCode = ({
         }
         
         // Draw username
-        ctx.font = `${iconTextSize}px 'Segoe UI', Arial, sans-serif`;
-        ctx.fillStyle = "#666666";
+        ctx.font = config.socialFont;
+        ctx.fillStyle = style === 'elegant' ? "#555" : style === 'modern' ? "#444" : "#666";
         ctx.textAlign = "left";
         
-        // Truncate long usernames if they exceed canvas width
         let displayText = displayName;
         if (displayText && displayText.length > 25) {
           displayText = displayText.substring(0, 22) + '...';
@@ -371,19 +625,74 @@ const ProfileQrCode = ({
       }
     }
 
-    // Download the composite image
-    const downloadedImage = downloadCanvas.toDataURL("image/png");
-    const downloadLink = document.createElement("a");
-    downloadLink.href = downloadedImage;
-    downloadLink.download = `${name.replace(/\s+/g, '_').toLowerCase() || 'profile'}_qr_code.png`;
-    downloadLink.click();
+    return downloadCanvas.toDataURL("image/png");
   };
+
+  const handleDownloadClick = () => {
+    setShowStyleModal(true);
+  };
+
+  const handleStyleSelect = async (style) => {
+    setSelectedStyle(style);
+    const imageData = await createQRCodeForDownload(style);
+    if (imageData) {
+      const downloadLink = document.createElement("a");
+      downloadLink.href = imageData;
+      downloadLink.download = `${name.replace(/\s+/g, '_').toLowerCase()}_${style}_qr_code.png`;
+      downloadLink.click();
+    }
+    setShowStyleModal(false);
+  };
+
+  const StylePreviewCard = ({ style, title, description, isSelected, onClick, previewUrl }) => (
+    <div 
+      className={`style-preview-card ${isSelected ? 'selected' : ''}`}
+      onClick={() => onClick(style)}
+    >
+      <div className="preview-image-container">
+        {previewUrl ? (
+          <img 
+            src={previewUrl} 
+            alt={`${title} style preview`}
+            className="style-preview-image"
+          />
+        ) : (
+          <div className="preview-loading">Generating preview...</div>
+        )}
+      </div>
+      <div className="preview-info">
+        <div className="preview-title" style={{
+          fontFamily: style === 'classic' ? "'Georgia', serif" : 
+                     style === 'modern' ? "'Helvetica', sans-serif" : 
+                     "'Times New Roman', serif",
+          fontSize: '18px',
+          fontWeight: 'bold',
+          marginBottom: '5px',
+          color: '#333'
+        }}>
+          {title}
+        </div>
+        <div className="preview-description" style={{
+          fontFamily: style === 'classic' ? "'Segoe UI', sans-serif" : 
+                     style === 'modern' ? "'Arial', sans-serif" : 
+                     "'Times New Roman', serif",
+          fontSize: '12px',
+          color: '#666',
+          lineHeight: '1.4'
+        }}>
+          {description}
+        </div>
+        <div className="preview-select-button">
+          Download {title}
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="qr-container" ref={qrRef}>
       <h2 className="title-section-title">Share Profile</h2>
       
-      {/* Preview container with border and name */}
       <div className="qr-preview" style={{
         border: `2px solid ${color}`,
         padding: '25px',
@@ -392,7 +701,6 @@ const ProfileQrCode = ({
         marginBottom: '20px',
         boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
       }}>
-        {/* Profile image - Updated with thick border to match download */}
         {image && (
           <div className="qr-profile-image" style={{
             display: 'flex',
@@ -403,18 +711,17 @@ const ProfileQrCode = ({
               src={image} 
               alt={name || "Profile"} 
               style={{
-                width: '100px', // Increased to match download
-                height: '100px', // Increased to match download
+                width: '100px',
+                height: '100px',
                 borderRadius: '50%',
                 objectFit: 'cover',
-                border: `4px solid ${color}`, // Thick border to match download
-                boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', // Added shadow
-                padding: '2px', // Creates inner white border effect
-                backgroundColor: 'white' // Creates inner white border
+                border: `4px solid ${color}`,
+                boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+                padding: '2px',
+                backgroundColor: 'white'
               }}
               onError={(e) => {
                 e.target.style.display = 'none';
-                // Show fallback
                 const placeholder = document.createElement('div');
                 placeholder.style.cssText = `
                   width: 100px;
@@ -445,7 +752,7 @@ const ProfileQrCode = ({
               color: '#333',
               fontSize: '24px',
               fontWeight: '600',
-              textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)' // Added text shadow
+              textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)'
             }}>{name}</h3>
           </div>
         )}
@@ -497,11 +804,58 @@ const ProfileQrCode = ({
           text="Download QR Code"
           color="green"
           bold
-          action={handleDownload}
+          action={handleDownloadClick}
           width={qrSize + 40}
           icon={<IoDownload size={18} />} 
         />
       </div>
+
+      {/* Style Selection Modal with Previews */}
+      <Modal 
+        visible={showStyleModal}
+        onClose={() => setShowStyleModal(false)}
+        title="Choose QR Code Style"
+        maxWidth={1000}
+      >
+        <div className="style-selection-container">
+          <div className="style-preview-grid">
+            <StylePreviewCard
+              style="classic"
+              title="Classic"
+              description="Professional design with serif fonts and gradient background"
+              isSelected={selectedStyle === "classic"}
+              onClick={handleStyleSelect}
+              previewUrl={previewDataUrls.classic}
+            />
+            
+            <StylePreviewCard
+              style="modern"
+              title="Modern"
+              description="Sleek design with sans-serif fonts and minimal borders"
+              isSelected={selectedStyle === "modern"}
+              onClick={handleStyleSelect}
+              previewUrl={previewDataUrls.modern}
+            />
+            
+            <StylePreviewCard
+              style="elegant"
+              title="Elegant"
+              description="Sophisticated serif fonts with refined spacing"
+              isSelected={selectedStyle === "elegant"}
+              onClick={handleStyleSelect}
+              previewUrl={previewDataUrls.elegant}
+            />
+          </div>
+          <div className="style-modal-footer">
+            <Button
+              text="Cancel"
+              color="gray"
+              action={() => setShowStyleModal(false)}
+              width="120px"
+            />
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };
