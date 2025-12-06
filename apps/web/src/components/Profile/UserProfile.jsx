@@ -27,6 +27,10 @@ const UserProfile = ({
   customContent,
   fetchUserProfile,
   QrCodeColor="#fff",
+  includeProfilePic,
+  includeContact,
+  includeSocialMedia,
+  includeWebsite,
 }
 ) => {
   const getToken = () => {
@@ -75,6 +79,10 @@ const UserProfile = ({
               customContent = {customContent}
               QrCodeColor={QrCodeColor}
               profilePic={profilePic}
+              includeProfilePic ={includeProfilePic}
+              includeContact={includeContact}
+              includeSocialMedia={includeSocialMedia}
+              includeWebsite={includeWebsite}
       >
       </TwoColumnLayout>
       <Footer />

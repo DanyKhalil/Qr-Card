@@ -36,6 +36,14 @@ const TwoColumnLayout = ({
     locationSetter,
     customContentSetter,
     QrCodeColor="#000", QrCodeColorSetter,
+    includeProfilePic,
+    setIncludeProfilePic,
+    includeContact,
+    setIncludeContact,
+    includeSocialMedia,
+    setIncludeSocialMedia,
+    includeWebsite,
+    setIncludeWebsite,
 
     addSocialMediaModalVisibiltySetter,
     addVideoModalVisibiltySetter,
@@ -83,7 +91,19 @@ const TwoColumnLayout = ({
                     setter={connectLinksSetter} 
                     addAction={()=>addSocialMediaModalVisibiltySetter(true)}
                 />
-                <ProfileQrCode profileUrl={profileUrlForQrCode} color={QrCodeColor} setter={QrCodeColorSetter}/>
+                <ProfileQrCode 
+                    profileUrl={profileUrlForQrCode} 
+                    color={QrCodeColor} 
+                    setter={QrCodeColorSetter}
+                    includeProfilePic={includeProfilePic}
+                    setIncludeProfilePic={setIncludeProfilePic}
+                    includeContact={includeContact}
+                    setIncludeContact={setIncludeContact}
+                    includeSocialMedia={includeSocialMedia}
+                    setIncludeSocialMedia={setIncludeSocialMedia}
+                    includeWebsite={includeWebsite}
+                    setIncludeWebsite={setIncludeWebsite}
+                />
             </div>
             
             <div 

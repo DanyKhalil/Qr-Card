@@ -32,6 +32,10 @@ const EditUserProfile = ({
   id = "User001",
   customContent,
   QrCodeColor,
+  includeProfilePic,
+  includeContact,
+  includeSocialMedia,
+  includeWebsite,
 }
 ) => {
 
@@ -44,6 +48,10 @@ const EditUserProfile = ({
   const [profilePicInput, setProfilePicInput] = useState(profilePic);
 
   const [qrCodeColorInput, setQrCodeColorInput] = useState(QrCodeColor)
+  const [includeProfilePicInput, setIncludeProfilePicInput] = useState(includeProfilePic);
+  const [includeContactInput, setIncludeContactInput] = useState(includeContact);
+  const [includeSocialMediaInput, setIncludeSocialMediaInput] = useState(includeSocialMedia);
+  const [includeWebsiteInput, setIncludeWebsiteInput] = useState(includeWebsite);
 
   // USER NAME INPUTT
   const [userNameInput, setUserNameInput] = useState(userName);
@@ -277,6 +285,11 @@ const EditUserProfile = ({
       formData.append('bio', newBio);
       formData.append('websiteUrl', newWebsite);
       formData.append('qrCodeColor', qrCodeColorInput);
+      formData.append('qr_code_include_profile_pic', includeProfilePicInput);
+      formData.append('qr_code_include_contact', includeContactInput);
+      formData.append('qr_code_include_social', includeSocialMediaInput);
+      formData.append('qr_code_include_website', includeWebsiteInput);
+
       formData.append('connectLinks', JSON.stringify(newSocialMediaLinks));
       formData.append('videos', JSON.stringify(newVideos));
       formData.append('locations', JSON.stringify(newLocations));
@@ -385,6 +398,10 @@ const EditUserProfile = ({
               id = {id}
               customContent={customContentInput} customContentSetter={setCustomContentInput}
               QrCodeColor={qrCodeColorInput} QrCodeColorSetter={setQrCodeColorInput} 
+              includeProfilePic={includeProfilePicInput} setIncludeProfilePic={setIncludeProfilePicInput}
+              includeContact={includeContactInput} setIncludeContact={setIncludeContactInput}
+              includeSocialMedia={includeSocialMediaInput} setIncludeSocialMedia={setIncludeSocialMediaInput}
+              includeWebsite={includeWebsiteInput} setIncludeWebsite={setIncludeWebsiteInput}
 
               addSocialMediaModalVisibiltySetter = {setAddSocialMediaModalIsVisible}
 

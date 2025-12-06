@@ -23,6 +23,10 @@ const TwoColumnLayout = ({
     customContent,
     QrCodeColor = "#fff",
     profilePic,
+    includeProfilePic,
+    includeContact,
+    includeSocialMedia,
+    includeWebsite,
 }) => {
 
 
@@ -64,8 +68,12 @@ const TwoColumnLayout = ({
                     profileUrl={profileUrlForQrCode} 
                     color={QrCodeColor}
                     name={userName}
-                    userLinks={contactLinks.concat(formatSocialLinks(connectLinks)).concat([{name:websiteLink, iconName:"web"}].filter(link => link.name && String(link.name).trim() !== ''))}
-                    image={profilePic}
+                    userLinks={
+                                (includeContact ? contactLinks : []).concat(
+                                    (includeSocialMedia ? formatSocialLinks(connectLinks) : [])).concat(
+                                        (includeWebsite ? [{name:websiteLink, iconName:"web"}].filter(link => link.name && String(link.name).trim() !== '') : [])
+                                )}
+                    image={includeProfilePic ? profilePic : null}
                 />
             </div>
             

@@ -40,6 +40,7 @@ export const deleteUser = async (req, res) => {
   }
 };
 
+// === to get user profuoe info ----
 export const getUserProfile = async (req, res) => {
   try {
     const { id } = req.params;
@@ -170,6 +171,10 @@ export const getUserProfile = async (req, res) => {
       cover_photo_url: user.profile.cover_pic_url,
       profile_pic_url: user.profile.profile_pic_url,
       qr_code_color: user.profile.qr_code_color, 
+      qr_code_include_profile_pic: user.profile.qr_code_include_profile_pic,
+      qr_code_include_contact: user.profile.qr_code_include_contact,
+      qr_code_include_social: user.profile.qr_code_include_social,
+      qr_code_include_website: user.profile.qr_code_include_website,
       dob: user.profile.dob,
       headline: user.profile.headline,
       bio: user.profile.bio,
@@ -279,7 +284,7 @@ export const updateUserProfile = async (req, res) => {
       headline, bio, websiteUrl, 
       connectLinks, videos, locations, customContent,
       coverPhotoPath, profilePhotoPath,
-      qrCodeColor
+      qrCodeColor, qr_code_include_profile_pic, qr_code_include_contact, qr_code_include_social, qr_code_include_website
     } = req.body;
 
     if (!id) {
@@ -387,7 +392,11 @@ export const updateUserProfile = async (req, res) => {
       website: websiteUrl,
       cover_pic_url: finalCoverPhotoPath,
       profile_pic_url: finalProfilePhotoPath,
-      qr_code_color: qrCodeColor || "#000000"
+      qr_code_color: qrCodeColor || "#000000",
+      qr_code_include_profile_pic: qr_code_include_profile_pic || true,
+      qr_code_include_contact: qr_code_include_contact || true,
+      qr_code_include_social: qr_code_include_social || true,
+      qr_code_include_website: qr_code_include_website || true,
     })
 
     // Social media links update

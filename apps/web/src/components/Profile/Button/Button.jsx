@@ -11,7 +11,6 @@ const Button = ({
     icon = null // New prop for icon
 }) => {
     const colorClass = color === "coral" ? "fancy-btn__coral" : "fancy-btn__green";
-    console.log("Disabled Button:", disabled)
 
     return (
         <button
