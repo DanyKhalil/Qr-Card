@@ -23,6 +23,22 @@ const Profile = sequelize.define(
             type: DataTypes.STRING(7),
             defaultValue: '#000000',
         },
+        qr_code_include_profile_pic: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: true,
+        },
+        qr_code_include_contact: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: true,
+        },
+        qr_code_include_social: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: true,
+        },
+        qr_code_include_website: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: true,
+        },
         dob: {
             type: DataTypes.DATE,
         },
