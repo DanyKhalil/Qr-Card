@@ -28,6 +28,7 @@ const ProfileList = ({ profiles = [], onProfileClick = () => {} }) => {
   const [error, setError] = useState(null);
   const [loggedInUserId, setLoggedInUserId] = useState(null);
 
+
   const transformImageUrl = (url: string) => {
     if (!url) 
         return url;

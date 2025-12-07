@@ -320,6 +320,10 @@ const UserProfilePage = ({id}) => {
             customContent={userData.custom_content}
             fetchUserProfile = {fetchUserProfile}
             QrCodeColor = {userData.qr_code_color}
+            includeProfilePic ={userData.qr_code_include_profile_pic}
+            includeContact={userData.qr_code_include_contact}
+            includeSocialMedia={userData.qr_code_include_social}
+            includeWebsite={userData.qr_code_include_website}
             // saveContactFunction={saveContact}
             // phoneNumber={userData.phone_number[0]}
             // email={userData.email[0]}

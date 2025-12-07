@@ -47,6 +47,10 @@ const UserProfile = ({
         following,
         fetchUserProfile,
         QrCodeColor,
+        includeContact,
+        includeSocialMedia,
+        includeWebsite,
+        includeProfilePic,
         // saveContactFunction,
         // phoneNumber,
         // email,
@@ -135,7 +139,15 @@ const UserProfile = ({
                     <TitleAndLinks title="Connect" links={connectLinks}/>
                     {websiteLink && <TitleAndLinks title="Website" links={[{name:websiteLink, iconName:"web"}]}/>}
 
-                    <ProfileQrCode id={id} color={QrCodeColor}/>
+                    <ProfileQrCode id={id} color={QrCodeColor}
+                        name={userName}
+                        userLinks={
+                                (includeContact ? contactLinks : []).concat(
+                                    (includeSocialMedia ? connectLinks : [])).concat(
+                                        (includeWebsite ? [{name:websiteLink, iconName:"web"}].filter(link => link.name && String(link.name).trim() !== '') : [])
+                                )}
+                        image={includeProfilePic ? profilePic : null}
+                    />
                     
                     
                 </ScrollView>

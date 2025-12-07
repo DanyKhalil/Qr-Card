@@ -55,6 +55,10 @@ const EditUserProfile = ({
         id = "User001",
         customContent = [],
         QrCodeColor,
+        includeProfilePic,
+        includeContact,
+        includeSocialMedia,
+        includeWebsite,
     }: EditUserProfileProps) => {
         // for files
 
@@ -203,6 +207,10 @@ const EditUserProfile = ({
         const [customContentInput, setCustomContentInput] = useState(customContent || []);
 
         const [qrCodeColorInput, setQrCodeColorInput] = useState(QrCodeColor);
+        const [includeProfilePicInput, setIncludeProfilePicInput] = useState(includeProfilePic);
+        const [includeContactInput, setIncludeContactInput] = useState(includeContact);
+        const [includeSocialMediaInput, setIncludeSocialMediaInput] = useState(includeSocialMedia);
+        const [includeWebsiteInput, setIncludeWebsiteInput] = useState(includeWebsite);
 
 
 
@@ -388,7 +396,11 @@ const EditUserProfile = ({
                     profilePicInput: profilePicInput,
                     coverPhotoInput: coverPhotoInput,
                     customContent: customContentInput,
-                    qrCodeColor: qrCodeColorInput
+                    qrCodeColor: qrCodeColorInput,
+                    qr_code_include_profile_pic: includeProfilePicInput,
+                    qr_code_include_contact: includeContactInput,
+                    qr_code_include_social: includeSocialMediaInput,
+                    qr_code_include_website: includeWebsiteInput,
                     // profilePicFile,
                     // coverPhotoFile,
                     // profilePicInput,
@@ -484,7 +496,18 @@ const EditUserProfile = ({
                         setCustomContent={setCustomContentInput}
                     />
 
-                    <ProfileQrCode id={id} color={qrCodeColorInput} setter={setQrCodeColorInput}/>
+                    <ProfileQrCode id={id} 
+                        color={qrCodeColorInput} 
+                        setter={setQrCodeColorInput}
+                        includeProfilePic={includeProfilePicInput}
+                        setIncludeProfilePic={setIncludeProfilePicInput}
+                        includeContact={includeContactInput}
+                        setIncludeContact={setIncludeContactInput}
+                        includeSocialMedia={includeSocialMediaInput}
+                        setIncludeSocialMedia={setIncludeSocialMediaInput}
+                        includeWebsite={includeWebsiteInput}
+                        setIncludeWebsite={setIncludeWebsiteInput}
+                    />
 
 
                     <AddSocialMediaModal 
