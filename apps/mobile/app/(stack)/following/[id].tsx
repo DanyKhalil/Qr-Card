@@ -17,7 +17,6 @@ export default function FollowingScreen() {
             try {
                 const parsedProfiles = JSON.parse(profilesJson as string);
                 setProfiles(parsedProfiles);
-                console.log('Using passed profiles:', parsedProfiles.length);
             } catch (err) {
                 console.error("Error parsing profiles:", err);
                 // If parsing fails, fetch from API

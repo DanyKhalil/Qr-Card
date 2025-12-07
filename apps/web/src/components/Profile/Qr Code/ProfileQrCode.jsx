@@ -26,8 +26,6 @@ const ProfileQrCode = ({
   userLinks = [],
   image,
 }) => {
-  console.log('profile', profileUrl)
-  console.log('links', userLinks)
   const qrRef = useRef(null);
   const [qrSize, setQrSize] = useState(180);
   const [showStyleModal, setShowStyleModal] = useState(false);

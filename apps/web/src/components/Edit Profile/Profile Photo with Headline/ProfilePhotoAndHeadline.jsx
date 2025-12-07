@@ -74,7 +74,6 @@ const ProfilePhotoAndHeadline = ({
         }
         event.target.value = '';
     };
-    console.log("disabled", disabledSave)
 
     return (
         <div className="profile-section__wrapper">
