@@ -3,9 +3,11 @@ import CustomItemCard from "../CustomItemCard/CustomItemCard";
 import "./CustomContentDisplay.css"; 
 
 const CustomContentDisplay = ({ customContent }) => {
+  console.log(customContent);
   return (
     <section className="custom-content-section">
       <h2 className="custom-content-title">{customContent.name}</h2>
+      <p className="custom-content-description">{customContent.description}</p>
 
       <div className="custom-cards-grid">
         {customContent.items.map((item) => (
