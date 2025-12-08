@@ -58,6 +58,79 @@ const CustomItemsManager = ({ visible, onClose, contentType, onUpdateItems }) =>
     onClose();
   };
 
+  // Helper function to get image URL from value
+  const getImageUrl = (value) => {
+    if (!value) return null;
+    
+    // If value is a string URL
+    if (typeof value === 'string') {
+      return value;
+    }
+    
+    // If value is a File object, create blob URL
+    if (value instanceof File || (value && value.name && value.size)) {
+      return URL.createObjectURL(value);
+    }
+    
+    // If value is an object with url property
+    if (value && typeof value === 'object' && value.url) {
+      return value.url;
+    }
+    
+    return null;
+  };
+
+  // Helper function to check if value should display as image
+  const shouldDisplayAsImage = (value, fieldType) => {
+    if (fieldType === 'image') return true;
+    
+    // Check if value looks like an image
+    const url = getImageUrl(value);
+    return !!url;
+  };
+
+  // Helper function to get display text for non-image values
+  const getDisplayText = (value) => {
+    if (value === null || value === undefined) return '';
+    
+    // Handle boolean values
+    if (typeof value === 'boolean') {
+      return value ? 'Yes' : 'No';
+    }
+    
+    // Handle File objects (for non-image display)
+    if (value instanceof File) {
+      return `📄 ${value.name} (${(value.size / 1024).toFixed(1)} KB)`;
+    }
+    
+    // Handle objects
+    if (typeof value === 'object') {
+      // Check if it's an empty object
+      if (Object.keys(value).length === 0) {
+        return '[Empty Object]';
+      }
+      
+      // Try to stringify, but limit length
+      try {
+        const str = JSON.stringify(value);
+        return str.length > 100 ? str.substring(0, 100) + '...' : str;
+      } catch (e) {
+        return '[Object]';
+      }
+    }
+    
+    // Handle strings and numbers
+    return String(value);
+  };
+
+  const handleImageError = (e) => {
+    e.target.style.display = 'none';
+    const fallback = e.target.nextElementSibling;
+    if (fallback) {
+      fallback.style.display = 'block';
+    }
+  };
+
   return (
     <Modal 
       visible={visible} 
@@ -100,13 +173,6 @@ const CustomItemsManager = ({ visible, onClose, contentType, onUpdateItems }) =>
                   </div>
                   
                   <div className="item-actions">
-                    {/* <button 
-                      className="item-action-btn visibility-btn"
-                      onClick={() => handleToggleVisibility(item.id)}
-                      title={item.visibility ? 'Hide item' : 'Show item'}
-                    >
-                      {item.visibility ? '👁️' : '👁️‍🗨️'}
-                    </button> */}
                     <button 
                       className="item-action-btn edit-btn"
                       onClick={() => {
@@ -130,19 +196,43 @@ const CustomItemsManager = ({ visible, onClose, contentType, onUpdateItems }) =>
                 <div className="item-values">
                   {item.values && item.values.length > 0 ? (
                     <div className="values-grid">
-                      {item.values.map((value, index) => (
-                        <div key={index} className="value-item">
-                          <span className="value-label">
-                            {value.field_label || value.field_name}:
-                          </span>
-                          <span className="value-content">
-                            {typeof value.value === 'object' 
-                              ? JSON.stringify(value.value) 
-                              : String(value.value || '').substring(0, 100)}
-                            {String(value.value || '').length > 100 ? '...' : ''}
-                          </span>
-                        </div>
-                      ))}
+                      {item.values.map((value, index) => {
+                        const isImage = shouldDisplayAsImage(value.value, value.field_type);
+                        const imageUrl = isImage ? getImageUrl(value.value) : null;
+                        
+                        return (
+                          <div key={index} className={`value-item ${isImage ? 'image-value-item' : ''}`}>
+                            <span className="value-label">
+                              {value.field_label || value.field_name}:
+                            </span>
+                            
+                            {isImage && imageUrl ? (
+                              <div className="image-value-content">
+                                <div className="image-preview-wrapper">
+                                  <img 
+                                    src={imageUrl} 
+                                    alt={value.field_label || 'Image preview'}
+                                    className="item-image-preview"
+                                    onError={handleImageError}
+                                  />
+                                  <div className="image-fallback" style={{ display: 'none' }}>
+                                    📷 Image not available
+                                  </div>
+                                </div>
+                                {value.value instanceof File && (
+                                  <div className="image-file-info">
+                                    <small>New file: {value.value.name}</small>
+                                  </div>
+                                )}
+                              </div>
+                            ) : (
+                              <span className="value-content">
+                                {getDisplayText(value.value)}
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   ) : (
                     <div className="no-values">No field values set</div>

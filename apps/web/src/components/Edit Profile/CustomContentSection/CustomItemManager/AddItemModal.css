@@ -31,8 +31,8 @@
 
 /* 🔥 Wider fields: two-column grid on desktop */
 .fields-grid {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Two-column layout */
   width: 100%;
   gap: 1.2rem;
 }
@@ -41,6 +41,11 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+}
+
+/* Make image upload fields span full width */
+.field-group:has(.image-upload-field) {
+  grid-column: span 2; /* Image fields take full width */
 }
 
 .field-label {
@@ -104,6 +109,108 @@
   margin: 0;
 }
 
+/* ========== IMAGE UPLOAD STYLES ========== */
+.image-upload-field {
+  margin-top: 8px;
+}
+
+.image-upload-placeholder {
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  padding: 30px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background-color: #f9f9f9;
+}
+
+.image-upload-placeholder:hover {
+  border-color: #82C294;
+  background-color: #f0f9f3;
+}
+
+.upload-icon {
+  font-size: 40px;
+  margin-bottom: 10px;
+  opacity: 0.7;
+}
+
+.upload-text {
+  font-size: 16px;
+  font-weight: 500;
+  color: #555;
+  margin-bottom: 5px;
+}
+
+.upload-hint {
+  font-size: 12px;
+  color: #888;
+}
+
+.image-preview-container {
+  margin-top: 10px;
+}
+
+.image-preview {
+  max-width: 100%;
+  max-height: 200px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  margin-bottom: 10px;
+  object-fit: contain;
+  background-color: #f5f5f5;
+}
+
+.image-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.file-info {
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #555;
+  border: 1px solid #eaeaea;
+}
+
+.uploading-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 20px;
+  border: 2px dashed #82C294;
+  border-radius: 8px;
+  background-color: #f0f9f3;
+  color: #2e7d32;
+  font-weight: 500;
+}
+
+.uploading-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #82C294;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Image upload field specific focus states */
+.image-upload-placeholder:focus-within {
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+/* ========== END IMAGE UPLOAD STYLES ========== */
+
 .no-fields-notice {
   text-align: center;
   padding: 2rem;
@@ -111,6 +218,7 @@
   background: #f8f9fa;
   border-radius: 6px;
   margin: 1rem 0;
+  grid-column: span 2; /* Span full width */
 }
 
 /* Footer actions */
@@ -124,6 +232,7 @@
   position: sticky;
   bottom: 0;
   background: white;
+  grid-column: span 2; /* Span full width */
 }
 
 .form-cancel-btn,
@@ -136,6 +245,10 @@
   .fields-grid {
     grid-template-columns: 1fr;  /* stack on mobile */
   }
+  
+  .field-group:has(.image-upload-field) {
+    grid-column: span 1; /* Reset to single column on mobile */
+  }
 
   .form-actions {
     flex-direction: column-reverse;
@@ -145,5 +258,24 @@
   .form-submit-btn {
     width: 100%;
     min-width: auto;
+  }
+  
+  .image-actions {
+    flex-direction: column;
+  }
+  
+  .image-preview {
+    max-height: 150px;
+  }
+}
+
+/* Large desktop screens */
+@media (min-width: 1200px) {
+  .fields-grid {
+    grid-template-columns: repeat(3, 1fr); /* Three columns on large screens */
+  }
+  
+  .field-group:has(.image-upload-field) {
+    grid-column: span 3; /* Image fields take full width on large screens */
   }
 }

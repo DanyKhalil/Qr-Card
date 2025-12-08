@@ -340,7 +340,11 @@ export const updateUserProfile = async (req, res) => {
     const parsedCustomContent = customContent ? JSON.parse(customContent) : [];
     
 
-    // Handling cover and profile picture changes
+    // --------------------------------------------------------------
+    // HANDLE ALL IMAGE UPLOADS
+    // --------------------------------------------------------------
+    
+    // 1. Profile and Cover Photos
     let finalProfilePhotoPath = profilePhotoPath;
     let finalCoverPhotoPath = coverPhotoPath;
 
@@ -359,6 +363,67 @@ export const updateUserProfile = async (req, res) => {
       finalCoverPhotoPath = coverPhotoPath || null;
     }
 
+    // 2. Custom Content Images
+    // Create a map of custom image files from req.files
+    const customImageFiles = {};
+    if (req.files && Array.isArray(req.files)) {
+      
+      req.files.forEach((file, index) => {
+        console.log('File object:', {
+          fieldname: file.fieldname,
+          originalname: file.originalname,
+          filename: file.filename,
+          path: file.path,
+          destination: file.destination,
+          mimetype: file.mimetype,
+          size: file.size
+        });
+        
+        if (file.fieldname && file.fieldname.startsWith('customImage_')) {
+          customImageFiles[file.fieldname] = `http://localhost:5050/uploads/custom-content/${file.filename}`;
+        }
+      });
+    } else if (req.files && typeof req.files === 'object') {
+      // Fallback for object format (if using .fields())
+      Object.keys(req.files).forEach(key => {
+        if (key.startsWith('customImage_')) {
+          const file = req.files[key][0];
+          customImageFiles[key] = `http://localhost:5050/uploads/custom-content/${file.filename}`;
+        }
+      });
+    }
+
+
+    // 3. Process custom content to replace image placeholders with actual URLs
+    const processedCustomContent = parsedCustomContent.map(contentType => ({
+      ...contentType,
+      items: contentType.items?.map(item => ({
+        ...item,
+        values: item.values?.map(value => {
+          // Check if this is an image field that has a placeholder
+          if (value.field_type === 'image' && value.value && typeof value.value === 'string' && value.value.startsWith('__IMAGE_PLACEHOLDER_')) {
+            // Extract the key from placeholder
+            const placeholderMatch = value.value.match(/__IMAGE_PLACEHOLDER_(.*)__/);
+            if (placeholderMatch && placeholderMatch[1]) {
+              const imageKey = `customImage_${placeholderMatch[1]}`;
+              // Replace with actual URL if we have it
+              if (customImageFiles[imageKey]) {
+                return {
+                  ...value,
+                  value: customImageFiles[imageKey]
+                };
+              }
+            }
+          }
+          return value;
+        })
+      }))
+    }));
+
+    // --------------------------------------------------------------
+    // DATABASE OPERATIONS
+    // --------------------------------------------------------------
+    
     const user = await User.findOne({
       where: {id: id}
     })
@@ -529,8 +594,8 @@ export const updateUserProfile = async (req, res) => {
       }
     }
 
-    // CUSTOM CONTENT UPDATE - Fixed handling with field ID mapping
-    for (let incomingType of parsedCustomContent) {
+    // CUSTOM CONTENT UPDATE - with image handling
+    for (let incomingType of processedCustomContent) {
       let existingType = existingCustomTypes.find(type => type.id === incomingType.id);
       
       if (!existingType) {
@@ -574,12 +639,22 @@ export const updateUserProfile = async (req, res) => {
           for (let incomingValue of incomingItem.values || []) {
             const realFieldId = fieldIdMap[incomingValue.field_id];
             if (realFieldId) {
-              await CustomContentValue.create({
-                content_item_id: newItemRecord.id,
-                content_field_id: realFieldId,
-                value_text: ['longtext', 'text'].includes(incomingValue.field_type) ? incomingValue.value : null,
-                value_json: !['longtext', 'text'].includes(incomingValue.field_type) ? incomingValue.value : null
-              });
+              // For image type, store URL in value_text (since it's a string)
+              if (incomingValue.field_type === 'image') {
+                await CustomContentValue.create({
+                  content_item_id: newItemRecord.id,
+                  content_field_id: realFieldId,
+                  value_text: incomingValue.value, // Image URL
+                  value_json: null
+                });
+              } else {
+                await CustomContentValue.create({
+                  content_item_id: newItemRecord.id,
+                  content_field_id: realFieldId,
+                  value_text: ['longtext', 'text'].includes(incomingValue.field_type) ? incomingValue.value : null,
+                  value_json: !['longtext', 'text'].includes(incomingValue.field_type) ? incomingValue.value : null
+                });
+              }
             }
           }
         }
@@ -657,12 +732,22 @@ export const updateUserProfile = async (req, res) => {
               });
               
               if (fieldExists) {
-                await CustomContentValue.create({
-                  content_item_id: newItemRecord.id,
-                  content_field_id: realFieldId,
-                  value_text: ['longtext', 'text'].includes(incomingValue.field_type) ? incomingValue.value : null,
-                  value_json: !['longtext', 'text'].includes(incomingValue.field_type) ? incomingValue.value : null
-                });
+                // For image type, store URL in value_text
+                if (incomingValue.field_type === 'image') {
+                  await CustomContentValue.create({
+                    content_item_id: newItemRecord.id,
+                    content_field_id: realFieldId,
+                    value_text: incomingValue.value, // Image URL
+                    value_json: null
+                  });
+                } else {
+                  await CustomContentValue.create({
+                    content_item_id: newItemRecord.id,
+                    content_field_id: realFieldId,
+                    value_text: ['longtext', 'text'].includes(incomingValue.field_type) ? incomingValue.value : null,
+                    value_json: !['longtext', 'text'].includes(incomingValue.field_type) ? incomingValue.value : null
+                  });
+                }
               }
             }
           } else {
@@ -682,10 +767,17 @@ export const updateUserProfile = async (req, res) => {
 
               if (existingValue) {
                 // UPDATE EXISTING VALUE
-                await existingValue.update({
-                  value_text: ['longtext', 'text'].includes(incomingValue.field_type) ? incomingValue.value : null,
-                  value_json: !['longtext', 'text'].includes(incomingValue.field_type) ? incomingValue.value : null
-                });
+                if (incomingValue.field_type === 'image') {
+                  await existingValue.update({
+                    value_text: incomingValue.value, // Image URL
+                    value_json: null
+                  });
+                } else {
+                  await existingValue.update({
+                    value_text: ['longtext', 'text'].includes(incomingValue.field_type) ? incomingValue.value : null,
+                    value_json: !['longtext', 'text'].includes(incomingValue.field_type) ? incomingValue.value : null
+                  });
+                }
               } else {
                 // CREATE NEW VALUE
                 const fieldExists = await CustomContentField.findOne({
@@ -693,12 +785,21 @@ export const updateUserProfile = async (req, res) => {
                 });
                 
                 if (fieldExists) {
-                  await CustomContentValue.create({
-                    content_item_id: existingItem.id,
-                    content_field_id: realFieldId,
-                    value_text: ['longtext', 'text'].includes(incomingValue.field_type) ? incomingValue.value : null,
-                    value_json: !['longtext', 'text'].includes(incomingValue.field_type) ? incomingValue.value : null
-                  });
+                  if (incomingValue.field_type === 'image') {
+                    await CustomContentValue.create({
+                      content_item_id: existingItem.id,
+                      content_field_id: realFieldId,
+                      value_text: incomingValue.value, // Image URL
+                      value_json: null
+                    });
+                  } else {
+                    await CustomContentValue.create({
+                      content_item_id: existingItem.id,
+                      content_field_id: realFieldId,
+                      value_text: ['longtext', 'text'].includes(incomingValue.field_type) ? incomingValue.value : null,
+                      value_json: !['longtext', 'text'].includes(incomingValue.field_type) ? incomingValue.value : null
+                    });
+                  }
                 }
               }
             }
@@ -728,7 +829,7 @@ export const updateUserProfile = async (req, res) => {
 
     // Delete types that were removed
     for (let existingType of existingCustomTypes) {
-      let typeExists = parsedCustomContent.find(type => type.id === existingType.id);
+      let typeExists = processedCustomContent.find(type => type.id === existingType.id);
       if (!typeExists) {
         await CustomContentType.destroy({ where: { id: existingType.id } });
       }
