@@ -62,22 +62,37 @@ const CustomItemsManager = ({ visible, onClose, contentType, onUpdateItems }) =>
   const getImageUrl = (value) => {
     if (!value) return null;
     
-    // If value is a string URL
+    let url = null;
+    
+    // Handle different value types
     if (typeof value === 'string') {
-      return value;
+      url = value;
+    } else if (value instanceof File || (value && value.name && value.size)) {
+      // Create blob URL for File objects
+      url = URL.createObjectURL(value);
+    } else if (value && typeof value === 'object' && value.url) {
+      url = value.url;
     }
     
-    // If value is a File object, create blob URL
-    if (value instanceof File || (value && value.name && value.size)) {
-      return URL.createObjectURL(value);
-    }
+    // Validate if it's actually an image URL
+    if (!url || typeof url !== 'string') return null;
     
-    // If value is an object with url property
-    if (value && typeof value === 'object' && value.url) {
-      return value.url;
-    }
+    // Check if it ends with image extension
+    const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.svg'];
+    const isImageExtension = imageExtensions.some(ext => 
+      url.toLowerCase().endsWith(ext)
+    );
     
-    return null;
+    // Check if it's a URL with common image patterns
+    const isImageUrlPattern = (
+      (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('/')) &&
+      (url.includes('/uploads/') || url.includes('/images/') || url.match(/\.(jpg|jpeg|png|gif|webp|bmp|svg)(\?.*)?$/i))
+    );
+    
+    // Check if it's a blob URL (from File object)
+    const isBlobUrl = url.startsWith('blob:');
+    
+    return (isImageExtension || isImageUrlPattern || isBlobUrl) ? url : null;
   };
 
   // Helper function to check if value should display as image
@@ -100,6 +115,9 @@ const CustomItemsManager = ({ visible, onClose, contentType, onUpdateItems }) =>
     
     // Handle File objects (for non-image display)
     if (value instanceof File) {
+      // Check if it might be an image file
+      const fileName = value.name.toLowerCase();
+      const isLikelyImage = fileName.match(/\.(jpg|jpeg|png|gif|webp|bmp|svg)$/);
       return `📄 ${value.name} (${(value.size / 1024).toFixed(1)} KB)`;
     }
     
@@ -120,7 +138,14 @@ const CustomItemsManager = ({ visible, onClose, contentType, onUpdateItems }) =>
     }
     
     // Handle strings and numbers
-    return String(value);
+    const stringValue = String(value);
+    
+    // Truncate very long text
+    if (stringValue.length > 150) {
+      return stringValue.substring(0, 150) + '...';
+    }
+    
+    return stringValue;
   };
 
   const handleImageError = (e) => {

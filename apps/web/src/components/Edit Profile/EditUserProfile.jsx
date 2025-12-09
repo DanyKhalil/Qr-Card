@@ -216,7 +216,6 @@ const EditUserProfile = ({
 
 
 
-  console.log(customContentInput)
 
   
   // Profile and Cover Photos UseStates:
