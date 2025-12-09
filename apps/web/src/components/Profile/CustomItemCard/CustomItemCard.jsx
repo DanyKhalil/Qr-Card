@@ -1,22 +1,38 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import "./CustomItemCard.css";
 
-const CustomItemCard = ({ customItem }) => {
+const CustomItemCard = ({ customItem, cardLayout = true }) => {
+  console.log(customItem);
   if (!customItem) return null;
 
   const { title, fields, values } = customItem;
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  // Get all image URLs from the item
+  const getImageUrls = () => {
+    const imageUrls = [];
+    
+    fields.forEach(field => {
+      if (field.type === 'image' && values?.[field.key]) {
+        imageUrls.push(values[field.key]);
+      }
+    });
+    
+    return imageUrls;
+  };
+
+  const imageUrls = getImageUrls();
+  const hasImages = imageUrls.length > 0;
 
   // Helper function to check if value is an image URL
   const isImageUrl = (value) => {
     if (!value || typeof value !== "string") return false;
     
-    // Check if it's a URL that ends with image extension
     const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.svg'];
     const isImageExtension = imageExtensions.some(ext => 
       value.toLowerCase().endsWith(ext)
     );
     
-    // Check if it's a URL that contains common image patterns
     const isImageUrlPattern = value.startsWith('http') && 
       (value.includes('/uploads/') || value.match(/\.(jpg|jpeg|png|gif|webp|bmp)(\?.*)?$/i));
     
@@ -53,6 +69,107 @@ const CustomItemCard = ({ customItem }) => {
     }
   };
 
+  const handlePrevImage = () => {
+    setCurrentImageIndex(prev => 
+      prev === 0 ? imageUrls.length - 1 : prev - 1
+    );
+  };
+
+  const handleNextImage = () => {
+    setCurrentImageIndex(prev => 
+      prev === imageUrls.length - 1 ? 0 : prev + 1
+    );
+  };
+
+  // Reset image index when customItem changes
+  useEffect(() => {
+    setCurrentImageIndex(0);
+  }, [customItem]);
+
+  if (cardLayout) {
+    return (
+      <div className="custom-card-layout">
+        {/* Image Carousel Section */}
+        {hasImages && (
+          <div className="card-image-section">
+            <div className="image-carousel">
+              <img 
+                src={imageUrls[currentImageIndex]} 
+                alt={`${title || "Item"} - Image ${currentImageIndex + 1}`}
+                className="carousel-image"
+                onError={handleImageError}
+              />
+              
+              {/* Navigation Arrows */}
+              {imageUrls.length > 1 && (
+                <>
+                  <button 
+                    className="carousel-arrow carousel-arrow-left"
+                    onClick={handlePrevImage}
+                    aria-label="Previous image"
+                  >
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M15 18l-6-6 6-6" />
+                    </svg>
+                  </button>
+                  <button 
+                    className="carousel-arrow carousel-arrow-right"
+                    onClick={handleNextImage}
+                    aria-label="Next image"
+                  >
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M9 18l6-6-6-6" />
+                    </svg>
+                  </button>
+                </>
+              )}
+            </div>
+            {/* Image Indicators */}
+            {imageUrls.length > 1 && (
+              <div className="image-indicators">
+                {imageUrls.map((_, index) => (
+                  <button
+                    key={index}
+                    className={`indicator ${index === currentImageIndex ? 'active' : ''}`}
+                    onClick={() => setCurrentImageIndex(index)}
+                    aria-label={`Go to image ${index + 1}`}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Card Content */}
+        <div className="card-content">
+          {/* Title */}
+          <h2 className="card-title">{title || "Untitled"}</h2>
+          
+          {/* Fields */}
+          <div className="card-fields">
+            {fields
+              .filter(field => !isImageField(field)) // Exclude image fields from list
+              .map((field) => {
+                const value = values?.[field.key];
+                
+                return (
+                  <div className="card-field" key={field.key}>
+                    <div className="field-header">
+                      <span className="field-label">{field.label}:</span>
+                      <span className="field-value">
+                        {formatValue(value, field.type)}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Original layout (table-like)
   return (
     <div className="custom-card">
       <h2 className="custom-card-title">{title || "Untitled"}</h2>

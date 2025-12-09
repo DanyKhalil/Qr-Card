@@ -1,15 +1,9 @@
+/* Original styles (unchanged) */
 .custom-card {
     background-color: #ffffff;
     border-radius: 12px;
     padding: 20px;
-    /* box-shadow: 0 4px 12px rgba(0,0,0,0.1); */
-    /* transition: transform 0.2s ease, box-shadow 0.2s ease; */
-    width: 100%; /* full width of container */
-}
-
-.custom-card:hover {
-    /* transform: translateY(-4px); */
-    /* box-shadow: 0 6px 16px rgba(0,0,0,0.15); */
+    width: 100%;
 }
 
 .custom-card-title {
@@ -29,7 +23,6 @@
     display: flex;
     flex-direction: column;
     border: 1px solid #FF8559;
-    /* background-color: #fdf2ee; */
     padding: 10px 15px;
     border-radius: 8px;
 }
@@ -54,7 +47,6 @@
     word-break: break-word;
 }
 
-/* Image specific styles */
 .image-value-container {
     width: 100%;
     display: flex;
@@ -84,8 +76,179 @@
     font-style: italic;
 }
 
+/* New Card Layout Styles */
+.custom-card-layout {
+    background-color: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    width: 100%;
+    height: 100%; /* Take full height of grid cell */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.custom-card-layout:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+}
+
+/* Image Section - Updated */
+.card-image-section {
+    position: relative;
+    background-color: #f8f9fa;
+    display: flex;
+    flex-direction: column;
+}
+
+.image-carousel {
+    position: relative;
+    width: 100%;
+    height: 220px; /* Fixed height */
+    overflow: hidden; /* Hide overflowing parts of the image */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.carousel-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Cover the entire area, may crop edges */
+    object-position: center; /* Center the image */
+    background-color: #f8f9fa;
+}
+
+/* Carousel Navigation */
+.carousel-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(255, 255, 255, 0.9);
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    transition: all 0.2s ease;
+    z-index: 2;
+}
+
+.carousel-arrow:hover {
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    transform: translateY(-50%) scale(1.1);
+}
+
+.carousel-arrow:active {
+    transform: translateY(-50%) scale(0.95);
+}
+
+.carousel-arrow svg {
+    stroke: #333;
+}
+
+.carousel-arrow-left {
+    left: 16px;
+}
+
+.carousel-arrow-right {
+    right: 16px;
+}
+
+/* Image Indicators */
+.image-indicators {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 0;
+    background-color: #f8f9fa;
+}
+
+.indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    border: none;
+    background-color: #cccccc;
+    cursor: pointer;
+    padding: 0;
+    transition: all 0.3s ease;
+}
+
+.indicator:hover {
+    background-color: #999999;
+    transform: scale(1.2);
+}
+
+.indicator.active {
+    background-color: #4CAF50;
+    transform: scale(1.2);
+}
+
+/* Card Content */
+.card-content {
+    padding: 24px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.card-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid #f0f2f5;
+}
+
+/* Fields Grid */
+.card-fields {
+    flex: 1;
+}
+
+.card-field {
+    padding: 12px 0;
+    border-bottom: 1px solid #f0f2f5;
+}
+
+.card-field:last-child {
+    border-bottom: none;
+}
+
+.card-field .field-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.card-field .field-label {
+    font-weight: 600;
+    color: #4CAF50;
+    font-size: 0.95rem;
+    min-width: 120px;
+    flex-shrink: 0;
+}
+
+.card-field .field-value {
+    color: #333333;
+    text-align: right;
+    word-break: break-word;
+    flex: 1;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
+    /* Original responsive styles */
     .custom-card {
         padding: 15px;
     }
@@ -105,4 +268,95 @@
     .field-image {
         max-height: 150px;
     }
+
+    /* Card layout responsive */
+    .custom-card-layout {
+        border-radius: 12px;
+    }
+    
+    .card-content {
+        padding: 20px 16px;
+    }
+    
+    .card-title {
+        font-size: 1.4rem;
+        margin-bottom: 16px;
+        padding-bottom: 12px;
+    }
+    
+    /* Fixed image height for mobile */
+    .image-carousel {
+        height: 200px; /* Slightly smaller on mobile */
+    }
+    
+    .carousel-arrow {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .carousel-arrow-left {
+        left: 12px;
+    }
+    
+    .carousel-arrow-right {
+        right: 12px;
+    }
+    
+    .card-field .field-header {
+        flex-direction: column;
+        gap: 4px;
+        align-items: flex-start;
+    }
+    
+    .card-field .field-label {
+        min-width: auto;
+    }
+    
+    .card-field .field-value {
+        text-align: left;
+    }
+}
+
+@media (max-width: 480px) {
+    .card-title {
+        font-size: 1.3rem;
+    }
+    
+    /* Fixed image height for small mobile */
+    .image-carousel {
+        height: 180px;
+    }
+    
+    .indicator {
+        width: 6px;
+        height: 6px;
+    }
+    
+    .carousel-arrow {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .carousel-arrow svg {
+        width: 20px;
+        height: 20px;
+    }
+    
+    .image-indicators {
+        padding: 10px 0;
+    }
+}
+
+/* Adjust for different screen sizes */
+@media (min-width: 1400px) {
+    .image-carousel {
+        height: 250px; /* Larger image on bigger screens */
+    }
+}
+
+/* Special handling for portrait images */
+.carousel-image.portrait {
+    object-fit: contain; /* For portrait images, show full image */
+    padding: 20px;
+    background-color: #f8f9fa;
 }
