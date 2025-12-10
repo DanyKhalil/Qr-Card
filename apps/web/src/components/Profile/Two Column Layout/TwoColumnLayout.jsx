@@ -56,6 +56,22 @@ const TwoColumnLayout = ({
     }
 
     const profileUrlForQrCode = `${window.location.origin}/profile/${id}?qrScan=true`;
+
+
+    const getToken = () => {
+        return localStorage.getItem("token");
+    };
+    const getCurrentUser = () => {
+        const userStr = localStorage.getItem("user");
+        if (!userStr) return null;
+        
+        try {
+            return JSON.parse(userStr);
+        } catch (error) {
+            console.error("Error parsing user data:", error);
+            return null;
+        }
+    };
     
 
     return (
@@ -64,7 +80,7 @@ const TwoColumnLayout = ({
                 <TitleAndLinks title="Contact" links={contactLinks}/>
                 <TitleAndLinks title="Connect" links={formatSocialLinks(connectLinks)}/>
                 <TitleAndLinks title="Website" links={[{name:websiteLink, iconName:"web"}].filter(link => link.name && String(link.name).trim() !== '')}/>
-                <ProfileQrCode 
+                {id===getCurrentUser()?.id && (<ProfileQrCode 
                     profileUrl={profileUrlForQrCode} 
                     color={QrCodeColor}
                     name={userName}
@@ -74,7 +90,7 @@ const TwoColumnLayout = ({
                                         (includeWebsite ? [{name:websiteLink, iconName:"web"}].filter(link => link.name && String(link.name).trim() !== '') : [])
                                 )}
                     image={includeProfilePic ? profilePic : null}
-                />
+                />)}
             </div>
             
             <div 

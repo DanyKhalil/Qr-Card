@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import "./CustomItemCard.css";
 
 const CustomItemCard = ({ customItem, cardLayout = true }) => {
-  console.log(customItem);
   if (!customItem) return null;
 
   const { title, fields, values } = customItem;
