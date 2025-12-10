@@ -189,6 +189,7 @@ export const getUserProfile = async (req, res) => {
       phone_number: user.profile.phone_number ? [user.profile.phone_number] : [],
       email: user.email ? [user.email] : [],
       website_link: user.profile.website,
+      visibility: user.visibility,
 
       // Social media sorted by created_at
       social_media_links: sortByCreatedAt(

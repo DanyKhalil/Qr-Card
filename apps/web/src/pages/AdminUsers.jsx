@@ -3,33 +3,57 @@ import axios from "axios";
 import "../Style/AdminUsers.css";
 import Header from "../components/Header/Header";
 import Footer from "../components/Footer/Footer";
-import { useNavigate } from "react-router-dom"; // ✅ import
+import { useNavigate } from "react-router-dom";
 
 const AdminUsers = () => {
   const [users, setUsers] = useState([]);
   const [search, setSearch] = useState("");
   const [editingUserId, setEditingUserId] = useState(null);
-  const [editForm, setEditForm] = useState({ name: "", email: "", role: "", verified: false });
+
+  const [editForm, setEditForm] = useState({
+    name: "",
+    email: "",
+    role: "",
+    verified: false,
+    visibility: true,
+  });
 
   const token = localStorage.getItem("token");
-  const navigate = useNavigate(); // ✅ initialize navigate
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchUsers();
   }, [search]);
 
+  // ======================
+  // FETCH USERS + Normalize booleans
+  // ======================
   const fetchUsers = async () => {
     try {
-      const res = await axios.get(`http://localhost:5050/api/users3?search=${search}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setUsers(res.data);
+      const res = await axios.get(
+        `http://localhost:5050/api/users3?search=${search}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      // Normalize booleans (fixes locked column issue)
+      console.log(res.data)
+      const normalized = res.data.map((u) => ({
+        ...u,
+        visibility:
+          u.visibility === false || u.visibility === "false" ? false : true,
+        verified: u.verified === true || u.verified === "true" ? true : false,
+      }));
+
+      setUsers(normalized);
     } catch (err) {
       console.error("Error fetching users:", err);
       alert("You are not authorized to view this page");
     }
   };
 
+  // ======================
+  // DELETE USER
+  // ======================
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this user?")) return;
 
@@ -37,6 +61,7 @@ const AdminUsers = () => {
       await axios.delete(`http://localhost:5050/api/users3/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+
       setUsers(users.filter((user) => user.id !== id));
       alert("User deleted successfully");
     } catch (err) {
@@ -45,6 +70,9 @@ const AdminUsers = () => {
     }
   };
 
+  // ======================
+  // EDIT USER
+  // ======================
   const handleEdit = (user) => {
     setEditingUserId(user.id);
     setEditForm({
@@ -52,31 +80,69 @@ const AdminUsers = () => {
       email: user.email,
       role: user.role,
       verified: user.verified,
+      visibility: user.visibility, // true = unlocked
     });
   };
 
+  // ======================
+  // HANDLE EDIT CHANGES
+  // ======================
   const handleEditChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setEditForm((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
-  };
+    const { name, type, checked, value } = e.target;
 
-  const handleUpdate = async (id) => {
-    try {
-      const res = await axios.put(`http://localhost:5050/api/users3/${id}`, editForm, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setUsers(users.map((user) => (user.id === id ? res.data.user : user)));
-      setEditingUserId(null);
-      alert("User updated successfully");
-    } catch (err) {
-      console.error("Error updating user:", err);
-      alert("Failed to update user");
+    if (name === "locked") {
+      // locked checked → visibility false
+      setEditForm((prev) => ({
+        ...prev,
+        visibility: !checked,
+      }));
+    } else {
+      setEditForm((prev) => ({
+        ...prev,
+        [name]: type === "checkbox" ? checked : value,
+      }));
     }
   };
 
+  // ======================
+  // UPDATE USER
+  // ======================
+  const handleUpdate = async (id) => {
+    try {
+      const res = await axios.put(
+        `http://localhost:5050/api/users3/${id}`,
+        editForm,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      setUsers(users.map((user) => (user.id === id ? res.data.user : user)));
+      setEditingUserId(null);
+      alert("User updated successfully");
+      fetchUsers();
+    } catch (err) {
+      console.error("Error updating user:", err);
+      alert(err.response?.data?.error || "Failed to update user");
+    }
+  };
+
+  // ======================
+  // Display Locked Column
+  // ======================
+  const getLockedStatus = (user) => {
+    return user.visibility ? "No" : "Yes"; // visibility true = not locked
+  };
+
+  const getLockedStyle = (user) => {
+    return !user.visibility
+      ? { color: "red", fontWeight: "bold" }
+      : {};
+  };
+
+  // ======================
+  // RENDER
+  // ======================
   return (
     <div className="admin-users-page">
       <Header />
@@ -92,7 +158,6 @@ const AdminUsers = () => {
             onChange={(e) => setSearch(e.target.value)}
             className="admin-search"
           />
-          {/* ✅ Navigate to AddUserPage */}
           <button
             className="admin-add-button"
             onClick={() => navigate("/admin/add-user")}
@@ -109,6 +174,7 @@ const AdminUsers = () => {
               <th>Email</th>
               <th>Role</th>
               <th>Verified</th>
+              <th>Locked</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -116,9 +182,12 @@ const AdminUsers = () => {
           <tbody>
             {users.map((user) => {
               const isEditing = editingUserId === user.id;
+
               return (
                 <tr key={user.id}>
                   <td>{user.id}</td>
+
+                  {/* NAME */}
                   <td>
                     {isEditing ? (
                       <input
@@ -131,6 +200,8 @@ const AdminUsers = () => {
                       user.name
                     )}
                   </td>
+
+                  {/* EMAIL */}
                   <td>
                     {isEditing ? (
                       <input
@@ -143,6 +214,8 @@ const AdminUsers = () => {
                       user.email
                     )}
                   </td>
+
+                  {/* ROLE */}
                   <td>
                     {isEditing ? (
                       <input
@@ -155,6 +228,8 @@ const AdminUsers = () => {
                       user.role
                     )}
                   </td>
+
+                  {/* VERIFIED */}
                   <td>
                     {isEditing ? (
                       <input
@@ -169,6 +244,22 @@ const AdminUsers = () => {
                       "No"
                     )}
                   </td>
+
+                  {/* LOCKED */}
+                  <td style={getLockedStyle(user)}>
+                    {isEditing ? (
+                      <input
+                        type="checkbox"
+                        name="locked"
+                        checked={!editForm.visibility} // locked = !visibility
+                        onChange={handleEditChange}
+                      />
+                    ) : (
+                      getLockedStatus(user)
+                    )}
+                  </td>
+
+                  {/* ACTIONS */}
                   <td>
                     {isEditing ? (
                       <>
