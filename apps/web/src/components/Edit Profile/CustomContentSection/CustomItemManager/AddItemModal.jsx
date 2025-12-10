@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Modal from '../../Modals/Modal/Modal';
 import Button from '../../../Profile/Button/Button';
 import './AddItemModal.css';
@@ -7,6 +7,10 @@ const AddItemModal = ({ visible, onClose, onAdd, contentType }) => {
   const [title, setTitle] = useState('');
   const [visibility, setVisibility] = useState(true);
   const [fieldValues, setFieldValues] = useState({});
+  const [uploadingImages, setUploadingImages] = useState({});
+  
+  // Refs for file inputs
+  const fileInputRefs = useRef({});
 
   useEffect(() => {
     if (visible && contentType) {
@@ -15,9 +19,10 @@ const AddItemModal = ({ visible, onClose, onAdd, contentType }) => {
       // Initialize field values based on content type fields
       const initialValues = {};
       contentType.fields?.forEach(field => {
-        initialValues[field.key] = getDefaultValue(field.type); // Use field.key and field.type
+        initialValues[field.key] = getDefaultValue(field.type);
       });
       setFieldValues(initialValues);
+      setUploadingImages({});
     }
   }, [visible, contentType]);
 
@@ -29,6 +34,7 @@ const AddItemModal = ({ visible, onClose, onAdd, contentType }) => {
       case 'boolean': return false;
       case 'date': return '';
       case 'json': return {};
+      case 'image': return ''; // Empty string for image URL
       default: return '';
     }
   };
@@ -40,13 +46,75 @@ const AddItemModal = ({ visible, onClose, onAdd, contentType }) => {
     }));
   };
 
+  const handleImageUpload = (fieldKey, event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Validate image file
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file (JPEG, PNG, GIF, etc.)');
+      return;
+    }
+
+    // Show uploading state
+    setUploadingImages(prev => ({
+      ...prev,
+      [fieldKey]: true
+    }));
+
+    // Simulate upload process (you'll replace this with actual API call)
+    setTimeout(() => {
+      // For now, create a blob URL for preview
+      // In real implementation, you would upload to server and get back URL
+      const imageUrl = URL.createObjectURL(file);
+      
+      handleFieldChange(fieldKey, file); // Store the file object
+      
+      setUploadingImages(prev => ({
+        ...prev,
+        [fieldKey]: false
+      }));
+
+      // In production, you would:
+      // 1. Upload file to your server
+      // 2. Get back the URL from server response
+      // 3. Update field value with the URL
+      
+    }, 1000);
+
+    // Reset file input
+    event.target.value = '';
+  };
+
+  const triggerFileInput = (fieldKey) => {
+    if (fileInputRefs.current[fieldKey]) {
+      fileInputRefs.current[fieldKey].click();
+    }
+  };
+
+  const removeImage = (fieldKey) => {
+    handleFieldChange(fieldKey, '');
+    // Clean up blob URL if exists
+    if (fieldValues[fieldKey] && fieldValues[fieldKey] instanceof File) {
+      URL.revokeObjectURL(URL.createObjectURL(fieldValues[fieldKey]));
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     
     // Validate required fields
     const requiredFields = contentType.fields?.filter(field => field.required) || [];
     const missingRequired = requiredFields.filter(field => {
-      const value = fieldValues[field.key]; // Use field.key
+      const value = fieldValues[field.key];
+      
+      // Special handling for image type
+      if (field.type === 'image') {
+        // For images, check if value is empty (no file selected)
+        return !value || value === '';
+      }
+      
+      // Regular validation for other types
       return value === '' || value === null || value === undefined;
     });
 
@@ -56,13 +124,13 @@ const AddItemModal = ({ visible, onClose, onAdd, contentType }) => {
     }
 
     const valuesArray = Object.entries(fieldValues).map(([field_key, value]) => {
-      const field = contentType.fields?.find(f => f.key === field_key); // Use field.key
+      const field = contentType.fields?.find(f => f.key === field_key);
       return {
         field_id: field?.id,
         field_key: field_key,
-        field_name: field?.name, // Use field.name
+        field_name: field?.name,
         field_label: field?.label,
-        field_type: field?.type, // Use field.type
+        field_type: field?.type,
         value: value
       };
     });
@@ -76,16 +144,17 @@ const AddItemModal = ({ visible, onClose, onAdd, contentType }) => {
   };
 
   const renderFieldInput = (field) => {
-    const value = fieldValues[field.key] || getDefaultValue(field.type); // Use field.key and field.type
-    const fieldName = field.name || field.label || field.key; // Use field.name
+    const value = fieldValues[field.key] || getDefaultValue(field.type);
+    const fieldName = field.name || field.label || field.key;
+    const isUploading = uploadingImages[field.key];
 
-    switch (field.type) { // Use field.type
+    switch (field.type) {
       case 'text':
         return (
           <input
             type="text"
             value={value}
-            onChange={(e) => handleFieldChange(field.key, e.target.value)} // Use field.key
+            onChange={(e) => handleFieldChange(field.key, e.target.value)}
             className="field-input"
             placeholder={`Enter ${fieldName.toLowerCase()}...`}
             required={field.required}
@@ -96,7 +165,7 @@ const AddItemModal = ({ visible, onClose, onAdd, contentType }) => {
         return (
           <textarea
             value={value}
-            onChange={(e) => handleFieldChange(field.key, e.target.value)} // Use field.key
+            onChange={(e) => handleFieldChange(field.key, e.target.value)}
             className="field-textarea"
             placeholder={`Enter ${fieldName.toLowerCase()}...`}
             rows="4"
@@ -109,7 +178,7 @@ const AddItemModal = ({ visible, onClose, onAdd, contentType }) => {
           <input
             type="number"
             value={value}
-            onChange={(e) => handleFieldChange(field.key, e.target.value)} // Use field.key
+            onChange={(e) => handleFieldChange(field.key, e.target.value)}
             className="field-input"
             placeholder={`Enter ${fieldName.toLowerCase()}...`}
             required={field.required}
@@ -122,7 +191,7 @@ const AddItemModal = ({ visible, onClose, onAdd, contentType }) => {
             <input
               type="checkbox"
               checked={value}
-              onChange={(e) => handleFieldChange(field.key, e.target.checked)} // Use field.key
+              onChange={(e) => handleFieldChange(field.key, e.target.checked)}
               className="field-checkbox"
             />
             <span className="checkbox-label">{field.label || field.name}</span>
@@ -134,7 +203,7 @@ const AddItemModal = ({ visible, onClose, onAdd, contentType }) => {
           <input
             type="date"
             value={value}
-            onChange={(e) => handleFieldChange(field.key, e.target.value)} // Use field.key
+            onChange={(e) => handleFieldChange(field.key, e.target.value)}
             className="field-input"
             required={field.required}
           />
@@ -147,9 +216,9 @@ const AddItemModal = ({ visible, onClose, onAdd, contentType }) => {
             onChange={(e) => {
               try {
                 const parsedValue = JSON.parse(e.target.value);
-                handleFieldChange(field.key, parsedValue); // Use field.key
+                handleFieldChange(field.key, parsedValue);
               } catch {
-                handleFieldChange(field.key, e.target.value); // Use field.key
+                handleFieldChange(field.key, e.target.value);
               }
             }}
             className="field-textarea"
@@ -159,12 +228,68 @@ const AddItemModal = ({ visible, onClose, onAdd, contentType }) => {
           />
         );
       
+      case 'image':
+        return (
+          <div className="image-upload-field">
+            <input
+              type="file"
+              ref={el => fileInputRefs.current[field.key] = el}
+              onChange={(e) => handleImageUpload(field.key, e)}
+              accept="image/*"
+              style={{ display: 'none' }}
+            />
+            
+            {value && value instanceof File ? (
+              <div className="image-preview-container">
+                <img 
+                  src={URL.createObjectURL(value)} 
+                  alt="Preview" 
+                  className="image-preview"
+                />
+                <div className="image-actions">
+                  <Button
+                    text="Change"
+                    color="green"
+                    action={() => triggerFileInput(field.key)}
+                    size="small"
+                  />
+                  <Button
+                    text="Remove"
+                    color="coral"
+                    action={() => removeImage(field.key)}
+                    size="small"
+                  />
+                </div>
+              </div>
+            ) : isUploading ? (
+              <div className="uploading-state">
+                <div className="uploading-spinner"></div>
+                <span>Uploading image...</span>
+              </div>
+            ) : (
+              <div className="image-upload-placeholder" onClick={() => triggerFileInput(field.key)}>
+                <div className="upload-icon">📁</div>
+                <div className="upload-text">Click to upload image</div>
+                <div className="upload-hint">Supports: JPG, PNG, GIF, WEBP</div>
+              </div>
+            )}
+            
+            {value && value instanceof File && (
+              <div className="file-info">
+                <strong>File:</strong> {value.name}
+                <br />
+                <small>Size: {(value.size / 1024).toFixed(2)} KB</small>
+              </div>
+            )}
+          </div>
+        );
+      
       default:
         return (
           <input
             type="text"
             value={value}
-            onChange={(e) => handleFieldChange(field.key, e.target.value)} // Use field.key
+            onChange={(e) => handleFieldChange(field.key, e.target.value)}
             className="field-input"
             placeholder={`Enter ${fieldName.toLowerCase()}...`}
             required={field.required}
@@ -199,18 +324,6 @@ const AddItemModal = ({ visible, onClose, onAdd, contentType }) => {
               required
             />
           </div>
-
-          {/* <div className="form-content">
-            <label className="form-label checkbox-label">
-              <input
-                type="checkbox"
-                checked={visibility}
-                onChange={(e) => setVisibility(e.target.checked)}
-                className="form-checkbox"
-              />
-              Visible to visitors
-            </label>
-          </div> */}
         </div>
 
         {contentType?.fields && contentType.fields.length > 0 && (
@@ -221,12 +334,12 @@ const AddItemModal = ({ visible, onClose, onAdd, contentType }) => {
                 .sort((a, b) => (a.display_order || 0) - (b.display_order || 0))
                 .map((field) => (
                 <div key={field.id} className="field-group">
-                  <label htmlFor={`field-${field.key}`} className="field-label"> {/* Use field.key */}
-                    {field.label || field.name} {/* Use field.name */}
+                  <label htmlFor={`field-${field.key}`} className="field-label">
+                    {field.label || field.name}
                     {field.required && <span className="required-star"> *</span>}
                   </label>
                   <div className="field-type-hint">
-                    {field.type} {/* Use field.type */}
+                    {field.type === 'image' ? 'Image Upload' : field.type}
                   </div>
                   {renderFieldInput(field)}
                 </div>

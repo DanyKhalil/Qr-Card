@@ -10,15 +10,26 @@ const __dirname = path.dirname(__filename);
 const uploadsRoot = path.join(__dirname, '../../uploads');
 const profilesDir = path.join(uploadsRoot, 'profiles');
 const coversDir = path.join(uploadsRoot, 'covers');
-// here creating fodlers if they dont exist
-[uploadsRoot, profilesDir, coversDir].forEach(dir => {
+const customContentDir = path.join(uploadsRoot, 'custom-content');
+
+// here creating folders if they don't exist
+[uploadsRoot, profilesDir, coversDir, customContentDir].forEach(dir => {
     if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir, { recursive: true });
         console.log(`Folder has been created:: ${dir}`);
     }
 });
 
-// telling multer where and how to save profile upload picturess
+// this is for security to only accept images
+const fileFilter = (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+        cb(null, true); // Accept file
+    } else {
+        cb(new Error('Only image files are allowed!'), false);
+    }
+};
+
+// telling multer where and how to save profile upload pictures
 const profileStorage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, profilesDir);
@@ -44,15 +55,6 @@ const coverStorage = multer.diskStorage({
     }
 });
 
-// this is for security to only accept images
-const fileFilter = (req, file, cb) => {
-    if (file.mimetype.startsWith('image/')) {
-        cb(null, true); // Accept file
-    } else {
-        cb(new Error('Only image files are allowed!'), false);
-    }
-};
-
 // creating a multer object for profile then for cover
 const uploadProfile = multer({
     storage: profileStorage,
@@ -66,9 +68,7 @@ const uploadCover = multer({
     fileFilter: fileFilter
 });
 
-
-
-// and this is a multer to handle either a profile or cover 
+// and this is a multer to handle either a profile or cover or custom images
 const uploadUserMedia = multer({
     storage: multer.diskStorage({
         destination: function (req, file, cb) {
@@ -76,7 +76,10 @@ const uploadUserMedia = multer({
                 cb(null, profilesDir);
             } else if (file.fieldname === 'coverPhoto') {
                 cb(null, coversDir);
+            } else if (file.fieldname && file.fieldname.startsWith('customImage_')) {
+                cb(null, customContentDir);
             } else {
+                // For any other fields, put in root uploads folder
                 cb(null, uploadsRoot);
             }
         },
@@ -88,6 +91,10 @@ const uploadUserMedia = multer({
                 cb(null, 'profile-' + uniqueSuffix + fileExtension);
             } else if (file.fieldname === 'coverPhoto') {
                 cb(null, 'cover-' + uniqueSuffix + fileExtension);
+            } else if (file.fieldname && file.fieldname.startsWith('customImage_')) {
+                // Keep the original fieldname in the filename for reference
+                const fieldName = file.fieldname.replace(/[^a-zA-Z0-9_]/g, '_');
+                cb(null, `custom-${fieldName}-${uniqueSuffix}${fileExtension}`);
             } else {
                 cb(null, 'file-' + uniqueSuffix + fileExtension);
             }
@@ -95,12 +102,9 @@ const uploadUserMedia = multer({
     }),
     limits: { 
         fileSize: 4 * 1024 * 1024, // 4 mb max 
-        files: 2 // 2 files max
+        files: 20 // Increase limit for custom content images
     },
     fileFilter: fileFilter
-}).fields([
-    { name: 'profilePicture', maxCount: 1 },
-    { name: 'coverPhoto', maxCount: 1 }
-]);
+}).any(); // Use .any() to accept any field names
 
 export { uploadProfile, uploadCover, uploadUserMedia };

@@ -216,6 +216,8 @@ const EditUserProfile = ({
 
 
 
+
+  
   // Profile and Cover Photos UseStates:
   const [coverPhotoFile, setCoverPhotoFile] = useState(null);
   const [profilePicFile, setProfilePicFile] = useState(null);
@@ -259,6 +261,35 @@ const EditUserProfile = ({
 
 
 
+  const extractImagesFromCustomContent = (customContent) => {
+    const cleanCustomContent = JSON.parse(JSON.stringify(customContent));
+    const imageFiles = [];
+    
+    customContent.forEach((contentType, typeIndex) => {
+      contentType.items?.forEach((item, itemIndex) => {
+        item.values?.forEach((value, valueIndex) => {
+          if (value.field_type === 'image' && value.value instanceof File) {
+            // Generate a unique key
+            const imageKey = `${typeIndex}_${itemIndex}_${valueIndex}`;
+            
+            // Store the file with the key
+            imageFiles.push({
+              key: imageKey,
+              file: value.value
+            });
+            
+            // Replace File with placeholder
+            cleanCustomContent[typeIndex].items[itemIndex].values[valueIndex].value = `__IMAGE_PLACEHOLDER_${imageKey}__`;
+          }
+        });
+      });
+    });
+    
+    return { cleanCustomContent, imageFiles };
+  };
+
+
+
 
   // function to update user in db
   const [isUpdating, setIsUpdating] = useState(false);
@@ -271,11 +302,14 @@ const EditUserProfile = ({
     try {
       const formData = new FormData();
       
+      // 1. Extract images and create placeholders
+      const { cleanCustomContent, imageFiles } = extractImagesFromCustomContent(newCustomContent);
+      
+      // 2. Add all form data
       formData.append('userName', newUserName);
       
       let cleanDob = null;
-      if (newDob && !(newDob=='') && !isNaN(new Date(newDob).getTime())) {
-        // valid date → convert to YYYY-MM-DD
+      if (newDob && !(newDob == '') && !isNaN(new Date(newDob).getTime())) {
         cleanDob = new Date(newDob).toISOString().split("T")[0];
       }
       formData.append('dob', cleanDob);
@@ -293,12 +327,20 @@ const EditUserProfile = ({
       formData.append('connectLinks', JSON.stringify(newSocialMediaLinks));
       formData.append('videos', JSON.stringify(newVideos));
       formData.append('locations', JSON.stringify(newLocations));
-      formData.append('customContent', JSON.stringify(newCustomContent))
       
+      // Use the cleaned custom content with placeholders
+      formData.append('customContent', JSON.stringify(cleanCustomContent));
+      
+      // 3. Add custom content images to FormData
+      imageFiles.forEach(({ key, file }) => {
+        formData.append(`customImage_${key}`, file);
+      });
+      
+      // 4. Add profile and cover photos
       if (profilePicFile) {
         formData.append('profilePicture', profilePicFile);
       } else {
-        formData.append('profilePhotoPath', profilePicInput || ''); // Ensure it's a string
+        formData.append('profilePhotoPath', profilePicInput || '');
       }
       
       if (coverPhotoFile) {
@@ -307,10 +349,11 @@ const EditUserProfile = ({
         formData.append('coverPhotoPath', coverPhotoInput || '');
       }
 
-      // Send as FormData instead of JSON
+      // 5. Send everything at once
       const result = await userApi.updateUserProfile(id, formData);
       
       if (result.success) {
+        // Clear file states
         setProfilePicFile(null);
         setCoverPhotoFile(null);
         setUpdateMessage('User updated successfully!');

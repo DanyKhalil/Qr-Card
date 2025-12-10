@@ -166,3 +166,45 @@
   padding-top: 1rem;
   border-top: 1px solid #e5e5e5;
 }
+
+/* EditFieldModal.css or existing CSS file */
+.image-config-section {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 20px;
+  border: 1px solid #e9ecef;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #495057;
+  margin-top: 0;
+  margin-bottom: 15px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.dimensions-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-top: 10px;
+}
+
+.hint-text {
+  font-size: 12px;
+  color: #6c757d;
+  margin-top: 4px;
+}
+
+.field-type-hint {
+  background: #e7f4e4;
+  border: 1px solid #c3e6cb;
+  border-radius: 4px;
+  padding: 8px 12px;
+  margin-top: 10px;
+  font-size: 13px;
+  color: #155724;
+}

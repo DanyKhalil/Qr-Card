@@ -56,19 +56,19 @@ export const getUserProfile = async (req, res) => {
             {
               model: SocialMedia,
               as: 'social_media',
-              attributes: ['id', 'url', 'display_order']
+              attributes: ['id', 'url', 'display_order', 'created_at']
             },
             {
               model: Video,
               as: 'videos',
-              attributes: ['id', 'video_url', 'title', 'description', 'display_order']
+              attributes: ['id', 'video_url', 'title', 'description', 'display_order', 'created_at']
             },
             {
               model: Location,
               as: 'locations',
               attributes: [
                 'id', 'title', 'country', 'state', 'city', 'street',
-                'building', 'floor', 'maps_url', 'latitude', 'longitude'
+                'building', 'floor', 'maps_url', 'latitude', 'longitude', 'created_at'
               ]
             },
             {
@@ -80,7 +80,7 @@ export const getUserProfile = async (req, res) => {
                   as: 'fields',
                   attributes: [
                     'id', 'field_name', 'label', 'field_key',
-                    'field_type', 'required', 'display_order', 'config'
+                    'field_type', 'required', 'display_order', 'config', 'created_at'
                   ]
                 },
                 {
@@ -94,14 +94,14 @@ export const getUserProfile = async (req, res) => {
                       model: CustomContentValue,
                       as: 'values',
                       attributes: [
-                        'id', 'value_text', 'value_json'
+                        'id', 'value_text', 'value_json', 'created_at'
                       ],
                       include: [
                         {
                           model: CustomContentField,
                           as: 'field',
                           attributes: [
-                            'id', 'field_key', 'field_name', 'label', 'field_type'
+                            'id', 'field_key', 'field_name', 'label', 'field_type', 'created_at'
                           ]
                         }
                       ]
@@ -121,9 +121,8 @@ export const getUserProfile = async (req, res) => {
     const profileId = user.profile.id;
 
     // ---------------------------------------
-    // ---------------------------------------
-
     // Followers: profiles that FOLLOW this profile
+    // ---------------------------------------
     const followers = await ProfileFollow.findAll({
       where: { following_profile_id: profileId },
       include: [
@@ -139,10 +138,13 @@ export const getUserProfile = async (req, res) => {
             }
           ]
         }
-      ]
+      ],
+      order: [['created_at', 'ASC']]
     });
 
+    // ---------------------------------------
     // Following: profiles this profile is FOLLOWING
+    // ---------------------------------------
     const following = await ProfileFollow.findAll({
       where: { follower_profile_id: profileId },
       include: [
@@ -158,12 +160,18 @@ export const getUserProfile = async (req, res) => {
             }
           ]
         }
-      ]
+      ],
+      order: [['created_at', 'ASC']]
     });
 
     // ---------------------------------------
     // format to JSON-friendly structure
     // ---------------------------------------
+
+    // Sort helper function
+    const sortByCreatedAt = (array) => {
+      return array.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+    };
 
     // Format Profile Base Info
     const userProfile = {
@@ -182,36 +190,49 @@ export const getUserProfile = async (req, res) => {
       email: user.email ? [user.email] : [],
       website_link: user.profile.website,
 
-      social_media_links: user.profile.social_media?.map(sm => ({
-        id: sm.id,
-        url: sm.url,
-        display_order: sm.display_order
-      })) || [],
+      // Social media sorted by created_at
+      social_media_links: sortByCreatedAt(
+        user.profile.social_media?.map(sm => ({
+          id: sm.id,
+          url: sm.url,
+          display_order: sm.display_order,
+          created_at: sm.created_at
+        })) || []
+      ),
 
-      videos_links: user.profile.videos?.map(video => ({
-        id: video.id,
-        video_url: video.video_url,
-        title: video.title,
-        description: video.description,
-        display_order: video.display_order
-      })) || [],
+      // Videos sorted by created_at
+      videos_links: sortByCreatedAt(
+        user.profile.videos?.map(video => ({
+          id: video.id,
+          video_url: video.video_url,
+          title: video.title,
+          description: video.description,
+          display_order: video.display_order,
+          created_at: video.created_at
+        })) || []
+      ),
 
-      locations: user.profile.locations?.map(loc => ({
-        id: loc.id,
-        title: loc.title,
-        country: loc.country,
-        state: loc.state,
-        city: loc.city,
-        street: loc.street,
-        building: loc.building,
-        floor: loc.floor,
-        maps_url: loc.maps_url,
-        coordinates:
-          loc.latitude && loc.longitude
-            ? { latitude: loc.latitude, longitude: loc.longitude }
-            : null
-      })) || [],
+      // Locations sorted by created_at
+      locations: sortByCreatedAt(
+        user.profile.locations?.map(loc => ({
+          id: loc.id,
+          title: loc.title,
+          country: loc.country,
+          state: loc.state,
+          city: loc.city,
+          street: loc.street,
+          building: loc.building,
+          floor: loc.floor,
+          maps_url: loc.maps_url,
+          coordinates:
+            loc.latitude && loc.longitude
+              ? { latitude: loc.latitude, longitude: loc.longitude }
+              : null,
+          created_at: loc.created_at
+        })) || []
+      ),
       
+      // Followers already sorted by ProfileFollow.created_at
       followers: followers.map(f => ({
         follow_id: f.id,
         profile_id: f.follower?.id,
@@ -219,9 +240,11 @@ export const getUserProfile = async (req, res) => {
         name: f.follower?.user?.name,
         profile_pic_url: f.follower?.profile_pic_url,
         headline: f.follower?.headline,
-        bio: f.follower?.bio
+        bio: f.follower?.bio,
+        created_at: f.created_at
       })),
 
+      // Following already sorted by ProfileFollow.created_at
       following: following.map(f => ({
         follow_id: f.id,
         profile_id: f.following?.id,
@@ -229,42 +252,58 @@ export const getUserProfile = async (req, res) => {
         name: f.following?.user?.name,
         profile_pic_url: f.following?.profile_pic_url,
         headline: f.following?.headline,
-        bio: f.following?.bio
+        bio: f.following?.bio,
+        created_at: f.created_at
       })),
 
-      // ⭐ CUSTOM CONTENT RESPONSE ⭐
-      custom_content: user.profile.custom_types?.map(type => ({
-        id: type.id,
-        name: type.name,
-        slug: type.slug,
-        description: type.description,
+      // Custom Content - Sort everything by created_at
+      custom_content: sortByCreatedAt(
+        user.profile.custom_types?.map(type => ({
+          id: type.id,
+          name: type.name,
+          slug: type.slug,
+          description: type.description,
+          created_at: type.created_at,
 
-        fields: type.fields?.map(f => ({
-          id: f.id,
-          name: f.field_name,
-          label: f.label,
-          key: f.field_key,
-          type: f.field_type,
-          required: f.required,
-          display_order: f.display_order,
-          config: f.config
-        })) || [],
+          // Sort fields by created_at
+          fields: sortByCreatedAt(
+            type.fields?.map(f => ({
+              id: f.id,
+              name: f.field_name,
+              label: f.label,
+              key: f.field_key,
+              type: f.field_type,
+              required: f.required,
+              display_order: f.display_order,
+              config: f.config,
+              created_at: f.created_at
+            })) || []
+          ),
 
-        items: type.items?.map(item => ({
-          id: item.id,
-          title: item.title,
-          visibility: item.visibility,
+          // Sort items by created_at
+          items: sortByCreatedAt(
+            type.items?.map(item => ({
+              id: item.id,
+              title: item.title,
+              visibility: item.visibility,
+              created_at: item.created_at,
 
-          values: item.values?.map(v => ({
-            field_id: v.field.id,
-            field_key: v.field.field_key,
-            field_name: v.field.field_name,
-            field_label: v.field.label,
-            field_type: v.field.field_type,
-            value: v.value_json ?? v.value_text
-          })) || []
+              // Sort values by created_at
+              values: sortByCreatedAt(
+                item.values?.map(v => ({
+                  field_id: v.field?.id,
+                  field_key: v.field?.field_key,
+                  field_name: v.field?.field_name,
+                  field_label: v.field?.label,
+                  field_type: v.field?.field_type,
+                  value: v.value_json ?? v.value_text,
+                  created_at: v.created_at
+                })) || []
+              )
+            })) || []
+          )
         })) || []
-      })) || []
+      )
     };
 
     res.json(userProfile);
@@ -301,7 +340,11 @@ export const updateUserProfile = async (req, res) => {
     const parsedCustomContent = customContent ? JSON.parse(customContent) : [];
     
 
-    // Handling cover and profile picture changes
+    // --------------------------------------------------------------
+    // HANDLE ALL IMAGE UPLOADS
+    // --------------------------------------------------------------
+    
+    // 1. Profile and Cover Photos
     let finalProfilePhotoPath = profilePhotoPath;
     let finalCoverPhotoPath = coverPhotoPath;
 
@@ -320,6 +363,67 @@ export const updateUserProfile = async (req, res) => {
       finalCoverPhotoPath = coverPhotoPath || null;
     }
 
+    // 2. Custom Content Images
+    // Create a map of custom image files from req.files
+    const customImageFiles = {};
+    if (req.files && Array.isArray(req.files)) {
+      
+      req.files.forEach((file, index) => {
+        console.log('File object:', {
+          fieldname: file.fieldname,
+          originalname: file.originalname,
+          filename: file.filename,
+          path: file.path,
+          destination: file.destination,
+          mimetype: file.mimetype,
+          size: file.size
+        });
+        
+        if (file.fieldname && file.fieldname.startsWith('customImage_')) {
+          customImageFiles[file.fieldname] = `http://localhost:5050/uploads/custom-content/${file.filename}`;
+        }
+      });
+    } else if (req.files && typeof req.files === 'object') {
+      // Fallback for object format (if using .fields())
+      Object.keys(req.files).forEach(key => {
+        if (key.startsWith('customImage_')) {
+          const file = req.files[key][0];
+          customImageFiles[key] = `http://localhost:5050/uploads/custom-content/${file.filename}`;
+        }
+      });
+    }
+
+
+    // 3. Process custom content to replace image placeholders with actual URLs
+    const processedCustomContent = parsedCustomContent.map(contentType => ({
+      ...contentType,
+      items: contentType.items?.map(item => ({
+        ...item,
+        values: item.values?.map(value => {
+          // Check if this is an image field that has a placeholder
+          if (value.field_type === 'image' && value.value && typeof value.value === 'string' && value.value.startsWith('__IMAGE_PLACEHOLDER_')) {
+            // Extract the key from placeholder
+            const placeholderMatch = value.value.match(/__IMAGE_PLACEHOLDER_(.*)__/);
+            if (placeholderMatch && placeholderMatch[1]) {
+              const imageKey = `customImage_${placeholderMatch[1]}`;
+              // Replace with actual URL if we have it
+              if (customImageFiles[imageKey]) {
+                return {
+                  ...value,
+                  value: customImageFiles[imageKey]
+                };
+              }
+            }
+          }
+          return value;
+        })
+      }))
+    }));
+
+    // --------------------------------------------------------------
+    // DATABASE OPERATIONS
+    // --------------------------------------------------------------
+    
     const user = await User.findOne({
       where: {id: id}
     })
@@ -490,8 +594,8 @@ export const updateUserProfile = async (req, res) => {
       }
     }
 
-    // CUSTOM CONTENT UPDATE - Fixed handling with field ID mapping
-    for (let incomingType of parsedCustomContent) {
+    // CUSTOM CONTENT UPDATE - with image handling
+    for (let incomingType of processedCustomContent) {
       let existingType = existingCustomTypes.find(type => type.id === incomingType.id);
       
       if (!existingType) {
@@ -535,12 +639,22 @@ export const updateUserProfile = async (req, res) => {
           for (let incomingValue of incomingItem.values || []) {
             const realFieldId = fieldIdMap[incomingValue.field_id];
             if (realFieldId) {
-              await CustomContentValue.create({
-                content_item_id: newItemRecord.id,
-                content_field_id: realFieldId,
-                value_text: ['longtext', 'text'].includes(incomingValue.field_type) ? incomingValue.value : null,
-                value_json: !['longtext', 'text'].includes(incomingValue.field_type) ? incomingValue.value : null
-              });
+              // For image type, store URL in value_text (since it's a string)
+              if (incomingValue.field_type === 'image') {
+                await CustomContentValue.create({
+                  content_item_id: newItemRecord.id,
+                  content_field_id: realFieldId,
+                  value_text: incomingValue.value, // Image URL
+                  value_json: null
+                });
+              } else {
+                await CustomContentValue.create({
+                  content_item_id: newItemRecord.id,
+                  content_field_id: realFieldId,
+                  value_text: ['longtext', 'text'].includes(incomingValue.field_type) ? incomingValue.value : null,
+                  value_json: !['longtext', 'text'].includes(incomingValue.field_type) ? incomingValue.value : null
+                });
+              }
             }
           }
         }
@@ -618,12 +732,22 @@ export const updateUserProfile = async (req, res) => {
               });
               
               if (fieldExists) {
-                await CustomContentValue.create({
-                  content_item_id: newItemRecord.id,
-                  content_field_id: realFieldId,
-                  value_text: ['longtext', 'text'].includes(incomingValue.field_type) ? incomingValue.value : null,
-                  value_json: !['longtext', 'text'].includes(incomingValue.field_type) ? incomingValue.value : null
-                });
+                // For image type, store URL in value_text
+                if (incomingValue.field_type === 'image') {
+                  await CustomContentValue.create({
+                    content_item_id: newItemRecord.id,
+                    content_field_id: realFieldId,
+                    value_text: incomingValue.value, // Image URL
+                    value_json: null
+                  });
+                } else {
+                  await CustomContentValue.create({
+                    content_item_id: newItemRecord.id,
+                    content_field_id: realFieldId,
+                    value_text: ['longtext', 'text'].includes(incomingValue.field_type) ? incomingValue.value : null,
+                    value_json: !['longtext', 'text'].includes(incomingValue.field_type) ? incomingValue.value : null
+                  });
+                }
               }
             }
           } else {
@@ -643,10 +767,17 @@ export const updateUserProfile = async (req, res) => {
 
               if (existingValue) {
                 // UPDATE EXISTING VALUE
-                await existingValue.update({
-                  value_text: ['longtext', 'text'].includes(incomingValue.field_type) ? incomingValue.value : null,
-                  value_json: !['longtext', 'text'].includes(incomingValue.field_type) ? incomingValue.value : null
-                });
+                if (incomingValue.field_type === 'image') {
+                  await existingValue.update({
+                    value_text: incomingValue.value, // Image URL
+                    value_json: null
+                  });
+                } else {
+                  await existingValue.update({
+                    value_text: ['longtext', 'text'].includes(incomingValue.field_type) ? incomingValue.value : null,
+                    value_json: !['longtext', 'text'].includes(incomingValue.field_type) ? incomingValue.value : null
+                  });
+                }
               } else {
                 // CREATE NEW VALUE
                 const fieldExists = await CustomContentField.findOne({
@@ -654,12 +785,21 @@ export const updateUserProfile = async (req, res) => {
                 });
                 
                 if (fieldExists) {
-                  await CustomContentValue.create({
-                    content_item_id: existingItem.id,
-                    content_field_id: realFieldId,
-                    value_text: ['longtext', 'text'].includes(incomingValue.field_type) ? incomingValue.value : null,
-                    value_json: !['longtext', 'text'].includes(incomingValue.field_type) ? incomingValue.value : null
-                  });
+                  if (incomingValue.field_type === 'image') {
+                    await CustomContentValue.create({
+                      content_item_id: existingItem.id,
+                      content_field_id: realFieldId,
+                      value_text: incomingValue.value, // Image URL
+                      value_json: null
+                    });
+                  } else {
+                    await CustomContentValue.create({
+                      content_item_id: existingItem.id,
+                      content_field_id: realFieldId,
+                      value_text: ['longtext', 'text'].includes(incomingValue.field_type) ? incomingValue.value : null,
+                      value_json: !['longtext', 'text'].includes(incomingValue.field_type) ? incomingValue.value : null
+                    });
+                  }
                 }
               }
             }
@@ -689,7 +829,7 @@ export const updateUserProfile = async (req, res) => {
 
     // Delete types that were removed
     for (let existingType of existingCustomTypes) {
-      let typeExists = parsedCustomContent.find(type => type.id === existingType.id);
+      let typeExists = processedCustomContent.find(type => type.id === existingType.id);
       if (!typeExists) {
         await CustomContentType.destroy({ where: { id: existingType.id } });
       }
