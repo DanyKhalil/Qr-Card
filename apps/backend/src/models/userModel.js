@@ -65,6 +65,10 @@ User.associate = function(models) {
     foreignKey: 'visitor_user_id',
     as: 'profile_visits_made' // visits this user made to other profiles
   });
+  User.hasMany(models.Notification, {
+    foreignKey: 'user_id',
+    as: 'notifications'
+  });
 };
 
 export default User;

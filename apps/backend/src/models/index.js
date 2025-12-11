@@ -10,6 +10,7 @@ import CustomContentType from './customeContentType.js';
 import CustomContentItem from './customContentItem.js';
 import CustomContentField from './customContentField.js';
 import CustomContentValue from './customContentValue.js';
+import Notification from './notificationModel.js';
 
 const models = {
   User,
@@ -22,7 +23,8 @@ const models = {
   CustomContentType,
   CustomContentItem,
   CustomContentField,
-  CustomContentValue
+  CustomContentValue,
+  Notification,
 };
 
 // Set up associations
@@ -33,5 +35,5 @@ Object.keys(models).forEach(modelName => {
 });
 
 export { sequelize, User, Profile, SocialMedia, Video, Location, ProfileAnalytics,  ProfileFollow,
-        CustomContentType, CustomContentItem, CustomContentField, CustomContentValue,
+        CustomContentType, CustomContentItem, CustomContentField, CustomContentValue, Notification
 };
