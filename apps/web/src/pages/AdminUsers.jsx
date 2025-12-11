@@ -36,7 +36,6 @@ const AdminUsers = () => {
       );
 
       // Normalize booleans (fixes locked column issue)
-      console.log(res.data)
       const normalized = res.data.map((u) => ({
         ...u,
         visibility:
