@@ -49,7 +49,7 @@ const UserProfile = ({
       }
   };
 
-  let activeIndex = getCurrentUser()?.id === id ? 2 : null;
+  let activeIndex = getCurrentUser()?.id === id ? 3 : null;
 
   return (    
     <div>

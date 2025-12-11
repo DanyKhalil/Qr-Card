@@ -18,6 +18,7 @@ import ProfileAnalytics from './pages/ProfileAnalytics.jsx';
 import Admin from './pages/AdminUsers.jsx';
 import AddUserPage from './pages/AddUserPage.jsx';
 import ProfileListPage from './components/Profile/ProfileList/ProfileListPage.jsx';
+import NotificationsPage from './components/Profile/Notifications/NotificationsPage.jsx';
 
 function App() {
   return (    
@@ -33,6 +34,7 @@ function App() {
       <Route path="/" element={<WelcomePage/>}></Route>
       <Route path="/scan-qr-code" element={<ScanQrCode/>}/>
       <Route path="/profile-analytics" element={<ProfileAnalytics/>}/>
+      <Route path="/notifications" element={<NotificationsPage/>}/>
       <Route path="/admin" element={<Admin/>}/>
       <Route path="/admin/add-user" element={<AddUserPage/>}/>
       <Route path="/profile-list" element={<ProfileListPage />} />
