@@ -1,4 +1,4 @@
-import { User, Profile, ProfileFollow } from "../models/index.js";
+import { User, Profile, ProfileFollow, Notification } from "../models/index.js";
 
 /**
  * Make one user follow another
@@ -23,6 +23,15 @@ export const followUser = async (req, res) => {
       return res.status(404).json({ error: "One or both profiles not found" });
     }
 
+    const followerUser = await User.findOne({
+      where: { id: follower_user_id },
+      attributes: ['name']
+    });
+
+    if (!followerUser) {
+      return res.status(404).json({ error: "Follower user not found" });
+    }
+
     // Check if already following
     const existingFollow = await ProfileFollow.findOne({
       where: {
@@ -41,13 +50,28 @@ export const followUser = async (req, res) => {
       following_profile_id: followingProfile.id
     });
 
+    // sending a notificationnnnn
+    await Notification.create({
+      user_id: following_user_id,
+      sender_id: follower_user_id,
+      type: "new_follower",
+      title: "New Follower",
+      message: `${followerUser.name} started following you`,
+      metadata: {
+        follower_id: follower_user_id,
+        profile_id: followerProfile.id
+      },
+      is_read: false,
+      is_sent: false,
+      is_seen: false
+    });
+
     res.status(201).json({ message: "Followed successfully", follow });
   } catch (error) {
     console.error("Error in followUser:", error);
     res.status(500).json({ error: error.message });
   }
 };
-
 
 /**
  * Unfollow a user
@@ -89,8 +113,6 @@ export const unfollowUser = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-
-
 
 export const getUserFollowStatus = async (req, res) => {
   try {

@@ -158,7 +158,6 @@ const ProfileQrCode = ({
     };
 
     const handleStyleSelect = (style: string) => {
-        console.log('Selected style:', style);
         setSelectedStyle(style);
         setShowStyleModal(false);
     };
