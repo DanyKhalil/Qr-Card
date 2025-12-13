@@ -57,14 +57,26 @@ export default function TabLayout() {
           fontSize: 24,
         },
         // Add conditional header right button for admin
-        ...(route.name === 'profile' && isAdmin ? {
+        ...(route.name === 'profile' ? {
           headerRight: () => (
-            <TouchableOpacity
-              onPress={() => router.push('/admin-panel')}
-              style={{ marginRight: 15 }}
-            >
-              <Ionicons name="shield-outline" size={24} color="#fff" />
-            </TouchableOpacity>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 15 }}>
+              {/* Notifications Icon (always shown) */}
+              <TouchableOpacity
+                onPress={() => router.push('/notifications')}
+                style={{ marginRight: 15 }}
+              >
+                <Ionicons name="notifications-outline" size={24} color="#fff" />
+              </TouchableOpacity>
+              
+              {/* Admin Shield Icon (only shown if user is admin) */}
+              {isAdmin && (
+                <TouchableOpacity
+                  onPress={() => router.push('/admin-panel')}
+                >
+                  <Ionicons name="shield-outline" size={24} color="#fff" />
+                </TouchableOpacity>
+              )}
+            </View>
           ),
         } : {}),
       })}>
