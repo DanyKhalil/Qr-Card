@@ -32,9 +32,9 @@ const Login = () => {
           const user = JSON.parse(userString);
           
           if (user.role === "admin") {
-            router.replace("/(tabs)/search");
+            router.replace("/(tabs)/profile");
           } else {
-            router.replace("/(tabs)/search");
+            router.replace("/(tabs)/profile");
           }
         } else {
           setChecking(false);
@@ -65,9 +65,9 @@ const Login = () => {
 
       // Navigate based on user role
       if (res.data.user.role === "admin") {
-        router.replace("/(tabs)/search");
+        router.replace("/(tabs)/profile");
       } else {
-        router.replace("/(tabs)/search");
+        router.replace("/(tabs)/profile");
       }
     } catch (err) {
       setError(err.response?.data?.error || "Login failed. Please check your credentials.");

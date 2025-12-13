@@ -12,6 +12,7 @@ import ProfileQrCode from './ProfileQrCode/ProfileQrCode';
 import { router } from 'expo-router';
 import CustomContentDisplay from './CustomContentDisplay/CustomContentDisplay';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import PopupComponent from './Popup/Popup';
 
 
 interface UserProfileProps {
@@ -156,6 +157,7 @@ const UserProfile = ({
                             <View style={{ height: 16 }} />
                         </>
                     )}
+                    {!loggedInUserId && (<PopupComponent />)}
                     
                     
                 </ScrollView>

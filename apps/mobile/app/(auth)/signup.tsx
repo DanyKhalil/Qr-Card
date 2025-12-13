@@ -38,7 +38,7 @@ const Registration = () => {
           const user = JSON.parse(userString);
           
           if (user.role === "admin") {
-            router.replace("/(tabs)/admin");
+            router.replace("/(tabs)/profile");
           } else {
             router.replace("/(tabs)/search");
           }
