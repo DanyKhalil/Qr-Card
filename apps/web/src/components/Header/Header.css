@@ -3,8 +3,8 @@
     justify-content: space-between;
     align-items: center;
     padding: 16px 24px;
-    background-color: #FF8559;
-    border-bottom: 1px solid #e0e0e0;
+    background-color: #547DAD; /* Muted Indigo */
+    border-bottom: 1px solid #C9C5DA; /* Lavender-gray border */
     font-family: Arial, sans-serif;
     padding: clamp(12px, 3vw, 24px);
     position: fixed;
@@ -35,9 +35,9 @@
 .company-name {
     font-size: 36px;
     font-weight: bold;
-    color: #BCF4CB;
-    -webkit-text-stroke: 1px black;
-    text-stroke: 1px black;
+    color: #E3E0F3; /* Soft Lavender */
+    -webkit-text-stroke: 1px #1E293B;
+    text-stroke: 1px #1E293B;
     paint-order: stroke fill;
     font-size: clamp(20px, 5vw, 36px);
     white-space: nowrap;
@@ -67,12 +67,13 @@
     gap: clamp(8px, 2vw, 20px);
     white-space: nowrap;
 }
+
 .menu-item.active {
-    background-color: #FF6F3C;
+    background-color: #3C5C89; /* Darker Indigo for active */
 }
 
 .menu-item:hover {
-    background-color: #FF6F3C;
+    background-color: #3C5C89; /* Same hover shade */
     transition-delay: 0s;
 }
 
@@ -86,13 +87,13 @@
 
 .menu-name {
     font-size: 18px;
-    color: #ffffff;
+    color: #FFFFFF;
     font-size: clamp(14px, 3vw, 18px);
     text-shadow: 
-        -0.5px -0.5px 0 rgba(0,0,0,0.3),
-        0.5px -0.5px 0 rgba(0,0,0,0.3),
-        -0.5px 0.5px 0 rgba(0,0,0,0.3),
-        0.5px 0.5px 0 rgba(0,0,0,0.3);
+        -0.5px -0.5px 0 rgba(0,0,0,0.25),
+        0.5px -0.5px 0 rgba(0,0,0,0.25),
+        -0.5px 0.5px 0 rgba(0,0,0,0.25),
+        0.5px 0.5px 0 rgba(0,0,0,0.25);
 }
 
 /* Mobile responsiveness */
@@ -143,7 +144,6 @@
     }
 }
 
-
 @media (min-width: 1200px) {
     .header {
         padding: 20px 48px;
@@ -154,11 +154,9 @@
     }
 }
 
-
 .menu-item, .logo, .company-name {
     transition: all 0.3s ease-in-out;
 }
-
 
 .menu-item:hover .menu-icon {
     transform: scale(1.1);

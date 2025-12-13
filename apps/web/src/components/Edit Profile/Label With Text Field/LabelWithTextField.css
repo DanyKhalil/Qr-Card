@@ -10,7 +10,7 @@
     flex: 0 0 100px;
     font-size: 0.95rem;
     font-weight: 500;
-    color: #444;
+    color: #333; /* updated primary text */
     text-align: left;
     padding-top: 10px;
 }
@@ -25,12 +25,13 @@
 .label-field__input {
     width: 100%;
     padding: 10px 12px;
-    border: 1px solid #FF8559;
+    border: 1px solid #007bff; /* updated primary border */
     border-radius: 6px;
     font-size: 1rem;
     box-sizing: border-box;
     transition: border-color 0.2s, box-shadow 0.2s;
-    color: #555;
+    color: #555; /* neutral text */
+    background-color: #f9f9f9; /* light background */
 }
 
 .label-field__input--error {
@@ -39,15 +40,15 @@
 }
 
 .label-field__input:focus {
-    border-color: #82C294;
-    box-shadow: 0 0 6px #82C294;
+    border-color: #007bff; /* primary focus */
+    box-shadow: 0 0 6px rgba(0, 123, 255, 0.2);
     outline: none;
 }
 
 .label-field__error-message {
     height: 20px;
     font-size: 0.8rem;
-    color: #ff4444;
+    color: #ff4444; /* error red */
     margin-top: 4px;
     line-height: 1.2;
     font-weight: 500;

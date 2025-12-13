@@ -5,7 +5,7 @@
   border-radius: 20px;
   margin: 40px auto;
   max-width: 800px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 30px rgba(59, 74, 153, 0.08); /* muted indigo shadow */
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
@@ -16,12 +16,12 @@
   align-items: center;
   margin-bottom: 30px;
   padding-bottom: 20px;
-  border-bottom: 2px solid #f1f5f9;
+  border-bottom: 2px solid #e2e8f0; /* muted border */
 }
 
 .notifications-header h3 {
   margin: 0;
-  color: #1a202c;
+  color: #2c2f48; /* muted deep indigo */
   font-size: 24px;
   font-weight: 700;
 }
@@ -33,7 +33,7 @@
 }
 
 .notifications-count {
-  background: #64A377;
+  background: #3AAFA9; /* teal accent */
   color: white;
   padding: 6px 14px;
   border-radius: 20px;
@@ -44,7 +44,7 @@
 }
 
 .unread-badge {
-  background: #ff6b3d;
+  background: #bc6c5b; /* muted warm accent */
   color: white;
   padding: 4px 12px;
   border-radius: 12px;
@@ -66,7 +66,7 @@
   gap: 18px;
   padding: 20px;
   border-radius: 16px;
-  border: 2px solid #f1f5f9;
+  border: 2px solid #e2e8f0;
   background: #ffffff;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -74,14 +74,14 @@
 }
 
 .notification-card:hover {
-  border-color: #e2e8f0;
-  background: #f8fafc;
+  border-color: #cbd5e1;
+  background: #f6f7fc; /* subtle indigo-neutral */
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 6px 20px rgba(59, 74, 153, 0.1); /* muted indigo hover shadow */
 }
 
 .notification-card.unread {
-  background: #f0f7ff;
+  background: #edf2ff;
   border-color: #dbeafe;
 }
 
@@ -89,7 +89,7 @@
 .unread-dot {
   width: 10px;
   height: 10px;
-  background: #ff6b3d;
+  background: #bc6c5b;
   border-radius: 50%;
   position: absolute;
   top: 15px;
@@ -118,15 +118,15 @@
 }
 
 .notification-icon.follower {
-  background: #64A377;
+  background: #3AAFA9; /* teal */
 }
 
 .notification-icon.visit {
-  background: #2196F3;
+  background: #5a6fc1; /* muted indigo */
 }
 
 .notification-icon.default {
-  background: #9C27B0;
+  background: #6d4cab; /* muted purple-indigo */
 }
 
 /* Notification Content */
@@ -147,17 +147,18 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  color: #2c2f48; /* muted indigo */
 }
 
 .notification-time {
   font-size: 12px;
-  color: #94a3b8;
+  color: #64748b; /* muted grey */
   font-weight: 500;
 }
 
 .notification-message {
   margin: 0 0 16px 0;
-  color: #475569;
+  color: #475569; /* softer dark */
   font-size: 15px;
   line-height: 1.5;
 }
@@ -177,7 +178,7 @@
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid white;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 6px rgba(59, 74, 153, 0.12); /* muted shadow */
 }
 
 .sender-avatar.anonymous {
@@ -204,7 +205,7 @@
 
 /* Action Button */
 .action-button {
-  background: #64A377;
+  background: #3AAFA9; /* teal */
   color: white;
   border: none;
   padding: 8px 20px;
@@ -217,16 +218,16 @@
 }
 
 .action-button:hover {
-  background: #4A8D5C;
+  background: #2c9b8c;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(100, 163, 119, 0.3);
+  box-shadow: 0 4px 12px rgba(58, 175, 169, 0.3);
 }
 
 /* Mark Read Button */
 .mark-read-btn {
   background: transparent;
   border: 2px solid #e2e8f0;
-  color: #94a3b8;
+  color: #64748b;
   width: 36px;
   height: 36px;
   border-radius: 50%;
@@ -239,8 +240,8 @@
 }
 
 .mark-read-btn:hover {
-  background: #64A377;
-  border-color: #64A377;
+  background: #3AAFA9; /* teal */
+  border-color: #3AAFA9;
   color: white;
 }
 

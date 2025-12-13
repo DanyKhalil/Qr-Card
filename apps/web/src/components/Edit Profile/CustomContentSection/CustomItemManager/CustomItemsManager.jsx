@@ -213,7 +213,7 @@ const CustomItemsManager = ({ visible, onClose, contentType, onUpdateItems }) =>
                       onClick={() => handleDeleteItem(item.id)}
                       title="Delete item"
                     >
-                      <IoTrash size={18}/>
+                      <IoTrash size={18} color='darkred'/>
                     </button>
                   </div>
                 </div>

@@ -1,5 +1,5 @@
 .youtube-card {
-    border: 1px solid #FF8559;
+    border: 1px solid #6366f1; /* replaced orange with indigo */
     border-radius: 12px;
     padding: 20px;
     background-color: #ffffff;
@@ -11,7 +11,7 @@
 
 .youtube-card:hover {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-    border-color: #82c294;
+    border-color: #818cf8; /* soft purple for hover */
 }
 
 .youtube-card__content {
@@ -41,8 +41,8 @@
 .youtube-card__text-field {
     flex: 1;
     padding: 12px 16px;
-    border: 1px solid #FF8559;
-    background-color: #fdf2ee;
+    border: 1px solid #6366f1; /* indigo border */
+    background-color: #f3f0ff; /* light purple background */
     border-radius: 8px;
     font-size: 0.95rem;
     color: #333;
@@ -78,22 +78,22 @@
 }
 
 .youtube-card__button--edit {
-    border-color: #4285f4;
-    color: #4285f4;
+    border-color: #6366f1; /* indigo */
+    color: #6366f1;
 }
 
 .youtube-card__button--edit:hover {
-    background-color: #4285f4;
+    background-color: #6366f1;
     color: white;
 }
 
 .youtube-card__button--remove {
-    border-color: #ea4335;
-    color: #ea4335;
+    border-color: #a78bfa; /* accent purple */
+    color: #a78bfa;
 }
 
 .youtube-card__button--remove:hover {
-    background-color: #ea4335;
+    background-color: #a78bfa;
     color: white;
 }
 

@@ -1,10 +1,11 @@
+/* ---------------- Profile Circle ---------------- */
 .profile-circle {
     aspect-ratio: 1 / 1;
     min-width: 210px;
     max-width: 210px;
     height: auto;
     border-radius: 50%;
-    border: 3px solid #82C294;
+    border: 3px solid #6B7280; /* muted indigo/gray */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -13,7 +14,7 @@
     cursor: pointer;
     overflow: hidden;
     box-sizing: border-box;
-    background: #82C294;
+    background: #6B7280; /* muted indigo */
     position: relative;
     margin-top: -100px;
 }
@@ -28,7 +29,6 @@
     justify-content: center;
     background: linear-gradient(135deg, #f5f5f5, #e0e0e0);
 }
-
 
 .profile-circle:hover {
     transform: scale(1.05);
@@ -57,10 +57,10 @@
     height: 60%;
 }
 
+/* Status indicators */
 .profile-circle.online {
-    border-color: #4CAF50;
+    border-color: #4F46E5; /* muted indigo */
 }
-
 .profile-circle.online::after {
     content: '';
     position: absolute;
@@ -68,7 +68,7 @@
     right: 8px;
     width: 20px;
     height: 20px;
-    background: #4CAF50;
+    background: #4F46E5; /* muted indigo */
     border: 3px solid white;
     border-radius: 50%;
     z-index: 2;
@@ -83,12 +83,12 @@
     border-width: 4px;
 }
 
-
+/* Circle sizes */
 .profile-circle.small {
     width: 40px !important;
     height: 40px !important;
     border-width: 2px;
-    margin: 0; 
+    margin: 0;
 }
 
 .profile-circle.medium {
@@ -116,53 +116,13 @@
     transform: scale(0.95);
 }
 
-/* Responsive design */
-@media (max-width: 768px) {
-    .profile-circle {
-        min-width: 180px;
-        max-width: 180px;
-        margin-top: 0px;
-    }
-}
-
-@media (max-width: 480px) {
-    .profile-circle {
-        width: 150px;
-        height: 150px;
-    }
-    
-    .profile-circle.small {
-        width: 35px !important;
-        height: 35px !important;
-    }
-    
-    .profile-circle.medium {
-        width: 50px !important;
-        height: 50px !important;
-    }
-    
-    .profile-circle.large {
-        width: 70px !important;
-        height: 70px !important;
-    }
-    
-    .profile-circle.xlarge {
-        width: 90px !important;
-        height: 90px !important;
-    }
-}
-
-/* Fix for inner circle to maintain proper sizing */
+/* Inner circle adjustments */
 .profile-circle.small .profile-circle-inner {
     width: calc(100% - 4px);
     height: calc(100% - 4px);
 }
 
-.profile-circle.medium .profile-circle-inner {
-    width: calc(100% - 6px);
-    height: calc(100% - 6px);
-}
-
+.profile-circle.medium .profile-circle-inner,
 .profile-circle.large .profile-circle-inner {
     width: calc(100% - 6px);
     height: calc(100% - 6px);
@@ -171,4 +131,40 @@
 .profile-circle.xlarge .profile-circle-inner {
     width: calc(100% - 8px);
     height: calc(100% - 8px);
+}
+
+/* ---------------- Responsive ---------------- */
+@media (max-width: 768px) {
+    .profile-circle {
+        min-width: 180px;
+        max-width: 180px;
+        margin-top: 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .profile-circle {
+        width: 150px;
+        height: 150px;
+    }
+
+    .profile-circle.small {
+        width: 35px !important;
+        height: 35px !important;
+    }
+
+    .profile-circle.medium {
+        width: 50px !important;
+        height: 50px !important;
+    }
+
+    .profile-circle.large {
+        width: 70px !important;
+        height: 70px !important;
+    }
+
+    .profile-circle.xlarge {
+        width: 90px !important;
+        height: 90px !important;
+    }
 }

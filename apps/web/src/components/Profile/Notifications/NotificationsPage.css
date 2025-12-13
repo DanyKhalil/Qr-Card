@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background: #f7fafc; /* Add background color */
+  background: #f6f7fc; /* muted indigo-neutral background */
 }
 
 .notifications-page-container {
@@ -29,14 +29,14 @@
 .page-title {
   font-size: 2.5rem;
   font-weight: 800;
-  color: #2d3748; /* Changed from white to dark gray */
+  color: #2c2f48; /* muted deep indigo */
   margin: 0;
 }
 
 .mark-all-read-btn {
-  background: #64A377; /* Changed to solid green */
+  background: #3AAFA9; /* teal accent */
   color: white;
-  border: 2px solid #64A377; /* Solid border */
+  border: 2px solid #3AAFA9;
   padding: 10px 24px;
   border-radius: 25px;
   font-size: 14px;
@@ -46,10 +46,10 @@
 }
 
 .mark-all-read-btn:hover {
-  background: #4A8D5C;
-  border-color: #4A8D5C;
+  background: #2c9b8c;
+  border-color: #2c9b8c;
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(100, 163, 119, 0.3);
+  box-shadow: 0 8px 25px rgba(58, 175, 169, 0.3);
 }
 
 /* Loading State */
@@ -59,17 +59,17 @@
   align-items: center;
   justify-content: center;
   padding: 60px;
-  background: white;
+  background: #ffffff;
   border-radius: 20px;
   width: 100%;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 30px rgba(59, 74, 153, 0.08); /* muted indigo shadow */
 }
 
 .loading-spinner {
   width: 50px;
   height: 50px;
   border: 4px solid #f3f3f3;
-  border-top: 4px solid #64A377;
+  border-top: 4px solid #3AAFA9; /* teal accent */
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 20px;
@@ -81,7 +81,7 @@
 }
 
 .loading-state p {
-  color: #64748b;
+  color: #64748b; /* muted gray text */
   font-size: 16px;
   margin: 0;
 }
@@ -90,20 +90,20 @@
 .error-state {
   text-align: center;
   padding: 60px;
-  background: white;
+  background: #ffffff;
   border-radius: 20px;
   width: 100%;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 30px rgba(59, 74, 153, 0.08);
 }
 
 .error-message {
-  color: #ef4444;
+  color: #bc6c5b; /* muted warm red */
   font-size: 16px;
   margin-bottom: 20px;
 }
 
 .retry-btn {
-  background: #64A377;
+  background: #3AAFA9; /* teal accent */
   color: white;
   border: none;
   padding: 10px 30px;
@@ -115,9 +115,9 @@
 }
 
 .retry-btn:hover {
-  background: #4A8D5C;
+  background: #2c9b8c;
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(100, 163, 119, 0.3);
+  box-shadow: 0 6px 20px rgba(58, 175, 169, 0.3);
 }
 
 /* Responsive */

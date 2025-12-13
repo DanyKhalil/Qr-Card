@@ -4,10 +4,9 @@
     overflow: hidden;
     cursor: default;
     transition: all 0.3s ease-in-out;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px rgba(86, 96, 125, 0.12); /* indigo-tinted shadow */
     padding-top: 70px;
-    height: 300px;
-
+    height: clamp(200px, 40vw, 300px);
 }
 
 .cover-photo-container.editable {
@@ -46,14 +45,14 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    color: #adb5bd;
-    background: linear-gradient(135deg, #e9ecef, #dee2e6);
+    color: #656d8b; /* cool neutral */
+    background: linear-gradient(135deg, #ebeefe, #dcdff8); /* indigo-neutral gradient */
     transition: all 0.3s ease-in-out;
 }
 
 .cover-photo-container.editable:hover .cover-photo-default {
-    background: linear-gradient(135deg, #dee2e6, #ced4da);
-    color: #6c757d;
+    background: linear-gradient(135deg, #e5e9ff, #d3d7ff);
+    color: #555e7b;
 }
 
 .cover-photo-default svg {
@@ -82,13 +81,14 @@
     top: 16px;
     right: 16px;
     background: white;
+    border: 1px solid rgba(21, 162, 135, 0.15); /* teal secondary */
     border-radius: 50%;
     width: 40px;
     height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     opacity: 0;
     transform: translateY(-10px);
     transition: all 0.3s ease-in-out;
@@ -96,7 +96,8 @@
 }
 
 .cover-photo-edit-button:hover {
-    background: #f8f9fa;
+    background: #f2fffc; /* faint teal tint */
+    border-color: rgba(21, 162, 135, 0.25);
     transform: scale(1.1);
 }
 

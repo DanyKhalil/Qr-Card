@@ -11,19 +11,19 @@
   align-items: flex-start;
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid #e5e5e5;
+  border-bottom: 1px solid #E0DEFF; /* palette update */
 }
 
 .fields-description {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  color: #666;
+  color: #555;
   margin: 0;
   flex: 1;
   margin-right: 1rem;
 }
 
 .add-field-btn {
-  background: #82c294;
+  background: #6B63FF; /* muted indigo */
   color: white;
   border: none;
   padding: 8px 16px;
@@ -36,7 +36,7 @@
 }
 
 .add-field-btn:hover {
-  background: #56ae6f;
+  background: #5a52d9; /* darker muted indigo */
 }
 
 .fields-list {
@@ -48,7 +48,7 @@
 .empty-fields {
   text-align: center;
   padding: 2rem;
-  color: #666;
+  color: #555;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
@@ -58,15 +58,14 @@
   align-items: center;
   padding: 1rem;
   margin-bottom: 0.75rem;
-  border: 1px solid #FF8559;
-  background-color: #fdf2ee;
-  border: 1px solid #e9ecef;
+  background-color: #F8F6FF; /* soft lavender */
+  border: 1px solid #E0DEFF; /* soft border */
   border-radius: 8px;
   transition: background-color 0.2s;
 }
 
 .field-item:hover {
-  background: #e9ecef;
+  background: #EDE9FF; /* lighter lavender hover */
 }
 
 .field-info {
@@ -90,8 +89,8 @@
 .field-key {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 0.85rem;
-  color: #666;
-  background: #e9ecef;
+  color: #555;
+  background: #EDE9FF; /* soft lavender */
   padding: 2px 6px;
   border-radius: 4px;
 }
@@ -105,8 +104,8 @@
 .field-type {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 0.85rem;
-  color: #007bff;
-  background: #e3f2fd;
+  color: #6B63FF; /* muted indigo */
+  background: #EDE9FF; /* soft lavender */
   padding: 2px 8px;
   border-radius: 12px;
 }
@@ -114,8 +113,8 @@
 .field-required {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 0.85rem;
-  color: #d32f2f;
-  background: #ffebee;
+  color: #C5B3FF; /* soft lavender text */
+  background: #F8F6FF; /* soft lavender bg */
   padding: 2px 8px;
   border-radius: 12px;
 }
@@ -133,8 +132,8 @@
 }
 
 .field-action-btn {
-  background: white;
-  border: 1px solid #dee2e6;
+  background: #fff;
+  border: 1px solid #E0DEFF;
   border-radius: 4px;
   padding: 6px;
   cursor: pointer;
@@ -144,8 +143,8 @@
 }
 
 .field-action-btn:hover:not(:disabled) {
-  background: #f8f9fa;
-  border-color: #adb5bd;
+  background: #F8F6FF;
+  border-color: #C5B3FF;
 }
 
 .field-action-btn:disabled {
@@ -153,37 +152,57 @@
   cursor: not-allowed;
 }
 
-.edit-btn { background: #e3f2fd; border-color: #2196f3; }
-.delete-btn { background: #f3a7b2; border-color: #f44336; }
+.edit-btn {
+  background: #EDE9FF;
+  border-color: #6B63FF;
+  color: #6B63FF;
+}
 
-.move-btn:hover { background: #e3f2fd; border-color: #2196f3; }
-.edit-btn:hover { background: #e3f2fd; border-color: #2196f3; }
-.delete-btn:hover { background: #ea6d80; border-color: #f44336; }
+.delete-btn {
+  background: #F8F6FF;
+  border-color: #C5B3FF;
+  color: #C5B3FF;
+}
+
+.move-btn:hover {
+  background: #EDE9FF;
+  border-color: #6B63FF;
+}
+
+.edit-btn:hover {
+  background: #EDE9FF;
+  border-color: #5a52d9;
+}
+
+.delete-btn:hover {
+  background: #F0E6FF;
+  border-color: #BFAFFF;
+}
 
 .fields-manager-actions {
   display: flex;
   justify-content: flex-end;
   padding-top: 1rem;
-  border-top: 1px solid #e5e5e5;
+  border-top: 1px solid #E0DEFF;
 }
 
-/* EditFieldModal.css or existing CSS file */
+/* EditFieldModal section */
 .image-config-section {
-  background: #f8f9fa;
+  background: #F8F6FF;
   border-radius: 8px;
   padding: 15px;
   margin-bottom: 20px;
-  border: 1px solid #e9ecef;
+  border: 1px solid #E0DEFF;
 }
 
 .section-title {
   font-size: 16px;
   font-weight: 600;
-  color: #495057;
+  color: #333;
   margin-top: 0;
   margin-bottom: 15px;
   padding-bottom: 8px;
-  border-bottom: 1px solid #dee2e6;
+  border-bottom: 1px solid #E0DEFF;
 }
 
 .dimensions-grid {
@@ -195,16 +214,16 @@
 
 .hint-text {
   font-size: 12px;
-  color: #6c757d;
+  color: #555;
   margin-top: 4px;
 }
 
 .field-type-hint {
-  background: #e7f4e4;
-  border: 1px solid #c3e6cb;
+  background: #EDE9FF;
+  border: 1px solid #C5B3FF;
   border-radius: 4px;
   padding: 8px 12px;
   margin-top: 10px;
   font-size: 13px;
-  color: #155724;
+  color: #6B63FF;
 }
