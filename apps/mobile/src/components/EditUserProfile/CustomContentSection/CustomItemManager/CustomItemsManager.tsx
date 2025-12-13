@@ -4,7 +4,10 @@ import {
   Text, 
   TouchableOpacity, 
   Alert,
-  StyleSheet 
+  StyleSheet,
+  ScrollView,
+  Image,
+  Dimensions
 } from 'react-native';
 import Modal from '../../Modals/Modal/Modal';
 import Button from '../../../UserProfile/Button/Button';
@@ -62,27 +65,107 @@ const CustomItemsManager = ({ visible, onClose, contentType, onUpdateItems }) =>
     );
   };
 
-  const handleToggleVisibility = (itemId) => {
-    const updatedItems = items.map(item => 
-      item.id === itemId ? { ...item, visibility: !item.visibility } : item
-    );
-    setItems(updatedItems);
-    onUpdateItems(contentType.id, updatedItems);
-  };
-
   const handleSaveAndClose = () => {
     onUpdateItems(contentType.id, items);
     onClose();
   };
 
-  const truncateValue = (value, maxLength = 100) => {
-    const stringValue = typeof value === 'object' 
-      ? JSON.stringify(value) 
-      : String(value || '');
+  // Helper function to get image URL from value
+  const getImageUrl = (value) => {
+    if (!value) return null;
     
-    return stringValue.length > maxLength 
-      ? stringValue.substring(0, maxLength) + '...' 
-      : stringValue;
+    let url = null;
+    
+    // Handle different value types
+    if (typeof value === 'string') {
+      url = value;
+    } else if (value && typeof value === 'object') {
+      // Handle File objects or image data objects
+      if (value.uri) {
+        url = value.uri;
+      } else if (value.url) {
+        url = value.url;
+      }
+    }
+    
+    // Validate if it's actually an image URL
+    if (!url || typeof url !== 'string') return null;
+    
+    // Check if it's a valid image URL pattern
+    const isImageUrlPattern = (
+      url.startsWith('http://') || 
+      url.startsWith('https://') || 
+      url.startsWith('file://') ||
+      url.startsWith('/') ||
+      url.includes('blob:') ||
+      url.match(/\.(jpg|jpeg|png|gif|webp|bmp|svg)(\?.*)?$/i)
+    );
+    
+    return isImageUrlPattern ? url : null;
+  };
+
+  // Helper function to check if value should display as image
+  const shouldDisplayAsImage = (value, fieldType) => {
+    if (fieldType === 'image') return true;
+    
+    // Check if value looks like an image
+    const url = getImageUrl(value);
+    return !!url;
+  };
+
+  // Helper function to get display text for non-image values
+  const getDisplayText = (value) => {
+    if (value === null || value === undefined || value === '') {
+      return '[Empty]';
+    }
+    
+    // Handle boolean values
+    if (typeof value === 'boolean') {
+      return value ? 'Yes' : 'No';
+    }
+    
+    // Handle File/Image objects
+    if (value && typeof value === 'object') {
+      if (value.name) {
+        return `📄 ${value.name}`;
+      }
+      
+      // Check if it's an empty object
+      if (Object.keys(value).length === 0) {
+        return '[Empty Object]';
+      }
+      
+      // Try to stringify, but limit length
+      try {
+        const str = JSON.stringify(value);
+        return str.length > 50 ? str.substring(0, 50) + '...' : str;
+      } catch (e) {
+        return '[Object]';
+      }
+    }
+    
+    // Handle strings and numbers
+    const stringValue = String(value);
+    
+    // Truncate very long text
+    if (stringValue.length > 100) {
+      return stringValue.substring(0, 100) + '...';
+    }
+    
+    return stringValue;
+  };
+
+  // Get display value for field
+  const getDisplayValue = (value, fieldType) => {
+    const isImage = shouldDisplayAsImage(value, fieldType);
+    const imageUrl = isImage ? getImageUrl(value) : null;
+    
+    return {
+      isImage,
+      imageUrl,
+      displayText: getDisplayText(value),
+      isFileObject: value && typeof value === 'object' && value.name
+    };
   };
 
   return (
@@ -90,6 +173,7 @@ const CustomItemsManager = ({ visible, onClose, contentType, onUpdateItems }) =>
       visible={visible} 
       onClose={onClose}
       title={`Manage ${contentType?.name || 'Items'}`}
+      size="large"
     >
       <View style={styles.itemsManager}>
         <View style={styles.itemsHeader}>
@@ -104,8 +188,7 @@ const CustomItemsManager = ({ visible, onClose, contentType, onUpdateItems }) =>
           </TouchableOpacity>
         </View>
 
-        {/* Removed ScrollView - using View instead */}
-        <View style={styles.itemsContent}>
+        <ScrollView style={styles.itemsList} showsVerticalScrollIndicator={true}>
           {items.length === 0 ? (
             <View style={styles.emptyItems}>
               <Text style={styles.emptyItemsText}>No items yet. Add your first item to get started.</Text>
@@ -117,31 +200,13 @@ const CustomItemsManager = ({ visible, onClose, contentType, onUpdateItems }) =>
                   <View style={styles.itemTitleSection}>
                     <Text style={styles.itemTitle}>{item.title || 'Untitled Item'}</Text>
                     <View style={styles.itemMeta}>
-                      {/* <View style={[
-                        styles.itemVisibility,
-                        item.visibility ? styles.visible : styles.hidden
-                      ]}>
-                        <Text style={styles.visibilityText}>
-                          {item.visibility ? 'Visible' : 'Hidden'}
-                        </Text>
-                      </View>
                       <Text style={styles.itemDate}>
-                        {new Date(item.created_at).toLocaleDateString()}
-                      </Text> */}
+                        Created: {new Date(item.created_at).toLocaleDateString()}
+                      </Text>
                     </View>
                   </View>
                   
                   <View style={styles.itemActions}>
-                    {/* <TouchableOpacity 
-                      style={[styles.itemActionBtn, styles.visibilityBtn]}
-                      onPress={() => handleToggleVisibility(item.id)}
-                    >
-                      <Ionicons 
-                        name={item.visibility ? "eye-outline" : "eye-off-outline"} 
-                        size={18} 
-                        color="#333" 
-                      />
-                    </TouchableOpacity> */}
                     <TouchableOpacity 
                       style={[styles.itemActionBtn, styles.editBtn]}
                       onPress={() => {
@@ -149,13 +214,13 @@ const CustomItemsManager = ({ visible, onClose, contentType, onUpdateItems }) =>
                         setEditItemModalVisible(true);
                       }}
                     >
-                      <Ionicons name="pencil-outline" size={18} color="#2196f3" />
+                      <Ionicons name="pencil-outline" size={18} color="#6B63FF" />
                     </TouchableOpacity>
                     <TouchableOpacity 
                       style={[styles.itemActionBtn, styles.deleteBtn]}
                       onPress={() => handleDeleteItem(item.id)}
                     >
-                      <Ionicons name="trash-outline" size={18} color="#f44336" />
+                      <Ionicons name="trash-outline" size={18} color="#C5B3FF" />
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -163,18 +228,46 @@ const CustomItemsManager = ({ visible, onClose, contentType, onUpdateItems }) =>
                 <View style={styles.itemValues}>
                   {item.values && item.values.length > 0 ? (
                     <View style={styles.valuesGrid}>
-                      {item.values.map((value, index) => (
-                        <View key={index} style={styles.valueItem}>
-                          <Text style={styles.valueLabel}>
-                            {value.field_label || value.field_name}:
-                          </Text>
-                          <View style={styles.valueContent}>
-                            <Text style={styles.valueText}>
-                              {truncateValue(value.value)}
+                      {item.values.map((value, index) => {
+                        const display = getDisplayValue(value.value, value.field_type);
+                        
+                        return (
+                          <View key={index} style={[
+                            styles.valueItem,
+                            display.isImage && styles.imageValueItem
+                          ]}>
+                            <Text style={styles.valueLabel}>
+                              {value.field_label || value.field_name}:
                             </Text>
+                            
+                            {display.isImage && display.imageUrl ? (
+                              <View style={styles.imageValueContent}>
+                                <View style={styles.imagePreviewWrapper}>
+                                  <Image 
+                                    source={{ uri: display.imageUrl }} 
+                                    style={styles.itemImagePreview}
+                                    resizeMode="contain"
+                                    onError={(e) => console.log('Image load error:', e.nativeEvent.error)}
+                                  />
+                                </View>
+                                {display.isFileObject && (
+                                  <View style={styles.imageFileInfo}>
+                                    <Text style={styles.fileInfoText}>
+                                      📎 {value.value.name}
+                                    </Text>
+                                  </View>
+                                )}
+                              </View>
+                            ) : (
+                              <View style={styles.valueContent}>
+                                <Text style={styles.valueText}>
+                                  {display.displayText}
+                                </Text>
+                              </View>
+                            )}
                           </View>
-                        </View>
-                      ))}
+                        );
+                      })}
                     </View>
                   ) : (
                     <View style={styles.noValues}>
@@ -185,7 +278,7 @@ const CustomItemsManager = ({ visible, onClose, contentType, onUpdateItems }) =>
               </View>
             ))
           )}
-        </View>
+        </ScrollView>
 
         <View style={styles.itemsManagerActions}>
           <Button 
@@ -214,55 +307,62 @@ const CustomItemsManager = ({ visible, onClose, contentType, onUpdateItems }) =>
   );
 };
 
+const { width } = Dimensions.get('window');
 const styles = StyleSheet.create({
   itemsManager: {
-    minHeight: 400,
+    height: 500,
+    flexDirection: 'column',
   },
   itemsHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 16,
+    marginBottom: 20,
     paddingBottom: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#e5e5e5',
+    borderBottomColor: '#E0DEFF',
   },
   itemsDescription: {
-    color: '#666',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    color: '#6B63FF',
     flex: 1,
     marginRight: 16,
     fontSize: 14,
     lineHeight: 20,
   },
   addItemBtn: {
-    backgroundColor: '#82c294',
+    backgroundColor: '#6B63FF',
     paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingVertical: 10,
     borderRadius: 6,
   },
   addItemBtnText: {
     color: 'white',
     fontSize: 14,
     fontWeight: '500',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
   },
-  itemsContent: {
+  itemsList: {
+    flex: 1,
     marginBottom: 16,
   },
   emptyItems: {
     alignItems: 'center',
-    padding: 48,
+    justifyContent: 'center',
+    padding: 60,
   },
   emptyItemsText: {
-    color: '#666',
+    color: '#818cf8',
     fontSize: 14,
     textAlign: 'center',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
   },
   itemCard: {
-    backgroundColor: '#fffafa',
+    backgroundColor: '#F8F6FF',
     borderWidth: 1,
-    borderColor: '#e9ecef',
+    borderColor: '#D6C9FF',
     borderRadius: 8,
-    padding: 20,
+    padding: 16,
     marginBottom: 12,
   },
   itemHeader: {
@@ -277,31 +377,17 @@ const styles = StyleSheet.create({
   itemTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
+    color: '#4338ca',
     marginBottom: 6,
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
   },
   itemMeta: {
     flexDirection: 'row',
-    gap: 12,
-  },
-  itemVisibility: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 12,
-  },
-  visible: {
-    backgroundColor: '#e8f5e8',
-  },
-  hidden: {
-    backgroundColor: '#fff3e0',
-  },
-  visibilityText: {
-    fontSize: 12,
-    fontWeight: '500',
   },
   itemDate: {
     fontSize: 12,
-    color: '#666',
+    color: '#6B63FF',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
   },
   itemActions: {
     flexDirection: 'row',
@@ -310,66 +396,108 @@ const styles = StyleSheet.create({
   itemActionBtn: {
     backgroundColor: 'white',
     borderWidth: 1,
-    borderColor: '#dee2e6',
+    borderColor: '#D6C9FF',
     borderRadius: 6,
-    padding: 6,
-    minWidth: 36,
+    padding: 8,
+    minWidth: 40,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  visibilityBtn: {
-    // Default styles
-  },
   editBtn: {
-    backgroundColor: '#e3f2fd',
-    borderColor: '#2196f3',
+    backgroundColor: '#D6C9FF',
+    borderColor: '#6B63FF',
   },
   deleteBtn: {
-    backgroundColor: '#f3a7b2',
-    borderColor: '#f44336',
+    backgroundColor: '#F0E0FF',
+    borderColor: '#A9A1FF',
   },
   itemValues: {
     borderTopWidth: 1,
-    borderTopColor: '#e9ecef',
+    borderTopColor: '#D6C9FF',
     paddingTop: 12,
   },
   valuesGrid: {
+    flexDirection: 'column',
     gap: 12,
   },
   valueItem: {
-    gap: 4,
+    gap: 6,
+  },
+  imageValueItem: {
+    // Image items can have special styling
   },
   valueLabel: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#555',
+    color: '#4338ca',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
   },
   valueContent: {
     borderWidth: 1,
-    borderColor: '#FF8559',
-    backgroundColor: '#fdf2ee',
-    padding: 8,
+    borderColor: '#D6C9FF',
+    backgroundColor: '#F8F6FF',
+    padding: 10,
     borderRadius: 4,
+    minHeight: 40,
   },
   valueText: {
     fontSize: 14,
-    color: '#333',
+    color: '#4338ca',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    lineHeight: 20,
+  },
+  // Image display styles
+  imageValueContent: {
+    borderWidth: 1,
+    borderColor: '#D6C9FF',
+    backgroundColor: '#F8F6FF',
+    borderRadius: 4,
+    padding: 8,
+    overflow: 'hidden',
+  },
+  imagePreviewWrapper: {
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+    backgroundColor: '#EDE6FF',
+    borderRadius: 4,
+    minHeight: 120,
+  },
+  itemImagePreview: {
+    width: '100%',
+    height: 150,
+    borderRadius: 4,
+  },
+  imageFileInfo: {
+    marginTop: 8,
+    padding: 6,
+    backgroundColor: '#E0DEFF',
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#C9BEFF',
+  },
+  fileInfoText: {
+    fontSize: 12,
+    color: '#4338ca',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
   },
   noValues: {
     alignItems: 'center',
-    padding: 12,
+    padding: 16,
   },
   noValuesText: {
-    color: '#999',
+    color: '#818cf8',
     fontStyle: 'italic',
     fontSize: 14,
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
   },
   itemsManagerActions: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
     paddingTop: 16,
     borderTopWidth: 1,
-    borderTopColor: '#e5e5e5',
+    borderTopColor: '#E0DEFF',
   },
 });
 

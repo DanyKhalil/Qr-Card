@@ -4,7 +4,8 @@ import {
   Text, 
   TouchableOpacity, 
   Alert,
-  StyleSheet 
+  StyleSheet,
+  ScrollView
 } from 'react-native';
 import Modal from '../../Modals/Modal/Modal';
 import Button from '../../../UserProfile/Button/Button';
@@ -30,7 +31,8 @@ const CustomFieldsManager = ({ visible, onClose, contentType, onUpdateFields }) 
     { value: 'number', label: 'Number' },
     { value: 'boolean', label: 'Yes/No' },
     { value: 'date', label: 'Date' },
-    { value: 'json', label: 'JSON Data' }
+    { value: 'json', label: 'JSON Data' },
+    { value: 'image', label: 'Image Upload' } // Added image option
   ];
 
   const handleAddField = (newField) => {
@@ -78,14 +80,13 @@ const CustomFieldsManager = ({ visible, onClose, contentType, onUpdateFields }) 
     }
 
     const newFields = [...fields];
-    const newIndex = direction === 'up' ? index - 1 : direction === 'down' ? index + 1 : index;
+    const newIndex = direction === 'up' ? index - 1 : index + 1;
     
-    // Swap the display_order values
-    const tempOrder = newFields[index].display_order;
-    newFields[index].display_order = newFields[newIndex].display_order;
-    newFields[newIndex].display_order = tempOrder;
+    // Swap display orders
+    [newFields[index].display_order, newFields[newIndex].display_order] = 
+    [newFields[newIndex].display_order, newFields[index].display_order];
     
-    // Swap the array positions
+    // Swap positions
     [newFields[index], newFields[newIndex]] = [newFields[newIndex], newFields[index]];
     
     setFields(newFields);
@@ -97,6 +98,11 @@ const CustomFieldsManager = ({ visible, onClose, contentType, onUpdateFields }) 
     onClose();
   };
 
+  // Get type label for display
+  const getTypeLabel = (typeValue) => {
+    return fieldTypes.find(t => t.value === typeValue)?.label || typeValue;
+  };
+
   // Create sorted fields for display
   const sortedFields = [...fields].sort((a, b) => a.display_order - b.display_order);
 
@@ -105,6 +111,7 @@ const CustomFieldsManager = ({ visible, onClose, contentType, onUpdateFields }) 
       visible={visible} 
       onClose={onClose}
       title={`Manage Fields - ${contentType?.name || 'Unknown'}`}
+      size="large"
     >
       <View style={styles.fieldsManager}>
         <View style={styles.fieldsHeader}>
@@ -124,34 +131,57 @@ const CustomFieldsManager = ({ visible, onClose, contentType, onUpdateFields }) 
             <Text style={styles.emptyFieldsText}>No fields yet. Add your first field to get started.</Text>
           </View>
         ) : (
-          <View style={styles.fieldsContent}>
+          <ScrollView 
+            style={styles.fieldsList}
+            showsVerticalScrollIndicator={true}
+          >
             {sortedFields.map((field, index) => (
               <View key={field.id} style={styles.fieldItem}>
                 <View style={styles.fieldInfo}>
+                  <View style={styles.fieldMain}>
+                    {/* Field key badge - like web version */}
+                    <Text style={styles.fieldKey}>{field.field_key || field.key}</Text>
+                  </View>
                   <View style={styles.fieldDetails}>
-                    <Text style={styles.fieldType}>
-                      {fieldTypes.find(t => t.value === field.type)?.label || field.type}
-                    </Text>
+                    <Text style={styles.fieldType}>{getTypeLabel(field.field_type || field.type)}</Text>
                     {field.required && <Text style={styles.fieldRequired}>Required</Text>}
                   </View>
-                  <Text style={styles.fieldLabel}>{field.label || field.name || 'Unnamed Field'}</Text>
-                  <Text style={styles.fieldKey}>Key: {field.key}</Text>
+                  {/* Field label with italic style like web */}
+                  {field.label && (
+                    <Text style={styles.fieldLabel}>{field.label}</Text>
+                  )}
                 </View>
                 
                 <View style={styles.fieldActions}>
                   <TouchableOpacity 
-                    style={[styles.fieldActionBtn, styles.moveBtn, index === 0 && styles.disabledBtn]}
+                    style={[
+                      styles.fieldActionBtn, 
+                      styles.moveBtn,
+                      index === 0 && styles.disabledBtn
+                    ]}
                     onPress={() => handleReorder(field.id, 'up')}
                     disabled={index === 0}
                   >
-                    <Ionicons name="chevron-up" size={18} color={index === 0 ? "#999" : "#333"} />
+                    <Ionicons 
+                      name="chevron-up" 
+                      size={18} 
+                      color={index === 0 ? "#C5B3FF" : "#6B63FF"} 
+                    />
                   </TouchableOpacity>
                   <TouchableOpacity 
-                    style={[styles.fieldActionBtn, styles.moveBtn, index === sortedFields.length - 1 && styles.disabledBtn]}
+                    style={[
+                      styles.fieldActionBtn, 
+                      styles.moveBtn,
+                      index === sortedFields.length - 1 && styles.disabledBtn
+                    ]}
                     onPress={() => handleReorder(field.id, 'down')}
                     disabled={index === sortedFields.length - 1}
                   >
-                    <Ionicons name="chevron-down" size={18} color={index === sortedFields.length - 1 ? "#999" : "#333"} />
+                    <Ionicons 
+                      name="chevron-down" 
+                      size={18} 
+                      color={index === sortedFields.length - 1 ? "#C5B3FF" : "#6B63FF"} 
+                    />
                   </TouchableOpacity>
                   <TouchableOpacity 
                     style={[styles.fieldActionBtn, styles.editBtn]}
@@ -160,18 +190,18 @@ const CustomFieldsManager = ({ visible, onClose, contentType, onUpdateFields }) 
                       setEditFieldModalVisible(true);
                     }}
                   >
-                    <Ionicons name="pencil-outline" size={18} color="#2196f3" />
+                    <Ionicons name="pencil-outline" size={18} color="#6B63FF" />
                   </TouchableOpacity>
                   <TouchableOpacity 
                     style={[styles.fieldActionBtn, styles.deleteBtn]}
                     onPress={() => handleDeleteField(field.id)}
                   >
-                    <Ionicons name="trash-outline" size={18} color="#f44336" />
+                    <Ionicons name="trash-outline" size={18} color="#C5B3FF" />
                   </TouchableOpacity>
                 </View>
               </View>
             ))}
-          </View>
+          </ScrollView>
         )}
 
         <View style={styles.fieldsManagerActions}>
@@ -187,7 +217,7 @@ const CustomFieldsManager = ({ visible, onClose, contentType, onUpdateFields }) 
           onClose={() => setAddFieldModalVisible(false)}
           onAdd={handleAddField}
           existingFields={fields}
-          fieldTypes={fieldTypes}
+          fieldTypes={fieldTypes.filter(t => t.value !== 'image')} // Pass without image for AddFieldModal
         />
 
         <EditFieldModal
@@ -195,7 +225,7 @@ const CustomFieldsManager = ({ visible, onClose, contentType, onUpdateFields }) 
           onClose={() => setEditFieldModalVisible(false)}
           field={currentField}
           onUpdate={handleUpdateField}
-          fieldTypes={fieldTypes}
+          fieldTypes={fieldTypes.filter(t => t.value !== 'image')} // Pass without image for EditFieldModal
         />
       </View>
     </Modal>
@@ -204,26 +234,30 @@ const CustomFieldsManager = ({ visible, onClose, contentType, onUpdateFields }) 
 
 const styles = StyleSheet.create({
   fieldsManager: {
-    minHeight: 300,
+    height: 500, // Fixed height like web's max-height: 600px
+    display: 'flex',
+    flexDirection: 'column',
   },
   fieldsHeader: {
+    display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 16,
+    marginBottom: 24,
     paddingBottom: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#e5e5e5',
+    borderBottomColor: '#E0DEFF',
   },
   fieldsDescription: {
-    color: '#666',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    color: '#555',
     flex: 1,
     marginRight: 16,
     fontSize: 14,
     lineHeight: 20,
   },
   addFieldBtn: {
-    backgroundColor: '#82c294',
+    backgroundColor: '#6B63FF',
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 6,
@@ -232,102 +266,121 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 14,
     fontWeight: '500',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
   },
-  fieldsContent: {
-    marginBottom: 16,
+  fieldsList: {
+    flex: 1,
+    marginBottom: 24,
   },
   emptyFields: {
     alignItems: 'center',
-    padding: 32,
-    marginBottom: 16,
+    justifyContent: 'center',
+    padding: 40,
+    flex: 1,
   },
   emptyFieldsText: {
-    color: '#666',
-    fontSize: 14,
+    color: '#555',
+    fontSize: 16,
     textAlign: 'center',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
   },
   fieldItem: {
+    display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 16,
     marginBottom: 12,
+    backgroundColor: '#F8F6FF',
     borderWidth: 1,
-    borderColor: '#e9ecef',
-    backgroundColor: '#fdf2ee',
+    borderColor: '#E0DEFF',
     borderRadius: 8,
   },
   fieldInfo: {
     flex: 1,
-    marginRight: 12,
+  },
+  fieldMain: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 4,
+  },
+  fieldKey: {
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    fontSize: 12,
+    color: '#555',
+    backgroundColor: '#EDE9FF',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
   },
   fieldDetails: {
     flexDirection: 'row',
     gap: 8,
-    marginBottom: 4,
+    marginBottom: 6,
     flexWrap: 'wrap',
   },
   fieldType: {
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
     fontSize: 12,
-    color: '#007bff',
-    backgroundColor: '#e3f2fd',
+    color: '#6B63FF',
+    backgroundColor: '#EDE9FF',
     paddingHorizontal: 8,
-    paddingVertical: 2,
+    paddingVertical: 4,
     borderRadius: 12,
     overflow: 'hidden',
   },
   fieldRequired: {
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
     fontSize: 12,
-    color: '#d32f2f',
-    backgroundColor: '#ffebee',
+    color: '#C5B3FF',
+    backgroundColor: '#F8F6FF',
     paddingHorizontal: 8,
-    paddingVertical: 2,
+    paddingVertical: 4,
     borderRadius: 12,
     overflow: 'hidden',
   },
   fieldLabel: {
-    fontSize: 16,
-    color: '#333',
-    fontWeight: '500',
-    marginBottom: 4,
-  },
-  fieldKey: {
-    fontSize: 12,
-    color: '#666',
-    fontFamily: 'monospace',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    fontSize: 14,
+    color: '#555',
+    fontStyle: 'italic',
   },
   fieldActions: {
     flexDirection: 'row',
     gap: 4,
   },
   fieldActionBtn: {
-    backgroundColor: 'white',
+    backgroundColor: '#fff',
     borderWidth: 1,
-    borderColor: '#dee2e6',
+    borderColor: '#E0DEFF',
     borderRadius: 4,
     padding: 6,
-    minWidth: 32,
+    minWidth: 36,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  moveBtn: {},
+  moveBtn: {
+    // Specific styles if needed
+  },
   editBtn: {
-    backgroundColor: '#e3f2fd',
-    borderColor: '#2196f3',
+    backgroundColor: '#EDE9FF',
+    borderColor: '#6B63FF',
   },
   deleteBtn: {
-    backgroundColor: '#f3a7b2',
-    borderColor: '#f44336',
+    backgroundColor: '#F8F6FF',
+    borderColor: '#C5B3FF',
   },
   disabledBtn: {
     opacity: 0.5,
   },
   fieldsManagerActions: {
+    display: 'flex',
     flexDirection: 'row',
     justifyContent: 'flex-end',
     paddingTop: 16,
     borderTopWidth: 1,
-    borderTopColor: '#e5e5e5',
+    borderTopColor: '#E0DEFF',
   },
 });
 

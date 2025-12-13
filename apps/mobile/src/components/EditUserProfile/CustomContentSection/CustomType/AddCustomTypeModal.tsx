@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text,   TextInput,ScrollView, StyleSheet } from 'react-native';
+import { 
+  View, 
+  Text, 
+  TextInput, 
+  ScrollView, 
+  StyleSheet 
+} from 'react-native';
 import Modal from '../../Modals/Modal/Modal';
 import Button from '../../../UserProfile/Button/Button';
 
@@ -51,7 +57,7 @@ const AddCustomTypeModal = ({ visible, onClose, onAdd }) => {
       onClose={handleCancel}
       title="Add Content Type"
     >
-      <ScrollView style={styles.container}>
+      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         <View style={styles.formContent}>
           <Text style={styles.label}>
             Name *
@@ -60,12 +66,13 @@ const AddCustomTypeModal = ({ visible, onClose, onAdd }) => {
             value={name}
             onChangeText={handleNameChange}
             placeholder="e.g., Projects, Recipes, Portfolio"
+            placeholderTextColor="#888"
             style={styles.input}
             autoFocus
           />
         </View>
 
-        {/* <View style={styles.formContent}>
+        <View style={styles.formContent}>
           <Text style={styles.label}>
             Slug *
           </Text>
@@ -73,12 +80,13 @@ const AddCustomTypeModal = ({ visible, onClose, onAdd }) => {
             value={slug}
             onChangeText={handleSlugChange}
             placeholder="e.g., projects, recipes"
+            placeholderTextColor="#888"
             style={styles.input}
           />
           <Text style={styles.slugHint}>
             Used in URLs. Only lowercase letters, numbers, and hyphens.
           </Text>
-        </View> */}
+        </View>
 
         <View style={styles.formContent}>
           <Text style={styles.label}>
@@ -88,6 +96,7 @@ const AddCustomTypeModal = ({ visible, onClose, onAdd }) => {
             value={description}
             onChangeText={setDescription}
             placeholder="Brief description of this content type..."
+            placeholderTextColor="#888"
             style={[styles.input, styles.textArea]}
             multiline
             numberOfLines={4}
@@ -120,23 +129,29 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   formContent: {
-    paddingBottom: 16,
+    paddingBottom: 20,
+    marginBottom: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E0DEFF',
   },
   label: {
     fontSize: 15,
     fontWeight: '500',
     color: '#333',
-    marginBottom: 6,
+    marginBottom: 8,
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
   },
   input: {
     width: '100%',
     paddingVertical: 14,
     paddingHorizontal: 18,
     borderWidth: 1,
-    borderColor: '#FF8559',
-    backgroundColor: '#fdf2ee',
+    borderColor: '#C5B3FF',
+    backgroundColor: '#F8F6FF',
     borderRadius: 8,
     fontSize: 16,
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    color: '#333',
   },
   textArea: {
     minHeight: 100,
@@ -144,8 +159,9 @@ const styles = StyleSheet.create({
   },
   slugHint: {
     fontSize: 12,
-    color: '#666',
-    marginTop: 4,
+    color: '#6B63FF',
+    marginTop: 6,
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
   },
   formActions: {
     flexDirection: 'row',
@@ -153,7 +169,7 @@ const styles = StyleSheet.create({
     gap: 12,
     paddingTop: 20,
     borderTopWidth: 1,
-    borderTopColor: '#e5e5e5',
+    borderTopColor: '#E0DEFF',
     marginTop: 20,
   },
   actionBtn: {
