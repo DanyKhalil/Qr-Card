@@ -130,13 +130,13 @@ const AddressCard = ({
 const styles = StyleSheet.create({
     card: {
         borderWidth: 1,
-        borderColor: "#FF8559",
+        borderColor: "#4F46E5", // Indigo border
         borderRadius: 12,
         padding: 20,
-        backgroundColor: "#fff",
+        backgroundColor: "#EDE9FE", // Soft Lavender background
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
+        shadowOpacity: 0.05,
         shadowRadius: 4,
         elevation: 3,
         width: "100%",
@@ -155,33 +155,33 @@ const styles = StyleSheet.create({
         width: 100,
         fontSize: 14,
         fontWeight: "600",
-        color: "#444",
+        color: "#312E81", // Dark Indigo text
     },
 
     textField: {
         flex: 1,
         padding: 12,
-        backgroundColor: "#f8f9fa",
+        backgroundColor: "#EDE9FE", // Soft Lavender input background
         borderRadius: 8,
-        borderColor: "#e9ecef",
+        borderColor: "#C4B5FD", // Lighter Indigo border
         borderWidth: 1,
         justifyContent: "center",
     },
 
     text: {
         fontSize: 15,
-        color: "#333",
+        color: "#312E81", // Dark Indigo text
     },
 
     urlField: {
         padding: 12,
-        backgroundColor: "#f8f9fa",
+        backgroundColor: "#EDE9FE", // Soft Lavender
         borderRadius: 8,
-        borderColor: "#e9ecef",
+        borderColor: "#C4B5FD",
         borderWidth: 1,
     },
     urlText: {
-        color: "#0066cc",
+        color: "#4F46E5", // Indigo URL text
         fontFamily: "monospace",
     },
 
@@ -191,12 +191,14 @@ const styles = StyleSheet.create({
         justifyContent: "flex-end",
         paddingTop: 16,
         borderTopWidth: 1,
-        borderTopColor: "#f0f0f0",
+        borderTopColor: "#DDD6FE", // Soft Indigo divider
     },
     buttonsColumn: {
         flexDirection: "column",
         gap: 8,
     },
 });
+
+
 
 export default AddressCard;

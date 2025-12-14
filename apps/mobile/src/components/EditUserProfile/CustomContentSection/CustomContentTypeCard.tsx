@@ -112,8 +112,8 @@ const CustomContentTypeCard = ({
 const styles = StyleSheet.create({
   contentTypeCard: {
     borderWidth: 1,
-    borderColor: '#FF8559',
-    backgroundColor: '#fdf2ee',
+    borderColor: '#A29BFF',       // soft lavender border
+    backgroundColor: '#F5F4FF',   // very light lavender background
     borderRadius: 8,
     padding: 20,
     marginBottom: 12,
@@ -137,17 +137,7 @@ const styles = StyleSheet.create({
   typeName: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#333',
-  },
-  typeSlug: {
-    fontSize: 14,
-    color: '#666',
-    backgroundColor: '#e9ecef',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
-    alignSelf: 'flex-start',
-    marginBottom: 6,
+    color: '#2E2B5F', // dark indigo
   },
   typeDescription: {
     fontSize: 15,
@@ -155,15 +145,14 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   contentTypeStats: {
-    display: 'flex',
     flexDirection: 'row',
     gap: 4,
     minWidth: 80,
   },
   stat: {
-    backgroundColor: 'white',
+    backgroundColor: '#EDEBFF', // lavender stat background
     borderWidth: 1,
-    borderColor: '#dee2e6',
+    borderColor: '#D1CFFF',     // soft lavender border
     borderRadius: 12,
     paddingHorizontal: 10,
     paddingVertical: 4,
@@ -171,7 +160,7 @@ const styles = StyleSheet.create({
   },
   statText: {
     fontSize: 12,
-    color: '#666',
+    color: '#4B47A1', // medium indigo
   },
   contentTypeActions: {
     flexDirection: 'row',
@@ -180,9 +169,7 @@ const styles = StyleSheet.create({
     gap: 20,
   },
   actionBtn: {
-    backgroundColor: 'white',
     borderWidth: 1,
-    borderColor: '#dee2e6',
     borderRadius: 6,
     padding: 12,
     minWidth: 40,
@@ -190,22 +177,22 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   editBtn: {
-    backgroundColor: '#e3f2fd',
-    borderColor: '#2196f3',
-    marginLeft: 4,
+    backgroundColor: '#D1CFFF', // light lavender
+    borderColor: '#6C63FF',     // indigo border
   },
   fieldsBtn: {
-    backgroundColor: '#9cdaa7',
-    borderColor: '#9c27b0',
+    backgroundColor: '#E8E4FF', // very light lavender
+    borderColor: '#9C94FF',     // soft indigo
   },
   itemsBtn: {
-    backgroundColor: '#c0dafa',
-    borderColor: '#4caebb',
+    backgroundColor: '#EDE8FF', // light lavender
+    borderColor: '#7F78D2',     // medium indigo
   },
   deleteBtn: {
-    backgroundColor: '#f3a7b2',
-    borderColor: '#f44336',
+    backgroundColor: '#FFE6E6', // light red
+    borderColor: '#F44336',     // classic danger red
   },
 });
+
 
 export default CustomContentTypeCard;

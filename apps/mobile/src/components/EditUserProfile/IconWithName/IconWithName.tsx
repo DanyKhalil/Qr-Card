@@ -87,7 +87,7 @@ const IconWithName = ({
                 <Ionicons 
                 name={getIconName(iconName)} 
                 size={isSmallScreen ? 18 : iconSize} 
-                color="#82C294" 
+                color="#6C63FF" 
                 />
             </View>
 

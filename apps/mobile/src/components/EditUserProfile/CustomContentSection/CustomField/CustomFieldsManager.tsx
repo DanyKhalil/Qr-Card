@@ -234,27 +234,25 @@ const CustomFieldsManager = ({ visible, onClose, contentType, onUpdateFields }) 
 
 const styles = StyleSheet.create({
   fieldsManager: {
-    height: 500, // Fixed height like web's max-height: 600px
-    display: 'flex',
+    height: 500,
     flexDirection: 'column',
   },
   fieldsHeader: {
-    display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     marginBottom: 24,
     paddingBottom: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#E0DEFF',
+    borderBottomColor: '#EDE9FF',
   },
   fieldsDescription: {
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
     color: '#555',
     flex: 1,
     marginRight: 16,
     fontSize: 14,
     lineHeight: 20,
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
   },
   addFieldBtn: {
     backgroundColor: '#6B63FF',
@@ -285,7 +283,6 @@ const styles = StyleSheet.create({
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
   },
   fieldItem: {
-    display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -293,7 +290,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     backgroundColor: '#F8F6FF',
     borderWidth: 1,
-    borderColor: '#E0DEFF',
+    borderColor: '#EDE9FF',
     borderRadius: 8,
   },
   fieldInfo: {
@@ -306,9 +303,8 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   fieldKey: {
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
     fontSize: 12,
-    color: '#555',
+    color: '#4F46E5',
     backgroundColor: '#EDE9FF',
     paddingHorizontal: 6,
     paddingVertical: 2,
@@ -321,27 +317,22 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   fieldType: {
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
     fontSize: 12,
-    color: '#6B63FF',
+    color: '#4F46E5',
     backgroundColor: '#EDE9FF',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
-    overflow: 'hidden',
   },
   fieldRequired: {
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
     fontSize: 12,
-    color: '#C5B3FF',
+    color: '#6B63FF',
     backgroundColor: '#F8F6FF',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
-    overflow: 'hidden',
   },
   fieldLabel: {
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
     fontSize: 14,
     color: '#555',
     fontStyle: 'italic',
@@ -353,16 +344,14 @@ const styles = StyleSheet.create({
   fieldActionBtn: {
     backgroundColor: '#fff',
     borderWidth: 1,
-    borderColor: '#E0DEFF',
+    borderColor: '#C5B3FF',
     borderRadius: 4,
     padding: 6,
     minWidth: 36,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  moveBtn: {
-    // Specific styles if needed
-  },
+  moveBtn: {},
   editBtn: {
     backgroundColor: '#EDE9FF',
     borderColor: '#6B63FF',
@@ -375,13 +364,13 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   fieldsManagerActions: {
-    display: 'flex',
     flexDirection: 'row',
     justifyContent: 'flex-end',
     paddingTop: 16,
     borderTopWidth: 1,
-    borderTopColor: '#E0DEFF',
+    borderTopColor: '#EDE9FF',
   },
 });
+
 
 export default CustomFieldsManager;

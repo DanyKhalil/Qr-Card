@@ -38,49 +38,60 @@ export default function TabLayout() {
       screenOptions={({ route }) => ({
         tabBarHideOnKeyboard: true,
         animation: 'shift',
-        tabBarActiveTintColor: '#FF571A',
-        tabBarActiveBackgroundColor: '#eee',
-        tabBarInactiveTintColor: '#666666',
+
+        tabBarActiveTintColor: '#547DAD',
+        tabBarInactiveTintColor: '#7A8FB8',
+        tabBarActiveBackgroundColor: '#E3E0F3',
+
         tabBarStyle: {
-          backgroundColor: '#FF8559',
+          backgroundColor: '#F5F7FB',
           height: 60 + insets.bottom,
         },
+
         headerShown: true,
         headerStyle: {
-          backgroundColor: '#FF8559',
+          backgroundColor: '#547DAD',
           elevation: 0,
           shadowOpacity: 0,
         },
-        headerTintColor: '#eee',
+        headerTintColor: '#F5F7FB',
         headerTitleStyle: {
           fontWeight: '600',
           fontSize: 24,
         },
-        // Add conditional header right button for admin
-        ...(route.name === 'profile' ? {
-          headerRight: () => (
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 15 }}>
-              {/* Notifications Icon (always shown) */}
-              <TouchableOpacity
-                onPress={() => router.push('/notifications')}
-                style={{ marginRight: 15 }}
-              >
-                <Ionicons name="notifications-outline" size={24} color="#fff" />
-              </TouchableOpacity>
-              
-              {/* Admin Shield Icon (only shown if user is admin) */}
-              {isAdmin && (
-                <TouchableOpacity
-                  onPress={() => router.push('/admin-panel')}
-                >
-                  <Ionicons name="shield-outline" size={24} color="#fff" />
-                </TouchableOpacity>
-              )}
-            </View>
-          ),
-        } : {}),
-      })}>
-      
+
+        ...(route.name === 'profile'
+          ? {
+              headerRight: () => (
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 15 }}>
+                  {/* Notifications */}
+                  <TouchableOpacity
+                    onPress={() => router.push('/notifications')}
+                    style={{ marginRight: 15 }}
+                  >
+                    <Ionicons
+                      name="notifications-outline"
+                      size={24}
+                      color="#F5F7FB"
+                    />
+                  </TouchableOpacity>
+
+                  {/* Admin */}
+                  {isAdmin && (
+                    <TouchableOpacity onPress={() => router.push('/admin-panel')}>
+                      <Ionicons
+                        name="shield-outline"
+                        size={24}
+                        color="#F5F7FB"
+                      />
+                    </TouchableOpacity>
+                  )}
+                </View>
+              ),
+            }
+          : {}),
+      })}
+    >
       <Tabs.Screen
         name="search"
         options={{
@@ -90,7 +101,7 @@ export default function TabLayout() {
           ),
         }}
       />
-      
+
       <Tabs.Screen
         name="scan"
         options={{
@@ -100,7 +111,7 @@ export default function TabLayout() {
           ),
         }}
       />
-      
+
       <Tabs.Screen
         name="profile"
         options={{

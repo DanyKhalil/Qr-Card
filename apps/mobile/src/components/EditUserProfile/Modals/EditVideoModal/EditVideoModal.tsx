@@ -215,15 +215,15 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
         paddingHorizontal: 16,
         borderWidth: 2,
-        borderColor: "#e5e5e5",
+        borderColor: "#E3E0F3", // Updated from light gray to Soft Lavender
         borderRadius: 10,
         fontSize: 16,
     },
     inputError: {
-        borderColor: "#ff4444",
+        borderColor: "#547DAD", // Use primary Indigo Blue for errors to match palette
     },
     errorText: {
-        color: "#ff4444",
+        color: "#547DAD", // Primary Indigo Blue instead of red
         fontSize: 12,
         marginTop: 4,
         minHeight: 16,
@@ -233,12 +233,13 @@ const styles = StyleSheet.create({
         gap: 12,
         marginTop: 20,
         borderTopWidth: 1,
-        borderTopColor: "#e5e5e5",
+        borderTopColor: "#E3E0F3", // Secondary Soft Lavender
         paddingTop: 20,
     },
     actionBtn: {
         width: "100%",
     },
 });
+
 
 export default EditVideoModal;

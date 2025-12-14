@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
     marginBottom: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#E0DEFF',
+    borderBottomColor: '#EDE9FF', // soft lavender
   },
   label: {
     fontSize: 15,
@@ -156,10 +156,10 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderWidth: 1,
-    borderColor: "#E0DEFF",
+    borderColor: "#EDE9FF",
     borderRadius: 8,
     fontSize: 16,
-    backgroundColor: '#fff',
+    backgroundColor: '#F8F6FF', // soft lavender background
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
   },
   slugHint: {
@@ -178,7 +178,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderWidth: 1,
-    borderColor: "#E0DEFF",
+    borderColor: "#EDE9FF",
     borderRadius: 8,
     backgroundColor: '#F8F6FF',
     minWidth: 100,
@@ -205,12 +205,12 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     borderWidth: 1,
-    borderColor: "#E0DEFF",
+    borderColor: "#EDE9FF",
     borderRadius: 4,
     marginRight: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: '#F8F6FF',
   },
   checkboxChecked: {
     borderColor: "#6B63FF",
@@ -249,5 +249,6 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
 });
+
 
 export default EditFieldModal;

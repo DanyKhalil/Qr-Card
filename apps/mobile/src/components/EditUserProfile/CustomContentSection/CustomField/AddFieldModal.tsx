@@ -168,12 +168,12 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
     marginBottom: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#E0DEFF',
+    borderBottomColor: '#EDE9FF', // Soft lavender border
   },
   label: {
     fontSize: 15,
     fontWeight: "500",
-    color: "#333",
+    color: "#4F46E5", // Indigo
     marginBottom: 8,
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
   },
@@ -182,15 +182,16 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderWidth: 1,
-    borderColor: "#E0DEFF",
+    borderColor: "#C5B3FF", // Soft lavender border
     borderRadius: 8,
     fontSize: 16,
-    backgroundColor: '#fff',
+    backgroundColor: '#F8F6FF', // Soft lavender background
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    color: "#1F2937", // Darker text for readability
   },
   slugHint: {
     fontSize: 12,
-    color: "#555",
+    color: "#6B63FF", // Indigo accent
     marginTop: 6,
     fontStyle: 'italic',
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
@@ -204,23 +205,23 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderWidth: 1,
-    borderColor: "#E0DEFF",
+    borderColor: "#C5B3FF",
     borderRadius: 8,
-    backgroundColor: '#F8F6FF',
+    backgroundColor: '#F0EEFF', // Soft lavender
     minWidth: 100,
   },
   optionSelected: {
-    borderColor: "#6B63FF",
-    backgroundColor: '#EDE9FF',
+    borderColor: "#4F46E5", // Indigo
+    backgroundColor: '#EDE9FF', // Soft lavender
   },
   optionText: {
     fontSize: 14,
-    color: "#555",
+    color: "#4B4B7D", // Slightly darker indigo tone
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
     textAlign: 'center',
   },
   optionTextSelected: {
-    color: "#6B63FF",
+    color: "#4F46E5", // Indigo
     fontWeight: '600',
   },
   checkboxContainer: {
@@ -231,16 +232,16 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     borderWidth: 1,
-    borderColor: "#E0DEFF",
+    borderColor: "#C5B3FF",
     borderRadius: 4,
     marginRight: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: '#F8F6FF',
   },
   checkboxChecked: {
-    borderColor: "#6B63FF",
-    backgroundColor: "#6B63FF",
+    borderColor: "#4F46E5",
+    backgroundColor: "#4F46E5",
   },
   checkmark: {
     color: '#fff',
@@ -249,7 +250,7 @@ const styles = StyleSheet.create({
   },
   checkboxLabel: {
     fontSize: 15,
-    color: "#333",
+    color: "#1F2937",
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
   },
   formActions: {
@@ -270,7 +271,7 @@ const styles = StyleSheet.create({
   },
   hintText: {
     fontSize: 13,
-    color: '#6B63FF',
+    color: '#4F46E5',
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
     lineHeight: 18,
   },

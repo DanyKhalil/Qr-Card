@@ -262,8 +262,8 @@ const styles = StyleSheet.create({
     },
     container: {
         borderRadius: 1000,
-        borderColor: '#82C294',
-        backgroundColor: '#82C294',
+        borderColor: '#547DAD', // Primary Indigo Blue
+        backgroundColor: '#E3E0F3', // Secondary Soft Lavender
         justifyContent: 'center',
         alignItems: 'center',
         shadowColor: '#000',
@@ -307,10 +307,10 @@ const styles = StyleSheet.create({
         elevation: 3,
     },
     editButton: {
-        backgroundColor: '#4CAF50',
+        backgroundColor: '#547DAD', // Primary Indigo Blue
     },
     removeButton: {
-        backgroundColor: '#FF6B6B',
+        backgroundColor: '#E3E0F3', // Secondary Soft Lavender
     },
     
     modalOverlay: {
