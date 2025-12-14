@@ -178,65 +178,66 @@ const Headline = ({
 };
 
 const styles = StyleSheet.create({
-    container: {
-        paddingVertical: 16,
-        paddingHorizontal: 20,
-        marginBottom: -10,
-    },
-    nameAgeContainer: {
-        flexDirection: 'row',
-        alignItems: 'baseline',
-        flexWrap: 'wrap',
-        marginBottom: 8,
-        gap: 12,
-    },
-    name: {
-        fontWeight: '700', // Bold like Instagram/Facebook
-        color: '#000000',
-        lineHeight: 36,
-    },
-    age: {
-        color: '#82C294', // Your brand green
-        fontWeight: '600',
-        lineHeight: 20,
-    },
-    headline: {
-        color: '#65676B', // Facebook-like gray
-        lineHeight: 20,
-        fontWeight: '400',
-    },
-    statsContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingVertical: 12,
-        width: '100%',
-    },
-    statItem: {
-        alignItems: 'center',
-        flex: 1,
-    },
-    statNumber: {
-        fontSize: 18,
-        fontWeight: '700',
-        color: '#262626', // Instagram dark text color
-    },
-    statLabel: {
-        fontSize: 14,
-        marginTop: 2,
-    },
-    followersLabel: {
-        color: '#85c697', // Your green color
-    },
-    followingLabel: {
-        color: '#8e8e8e', // Instagram light gray
-    },
-    separator: {
-        width: 1,
-        height: 28,
-        backgroundColor: '#dbdbdb', // Instagram separator color
-        marginHorizontal: 20,
-    },
+  container: {
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    marginBottom: -10,
+  },
+  nameAgeContainer: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    flexWrap: 'wrap',
+    marginBottom: 8,
+    gap: 12,
+  },
+  name: {
+    fontWeight: '700',
+    color: '#222225ff', // muted indigo
+    lineHeight: 36,
+  },
+  age: {
+    color: '#BFA5FF', // soft lavender
+    fontWeight: '600',
+    lineHeight: 20,
+  },
+  headline: {
+    color: '#151516ff', // medium lavender
+    lineHeight: 20,
+    fontWeight: '400',
+  },
+  statsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    width: '100%',
+  },
+  statItem: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  statNumber: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#4B3FDD', // muted indigo
+  },
+  statLabel: {
+    fontSize: 14,
+    marginTop: 2,
+  },
+  followersLabel: {
+    color: '#BFA5FF', // soft lavender
+  },
+  followingLabel: {
+    color: '#9C8DFF', // medium lavender
+  },
+  separator: {
+    width: 1,
+    height: 28,
+    backgroundColor: '#D3CFFF', // very soft lavender separator
+    marginHorizontal: 20,
+  },
 });
+
 
 export default Headline;

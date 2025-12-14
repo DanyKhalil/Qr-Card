@@ -17,7 +17,7 @@ const IconWithName = ({
         link,
         fontSize = 16,
         iconSize = 20,
-        color = '#47855B',
+        color = '#476385ff',
     }: IconWithNameProps) => {
   
         const getIconName = (icon: string) => {

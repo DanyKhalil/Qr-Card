@@ -233,25 +233,16 @@ const ProfileAnalytics = ({ userId }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#F5F3FF', // soft lavender background
   },
   scrollContainer: {
     flex: 1,
   },
   analyticsContainer: {
     flex: 1,
-    // padding: 20,
-    // paddingTop: 100,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#2d3748',
-    textAlign: 'center',
-    marginBottom: 20,
   },
   filtersSection: {
-    backgroundColor: '#d3f8dc',
+    backgroundColor: '#EDE9FE', // soft lavender section
     borderRadius: 8,
     padding: 20,
     marginBottom: 30,
@@ -262,7 +253,7 @@ const styles = StyleSheet.create({
   filterLabel: {
     fontWeight: '600',
     fontSize: 13,
-    color: '#4a5568',
+    color: '#4B4C7A', // muted indigo
     textTransform: 'uppercase',
     letterSpacing: 0.5,
     marginBottom: 8,
@@ -277,22 +268,22 @@ const styles = StyleSheet.create({
   pickerOption: {
     paddingHorizontal: 16,
     paddingVertical: 10,
-    backgroundColor: '#f9e4dd',
+    backgroundColor: '#F3E8FF', // soft lavender variant
     borderRadius: 8,
     borderWidth: 2,
-    borderColor: '#e1e5e9',
+    borderColor: '#D2C9F0', // subtle lavender border
   },
   pickerOptionSelected: {
-    backgroundColor: '#FFAE91',
-    borderColor: '#FF8559',
+    backgroundColor: '#C8C1F9', // muted indigo highlight
+    borderColor: '#4B4C7A', // muted indigo
   },
   pickerOptionText: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#2d3748',
+    color: '#4B4C7A', // muted indigo
   },
   pickerOptionTextSelected: {
-    color: '#2d3748',
+    color: '#FFFFFF', // white text for selected
   },
   chartTypeGroup: {
     gap: 15,
@@ -307,22 +298,22 @@ const styles = StyleSheet.create({
   chartTypeButton: {
     paddingHorizontal: 16,
     paddingVertical: 8,
-    backgroundColor: '#f9e4dd',
+    backgroundColor: '#F3E8FF', // soft lavender
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: '#e1e5e9',
+    borderColor: '#D2C9F0',
   },
   chartTypeButtonSelected: {
-    backgroundColor: '#FFAE91',
-    borderColor: '#FF8559',
+    backgroundColor: '#C8C1F9', // muted indigo highlight
+    borderColor: '#4B4C7A', // muted indigo
   },
   chartTypeButtonText: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#2d3748',
+    color: '#4B4C7A', // muted indigo
   },
   chartTypeButtonTextSelected: {
-    color: '#2d3748',
+    color: '#FFFFFF', // white text for selected
   },
   chartsGrid: {
     gap: 30,
@@ -336,7 +327,7 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 16,
     fontSize: 16,
-    color: '#718096',
+    color: '#6B6C8A', // muted indigo lighter
   },
   errorContainer: {
     flex: 1,
@@ -346,12 +337,12 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 16,
-    color: '#e53e3e',
+    color: '#6B4C7A', // muted indigo/redish
     textAlign: 'center',
     marginBottom: 16,
   },
   retryButton: {
-    backgroundColor: '#007bff',
+    backgroundColor: '#4B4C7A', // muted indigo
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 4,
@@ -362,6 +353,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
 });
+
 
 // Responsive styles
 const { width } = Dimensions.get('window');

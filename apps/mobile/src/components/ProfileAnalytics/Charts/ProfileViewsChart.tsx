@@ -39,12 +39,12 @@ const ProfileViewsChart = ({ data, chartType, dateRange }) => {
     };
 
     const chartConfig = {
-        backgroundColor: '#f8f9fb',
-        backgroundGradientFrom: '#f8f9fb',
-        backgroundGradientTo: '#f8f9fb',
+        backgroundColor: '#E3E0F3', // Soft Lavender
+        backgroundGradientFrom: '#E3E0F3', // Soft Lavender
+        backgroundGradientTo: '#E3E0F3',   // Soft Lavender
         backgrounColor: "transparent",
         decimalPlaces: 0,
-        color: (opacity = 1) => `rgba(255, 133, 89, ${opacity})`,
+        color: (opacity = 1) => `rgba(84, 125, 173, ${opacity})`, // Primary Indigo Blue
         labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
         style: {
             borderRadius: 16,
@@ -52,7 +52,7 @@ const ProfileViewsChart = ({ data, chartType, dateRange }) => {
         propsForDots: {
             r: '4',
             strokeWidth: '2',
-            stroke: '#FF8559',
+            stroke: '#547DAD', // Primary Indigo Blue
         },
         propsForLabels: {
             fontSize: 9,

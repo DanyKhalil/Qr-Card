@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Image, TouchableOpacity, StyleSheet, Dimensions, Animated, Modal, TouchableWithoutFeedback, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { BlurView } from 'expo-blur'
+import { BlurView } from 'expo-blur';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -10,7 +10,6 @@ interface ProfilePicProps {
     alt?: string;
     size?: 'small' | 'medium' | 'large' | 'xlarge' | 'xxlarge' | 'default';
     onPress?: () => void;
-    className?: string;
 }
 
 const ProfilePic = ({
@@ -18,19 +17,27 @@ const ProfilePic = ({
     alt = "User profile",
     size = 'default',
     onPress,
-    className = "",
 }: ProfilePicProps) => {
-
-    // this is for profile pic animation when holded
     const [isModalVisible, setIsModalVisible] = useState(false);
     const scaleAnim = new Animated.Value(0);
-  
-    // this is for when the user hasnt profile oicture
-    const renderDefaultIcon = () => (
-        <View style={styles.defaultIcon}>
-            <Ionicons name="person" size={getIconSize(size)} color="#999999" />
-        </View>
-    );
+
+    const handleLongPress = () => {
+        setIsModalVisible(true);
+        Animated.spring(scaleAnim, {
+            toValue: 1,
+            tension: 50,
+            friction: 7,
+            useNativeDriver: true,
+        }).start();
+    };
+
+    const closeModal = () => {
+        Animated.timing(scaleAnim, {
+            toValue: 0,
+            duration: 200,
+            useNativeDriver: true,
+        }).start(() => setIsModalVisible(false));
+    };
 
     const getSize = () => {
         switch (size) {
@@ -43,8 +50,8 @@ const ProfilePic = ({
         }
     };
 
-    const getIconSize = (sizeType: string) => {
-        switch (sizeType) {
+    const getIconSize = () => {
+        switch (size) {
             case 'small': return 20;
             case 'medium': return 30;
             case 'large': return 40;
@@ -75,46 +82,27 @@ const ProfilePic = ({
         }
     };
 
-
-    //and this is some naimation and functionality for when the usr holds th eprofile pic
-    const handleLongPress = () => {
-        setIsModalVisible(true);
-        Animated.spring(scaleAnim, {
-            toValue: 1,
-            tension: 50,
-            friction: 7,
-            useNativeDriver: true,
-        }).start();
-    };
-
-    const closeModal = () => {
-        Animated.timing(scaleAnim, {
-            toValue: 0,
-            duration: 200,
-            useNativeDriver: true,
-        }).start(() => {
-            setIsModalVisible(false);
-        });
-    };
+    const renderDefaultIcon = () => (
+        <View style={styles.defaultIcon}>
+            <Ionicons name="person" size={getIconSize()} color="#9C8DFF" />
+        </View>
+    );
 
     const containerSize = getSize();
     const borderWidth = getBorderWidth();
-    const innerSize = containerSize - (borderWidth * 2);
+    const innerSize = containerSize - borderWidth * 2;
     const marginTop = getMarginTop();
-
-    const ContainerComponent = TouchableOpacity;
 
     return (
         <>
-            <ContainerComponent
+            <TouchableOpacity
                 style={[
                     styles.container,
                     {
                         width: containerSize,
                         height: containerSize,
-                        borderWidth: borderWidth,
-                        marginTop: marginTop,
-                        marginLeft: 0,
+                        borderWidth,
+                        marginTop,
                     },
                 ]}
                 onPress={onPress}
@@ -122,74 +110,54 @@ const ProfilePic = ({
                 activeOpacity={0.8}
                 delayLongPress={300}
             >
-                <View style={[
-                    styles.innerCircle,
-                    { 
-                        width: innerSize, 
-                        height: innerSize,
-                        borderRadius: innerSize / 2,
-                    }
-                ]}>
+                <View
+                    style={[
+                        styles.innerCircle,
+                        { width: innerSize, height: innerSize, borderRadius: innerSize / 2 },
+                    ]}
+                >
                     {photo ? (
                         <Image
                             source={{ uri: photo }}
-                            style={[
-                            styles.profileImage,
-                            { 
-                                width: innerSize, 
-                                height: innerSize,
-                                borderRadius: innerSize / 2,
-                            }
-                            ]}
+                            style={[styles.profileImage, { width: innerSize, height: innerSize, borderRadius: innerSize / 2 }]}
                             resizeMode="cover"
                             accessibilityLabel={alt}
                         />
                     ) : (
-                    renderDefaultIcon()
+                        renderDefaultIcon()
                     )}
                 </View>
-            </ContainerComponent>
+            </TouchableOpacity>
 
-            {/* Full Screen Modal */}
-            <Modal
-                visible={isModalVisible}
-                transparent={true}
-                animationType="none"
-                statusBarTranslucent={true}
-            >
+            <Modal visible={isModalVisible} transparent animationType="none" statusBarTranslucent>
                 <TouchableWithoutFeedback onPress={closeModal}>
                     <View style={styles.modalOverlay}>
-                        {/* Blur Background */}
                         <BlurView intensity={80} style={StyleSheet.absoluteFill} />
-                        
-                        {/* Enlarged Profile Picture */}
-                        <Animated.View 
+
+                        <Animated.View
                             style={[
                                 styles.enlargedContainer,
                                 {
-                                    transform: [{
-                                        scale: scaleAnim.interpolate({
-                                            inputRange: [0, 1],
-                                            outputRange: [0.8, 1]
-                                        })
-                                    }]
-                                }
+                                    transform: [
+                                        {
+                                            scale: scaleAnim.interpolate({
+                                                inputRange: [0, 1],
+                                                outputRange: [0.8, 1],
+                                            }),
+                                        },
+                                    ],
+                                },
                             ]}
                         >
                             {photo ? (
-                                <Image
-                                    source={{ uri: photo }}
-                                    style={styles.enlargedImage}
-                                    resizeMode="contain"
-                                />
+                                <Image source={{ uri: photo }} style={styles.enlargedImage} resizeMode="contain" />
                             ) : (
                                 <View style={styles.enlargedDefault}>
-                                    <Ionicons name="person" size={120} color="#999999" />
+                                    <Ionicons name="person" size={120} color="#9C8DFF" />
                                 </View>
                             )}
                         </Animated.View>
 
-                        {/* Close Hint */}
                         <View style={styles.closeHint}>
                             <Ionicons name="close-circle" size={24} color="white" />
                             <Text style={styles.closeText}>Tap anywhere to close</Text>
@@ -204,15 +172,12 @@ const ProfilePic = ({
 const styles = StyleSheet.create({
     container: {
         borderRadius: 1000,
-        borderColor: '#82C294',
-        backgroundColor: '#82C294',
+        borderColor: '#9C8DFF',
+        backgroundColor: '#E6E0FF',
         justifyContent: 'center',
         alignItems: 'center',
         shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
+        shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.15,
         shadowRadius: 8,
         elevation: 4,
@@ -229,8 +194,6 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
-    
-    // Modal Styles
     modalOverlay: {
         flex: 1,
         backgroundColor: 'rgba(0, 0, 0, 0.8)',

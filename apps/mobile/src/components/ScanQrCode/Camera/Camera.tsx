@@ -216,7 +216,7 @@ const CameraComponent = () => {
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* Header */}
         <View style={styles.header}>
-          <Ionicons name="qr-code" size={48} color="#64A377" />
+          <Ionicons name="qr-code" size={48} color="#7480d7ff" />
           <Text style={styles.title}>QR Code Scanner</Text>
           <Text style={styles.subtitle}>Scan QR codes with your camera or images</Text>
         </View>
@@ -317,23 +317,23 @@ const CameraComponent = () => {
 
 /* ----------------------------- STYLES ------------------------------ */
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
+  container: { flex: 1, backgroundColor: '#F5F3FF' }, // soft lavender background
   scrollContent: { padding: 20 },
 
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
 
   permissionContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 },
-  permissionText: { fontSize: 18, color: '#666', marginTop: 16, marginBottom: 24 },
-  permissionButton: { backgroundColor: '#64A377', paddingHorizontal: 24, paddingVertical: 12, borderRadius: 8 },
-  permissionButtonText: { color: 'white', fontSize: 16, fontWeight: '600' },
+  permissionText: { fontSize: 18, color: '#4B4C7A', marginTop: 16, marginBottom: 24 }, // muted indigo
+  permissionButton: { backgroundColor: '#C8C1F9', paddingHorizontal: 24, paddingVertical: 12, borderRadius: 8 },
+  permissionButtonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
 
   header: { alignItems: 'center', marginBottom: 30 },
-  title: { fontSize: 28, fontWeight: 'bold', color: '#333', marginTop: 12 },
-  subtitle: { fontSize: 16, color: '#666', marginTop: 4 },
+  title: { fontSize: 28, fontWeight: 'bold', color: '#4B4C7A', marginTop: 12 }, // muted indigo
+  subtitle: { fontSize: 16, color: '#6B6C8A', marginTop: 4 }, // lighter muted indigo
 
   cameraContainer: {
     height: 350,
-    backgroundColor: '#000',
+    backgroundColor: '#EDE9FE', // soft lavender
     borderRadius: 12,
     overflow: 'hidden',
     marginBottom: 20,
@@ -341,34 +341,34 @@ const styles = StyleSheet.create({
   camera: { flex: 1 },
 
   scanOverlay: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  scanFrame: { width: 250, height: 250, borderWidth: 2, borderColor: 'transparent' },
+  scanFrame: { width: 250, height: 250, borderWidth: 2, borderColor: '#C8C1F9' }, // muted indigo frame
   scanText: {
-    color: 'white',
+    color: '#4B4C7A',
     marginTop: 20,
     fontSize: 16,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: 'rgba(245,243,255,0.7)', // soft lavender overlay
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
   },
 
-  imageContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#000' },
+  imageContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#EDE9FE' },
   image: { width: '100%', height: '100%' },
   scanningOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.7)',
+    backgroundColor: 'rgba(75,76,122,0.7)', // muted indigo overlay
     justifyContent: 'center',
     alignItems: 'center',
   },
   scanningText: { color: 'white', marginTop: 12, fontSize: 16 },
 
-  cameraPlaceholder: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#1a1a1a' },
-  placeholderText: { color: '#666', marginTop: 12, fontSize: 16 },
+  cameraPlaceholder: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#D8D4F2' }, // soft lavender
+  placeholderText: { color: '#4B4C7A', marginTop: 12, fontSize: 16 },
 
   controls: { flexDirection: 'row', justifyContent: 'center', gap: 12, marginBottom: 20, flexWrap: 'wrap' },
 
   primaryButton: {
-    backgroundColor: '#64A377',
+    backgroundColor: '#C8C1F9', // muted indigo
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 24,
@@ -379,7 +379,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   secondaryButton: {
-    backgroundColor: '#FF6B6B',
+    backgroundColor: '#9A92E8', // deeper muted indigo
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 24,
@@ -390,7 +390,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   uploadButton: {
-    backgroundColor: '#45B7D1',
+    backgroundColor: '#A89EE8', // soft lavender button
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 24,
@@ -400,35 +400,35 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 8,
   },
-  buttonText: { color: 'white', fontSize: 16, fontWeight: '600' },
+  buttonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
 
   clearButton: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', padding: 12, marginBottom: 20 },
-  clearButtonText: { color: '#666', fontSize: 14 },
+  clearButtonText: { color: '#4B4C7A', fontSize: 14 },
 
   resultContainer: {
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#F5F3FF', // soft lavender
     borderRadius: 12,
     padding: 20,
     alignItems: 'center',
     marginBottom: 20,
     borderWidth: 1,
-    borderColor: '#e9ecef',
+    borderColor: '#C8C1F9', // muted indigo border
   },
-  resultTitle: { fontSize: 18, fontWeight: '600', color: '#28a745', marginTop: 12, marginBottom: 16 },
+  resultTitle: { fontSize: 18, fontWeight: '600', color: '#4B4C7A', marginTop: 12, marginBottom: 16 },
   resultBox: {
     backgroundColor: 'white',
     padding: 16,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#dee2e6',
+    borderColor: '#D2C9F0',
     width: '100%',
     marginBottom: 16,
   },
-  resultLabel: { fontWeight: '600', color: '#333', marginBottom: 8 },
-  resultText: { color: '#495057', fontSize: 14, lineHeight: 20 },
+  resultLabel: { fontWeight: '600', color: '#4B4C7A', marginBottom: 8 },
+  resultText: { color: '#6B6C8A', fontSize: 14, lineHeight: 20 },
 
   urlButton: {
-    backgroundColor: '#64A377',
+    backgroundColor: '#C8C1F9',
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 20,
@@ -436,7 +436,8 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     gap: 8,
   },
-  urlButtonText: { color: 'white', fontWeight: '600' },
+  urlButtonText: { color: '#fff', fontWeight: '600' },
 });
+
 
 export default CameraComponent;

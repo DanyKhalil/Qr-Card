@@ -212,6 +212,7 @@ const styles = StyleSheet.create({
     maxWidth: 1000,
     width: Dimensions.get('window').width - 20,
     alignSelf: 'center',
+    backgroundColor: '#F5F3FF', // soft lavender background
   },
   tableHeader: {
     flexDirection: 'row',
@@ -222,11 +223,11 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#2d3748',
+    color: '#4B4C7A', // muted indigo
     margin: 0,
   },
   visitsCount: {
-    backgroundColor: '#e2e8f0',
+    backgroundColor: '#E0DBF7', // soft lavender variant
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 16,
@@ -234,7 +235,7 @@ const styles = StyleSheet.create({
   visitsCountText: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#4a5568',
+    color: '#4B4C7A', // muted indigo
   },
   visitsContainer: {
     flexDirection: 'column',
@@ -246,9 +247,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 16,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderColor: '#D2C9F0', // soft lavender border
     borderRadius: 8,
     maxWidth: '100%',
+    backgroundColor: '#FFFFFF', // keep card white
   },
   visitorInfo: {
     flexDirection: 'row',
@@ -261,17 +263,17 @@ const styles = StyleSheet.create({
     height: 48,
     borderRadius: 24,
     borderWidth: 2,
-    borderColor: '#f7fafc',
+    borderColor: '#EDE9FE', // lavender border
   },
   anonymousAvatar: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: '#f7fafc',
+    backgroundColor: '#EDE9FE', // soft lavender
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
-    borderColor: '#e2e8f0',
+    borderColor: '#D2C9F0', // lavender border
   },
   visitorDetails: {
     paddingLeft: 10,
@@ -281,17 +283,17 @@ const styles = StyleSheet.create({
   visitorName: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#2d3748',
+    color: '#4B4C7A', // muted indigo
     marginBottom: 4,
   },
   visitTime: {
     fontSize: 14,
-    color: '#718096',
+    color: '#6B6C8A', // muted indigo lighter
     marginBottom: 4,
   },
   qrBadge: {
     alignSelf: 'flex-start',
-    backgroundColor: '#e6fffa',
+    backgroundColor: '#EDE9FE', // soft lavender
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 12,
@@ -299,7 +301,7 @@ const styles = StyleSheet.create({
   qrBadgeText: {
     fontSize: 12,
     fontWeight: '500',
-    color: '#234e52',
+    color: '#4B4C7A', // muted indigo
   },
   anonymousVisit: {
     flexDirection: 'row',
@@ -313,9 +315,10 @@ const styles = StyleSheet.create({
   },
   noVisitsText: {
     fontSize: 16,
-    color: '#718096',
+    color: '#6B6C8A', // muted indigo lighter
     textAlign: 'center',
   },
 });
+
 
 export default ProfileVisitsTable;
