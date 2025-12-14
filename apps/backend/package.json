@@ -8,6 +8,7 @@
     "start": "node src/index.js"
   },
   "dependencies": {
+    "@tap-payments/card-sdk": "^1.0.2",
     "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
@@ -16,9 +17,12 @@
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.0.2",
     "mysql2": "^3.15.1",
+    "node-fetch": "^3.3.2",
     "nodemailer": "^7.0.10",
     "qrcode": "^1.5.4",
-    "sequelize": "^6.37.7"
+    "sequelize": "^6.37.7",
+    "stripe": "^20.0.0",
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.10"

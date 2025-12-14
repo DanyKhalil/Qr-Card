@@ -8,6 +8,8 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import adminUsersRoutes from './routes/adminUsers.js';
 import profileFollowRoutes from "./routes/profileFollowRoutes.js";
+import subscriptionRoutes from './routes/subscriptionRoutes.js';
+
 import notificationRoutes from "./routes/notificationRoutes.js";
 
 const app = express();
@@ -55,6 +57,8 @@ app.use("/api/users2", user2Routes);
 app.use("/api/profile-analytics", profileAnalyticsRoutes)
 app.use("/api/users3", adminUsersRoutes);
 app.use("/api/follow", profileFollowRoutes);
+app.use("/api/subscription", subscriptionRoutes);
+
 app.use("/api/notifications", notificationRoutes);
 
 app.get('/api/test-cors', (req, res) => {

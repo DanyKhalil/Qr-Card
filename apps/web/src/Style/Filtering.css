@@ -1,52 +1,177 @@
-/* Container for the entire page */
+/* ===== PAGE CONTAINER ===== */
 .filtering-page {
-  padding-top: 120px; /* space for header */
+  padding-top: 120px;
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
+  background-color: #f9fafb;
+  font-family: 'Inter', sans-serif;
+}
+
+/* ===== LAYOUT WRAPPER ===== */
+.filtering-layout {
+  display: flex;
+  gap: 32px;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* ===== LEFT FILTER SIDEBAR ===== */
+.filter-sidebar {
+  width: 260px;
+  padding: 24px;
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  height: fit-content;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Sidebar title */
+.filter-sidebar h4 {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: #111827;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 8px;
+  text-align: left;
+}
+
+/* ===== CHECKBOX STYLING ===== */
+.filter-sidebar label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  transition: background 0.2s, color 0.2s;
+}
+
+.filter-sidebar label:hover {
+  background-color: #f3f4f6;
+  color: #111827;
+}
+
+.filter-sidebar input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #56c596;
+}
+
+/* ===== DROPDOWN ===== */
+.role-filter {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.role-filter label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #4b5563;
+}
+
+.role-filter select {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  font-size: 14px;
+  cursor: pointer;
+  background-color: #ffffff;
+  transition: border-color 0.2s, box-shadow 0.2s;
   width: 100%;
 }
 
-/* Search bar styling */
+.role-filter select:focus {
+  outline: none;
+  border-color: #56c596;
+  box-shadow: 0 0 0 2px rgba(86, 197, 150, 0.2);
+}
+
+/* ===== SEARCH BAR ===== */
 .search-bar-container {
   display: flex;
   justify-content: center;
-  margin-bottom: 16px;
-  gap: 8px;
+  margin-bottom: 20px;
+  gap: 10px;
   width: 100%;
-  max-width: 900px; /* matches grid width */
-  z-index: 10;
+  max-width: 900px;
 }
 
 .search-input {
   width: 750px;
-  padding: 8px 12px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
+  padding: 10px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
   font-size: 14px;
+  transition: border 0.2s, box-shadow 0.2s;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #56c596;
+  box-shadow: 0 0 0 2px rgba(86, 197, 150, 0.2);
 }
 
 .search-button {
-  padding: 8px 16px;
+  padding: 10px 18px;
   background-color: #56c596;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
+  color: #ffffff;
+  font-weight: 600;
   font-size: 14px;
-  font-weight: 500;
-  transition: opacity 0.2s ease;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
 }
 
 .search-button:hover {
-  opacity: 0.85;
+  background-color: #3fa97a;
+  transform: translateY(-1px);
 }
 
-/* Profile cards grid */
+/* ===== PROFILE CARDS GRID ===== */
 .profile-cards-container {
   display: grid;
-  grid-template-columns: repeat(3, 260px); /* 3 cards fixed width */
-  gap: 12px; /* space between cards */
-  justify-content: center; /* center the grid */
-  padding: 1rem;
+  grid-template-columns: repeat(3, 260px); /* fixed 3 columns */
+  gap: 58px; /* smaller space between cards */
+  justify-content: center; /* center grid */
+  padding: 1rem 0;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 900px) {
+  .filtering-layout {
+    flex-direction: column;
+  }
+
+  .filter-sidebar {
+    width: 100%;
+    border-bottom: 1px solid #e5e7eb;
+    margin-bottom: 20px;
+  }
+
+  .profile-cards-container {
+    grid-template-columns: repeat(2, 260px); /* 2 columns */
+    gap: 6px;
+  }
+}
+
+@media (max-width: 600px) {
+  .profile-cards-container {
+    grid-template-columns: 1fr; /* 1 column on small screens */
+    gap: 6px;
+  }
 }

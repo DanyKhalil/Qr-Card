@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@tap-payments/card-sdk": "^1.0.2",
     "axios": "^1.12.2",
     "html5-qrcode": "^2.3.8",
     "lucide-react": "^0.559.0",

@@ -6,6 +6,7 @@ import CoverPhoto from './components/Profile/Cover Photo/CoverPhoto.jsx';
 import ProfilePhotoAndHeadline from './components/Profile/Profile Photo with Headline/ProfilePhotoAndHeadline.jsx';
 import TwoColumnLayout from './components/Profile/Two Column Layout/TwoColumnLayout.jsx';
 import Footer from './components/Footer/Footer.jsx';
+
 import UserProfile from './pages/UserProfile.jsx';
 import EditUserProfile from './pages/EditUserProfile.jsx';
 import Login from './pages/Login.jsx';
@@ -20,11 +21,16 @@ import AddUserPage from './pages/AddUserPage.jsx';
 import ProfileListPage from './components/Profile/ProfileList/ProfileListPage.jsx';
 import NotificationsPage from './components/Profile/Notifications/NotificationsPage.jsx';
 
+// Subscription pages
+import SubscribePage from './pages/SubscribePage.jsx';
+import SubscriptionSuccess from './pages/SubscriptionSuccess.jsx';
+
 function App() {
   return (    
     <Routes>
-      <Route path="/profile" element={<UserProfile/>}/> {/* for a user own profile */}
-      <Route path="/profile/:id" element={<UserProfile/>}/> {/* for another user profile */}
+      {/* Existing routes */}
+      <Route path="/profile" element={<UserProfile/>}/> 
+      <Route path="/profile/:id" element={<UserProfile/>}/> 
       <Route path="/edit-profile" element={<EditUserProfile/>}/>
       <Route path="/edit-profile/:id" element={<EditUserProfile/>}/>
       <Route path="/login" element={<Login/>}/>
@@ -38,8 +44,12 @@ function App() {
       <Route path="/admin" element={<Admin/>}/>
       <Route path="/admin/add-user" element={<AddUserPage/>}/>
       <Route path="/profile-list" element={<ProfileListPage />} />
+
+      {/* Subscription routes */}
+      <Route path="/subscribe" element={<SubscribePage />} />
+      <Route path="/subscription-success" element={<SubscriptionSuccess />} />
     </Routes>
   )
 }
 
-export default App
+export default App;
