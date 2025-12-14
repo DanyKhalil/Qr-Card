@@ -101,17 +101,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   btnFollow: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#6B63FF', // muted indigo
   },
   btnFollowBack: {
-    backgroundColor: '#007bff',
+    backgroundColor: '#BFA5FF', // soft lavender
   },
   btnUnfollow: {
     backgroundColor: 'white',
-    borderColor: '#f44336',
+    borderColor: '#6B63FF', // muted indigo
   },
   btnFriends: {
-    backgroundColor: '#f0ad4e',
+    backgroundColor: '#9C8DFF', // medium lavender
   },
   buttonText: {
     fontSize: 14,
@@ -121,8 +121,9 @@ const styles = StyleSheet.create({
     color: 'white',
   },
   textUnfollow: {
-    color: '#f44336',
+    color: '#6B63FF', // muted indigo
   },
 });
+
 
 export default FollowButton;

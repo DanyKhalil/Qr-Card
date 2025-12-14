@@ -1,4 +1,4 @@
-import { User, Profile, ProfileAnalytics } from '../models/index.js';
+import { User, Profile, ProfileAnalytics, Notification } from '../models/index.js';
 
 // ---- To get all th user profile visit for a single user ----
 export const getUserProfileAnalytics = async (req, res) => {
@@ -100,6 +100,23 @@ export const createProfileVisit = async (req, res) => {
       visitor_user_id: visitorUserId, // This will be null if no bearer token
       qr_scan: qr_scan
     });
+
+    if (visitorUserId) {
+      await Notification.create({
+        user_id: id, // The profile owner
+        sender_id: visitorUserId, // The visitor
+        type: "profile_visit",
+        title: "Profile Viewed",
+        message: `${req.user?.name || "Someone"} viewed your profile`,
+        metadata: {
+          visitor_id: visitorUserId,
+          qr_scan: qr_scan
+        },
+        is_read: false,
+        is_sent: false,
+        is_seen: false
+      });
+    }
 
     res.status(201).json(newVisit);
   } catch (error) {

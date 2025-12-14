@@ -177,7 +177,7 @@ const styles = StyleSheet.create({
         width: 100,
         fontSize: 14,
         fontWeight: '500',
-        color: '#444',
+        color: '#2E2B5F', // dark indigo
         textAlign: 'left',
         marginTop: 12,
     },
@@ -200,13 +200,13 @@ const styles = StyleSheet.create({
     input: {
         padding: 12,
         borderWidth: 1,
-        borderColor: '#FF8559',
+        borderColor: '#6C63FF', // indigo border
         borderRadius: 6,
         fontSize: 16,
-        color: '#555',
-        backgroundColor: '#fff',
+        color: '#2E2B5F', // dark indigo text
+        backgroundColor: '#F5F4FF', // light lavender background
         width: '100%',
-        maxWidth: '100%', 
+        maxWidth: '100%',
     },
     dateInput: {
         flexDirection: 'row',
@@ -214,19 +214,19 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         padding: 12,
         borderWidth: 1,
-        borderColor: '#FF8559',
+        borderColor: '#6C63FF', // indigo border
         borderRadius: 6,
-        backgroundColor: '#fff',
+        backgroundColor: '#F5F4FF', // light lavender background
         width: '100%',
         maxWidth: '100%',
     },
     dateText: {
         fontSize: 16,
-        color: '#555',
+        color: '#2E2B5F', // dark indigo text
         flex: 1,
     },
     placeholderText: {
-        color: '#999',
+        color: '#9A8CFF', // lighter lavender placeholder
     },
     columnInput: {
         width: '100%',
@@ -241,7 +241,7 @@ const styles = StyleSheet.create({
         alignSelf: 'stretch',
     },
     inputError: {
-        borderColor: '#ff4444',
+        borderColor: '#9A6CFF', // soft lavender-red for error
     },
     errorContainer: {
         minHeight: 20,
@@ -249,7 +249,7 @@ const styles = StyleSheet.create({
         width: '100%',
     },
     errorText: {
-        color: '#ff4444',
+        color: '#9A6CFF', // soft lavender-red for error text
         fontSize: 12,
         fontWeight: '500',
         lineHeight: 16,

@@ -1,3 +1,4 @@
+/* ---------------- Items Manager Container ---------------- */
 .items-manager {
   display: flex;
   flex-direction: column;
@@ -11,19 +12,20 @@
   align-items: flex-start;
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid #e5e5e5;
+  border-bottom: 1px solid #dcd7f7; /* soft lavender border */
 }
 
 .items-description {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  color: #666;
+  color: #6B63FF; /* muted indigo text */
   margin: 0;
   flex: 1;
   margin-right: 1rem;
 }
 
+/* Add item button */
 .add-item-btn {
-  background: #82c294;
+  background: #6B63FF; /* muted indigo */
   color: white;
   border: none;
   padding: 8px 16px;
@@ -36,37 +38,40 @@
 }
 
 .add-item-btn:hover {
-  background: #5ca571;
+  background: #4338ca; /* darker muted indigo */
 }
 
+/* Items list */
 .items-list {
   flex: 1;
-  /* overflow-y: auto; */
   margin-bottom: 1.5rem;
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  overflow-y: auto;
 }
 
 .empty-items {
   text-align: center;
   padding: 3rem;
-  color: #666;
+  color: #818cf8; /* soft indigo */
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
+/* Single item card */
 .item-card {
-  background: #fffafa;
-  border: 1px solid #e9ecef;
+  background: #F8F6FF; /* soft lavender */
+  border: 1px solid #D6C9FF; /* soft lavender border */
   border-radius: 8px;
   padding: 1.25rem;
   transition: box-shadow 0.2s;
 }
 
 .item-card:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(107, 99, 255, 0.15); /* muted indigo shadow */
 }
 
+/* Item header */
 .item-header {
   display: flex;
   justify-content: space-between;
@@ -82,7 +87,7 @@
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 1.1rem;
   font-weight: 600;
-  color: #333;
+  color: #4338ca; /* muted indigo */
   margin: 0 0 0.5rem 0;
 }
 
@@ -100,21 +105,22 @@
 }
 
 .item-visibility.visible {
-  background: #e8f5e8;
-  color: #2e7d32;
+  background: #E0DEFF; /* soft lavender */
+  color: #4338ca; /* muted indigo */
 }
 
 .item-visibility.hidden {
-  background: #fff3e0;
-  color: #ef6c00;
+  background: #F3EEFF; /* lighter lavender */
+  color: #6B63FF; /* muted indigo */
 }
 
 .item-date {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 0.8rem;
-  color: #666;
+  color: #6B63FF; /* muted indigo */
 }
 
+/* Item actions */
 .item-actions {
   display: flex;
   gap: 0.5rem;
@@ -122,74 +128,157 @@
 
 .item-action-btn {
   background: white;
-  border: 1px solid #dee2e6;
+  border: 1px solid #D6C9FF;
   border-radius: 6px;
   padding: 6px 8px;
   cursor: pointer;
   font-size: 0.9rem;
   transition: all 0.2s;
   min-width: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .item-action-btn:hover {
-  background: #f8f9fa;
-  border-color: #adb5bd;
+  background: #E0DEFF; /* soft lavender hover */
+  border-color: #6B63FF; /* muted indigo */
 }
 
-.edit-btn { background: #e3f2fd; border-color: #2196f3; }
-.delete-btn { background: #f3a7b2; border-color: #f44336; }
+/* Action button types */
+.edit-btn { background: #D6C9FF; border-color: #6B63FF; }
+.delete-btn { background: #F0E0FF; border-color: #A9A1FF; }
 
-.visibility-btn:hover { background: #e3f2fd; border-color: #2196f3; }
-.edit-btn:hover { background: #fff3e0; border-color: #ff9800; }
-.delete-btn:hover { background: #ea6d80; border-color: #f44336; }
+.edit-btn:hover { background: #A9A1FF; border-color: #4338ca; }
+.delete-btn:hover { background: #C9BEFF; border-color: #6B63FF; }
 
+/* Item values */
 .item-values {
-  border-top: 1px solid #e9ecef;
+  border-top: 1px solid #D6C9FF;
   padding-top: 1rem;
 }
 
 .values-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem;
 }
 
 .value-item {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.5rem;
+  min-height: 60px;
+}
+
+.value-item.image-value-item {
+  grid-column: span 2; /* Make image items take more space */
 }
 
 .value-label {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 0.85rem;
   font-weight: 600;
-  color: #555;
+  color: #4338ca; /* muted indigo */
+  flex-shrink: 0;
 }
 
 .value-content {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 0.9rem;
-  color: #333;
-  border: 1px solid #FF8559;
-  background-color: #fdf2ee;
+  color: #4338ca;
+  border: 1px solid #D6C9FF;
+  background-color: #F8F6FF; /* soft lavender */
   padding: 0.5rem;
   border-radius: 4px;
-  /* border: 1px solid #e9ecef; */
   word-break: break-word;
+  min-height: 40px;
+  flex-grow: 1;
+}
+
+/* Image preview styles */
+.image-value-content {
+  border: 1px solid #D6C9FF;
+  background-color: #F8F6FF;
+  border-radius: 4px;
+  padding: 0.5rem;
+  overflow: hidden;
+}
+
+.image-preview-wrapper {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.item-image-preview {
+  max-width: 100%;
+  max-height: 150px;
+  object-fit: contain;
+  border-radius: 4px;
+  background-color: #EDE6FF; /* soft lavender shade */
+}
+
+.image-fallback {
+  padding: 20px;
+  text-align: center;
+  color: #6B63FF; /* muted indigo */
+  font-size: 0.9rem;
+  background-color: #F8F6FF;
+  border-radius: 4px;
+  border: 1px dashed #D6C9FF;
+}
+
+.image-file-info {
+  margin-top: 8px;
+  padding: 4px 8px;
+  background-color: #E0DEFF;
+  border-radius: 3px;
+  font-size: 0.8rem;
+  color: #4338ca;
+  border: 1px solid #C9BEFF;
 }
 
 .no-values {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  color: #999;
+  color: #818cf8; /* soft indigo */
   font-style: italic;
   text-align: center;
   padding: 1rem;
+  grid-column: span 3;
 }
 
+/* Manager footer actions */
 .items-manager-actions {
   display: flex;
   justify-content: flex-end;
   padding-top: 1rem;
-  border-top: 1px solid #e5e5e5;
+  border-top: 1px solid #dcd7f7;
+  flex-shrink: 0;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .values-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .value-item.image-value-item {
+    grid-column: span 1;
+  }
+  
+  .item-image-preview {
+    max-height: 120px;
+  }
+  
+  .items-header {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .add-item-btn {
+    align-self: flex-start;
+  }
 }

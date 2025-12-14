@@ -54,21 +54,21 @@ const CustomContentTypeCard = ({
             onClick={() => setManageFieldsModalVisible(true)}
             title="Manage Fields"
           >
-            <IoListOutline size={20}/>
+            <IoListOutline size={20} color='blue'/>
           </button>
           <button 
             className="action-btn items-btn"
             onClick={() => setManageItemsModalVisible(true)}
             title="Manage Items"
           >
-            <IoAlbumsOutline size={20}/>
+            <IoAlbumsOutline size={20} color='blue'/>
           </button>
           <button 
             className="action-btn delete-btn"
             onClick={handleDelete}
             title="Delete Type"
           >
-            <IoTrash size={18}/>
+            <IoTrash size={18} color='darkred'/>
           </button>
         </div>
       </div>

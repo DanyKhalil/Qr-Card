@@ -41,6 +41,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 16px;
+  background-color: #d9dee4;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
   transition: all 0.2s ease;
@@ -62,7 +63,7 @@
 }
 
 .visitor-info:hover .visitor-name {
-  color: #FF8559;
+  color: #6366f1; /* replaced orange/green with muted indigo */
 }
 
 .visitor-avatar {
@@ -114,8 +115,8 @@
 .qr-badge {
   display: inline-block;
   padding: 2px 8px;
-  background: #e6fffa;
-  color: #234e52;
+  background: #ede9fe; /* light purple accent */
+  color: #4f46e5; /* indigo text */
   border-radius: 12px;
   font-size: 12px;
   font-weight: 500;
@@ -125,7 +126,7 @@
 
 .view-profile-btn {
   padding: 8px 16px;
-  background: linear-gradient(to right, #64A377, #A0E2B3);
+  background: linear-gradient(to right, #6366f1, #818cf8); /* replaced green gradient with indigo gradient */
   color: white;
   border: none;
   border-radius: 6px;
@@ -140,7 +141,7 @@
 
 .view-profile-btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(100, 163, 119, 0.3);
+  box-shadow: 0 4px 8px rgba(99, 102, 241, 0.3); /* indigo shadow */
 }
 
 .anonymous-visit {
@@ -162,7 +163,6 @@
   font-size: 16px;
 }
 
-
 @media (min-width: 1200px) {
   .profile-visits-table {
     max-width: 900px; 
@@ -172,7 +172,6 @@
     padding: 20px 24px; 
   }
 }
-
 
 @media (max-width: 768px) {
   .profile-visits-table {
@@ -198,7 +197,6 @@
   }
 }
 
-
 @media (max-width: 480px) {
   .visitor-info {
     flex-direction: column;
@@ -218,7 +216,6 @@
   }
 }
 
-/* Extra small screens */
 @media (max-width: 360px) {
   .profile-visits-table {
     padding: 12px;

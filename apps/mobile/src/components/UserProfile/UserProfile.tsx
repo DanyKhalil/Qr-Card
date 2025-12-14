@@ -12,6 +12,7 @@ import ProfileQrCode from './ProfileQrCode/ProfileQrCode';
 import { router } from 'expo-router';
 import CustomContentDisplay from './CustomContentDisplay/CustomContentDisplay';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import PopupComponent from './Popup/Popup';
 
 
 interface UserProfileProps {
@@ -47,6 +48,10 @@ const UserProfile = ({
         following,
         fetchUserProfile,
         QrCodeColor,
+        includeContact,
+        includeSocialMedia,
+        includeWebsite,
+        includeProfilePic,
         // saveContactFunction,
         // phoneNumber,
         // email,
@@ -135,7 +140,24 @@ const UserProfile = ({
                     <TitleAndLinks title="Connect" links={connectLinks}/>
                     {websiteLink && <TitleAndLinks title="Website" links={[{name:websiteLink, iconName:"web"}]}/>}
 
-                    <ProfileQrCode id={id} color={QrCodeColor}/>
+                    {loggedInUserId==id && (<ProfileQrCode id={id} color={QrCodeColor}
+                        name={userName}
+                        userLinks={
+                                (includeContact ? contactLinks : []).concat(
+                                    (includeSocialMedia ? connectLinks : [])).concat(
+                                        (includeWebsite ? [{name:websiteLink, iconName:"web"}].filter(link => link.name && String(link.name).trim() !== '') : [])
+                                )}
+                        image={includeProfilePic ? profilePic : null}
+                    />)}
+                    {loggedInUserId!=id && (
+                        <>
+                            <View style={{ height: 16 }} />
+                            <View style={{ height: 16 }} />
+                            <View style={{ height: 16 }} />
+                            <View style={{ height: 16 }} />
+                        </>
+                    )}
+                    {!loggedInUserId && (<PopupComponent />)}
                     
                     
                 </ScrollView>

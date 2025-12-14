@@ -6,34 +6,46 @@ import { profileFollowApi } from '../../../src/services/profileFollowApi';
 import { ActivityIndicator, View, Text } from 'react-native';
 
 export default function FollowersScreen() {
-  const { id } = useLocalSearchParams();
+  const { id, profiles: profilesJson } = useLocalSearchParams();
   const [profiles, setProfiles] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchFollowers = async () => {
+    if (profilesJson) {
       try {
-        setLoading(true);
-        const data = await profileFollowApi.getUserFollowStatus(id as string);
-        setProfiles(data.followers || []);
+        const parsedProfiles = JSON.parse(profilesJson as string);
+        setProfiles(parsedProfiles);
       } catch (err) {
-        console.error("Error fetching followers:", err);
-        setError("Failed to load followers");
-        setProfiles([]);
-      } finally {
-        setLoading(false);
+        console.error("Error parsing profiles:", err);
+        fetchFollowersFromApi();
       }
-    };
+    } else {
+      fetchFollowersFromApi();
+    }
+  }, [id, profilesJson]);
 
-    fetchFollowers();
-  }, [id]);
+  const fetchFollowersFromApi = async () => {
+    try {
+      setLoading(true);
+      const data = await profileFollowApi.getUserFollowStatus(id as string);
+      setProfiles(data.followers || []);
+    } catch (err) {
+      console.error("Error fetching followers:", err);
+      setError("Failed to load followers");
+      setProfiles([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (loading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color="#64A377" />
-        <Text>Loading followers...</Text>
+        <ActivityIndicator size="large" color="#547DAD" />
+        <Text style={{ marginTop: 10, color: "#547DAD" }}>
+          Loading followers...
+        </Text>
       </View>
     );
   }
@@ -41,7 +53,7 @@ export default function FollowersScreen() {
   if (error) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Text style={{ color: 'red' }}>{error}</Text>
+        <Text style={{ color: "#7A2E2E" }}>{error}</Text>
       </View>
     );
   }

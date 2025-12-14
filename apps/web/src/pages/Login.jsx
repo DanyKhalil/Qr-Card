@@ -71,7 +71,7 @@ const Form = () => {
       if (res.data.user.role === "admin") {
         navigate("/admin");
       } else {
-        navigate("/Filtering");
+        navigate("/profile");
       }
 
     } catch (err) {

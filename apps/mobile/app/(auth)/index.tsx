@@ -58,16 +58,17 @@ export default WelcomePage;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    display: 'flex',
-    flexDirection: 'column',
+    display: "flex",
+    flexDirection: "column",
     justifyContent: "space-between",
     alignItems: "center",
+    backgroundColor: "#E3E0F3", // secondary background
   },
 
   topImage: {
     width: "100%",
     height: undefined,
-    aspectRatio: 1.27, // adjust based on image ratio
+    aspectRatio: 1.27,
     resizeMode: "cover",
     marginTop: 0,
   },
@@ -79,32 +80,32 @@ const styles = StyleSheet.create({
   },
 
   title: {
-    fontSize: 32, // smaller than before
+    fontSize: 32,
     fontWeight: "700",
-    color: "#3a9a60",
+    color: "#547DAD", // primary
     textAlign: "center",
   },
 
   subtitle: {
-    fontSize: 18, // smaller
+    fontSize: 18,
     fontWeight: "500",
-    color: "#3a9a60",
+    color: "#547DAD", // primary
     textAlign: "center",
     marginTop: 5,
-    lineHeight: 24, // reduced
+    lineHeight: 24,
   },
 
   description: {
-    fontSize: 14, // smaller
-    color: "#333",
+    fontSize: 14,
+    color: "#2F3A4A", // neutral dark, softer than pure black
     textAlign: "center",
-    lineHeight: 20, // reduced
-    marginTop: 10, // reduced spacing
+    lineHeight: 20,
+    marginTop: 10,
     maxWidth: 400,
   },
 
   button: {
-    backgroundColor: "#3a9a60",
+    backgroundColor: "#547DAD", // primary
     paddingVertical: 12,
     paddingHorizontal: 35,
     borderRadius: 12,
@@ -113,7 +114,7 @@ const styles = StyleSheet.create({
   },
 
   buttonText: {
-    color: "white",
+    color: "#FFFFFF",
     fontSize: 14,
     fontWeight: "600",
   },
@@ -121,8 +122,9 @@ const styles = StyleSheet.create({
   bottomImage: {
     width: "100%",
     height: undefined,
-    aspectRatio: 2, // adjust based on image ratio
+    aspectRatio: 2,
     resizeMode: "cover",
     marginTop: 0,
   },
 });
+

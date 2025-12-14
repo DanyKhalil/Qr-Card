@@ -1,7 +1,8 @@
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const ScanTypeChart = ({ data, chartType }) => {
-    const COLORS = ['#FF8559', '#82C294'];
+    // Updated color palette
+    const COLORS = ['#6366f1', '#818cf8'];
     const maxValue = Math.max(...data.map(item => item.value || 0), 0);
 
     return (
@@ -22,18 +23,18 @@ const ScanTypeChart = ({ data, chartType }) => {
                                 dataKey="value"
                             >
                                 {data.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                 ))}
                             </Pie>
-                        <Tooltip />
+                            <Tooltip />
                         </PieChart>
                     ) : (
                         <BarChart data={data}>
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="name" />
-                            <YAxis domain={[0, maxValue * 1.1]} allowDecimals={false} />
+                            <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+                            <XAxis dataKey="name" tick={{ fill: '#4b5563', fontSize: 12 }} />
+                            <YAxis domain={[0, maxValue * 1.1]} allowDecimals={false} tick={{ fill: '#4b5563', fontSize: 12 }} />
                             <Tooltip />
-                            <Bar dataKey="value" fill="#82ca9d" />
+                            <Bar dataKey="value" fill="#6366f1" radius={[4, 4, 0, 0]} />
                         </BarChart>
                     )}
                 </ResponsiveContainer>

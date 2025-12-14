@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
         fontSize: 26,
         fontWeight: "700",
         marginBottom: 16,
-        color: "#333",
+        color: "#4F46E5", // Indigo
     },
 
     addressRow: {
@@ -86,3 +86,4 @@ const styles = StyleSheet.create({
         overflow: "hidden",
     },
 });
+

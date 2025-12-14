@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
     lineHeight: 32,
   },
   addTypeBtn: {
-    backgroundColor: '#82c294',
+    backgroundColor: '#6085b2ff',
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 8,

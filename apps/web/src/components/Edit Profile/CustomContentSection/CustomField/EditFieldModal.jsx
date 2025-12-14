@@ -18,11 +18,13 @@ const EditFieldModal = ({ visible, onClose, field, onUpdate, fieldTypes }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (fieldLabel.trim() && field) {
-      onUpdate(field.id, {
+      const updateData = {
         label: fieldLabel.trim(),
         type: fieldType,
         required: required
-      });
+      };
+
+      onUpdate(field.id, updateData);
       onClose();
     }
   };
@@ -43,7 +45,7 @@ const EditFieldModal = ({ visible, onClose, field, onUpdate, fieldTypes }) => {
             type="text"
             value={fieldLabel}
             onChange={(e) => setFieldLabel(e.target.value)}
-            placeholder="e.g., Cooking Time, Ingredients, Description"
+            placeholder="e.g., Cooking Time, Ingredients, Description, Profile Photo"
             className="custom-form-input"
             autoFocus
             required
@@ -68,7 +70,16 @@ const EditFieldModal = ({ visible, onClose, field, onUpdate, fieldTypes }) => {
                 {type.label}
               </option>
             ))}
+            {/* Add the image type option */}
+            <option value="image">Image Upload</option>
           </select>
+          
+          {/* Simple helper text for image type */}
+          {fieldType === 'image' && (
+            <div className="field-type-hint">
+              Users will be able to upload any image file.
+            </div>
+          )}
         </div>
 
         <div className="form-content">

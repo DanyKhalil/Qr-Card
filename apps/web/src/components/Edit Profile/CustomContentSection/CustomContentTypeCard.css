@@ -1,13 +1,13 @@
 .content-type-card {
-  border: 1px solid #FF8559;
-  background-color: #fdf2ee;
+  border: 1px solid #D6C9FF; /* soft lavender border */
+  background-color: #F8F6FF;  /* soft lavender background */
   border-radius: 8px;
   padding: 1.5rem;
   transition: box-shadow 0.2s;
 }
 
 .content-type-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(107, 99, 255, 0.15); /* subtle muted indigo shadow */
 }
 
 .content-type-header {
@@ -25,15 +25,15 @@
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 1.2rem;
   font-weight: 600;
-  color: #333;
+  color: #6B63FF; /* muted indigo title */
   margin: 0 0 0.25rem 0;
 }
 
 .type-slug {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 0.9rem;
-  color: #666;
-  background: #e9ecef;
+  color: #555;
+  background: #E0DEFF; /* soft lavender background for slug */
   padding: 2px 6px;
   border-radius: 4px;
   display: inline-block;
@@ -61,9 +61,9 @@
   color: #666;
   text-align: center;
   padding: 2px 6px;
-  background: white;
+  background: #F8F6FF; /* soft lavender stat background */
   border-radius: 12px;
-  border: 1px solid #dee2e6;
+  border: 1px solid #D6C9FF; /* soft lavender border */
 }
 
 .content-type-actions {
@@ -72,8 +72,8 @@
 }
 
 .action-btn {
-  background: white;
-  border: 1px solid #dee2e6;
+  background: #F8F6FF;  /* soft lavender button background */
+  border: 1px solid #D6C9FF; /* soft lavender border */
   border-radius: 6px;
   padding: 8px;
   cursor: pointer;
@@ -83,16 +83,16 @@
 }
 
 .action-btn:hover {
-  background: #f8f9fa;
-  border-color: #adb5bd;
+  background: #E0DEFF; /* hover soft lavender */
+  border-color: #6B63FF; /* muted indigo border on hover */
 }
 
-.edit-btn { background: #e3f2fd; border-color: #2196f3; }
-.fields-btn { background: #9cdaa7; border-color: #9c27b0; }
-.items-btn { background: #c0dafa; border-color: #4caebb; }
-.delete-btn { background: #f3a7b2; border-color: #f44336; }
+.edit-btn { background: #D6C9FF; border-color: #6B63FF; color: #fff; }
+.fields-btn { background: #C9BEFF; border-color: #6B63FF; color: #fff; }
+.items-btn { background: #E0DEFF; border-color: #6B63FF; color: #fff; }
+.delete-btn { background: #FFB3FF; border-color: #D47EFF; color: #fff; }
 
-.edit-btn:hover { background: #e3f2fd; border-color: #2196f3; }
-.fields-btn:hover { background: #78d688; border-color: #9c27b0; }
-.items-btn:hover { background: #a0c3ed; border-color: #4caebb; }
-.delete-btn:hover { background: #ea6d80; border-color: #f44336; }
+.edit-btn:hover { background: #6B63FF; border-color: #6B63FF; }
+.fields-btn:hover { background: #6B63FF; border-color: #6B63FF; }
+.items-btn:hover { background: #6B63FF; border-color: #6B63FF; }
+.delete-btn:hover { background: #D47EFF; border-color: #D47EFF; }

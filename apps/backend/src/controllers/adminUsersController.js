@@ -21,7 +21,7 @@ export const getAllUsers = async (req, res) => {
             ],
           }
         : {},
-      attributes: ["id", "name", "email", "role", "verified"],
+      attributes: ["id", "name", "email", "role", "verified", "visibility"],
       include: [
         {
           model: Profile,
@@ -82,7 +82,7 @@ export const createUser = async (req, res) => {
 export const updateUser = async (req, res) => {
   try {
     const userId = req.params.id;
-    const { name, email, role, verified } = req.body;
+    const { name, email, role, verified, visibility } = req.body; // Added visibility
 
     const user = await User.findByPk(userId);
     if (!user) return res.status(404).json({ error: "User not found" });
@@ -99,6 +99,7 @@ export const updateUser = async (req, res) => {
     user.email = email || user.email;
     user.role = role || user.role;
     if (verified !== undefined) user.verified = verified;
+    if (visibility !== undefined) user.visibility = visibility; // Added visibility update
 
     await user.save();
     res.json({ message: "User updated successfully", user });

@@ -1,412 +1,443 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Dimensions, Alert, Linking} from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  StyleSheet,
+  Alert,
+  Linking,
+  Image as RNImage,
+  ActivityIndicator,
+} from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
+import * as ImagePicker from 'expo-image-picker';
+import { WebView } from 'react-native-webview';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import jsQR from 'jsqr';
 
-const Camera = () => {
-  const [scanResult, setScanResult] = useState(null);
+const CameraComponent = () => {
+  const [scanResult, setScanResult] = useState<string | null>(null);
   const [cameraActive, setCameraActive] = useState(false);
   const [scanned, setScanned] = useState(false);
   const [permission, requestPermission] = useCameraPermissions();
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [scanningImage, setScanningImage] = useState(false);
   const cameraRef = useRef(null);
-  const scanResultRef = useRef(null);
   const router = useRouter();
 
+  const [webviewImage, setWebviewImage] = useState<string | null>(null);
+
   useEffect(() => {
-    if (!permission) {
-      requestPermission();
-    }
-  }, [permission]);
+    if (!permission) requestPermission();
+  }, []);
 
   const activateScanner = () => {
     setCameraActive(true);
     setScanResult(null);
     setScanned(false);
+    setUploadedImage(null);
   };
 
   const deactivateScanner = () => {
     setCameraActive(false);
-    setScanResult(null);
-    setScanned(false);
   };
 
-  const handleBarCodeScanned = ({ data }) => {
+  const handleBarCodeScanned = ({ type, data }) => {
     if (!scanned) {
       setScanned(true);
       setScanResult(data);
       setCameraActive(false);
-      
-      if (isValidUrl(data)) {
-        handleManualRedirect(data);
-      }
+
+      Alert.alert(
+        'QR Code Scanned!',
+        `Type: ${type}\nData: ${data}`,
+        [
+          {
+            text: 'Open URL',
+            onPress: () => {
+              if (isValidUrl(data)) handleManualRedirect(data);
+            },
+          },
+          {
+            text: 'Scan Again',
+            onPress: () => {
+              setScanned(false);
+              setCameraActive(true);
+            },
+          },
+          { text: 'Cancel', style: 'cancel' },
+        ]
+      );
     }
   };
 
-  const isValidUrl = (string) => {
+  const isValidUrl = (string: string) => {
     try {
-        const expoUrlPattern = /^(https?:\/\/|exp:\/\/)/i;
-        
-        if (string.startsWith('/--/') || string.startsWith('exp://')) {
-        return true;
-        }
-        
-        return expoUrlPattern.test(string);
-    } catch (error) {
-        console.error('Invalid URL format:', error);
-        return false;
+      return (
+        string.startsWith('http://') ||
+        string.startsWith('https://') ||
+        string.startsWith('exp://') ||
+        string.startsWith('/--/') ||
+        !!new URL(string)
+      );
+    } catch {
+      return false;
     }
   };
 
-  const handleManualRedirect = (url = scanResult) => {
-    if (url && isValidUrl(url)) {
-        
-        if (url.startsWith('exp://') || url.startsWith('/--/')) {
-        let path = url;
-        
-        if (url.startsWith('exp://')) {
-            const match = url.match(/\/--\/(.+)/);
-            path = match ? match[1] : url;
-        } else if (url.startsWith('/--/')) {
-            path = url.substring(4);
-        }
-        
-        path = path.replace(/^[^/]+\/\//, '');
-        path = path.replace(/^[^/]+\//, '');
-        
-        const separator = path.includes('?') ? '&' : '?';
-        const pathWithParam = `/${path}${separator}qrScan=true`;
-        
-        
-        router.push(pathWithParam);
-        
-        } else if (url.startsWith('http')) {
-        const separator = url.includes('?') ? '&' : '?';
-        const urlWithParam = `${url}${separator}qrScan=true`;
-        Linking.openURL(urlWithParam).catch(err =>
-            Alert.alert('Error', 'Cannot open URL: ' + err.message)
-        );
-        }
+  const handleManualRedirect = (url: string) => {
+    if (!url) return;
+
+    if (url.startsWith('exp://') || url.startsWith('/--/')) {
+      let path = url;
+
+      if (url.startsWith('exp://')) {
+        const match = url.match(/\/--\/(.+)/);
+        path = match ? match[1] : url;
+      } else if (url.startsWith('/--/')) {
+        path = path.substring(4);
+      }
+
+      path = path.replace(/^[^/]+\/\//, '').replace(/^[^/]+\//, '');
+      const separator = path.includes('?') ? '&' : '?';
+      router.push(`/${path}${separator}qrScan=true`);
     } else {
-        Alert.alert('Invalid URL', 'The scanned QR code does not contain a valid URL');
+      Linking.openURL(url).catch((err) =>
+        Alert.alert('Error', 'Cannot open URL: ' + err.message)
+      );
     }
   };
 
-  const handleScanAgain = () => {
-    setScanResult(null);
-    setScanned(false);
-    activateScanner();
+  const pickImage = async () => {
+      try {
+          const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+          if (status !== 'granted') {
+              Alert.alert('Permission required', 'Please grant permission to access your photo library.');
+              return;
+          }
+
+          const result = await ImagePicker.launchImageLibraryAsync({
+              mediaTypes: ImagePicker.MediaTypeOptions.Images, // ✅ fixed
+              allowsEditing: false,
+              quality: 1,
+              base64: true,
+          });
+
+          if (!result.canceled && result.assets?.[0]) {
+              const selectedImage = result.assets[0];
+              setUploadedImage(selectedImage.uri);
+              setWebviewImage(selectedImage.base64!);
+              setScanningImage(true);
+          }
+      } catch (error) {
+          console.error('Error picking image:', error);
+          Alert.alert('Error', 'Failed to pick image. ' + error.message);
+      }
+  };
+
+  const clearUploadedImage = () => {
+    setUploadedImage(null);
+    setScanningImage(false);
+    setWebviewImage(null);
+  };
+
+  /** HTML that runs inside WebView */
+  const webviewHTML = `
+    <html>
+      <body style="margin:0;padding:0;overflow:hidden;background:black;">
+        <canvas id="canvas"></canvas>
+        <script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.js"></script>
+        <script>
+          const imgBase64 = "${webviewImage}";
+          const img = new Image();
+          img.src = "data:image/jpeg;base64," + imgBase64;
+          img.onload = () => {
+            const canvas = document.getElementById("canvas");
+            const ctx = canvas.getContext("2d");
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const code = jsQR(imageData.data, canvas.width, canvas.height);
+            if (code) {
+              window.ReactNativeWebView.postMessage(JSON.stringify({
+                type: "QR_RESULT",
+                data: code.data
+              }));
+            } else {
+              window.ReactNativeWebView.postMessage(JSON.stringify({
+                type: "NO_QR"
+              }));
+            }
+          };
+        </script>
+      </body>
+    </html>
+  `;
+
+  const handleWebViewMessage = (event) => {
+    const message = JSON.parse(event.nativeEvent.data);
+
+    if (message.type === 'QR_RESULT') {
+      setScanningImage(false);
+      setScanResult(message.data);
+      Alert.alert('QR Code Found!', message.data);
+    } else if (message.type === 'NO_QR') {
+      setScanningImage(false);
+      Alert.alert('No QR Code Found', 'The selected image does not contain a QR code.');
+    }
   };
 
   if (!permission) {
     return (
-      <View style={styles.container}>
-        <Text>Requesting camera permission...</Text>
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#64A377" />
+        <Text>Requesting permissions...</Text>
       </View>
     );
   }
 
   if (!permission.granted) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.message}>Camera permission is required to scan QR codes</Text>
-        <TouchableOpacity style={styles.button} onPress={requestPermission}>
-          <Text style={styles.buttonText}>Grant Permission</Text>
+      <View style={styles.permissionContainer}>
+        <Ionicons name="camera-off" size={64} color="#999" />
+        <Text style={styles.permissionText}>Camera access is required</Text>
+        <TouchableOpacity style={styles.permissionButton} onPress={requestPermission}>
+          <Text style={styles.permissionButtonText}>Grant Permission</Text>
         </TouchableOpacity>
       </View>
     );
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-      <View style={styles.scannerHeader}>
-        <Text style={styles.title}>QR Code Scanner</Text>
-        <Text style={styles.subtitle}>Position QR code within the frame to scan</Text>
-      </View>
+    <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        {/* Header */}
+        <View style={styles.header}>
+          <Ionicons name="qr-code" size={48} color="#7480d7ff" />
+          <Text style={styles.title}>QR Code Scanner</Text>
+          <Text style={styles.subtitle}>Scan QR codes with your camera or images</Text>
+        </View>
 
-      <View style={styles.cameraViewport}>
-        {cameraActive ? (
-          <CameraView
-            ref={cameraRef}
-            style={styles.camera}
-            facing="back"
-            onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
-            barcodeScannerSettings={{
-              barcodeTypes: ['qr']
-            }}
-          >
-            <View style={styles.scanFrame}>
-              <View style={[styles.frameCorner, styles.topLeft]} />
-              <View style={[styles.frameCorner, styles.topRight]} />
-              <View style={[styles.frameCorner, styles.bottomLeft]} />
-              <View style={[styles.frameCorner, styles.bottomRight]} />
-            </View>
-          </CameraView>
-        ) : (
-          <View style={styles.cameraPlaceholder}>
-            <Ionicons name="camera-outline" size={64} color="#666" />
-            <Text style={styles.placeholderText}>Camera inactive</Text>
-          </View>
-        )}
-      </View>
-
-      <View style={styles.scannerControls}>
-        {!cameraActive ? (
-          <TouchableOpacity style={[styles.button, styles.primaryButton]} onPress={activateScanner}>
-            <Text style={styles.buttonText}>Start Scanning</Text>
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity style={[styles.button, styles.secondaryButton]} onPress={deactivateScanner}>
-            <Text style={styles.buttonText}>Stop Camera</Text>
-          </TouchableOpacity>
-        )}
-      </View>
-
-      {scanResult && (
-        <View style={styles.scanResult} ref={scanResultRef}>
-          <Text style={styles.successTitle}>Scan Successful!</Text>
-          <View style={styles.resultUrl}>
-            <Text style={styles.urlLabel}>Detected URL:</Text>
-            <Text style={styles.urlText}>{scanResult}</Text>
-          </View>
-          <View style={styles.resultActions}>
-            <TouchableOpacity 
-              style={[styles.button, styles.primaryButton, !isValidUrl(scanResult) && styles.disabledButton]}
-              onPress={() => handleManualRedirect()}
-              disabled={!isValidUrl(scanResult)}
+        {/* Camera / Image */}
+        <View style={styles.cameraContainer}>
+          {cameraActive ? (
+            <CameraView
+              ref={cameraRef}
+              style={styles.camera}
+              facing="back"
+              onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
+              barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
             >
-              <Text style={styles.buttonText}>Visit Website</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={[styles.button, styles.outlineButton]} onPress={handleScanAgain}>
-              <Text style={styles.outlineButtonText}>Scan Again</Text>
-            </TouchableOpacity>
-          </View>
-          {!isValidUrl(scanResult) && (
-            <Text style={styles.errorMessage}>Invalid URL detected</Text>
+              <View style={styles.scanOverlay}>
+                <View style={styles.scanFrame} />
+                <Text style={styles.scanText}>Align QR code within frame</Text>
+              </View>
+            </CameraView>
+          ) : uploadedImage ? (
+            <View style={styles.imageContainer}>
+              <RNImage source={{ uri: uploadedImage }} style={styles.image} />
+              {scanningImage && (
+                <View style={styles.scanningOverlay}>
+                  <ActivityIndicator size="large" color="#64A377" />
+                  <Text style={styles.scanningText}>Processing image...</Text>
+                </View>
+              )}
+            </View>
+          ) : (
+            <View style={styles.cameraPlaceholder}>
+              <Ionicons name="camera-outline" size={64} color="#666" />
+              <Text style={styles.placeholderText}>Camera is off</Text>
+            </View>
           )}
         </View>
-      )}
 
-      <View style={styles.scannerInstructions}>
-        <Text style={styles.instructionsTitle}>How to scan:</Text>
-        <View style={styles.instructionsList}>
-          <Text style={styles.instructionItem}>• Ensure good lighting</Text>
-          <Text style={styles.instructionItem}>• Hold steady and align QR code within frame</Text>
-          <Text style={styles.instructionItem}>• Keep appropriate distance from camera</Text>
+        {webviewImage && (
+          <WebView
+            source={{ html: webviewHTML }}
+            onMessage={handleWebViewMessage}
+            style={{ height: 0, width: 0, opacity: 0 }}
+          />
+        )}
+
+        {/* Buttons */}
+        <View style={styles.controls}>
+          {!cameraActive ? (
+            <TouchableOpacity style={styles.primaryButton} onPress={activateScanner}>
+              <Ionicons name="camera" size={24} color="white" />
+              <Text style={styles.buttonText}>Start Scanning</Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity style={styles.secondaryButton} onPress={deactivateScanner}>
+              <Ionicons name="camera-off" size={24} color="white" />
+              <Text style={styles.buttonText}>Stop Scanning</Text>
+            </TouchableOpacity>
+          )}
+
+          <TouchableOpacity style={styles.uploadButton} onPress={pickImage}>
+            <Ionicons name="image" size={24} color="white" />
+            <Text style={styles.buttonText}>Upload Image</Text>
+          </TouchableOpacity>
         </View>
-      </View>
-    </ScrollView>
+
+        {uploadedImage && !scanningImage && (
+          <TouchableOpacity style={styles.clearButton} onPress={clearUploadedImage}>
+            <Ionicons name="close-circle" size={20} color="#666" />
+            <Text style={styles.clearButtonText}>Clear Image</Text>
+          </TouchableOpacity>
+        )}
+
+        {/* QR Result */}
+        {scanResult && (
+          <View style={styles.resultContainer}>
+            <Ionicons name="checkmark-circle" size={40} color="#28a745" />
+            <Text style={styles.resultTitle}>QR Code Detected!</Text>
+            <View style={styles.resultBox}>
+              <Text style={styles.resultLabel}>Content:</Text>
+              <Text style={styles.resultText}>{scanResult}</Text>
+            </View>
+
+            {isValidUrl(scanResult) && (
+              <TouchableOpacity
+                style={styles.urlButton}
+                onPress={() => handleManualRedirect(scanResult)}
+              >
+                <Ionicons name="open-outline" size={20} color="white" />
+                <Text style={styles.urlButtonText}>Open URL</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        )}
+      </ScrollView>
+    </View>
   );
 };
 
+/* ----------------------------- STYLES ------------------------------ */
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  contentContainer: {
-    padding: 20,
-  },
-  scannerHeader: {
-    alignItems: 'center',
-    marginBottom: 30,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 14,
-    color: '#666',
-    textAlign: 'center',
-  },
-  cameraViewport: {
-    height: 400,
-    backgroundColor: '#000',
+  container: { flex: 1, backgroundColor: '#F5F3FF' }, // soft lavender background
+  scrollContent: { padding: 20 },
+
+  loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+
+  permissionContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 },
+  permissionText: { fontSize: 18, color: '#4B4C7A', marginTop: 16, marginBottom: 24 }, // muted indigo
+  permissionButton: { backgroundColor: '#C8C1F9', paddingHorizontal: 24, paddingVertical: 12, borderRadius: 8 },
+  permissionButtonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+
+  header: { alignItems: 'center', marginBottom: 30 },
+  title: { fontSize: 28, fontWeight: 'bold', color: '#4B4C7A', marginTop: 12 }, // muted indigo
+  subtitle: { fontSize: 16, color: '#6B6C8A', marginTop: 4 }, // lighter muted indigo
+
+  cameraContainer: {
+    height: 350,
+    backgroundColor: '#EDE9FE', // soft lavender
     borderRadius: 12,
     overflow: 'hidden',
     marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 20,
-    elevation: 5,
   },
-  camera: {
-    flex: 1,
+  camera: { flex: 1 },
+
+  scanOverlay: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  scanFrame: { width: 250, height: 250, borderWidth: 2, borderColor: '#C8C1F9' }, // muted indigo frame
+  scanText: {
+    color: '#4B4C7A',
+    marginTop: 20,
+    fontSize: 16,
+    backgroundColor: 'rgba(245,243,255,0.7)', // soft lavender overlay
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
   },
-  cameraPlaceholder: {
-    flex: 1,
-    backgroundColor: '#1a1a1a',
+
+  imageContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#EDE9FE' },
+  image: { width: '100%', height: '100%' },
+  scanningOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(75,76,122,0.7)', // muted indigo overlay
     justifyContent: 'center',
     alignItems: 'center',
   },
-  placeholderText: {
-    color: '#666',
-    marginTop: 16,
-    fontSize: 16,
-  },
-  scanFrame: {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: [{ translateX: -125 }, { translateY: -125 }],
-    width: 250,
-    height: 250,
-    borderWidth: 2,
-    borderColor: 'transparent',
-  },
-  frameCorner: {
-    position: 'absolute',
-    width: 30,
-    height: 30,
-    borderColor: '#00ff88',
-    borderWidth: 3,
-  },
-  topLeft: {
-    top: 0,
-    left: 0,
-    borderTopWidth: 3,
-    borderLeftWidth: 3,
-    borderRightWidth: 0,
-    borderBottomWidth: 0,
-  },
-  topRight: {
-    top: 0,
-    right: 0,
-    borderTopWidth: 3,
-    borderRightWidth: 3,
-    borderLeftWidth: 0,
-    borderBottomWidth: 0,
-  },
-  bottomLeft: {
-    bottom: 0,
-    left: 0,
-    borderBottomWidth: 3,
-    borderLeftWidth: 3,
-    borderTopWidth: 0,
-    borderRightWidth: 0,
-  },
-  bottomRight: {
-    bottom: 0,
-    right: 0,
-    borderBottomWidth: 3,
-    borderRightWidth: 3,
-    borderTopWidth: 0,
-    borderLeftWidth: 0,
-  },
-  scannerControls: {
+  scanningText: { color: 'white', marginTop: 12, fontSize: 16 },
+
+  cameraPlaceholder: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#D8D4F2' }, // soft lavender
+  placeholderText: { color: '#4B4C7A', marginTop: 12, fontSize: 16 },
+
+  controls: { flexDirection: 'row', justifyContent: 'center', gap: 12, marginBottom: 20, flexWrap: 'wrap' },
+
+  primaryButton: {
+    backgroundColor: '#C8C1F9', // muted indigo
+    flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
-  },
-  button: {
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,
-    alignItems: 'center',
+    minWidth: 160,
     justifyContent: 'center',
-    minWidth: 150,
-  },
-  primaryButton: {
-    backgroundColor: '#64A377',
+    gap: 8,
   },
   secondaryButton: {
-    backgroundColor: 'coral',
-  },
-  outlineButton: {
-    backgroundColor: 'transparent',
-    borderWidth: 2,
-    borderColor: '#64A377',
-  },
-  disabledButton: {
-    backgroundColor: '#ccc',
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  outlineButtonText: {
-    color: '#64A377',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  scanResult: {
-    backgroundColor: '#f8f9fa',
-    borderWidth: 1,
-    borderColor: '#e9ecef',
-    borderRadius: 8,
-    padding: 20,
-    marginBottom: 20,
-  },
-  successTitle: {
-    color: '#28a745',
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 16,
-    textAlign: 'center',
-  },
-  resultUrl: {
-    backgroundColor: 'white',
-    padding: 12,
-    borderRadius: 6,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: '#dee2e6',
-  },
-  urlLabel: {
-    fontWeight: '600',
-    marginBottom: 8,
-    color: '#333',
-  },
-  urlText: {
-    color: '#495057',
-    fontFamily: 'monospace',
-    fontSize: 14,
-    lineHeight: 18,
-  },
-  resultActions: {
+    backgroundColor: '#9A92E8', // deeper muted indigo
     flexDirection: 'row',
-    gap: 12,
-    justifyContent: 'center',
-    flexWrap: 'wrap',
-  },
-  errorMessage: {
-    color: '#dc3545',
-    marginTop: 12,
-    fontSize: 14,
-    textAlign: 'center',
-  },
-  scannerInstructions: {
-    backgroundColor: '#e4ffeb',
-    borderWidth: 1,
-    borderColor: '#87f2a4',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
     borderRadius: 8,
-    padding: 16,
-    marginTop: 20,
+    minWidth: 160,
+    justifyContent: 'center',
+    gap: 8,
   },
-  instructionsTitle: {
-    color: '#47855B',
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 12,
+  uploadButton: {
+    backgroundColor: '#A89EE8', // soft lavender button
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+    minWidth: 160,
+    justifyContent: 'center',
+    gap: 8,
   },
-  instructionsList: {
-  },
-  instructionItem: {
-    color: '#333',
-    fontSize: 14,
-    marginBottom: 6,
-    lineHeight: 20,
-  },
-  message: {
-    textAlign: 'center',
+  buttonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+
+  clearButton: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', padding: 12, marginBottom: 20 },
+  clearButtonText: { color: '#4B4C7A', fontSize: 14 },
+
+  resultContainer: {
+    backgroundColor: '#F5F3FF', // soft lavender
+    borderRadius: 12,
+    padding: 20,
+    alignItems: 'center',
     marginBottom: 20,
-    color: '#666',
-    fontSize: 16,
+    borderWidth: 1,
+    borderColor: '#C8C1F9', // muted indigo border
   },
+  resultTitle: { fontSize: 18, fontWeight: '600', color: '#4B4C7A', marginTop: 12, marginBottom: 16 },
+  resultBox: {
+    backgroundColor: 'white',
+    padding: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#D2C9F0',
+    width: '100%',
+    marginBottom: 16,
+  },
+  resultLabel: { fontWeight: '600', color: '#4B4C7A', marginBottom: 8 },
+  resultText: { color: '#6B6C8A', fontSize: 14, lineHeight: 20 },
+
+  urlButton: {
+    backgroundColor: '#C8C1F9',
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 6,
+    gap: 8,
+  },
+  urlButtonText: { color: '#fff', fontWeight: '600' },
 });
 
-export default Camera;
+
+export default CameraComponent;

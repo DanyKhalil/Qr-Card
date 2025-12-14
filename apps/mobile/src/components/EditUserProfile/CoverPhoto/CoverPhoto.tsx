@@ -70,7 +70,7 @@ const CoverPhoto = ({
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: '#f8f9fa',
+        backgroundColor: '#EDE9FE', // Soft Lavender
         overflow: 'hidden',
         position: 'relative',
     },
@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
     },
     defaultCover: {
         width: '100%',
-        backgroundColor: '#e9ecef',
+        backgroundColor: '#DDD6FE', // Slightly deeper lavender
         justifyContent: 'center',
         alignItems: 'center',
     },
@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
         gap: 6,
     },
     defaultCoverText: {
-        color: '#6c757d',
+        color: '#4F46E5', // Indigo
         fontSize: 16,
         fontWeight: '500',
     },
@@ -122,10 +122,10 @@ const styles = StyleSheet.create({
         elevation: 4,
     },
     editButton: {
-        backgroundColor: '#4CAF50',
+        backgroundColor: '#6366F1', // Indigo
     },
     removeButton: {
-        backgroundColor: '#FF6B6B',
+        backgroundColor: '#A78BFA', // Soft Lavender
     },
 });
 

@@ -1,6 +1,7 @@
 import Footer from '../Footer/Footer.jsx'
 import Header from '../Header/Header.jsx'
 import CoverPhoto from './Cover Photo/CoverPhoto.jsx'
+import PopupComponent from './Popup/PopupComponent.jsx'
 import ProfilePhotoAndHeadline from './Profile Photo with Headline/ProfilePhotoAndHeadline.jsx'
 import TwoColumnLayout from './Two Column Layout/TwoColumnLayout.jsx'
 
@@ -48,7 +49,7 @@ const UserProfile = ({
       }
   };
 
-  let activeIndex = getCurrentUser()?.id === id ? 2 : null;
+  let activeIndex = getCurrentUser()?.id === id ? 3 : null;
 
   return (    
     <div>
@@ -85,6 +86,7 @@ const UserProfile = ({
               includeWebsite={includeWebsite}
       >
       </TwoColumnLayout>
+      {!getCurrentUser()?.id && (<PopupComponent />)}
       <Footer />
     </div>
   )

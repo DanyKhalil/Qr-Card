@@ -1,22 +1,17 @@
+/* Original card container */
 .custom-card {
     background-color: #ffffff;
     border-radius: 12px;
     padding: 20px;
-    /* box-shadow: 0 4px 12px rgba(0,0,0,0.1); */
-    /* transition: transform 0.2s ease, box-shadow 0.2s ease; */
-    width: 100%; /* full width of container */
+    width: 100%;
 }
 
-.custom-card:hover {
-    /* transform: translateY(-4px); */
-    /* box-shadow: 0 6px 16px rgba(0,0,0,0.15); */
-}
-
+/* Title */
 .custom-card-title {
-    font-size: 1.6rem;
+    font-size: 1.4rem;
     font-weight: bold;
     margin-bottom: 15px;
-    color: #333333;
+    color: #2c2f48; /* muted deep indigo */
 }
 
 .custom-card-fields {
@@ -25,37 +20,273 @@
     gap: 10px;
 }
 
+/* FIELD BOX */
 .custom-card-field {
     display: flex;
     flex-direction: column;
-    border: 1px solid #FF8559;
-    /* background-color: #fdf2ee; */
+    border: 1px solid #b0b3d6; /* soft muted indigo border */
     padding: 10px 15px;
     border-radius: 8px;
 }
 
+/* special case for image field */
+.custom-card-field.image-field {
+    background-color: #ebebf8; /* muted lavender-indigo tint */
+    padding: 15px;
+}
+
+/* LABEL */
 .field-label {
     font-weight: 600;
-    color: #4CAF50; 
+    color: #3AAFA9; /* teal accent */
     margin-bottom: 3px;
 }
 
+.image-field .field-label {
+    margin-bottom: 8px;
+}
+
+/* TEXT VALUE */
 .field-value {
-    color: #333333;
+    color: #2c2f48; /* muted dark indigo */
     word-break: break-word;
 }
 
-/* Responsive adjustments */
+/* IMAGE DISPLAY */
+.image-value-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.field-image {
+    max-width: 100%;
+    max-height: 200px;
+    border-radius: 6px;
+    border: 1px solid #b0b3d6; /* muted indigo border */
+    object-fit: contain;
+    background-color: white;
+    box-shadow: 0 2px 6px rgba(59, 68, 115, 0.12); /* muted indigo shadow */
+}
+
+.image-fallback {
+    padding: 12px;
+    background-color: #ebebf8; /* muted lavender */
+    border: 1px dashed #b0b3d6;
+    border-radius: 6px;
+    color: #2c2f48;
+    font-size: 0.9rem;
+    text-align: center;
+    width: 100%;
+    font-style: italic;
+}
+
+/* -------------------- NEW CARD LAYOUT -------------------- */
+
+.custom-card-layout {
+    background-color: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06); /* softer neutral shadow */
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.custom-card-layout:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(59, 68, 115, 0.15); /* muted indigo shadow */
+}
+
+/* -------------------- IMAGE SECTION -------------------- */
+
+.card-image-section {
+    position: relative;
+    background-color: #f2f2f9; /* light muted indigo */
+    display: flex;
+    flex-direction: column;
+}
+
+.image-carousel {
+    position: relative;
+    width: 100%;
+    height: 220px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.carousel-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    background-color: #f2f2f9;
+}
+
+/* ---- Carousel Arrow Buttons ---- */
+.carousel-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(255, 255, 255, 0.9);
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    transition: all 0.2s ease;
+    z-index: 2;
+}
+
+.carousel-arrow:hover {
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(59, 68, 115, 0.15); /* muted indigo */
+    transform: translateY(-50%) scale(1.1);
+}
+
+.carousel-arrow svg {
+    stroke: #2c2f48; /* muted indigo-neutral */
+}
+
+.carousel-arrow-left { left: 16px; }
+.carousel-arrow-right { right: 16px; }
+
+/* ---- Indicators ---- */
+.image-indicators {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 0;
+    background-color: #fff;
+}
+
+.indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #b0b3c6; /* muted gray-indigo */
+    cursor: pointer;
+    border: none;
+    padding: 0;
+    transition: all 0.3s ease;
+}
+
+.indicator:hover {
+    background-color: #8c8fa5;
+    transform: scale(1.2);
+}
+
+.indicator.active {
+    background-color: #3AAFA9; /* teal accent remains */
+    transform: scale(1.2);
+}
+
+/* -------------------- CONTENT -------------------- */
+
+.card-content {
+    padding: 24px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.card-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #2c2f48; /* muted indigo */
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid #e5e5f5; /* subtle muted indigo border */
+}
+
+/* -------------------- FIELDS -------------------- */
+
+.card-fields {
+    flex: 1;
+}
+
+.card-field {
+    padding: 12px 0;
+    border-bottom: 1px solid #e5e5f5;
+}
+
+.card-field:last-child {
+    border-bottom: none;
+}
+
+.card-field .field-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.card-field .field-label {
+    font-weight: 600;
+    color: #589794; /* teal */
+    font-size: 0.95rem;
+    min-width: 120px;
+    flex-shrink: 0;
+}
+
+.card-field .field-value {
+    color: #2c2f48;
+    text-align: right;
+    word-break: break-word;
+    flex: 1;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+/* -------------------- RESPONSIVE -------------------- */
+
 @media (max-width: 768px) {
-    .custom-card {
-        padding: 15px;
+    .custom-card { padding: 15px; }
+    .custom-card-title { font-size: 1.4rem; }
+
+    .custom-card-field { padding: 8px 12px; }
+    .custom-card-field.image-field { padding: 12px; }
+    .field-image { max-height: 150px; }
+
+    .custom-card-layout { border-radius: 12px; }
+    .card-content { padding: 20px 16px; }
+    .card-title { font-size: 1.4rem; }
+
+    .image-carousel { height: 200px; }
+    .carousel-arrow { width: 36px; height: 36px; }
+
+    .card-field .field-header {
+        flex-direction: column;
+        align-items: flex-start;
     }
 
-    .custom-card-title {
-        font-size: 1.4rem;
-    }
+    .card-field .field-label { min-width: auto; }
+    .card-field .field-value { text-align: left; }
+}
 
-    .custom-card-field {
-        padding: 8px 12px;
-    }
+@media (max-width: 480px) {
+    .card-title { font-size: 1.3rem; }
+    .image-carousel { height: 180px; }
+
+    .indicator { width: 6px; height: 6px; }
+    .carousel-arrow { width: 32px; height: 32px; }
+}
+
+@media (min-width: 1400px) {
+    .image-carousel { height: 250px; }
+}
+
+.carousel-image.portrait {
+    object-fit: contain;
+    padding: 20px;
+    background-color: #f2f2f9;
 }

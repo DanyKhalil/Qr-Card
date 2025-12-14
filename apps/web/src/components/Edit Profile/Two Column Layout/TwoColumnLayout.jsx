@@ -110,7 +110,7 @@ const TwoColumnLayout = ({
                 className="separator"
                 style={{
                     width: "5px",
-                    backgroundColor: "#4CAF50",
+                    backgroundColor: "#6366f1",
                     marginLeft: gap,
                     marginRight: gap
                 }}

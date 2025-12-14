@@ -55,6 +55,10 @@ const EditUserProfile = ({
         id = "User001",
         customContent = [],
         QrCodeColor,
+        includeProfilePic,
+        includeContact,
+        includeSocialMedia,
+        includeWebsite,
     }: EditUserProfileProps) => {
         // for files
 
@@ -203,6 +207,10 @@ const EditUserProfile = ({
         const [customContentInput, setCustomContentInput] = useState(customContent || []);
 
         const [qrCodeColorInput, setQrCodeColorInput] = useState(QrCodeColor);
+        const [includeProfilePicInput, setIncludeProfilePicInput] = useState(includeProfilePic);
+        const [includeContactInput, setIncludeContactInput] = useState(includeContact);
+        const [includeSocialMediaInput, setIncludeSocialMediaInput] = useState(includeSocialMedia);
+        const [includeWebsiteInput, setIncludeWebsiteInput] = useState(includeWebsite);
 
 
 
@@ -374,6 +382,9 @@ const EditUserProfile = ({
             setUpdateMessage('');
 
             try {
+                // Extract images from custom content exactly like web version
+                const { cleanCustomContent, imageFiles } = extractImagesFromCustomContent(customContentInput);
+                
                 const result = await userApi.updateUserProfile({
                     userId: id,
                     userName: userNameInput,
@@ -387,12 +398,13 @@ const EditUserProfile = ({
                     locations: locationsInput,
                     profilePicInput: profilePicInput,
                     coverPhotoInput: coverPhotoInput,
-                    customContent: customContentInput,
-                    qrCodeColor: qrCodeColorInput
-                    // profilePicFile,
-                    // coverPhotoFile,
-                    // profilePicInput,
-                    // coverPhotoInput,
+                    customContent: cleanCustomContent, // Use cleaned custom content
+                    customImages: imageFiles, // Pass image files for processing
+                    qrCodeColor: qrCodeColorInput,
+                    qr_code_include_profile_pic: includeProfilePicInput,
+                    qr_code_include_contact: includeContactInput,
+                    qr_code_include_social: includeSocialMediaInput,
+                    qr_code_include_website: includeWebsiteInput,
                 });
 
                 if (result.success) {
@@ -409,6 +421,73 @@ const EditUserProfile = ({
                 setUpdateMessage(`Error: ${error.message || 'Network Error'}`);
                 setTimeout(() => setUpdateMessage(''), 5000);
             }
+        };
+
+        // Exact React Native version of web's extractImagesFromCustomContent
+        const extractImagesFromCustomContent = (customContent) => {
+            if (!customContent || !Array.isArray(customContent)) {
+                return { cleanCustomContent: [], imageFiles: [] };
+            }
+            
+            // Deep clone the custom content
+            const cleanCustomContent = JSON.parse(JSON.stringify(customContent));
+            const imageFiles = [];
+            
+            // Process exactly like web version: contentType -> items -> values
+            customContent.forEach((contentType, typeIndex) => {
+                if (contentType.items && Array.isArray(contentType.items)) {
+                    contentType.items.forEach((item, itemIndex) => {
+                        if (item.values && Array.isArray(item.values)) {
+                            item.values.forEach((value, valueIndex) => {
+                                // In React Native, check if value.value is a file object with uri
+                                if (value.field_type === 'image' && value.value && value.value.uri) {
+                                    // Generate unique key exactly like web version
+                                    const imageKey = `${typeIndex}_${itemIndex}_${valueIndex}`;
+                                    
+                                    // Get file info from React Native image object
+                                    const file = value.value;
+                                    
+                                    // Store the file with the key
+                                    imageFiles.push({
+                                        key: imageKey,
+                                        file: {
+                                            uri: file.uri,
+                                            type: file.type || 'image/jpeg',
+                                            name: file.fileName || `custom_image_${imageKey}.jpg`
+                                        }
+                                    });
+                                    
+                                    // Replace with placeholder exactly like web version
+                                    cleanCustomContent[typeIndex].items[itemIndex].values[valueIndex].value = `__IMAGE_PLACEHOLDER_${imageKey}__`;
+                                }
+                                // Also handle if value.value is a string URI (fallback)
+                                else if (value.field_type === 'image' && value.value && typeof value.value === 'string' && value.value.startsWith('file://')) {
+                                    // Generate unique key
+                                    const imageKey = `${typeIndex}_${itemIndex}_${valueIndex}`;
+                                    
+                                    // Extract filename from URI
+                                    const filename = value.value.split('/').pop() || `custom_image_${imageKey}.jpg`;
+                                    
+                                    // Store the file
+                                    imageFiles.push({
+                                        key: imageKey,
+                                        file: {
+                                            uri: value.value,
+                                            type: 'image/jpeg',
+                                            name: filename
+                                        }
+                                    });
+                                    
+                                    // Replace with placeholder
+                                    cleanCustomContent[typeIndex].items[itemIndex].values[valueIndex].value = `__IMAGE_PLACEHOLDER_${imageKey}__`;
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+            
+            return { cleanCustomContent, imageFiles };
         };
     
         const handleSaveChanges = () => {
@@ -484,7 +563,18 @@ const EditUserProfile = ({
                         setCustomContent={setCustomContentInput}
                     />
 
-                    <ProfileQrCode id={id} color={qrCodeColorInput} setter={setQrCodeColorInput}/>
+                    <ProfileQrCode id={id} 
+                        color={qrCodeColorInput} 
+                        setter={setQrCodeColorInput}
+                        includeProfilePic={includeProfilePicInput}
+                        setIncludeProfilePic={setIncludeProfilePicInput}
+                        includeContact={includeContactInput}
+                        setIncludeContact={setIncludeContactInput}
+                        includeSocialMedia={includeSocialMediaInput}
+                        setIncludeSocialMedia={setIncludeSocialMediaInput}
+                        includeWebsite={includeWebsiteInput}
+                        setIncludeWebsite={setIncludeWebsiteInput}
+                    />
 
 
                     <AddSocialMediaModal 

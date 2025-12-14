@@ -4,7 +4,7 @@ import { BarChart, PieChart } from 'react-native-chart-kit';
 
 const ScanTypeChart = ({ data, chartType }) => {
     const screenWidth = Dimensions.get('window').width - 40;
-    const COLORS = ['#FF8559', '#82C294'];
+    const COLORS = ['#547DAD', '#E3E0F3']; // Indigo Blue and Soft Lavender
 
     // Transform data for bar chart
     const barChartData = {
@@ -26,11 +26,11 @@ const ScanTypeChart = ({ data, chartType }) => {
     }));
 
     const chartConfig = {
-        backgroundColor: '#ffffff',
-        backgroundGradientFrom: '#ffffff',
-        backgroundGradientTo: '#ffffff',
+        backgroundColor: '#E3E0F3', // Soft Lavender
+        backgroundGradientFrom: '#E3E0F3',
+        backgroundGradientTo: '#E3E0F3',
         decimalPlaces: 0,
-        color: (opacity = 1) => `rgba(130, 194, 148, ${opacity})`, // #82C294 for bar chart
+        color: (opacity = 1) => `rgba(84, 125, 173, ${opacity})`, // Primary Indigo Blue for bars
         labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
         style: {
             borderRadius: 16,
@@ -42,7 +42,7 @@ const ScanTypeChart = ({ data, chartType }) => {
 
     const barChartConfig = {
         ...chartConfig,
-        color: (opacity = 1) => `rgba(130, 194, 148, ${opacity})`, // Green color for bars
+        color: (opacity = 1) => `rgba(84, 125, 173, ${opacity})`, // Indigo Blue
     };
 
     return (

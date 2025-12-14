@@ -152,7 +152,7 @@ const CustomFieldsManager = ({ visible, onClose, contentType, onUpdateFields }) 
                     onClick={() => handleDeleteField(field.id)}
                     title="Delete field"
                   >
-                    <IoTrash size={18}/>
+                    <IoTrash size={18} color='darkred'/>
                   </button>
                 </div>
               </div>

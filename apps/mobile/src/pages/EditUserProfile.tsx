@@ -153,6 +153,10 @@ const EditUserProfilePage = () => {
             id={Array.isArray(id) ? id[0] : id || 'User001'}
             customContent={userData.custom_content}
             QrCodeColor={userData.qr_code_color}
+            includeProfilePic ={userData.qr_code_include_profile_pic}
+            includeContact={userData.qr_code_include_contact}
+            includeSocialMedia={userData.qr_code_include_social}
+            includeWebsite={userData.qr_code_include_website}
         />
     );
 };

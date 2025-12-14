@@ -77,7 +77,7 @@ const Locations = ({
                             state={location.state}
                             country={location.country}
                             mapsLink={location.mapsLink}
-                            borderColor="#82C294"
+                            borderColor="#6a8adbff"
                             borderWidth={2}
                             />
                         </View>

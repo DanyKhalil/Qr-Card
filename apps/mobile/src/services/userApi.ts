@@ -12,77 +12,6 @@ export const userApi = {
             throw error;
         }
     },
-    // updateUserProfile: async ({
-    //     userId, userName, dob, phoneNumber, headline,
-    //     bio, website, connectLinks, videos, locations,
-    //     // profilePicFile, coverPhotoFile, profilePicInput, coverPhotoInput,
-    // }) => {
-    //     try {
-    //         const formData = new FormData();
-
-    //         formData.append('userName', userName || '');
-    //         formData.append('dob', dob || '');
-    //         formData.append('phoneNumber', phoneNumber || '');
-    //         formData.append('headline', headline || '');
-    //         formData.append('bio', bio || '');
-    //         formData.append('websiteUrl', website || '');
-    //         // formData.append('connectLinks', JSON.stringify(connectLinks || []));
-    //         // formData.append('videos', JSON.stringify(videos || []));
-    //         // formData.append('locations', JSON.stringify(locations || []));
-    //         connectLinks.forEach((link, index) => {
-    //             formData.append(`connectLinks[${index}][id]`, link.id);
-    //             formData.append(`connectLinks[${index}][url]`, link.url);
-    //             formData.append(`connectLinks[${index}][display_order]`, link.display_order.toString());
-    //         });
-
-    //         videos.forEach((video, index) => {
-    //             formData.append(`videos[${index}][id]`, video.id);
-    //             formData.append(`videos[${index}][video_url]`, video.video_url);
-    //             formData.append(`videos[${index}][title]`, video.title);
-    //             formData.append(`videos[${index}][description]`, video.description);
-    //             formData.append(`videos[${index}][display_order]`, video.display_order.toString());
-    //         });
-
-    //         locations.forEach((loc, index) => {
-    //             formData.append(`locations[${index}][id]`, loc.id);
-    //             formData.append(`locations[${index}][title]`, loc.title);
-    //             formData.append(`locations[${index}][country]`, loc.country);
-    //             formData.append(`locations[${index}][state]`, loc.state);
-    //             formData.append(`locations[${index}][city]`, loc.city);
-    //             formData.append(`locations[${index}][street]`, loc.street);
-    //             formData.append(`locations[${index}][building]`, loc.building);
-    //             formData.append(`locations[${index}][floor]`, loc.floor);
-    //         });
-
-    //         // if (profilePicFile) {
-    //         //     formData.append('profilePicture', {
-    //         //     uri: profilePicFile.uri,
-    //         //     type: profilePicFile.type || 'image/jpeg',
-    //         //     name: profilePicFile.name || 'profile.jpg',
-    //         //     });
-    //         // } else {
-    //         //     formData.append('profilePhotoPath', profilePicInput || '');
-    //         // }
-
-    //         // if (coverPhotoFile) {
-    //         //     formData.append('coverPhoto', {
-    //         //     uri: coverPhotoFile.uri,
-    //         //     type: coverPhotoFile.type || 'image/jpeg',
-    //         //     name: coverPhotoFile.name || 'cover.jpg',
-    //         //     });
-    //         // } else {
-    //         //     formData.append('coverPhotoPath', coverPhotoInput || '');
-    //         // }
-    //         console.log('FormData to send:');
-    //         formData.forEach((value, key) => console.log(key, value));
-
-    //         const response = await api.post(`/users/${userId}`, formData);
-    //         return response.data;
-    //     } catch (error) {
-    //         console.error('Error updating user profile:', error.message || error);
-    //         throw error;
-    //     }
-    // },
     updateUserProfile: async ({
         userId,
         userName,
@@ -97,24 +26,50 @@ export const userApi = {
         profilePicInput,
         coverPhotoInput,
         customContent,
+        customImages = [], // New parameter for custom content images
         qrCodeColor = "#000000",
+        qr_code_include_profile_pic = true,
+        qr_code_include_contact = true,
+        qr_code_include_social = true,
+        qr_code_include_website = true,
     }) => {
         try {
             const formData = new FormData();
 
+            // Basic user info - exactly matching web structure
             formData.append('userName', userName || '');
-            formData.append('dob', dob || '');
+            
+            // Format DOB exactly like web version
+            let cleanDob = null;
+            if (dob && dob !== '' && !isNaN(new Date(dob).getTime())) {
+                cleanDob = new Date(dob).toISOString().split("T")[0];
+            }
+            formData.append('dob', cleanDob || '');
+            
             formData.append('phoneNumber', phoneNumber || '');
             formData.append('headline', headline || '');
             formData.append('bio', bio || '');
             formData.append('websiteUrl', website || '');
 
+            // QR code settings - exactly like web
+            formData.append('qrCodeColor', qrCodeColor);
+            formData.append('qr_code_include_profile_pic', qr_code_include_profile_pic);
+            formData.append('qr_code_include_contact', qr_code_include_contact);
+            formData.append('qr_code_include_social', qr_code_include_social);
+            formData.append('qr_code_include_website', qr_code_include_website);
+
+            // JSON data - exactly like web
             formData.append('connectLinks', JSON.stringify(connectLinks || []));
             formData.append('videos', JSON.stringify(videos || []));
             formData.append('locations', JSON.stringify(locations || []));
-            formData.append('customContent', JSON.stringify(customContent))
-            formData.append('qrCodeColor', qrCodeColor);
+            formData.append('customContent', JSON.stringify(customContent || []));
 
+            // Add custom content images - exactly like web naming convention
+            customImages.forEach(({ key, file }) => {
+                formData.append(`customImage_${key}`, file);
+            });
+
+            // Profile picture handling - matching web logic
             if (profilePicInput?.startsWith('file://')) {
                 const filename = profilePicInput.split('/').pop();
                 formData.append('profilePicture', {
@@ -123,11 +78,10 @@ export const userApi = {
                     name: filename || 'profile.jpg',
                 });
             } else {
-                // send existing URL (or null)
                 formData.append('profilePhotoPath', profilePicInput || '');
             }
 
-            // same logic for cover photo
+            // Cover photo handling - matching web logic
             if (coverPhotoInput?.startsWith('file://')) {
                 const filename = coverPhotoInput.split('/').pop();
                 formData.append('coverPhoto', {
@@ -146,6 +100,7 @@ export const userApi = {
                     body: formData,
                     headers: {
                         Accept: 'application/json',
+                        // Don't set Content-Type for FormData - let React Native set it automatically
                     },
                 }
             );

@@ -28,6 +28,7 @@ const ProfileList = ({ profiles = [], onProfileClick = () => {} }) => {
   const [error, setError] = useState(null);
   const [loggedInUserId, setLoggedInUserId] = useState(null);
 
+
   const transformImageUrl = (url: string) => {
     if (!url) 
         return url;
@@ -253,7 +254,7 @@ const ProfileList = ({ profiles = [], onProfileClick = () => {} }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#ffffff",
+    backgroundColor: "#f8f8ff", // very light lavender
     width: SCREEN_WIDTH,
   },
   scrollContent: {
@@ -272,27 +273,27 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 24,
     fontWeight: "600",
-    color: "#1a202c",
+    color: "#4B3FDD", // muted indigo
   },
   countBadge: {
-    backgroundColor: "#edf2f7",
+    backgroundColor: "#E6E0FF", // soft lavender
     paddingHorizontal: 14,
     paddingVertical: 6,
     borderRadius: 20,
   },
   countText: {
     fontSize: 14,
-    color: "#4a5568",
+    color: "#4B3FDD", // muted indigo
     fontWeight: "500",
   },
   card: {
-    backgroundColor: "#fdf2ee",
+    backgroundColor: "#F0E8FF", // soft lavender card
     borderRadius: 12,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: "#e2e8f0",
+    borderColor: "#D3CFFF", // soft lavender border
     overflow: "hidden",
-    width: SCREEN_WIDTH - 32, // Full width minus padding
+    width: SCREEN_WIDTH - 32,
   },
   cardContent: {
     flexDirection: "row",
@@ -304,7 +305,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     flex: 1,
-    maxWidth: SCREEN_WIDTH * 0.65, // 65% of screen width for profile info
+    maxWidth: SCREEN_WIDTH * 0.65,
   },
   avatar: {
     width: 56,
@@ -318,7 +319,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: "#f1f5f9",
+    backgroundColor: "#E6E0FF", // soft lavender
     justifyContent: "center",
     alignItems: "center",
     marginRight: 16,
@@ -332,12 +333,12 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 17,
     fontWeight: "600",
-    color: "#2d3748",
+    color: "#4B3FDD", // muted indigo
     marginBottom: 4,
   },
   headline: {
     fontSize: 14,
-    color: "#718096",
+    color: "#9C8DFF", // medium lavender
   },
   followButton: {
     paddingHorizontal: 20,
@@ -348,18 +349,18 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   btnFollow: {
-    backgroundColor: "#64A377",
+    backgroundColor: "#4B3FDD", // muted indigo
   },
   btnUnfollow: {
     backgroundColor: "#ffffff",
     borderWidth: 2,
-    borderColor: "#f44336",
+    borderColor: "#9C8DFF", // medium lavender
   },
   btnFollowBack: {
-    backgroundColor: "#2196F3",
+    backgroundColor: "#BFA5FF", // soft lavender
   },
   btnFriends: {
-    backgroundColor: "#ff9800",
+    backgroundColor: "#9C8DFF", // medium lavender
   },
   buttonText: {
     fontSize: 14,
@@ -367,7 +368,7 @@ const styles = StyleSheet.create({
     color: "#ffffff",
   },
   unfollowText: {
-    color: "#f44336",
+    color: "#9C8DFF", // medium lavender
   },
   emptyContainer: {
     flex: 1,
@@ -378,7 +379,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 16,
-    color: "#718096",
+    color: "#9C8DFF", // medium lavender
   },
   loadingContainer: {
     flex: 1,
@@ -390,7 +391,7 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 12,
     fontSize: 16,
-    color: "#4a5568",
+    color: "#4B3FDD", // muted indigo
   },
   errorContainer: {
     flex: 1,
@@ -402,9 +403,10 @@ const styles = StyleSheet.create({
   errorText: {
     marginTop: 12,
     fontSize: 16,
-    color: "#f44336",
+    color: "#f44336", // keep red for errors
     textAlign: "center",
   },
 });
+
 
 export default ProfileList;
