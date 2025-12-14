@@ -11,6 +11,9 @@ import CustomContentItem from './customContentItem.js';
 import CustomContentField from './customContentField.js';
 import CustomContentValue from './customContentValue.js';
 import Notification from './notificationModel.js';
+import SubscriptionPlan from './subscriptionPlan.js';
+import UserSubscription from './userSubscription.js';
+import Payment from './paymentModel.js';
 
 const models = {
   User,
@@ -25,6 +28,9 @@ const models = {
   CustomContentField,
   CustomContentValue,
   Notification,
+  SubscriptionPlan,
+  UserSubscription,
+  Payment,
 };
 
 // Set up associations
@@ -35,5 +41,6 @@ Object.keys(models).forEach(modelName => {
 });
 
 export { sequelize, User, Profile, SocialMedia, Video, Location, ProfileAnalytics,  ProfileFollow,
-        CustomContentType, CustomContentItem, CustomContentField, CustomContentValue, Notification
+        CustomContentType, CustomContentItem, CustomContentField, CustomContentValue, Notification,
+        SubscriptionPlan, UserSubscription, Payment,
 };

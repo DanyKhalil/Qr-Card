@@ -69,6 +69,18 @@ User.associate = function(models) {
     foreignKey: 'user_id',
     as: 'notifications'
   });
+  User.hasMany(models.UserSubscription, {
+    foreignKey: "user_id",
+    as: "subscriptions",
+  });
+  User.hasMany(models.Payment, {
+    foreignKey: "user_id",
+    as: "payments",
+  });
+  User.hasMany(models.Payment, {
+    foreignKey: "approved_by",
+    as: "approved_payments",
+  });
 };
 
 export default User;

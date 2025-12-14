@@ -4,7 +4,7 @@ import NotificationsList from "./NotificationsList";
 import Header from "../../Header/Header";
 import Footer from "../../Footer/Footer";
 import "./NotificationsPage.css";
-import { notificationsApi } from "../../../services/notificationApi";
+import { notificationsApi } from "../../../services/notificationApi.js";
 
 const NotificationsPage = () => {
   const [notifications, setNotifications] = useState([]);

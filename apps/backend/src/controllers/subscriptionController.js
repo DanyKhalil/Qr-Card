@@ -1,101 +1,126 @@
-// src/controllers/subscriptionController.js
-import { v4 as uuidv4 } from 'uuid';
-import { Subscription } from '../models/subscription.js';
-import { createTapCharge } from './tapClient.js';
+// controllers/subscriptionController.js
+import { User, UserSubscription, SubscriptionPlan } from "../models/index.js";
 
-export const createSubscription = async (req, res) => {
+/**
+ * Get current user's subscription
+ * GET /subscription/current
+ */
+export const getCurrentSubscription = async (req, res) => {
   try {
-    const { userId, planName, price, email } = req.body;
-
-    if (!userId || !planName || !price || !email) {
-      return res.status(400).json({ error: 'Missing required fields' });
+    const userId = req.user?.id; // Assuming auth middleware sets req.user
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized" });
     }
 
-    // IMPORTANT: This must be your frontend URL
-    const redirectUrl = `${process.env.FRONTEND_URL}/subscription-success`;
-
-    // Create TAP charge
-    const tapResponse = await createTapCharge({
-      amount: price,
-      currency: 'USD',
-      description: `Subscription for ${planName}`,
-      metadata: { userId, planName },
-      email,
-      redirectUrl
+    const subscription = await UserSubscription.findOne({
+      where: { user_id: userId },
+      include: [
+        {
+          model: SubscriptionPlan,
+          as: "plan",
+        }
+      ]
     });
 
-    if (!tapResponse.id || !tapResponse.transaction) {
-      console.error('Invalid TAP response:', tapResponse);
-      return res.status(500).json({ error: 'Failed to create TAP charge' });
+    if (!subscription) {
+      return res.json({ subscription: null });
     }
 
-    // Save subscription as pending
-    const subscription = await Subscription.create({
-      id: uuidv4(),
+    res.json({ subscription });
+  } catch (error) {
+    console.error("Error in getCurrentSubscription:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+/**
+ * Get all available subscription plans
+ * GET /subscription/plans
+ */
+export const getAvailablePlans = async (req, res) => {
+  try {
+    const plans = await SubscriptionPlan.findAll({
+      order: [["price", "ASC"]]
+    });
+    res.json({ plans });
+  } catch (error) {
+    console.error("Error in getAvailablePlans:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+/**
+ * Subscribe to a plan
+ * POST /subscription/subscribe
+ * body: { plan_id, payment_details }
+ */
+export const subscribeToPlan = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    const { plan_id, payment_details } = req.body;
+
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const plan = await SubscriptionPlan.findByPk(plan_id);
+    if (!plan) {
+      return res.status(404).json({ error: "Plan not found" });
+    }
+
+    // Check if user already has an active subscription
+    const currentSub = await UserSubscription.findOne({
+      where: { user_id: userId, is_active: true }
+    });
+
+    if (currentSub) {
+      return res.status(400).json({ error: "User already has an active subscription" });
+    }
+
+    const subscription = await UserSubscription.create({
       user_id: userId,
-      plan_name: planName,
-      price,
+      plan_id,
       start_date: new Date(),
-      end_date: null,
-      status: 'pending',
-      tap_charge_id: tapResponse.id
+      end_date: new Date(Date.now() + 30*24*60*60*1000), // Example: 30 days
+      status: "active",
+      payment_details: payment_details || null,
+      is_active: true
     });
 
-    res.json({
-      chargeUrl: tapResponse.transaction.url,
-      subscriptionId: subscription.id
-    });
-
-  } catch (err) {
-    console.error('createSubscription error:', err);
-    res.status(500).json({ error: err.message || 'Failed to create subscription' });
+    res.status(201).json({ message: "Subscribed successfully", subscription });
+  } catch (error) {
+    console.error("Error in subscribeToPlan:", error);
+    res.status(500).json({ error: error.message });
   }
 };
 
-// Webhook to update status
-export const tapWebhook = async (req, res) => {
+/**
+ * Cancel current subscription
+ * POST /subscription/cancel
+ */
+export const cancelSubscription = async (req, res) => {
   try {
-    const event = req.body;
-
-    if (event.type === 'charge.success') {
-      const charge = event.data;
-
-      const subscription = await Subscription.findOne({ where: { tap_charge_id: charge.id } });
-      if (subscription) {
-        const startDate = new Date();
-        const endDate = new Date();
-        endDate.setMonth(endDate.getMonth() + 1);
-
-        await subscription.update({
-          status: 'active',
-          start_date: startDate,
-          end_date: endDate
-        });
-      }
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized" });
     }
 
-    res.status(200).json({ received: true });
-  } catch (err) {
-    console.error('Webhook error:', err);
-    res.status(500).json({ error: 'Webhook failed' });
-  }
-};
-
-// Check subscription status
-export const getSubscriptionStatus = async (req, res) => {
-  try {
-    const { userId } = req.params;
-    const subscription = await Subscription.findOne({
-      where: { user_id: userId, status: 'active' }
+    const subscription = await UserSubscription.findOne({
+      where: { user_id: userId, is_active: true }
     });
 
-    if (subscription) {
-      res.json({ status: 'active', plan: subscription.plan_name });
-    } else {
-      res.json({ status: 'inactive' });
+    if (!subscription) {
+      return res.status(404).json({ error: "No active subscription found" });
     }
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ status: 'error' });
+
+    subscription.is_active = false;
+    subscription.status = "cancelled";
+    subscription.end_date = new Date();
+    await subscription.save();
+
+    res.json({ message: "UserSubscription cancelled successfully", subscription });
+  } catch (error) {
+    console.error("Error in cancelSubscription:", error);
+    res.status(500).json({ error: error.message });
   }
 };
