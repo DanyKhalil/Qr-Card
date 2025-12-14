@@ -50,7 +50,8 @@
 .cropper-modal {
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.75);
+    background: rgba(0,0,0,0.5); /* softer overlay */
+    backdrop-filter: blur(4px);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -62,11 +63,11 @@
     width: 90vw;
     max-width: 700px;
     height: 70vh;
-    background: #ffffff;
+    background: #fff;
     border-radius: 12px;
     overflow: hidden;
     position: relative;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15); /* softer shadow */
 }
 
 .cropper-buttons {
@@ -83,27 +84,27 @@
 .save-btn {
     padding: 10px 22px;
     border-radius: 8px;
-    font-weight: bold;
+    font-weight: 600;
     border: none;
     cursor: pointer;
     font-size: 16px;
-    transition: 0.25s ease;
+    transition: all 0.25s ease;
 }
 
 .cancel-btn {
-    background: #ff6b6b;
-    color: white;
+    background: #ea6d80; /* updated to match app palette */
+    color: #fff;
 }
 .cancel-btn:hover {
-    background: #ff4747;
+    background: #e63946;
 }
 
 .save-btn {
-    background: #4caf50;
-    color: white;
+    background: #82c294; /* updated to match app palette */
+    color: #fff;
 }
 .save-btn:hover {
-    background: #43a047;
+    background: #56ae6f;
 }
 
 /* ================================

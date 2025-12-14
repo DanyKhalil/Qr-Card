@@ -38,7 +38,7 @@ const Registration = () => {
           const user = JSON.parse(userString);
           
           if (user.role === "admin") {
-            router.replace("/(tabs)/admin");
+            router.replace("/(tabs)/profile");
           } else {
             router.replace("/(tabs)/search");
           }
@@ -298,7 +298,7 @@ export default Registration;
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "white",
+    backgroundColor: "#FFFFFF",
   },
   scrollContainer: {
     flexGrow: 1,
@@ -308,46 +308,49 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "white",
+    backgroundColor: "#FFFFFF",
   },
   loadingText: {
     marginTop: 10,
-    color: "#64A377",
+    color: "#547DAD",
     fontSize: 16,
   },
+
   topImageContainer: {
-    width: '100%',
+    width: "100%",
     height: 180,
   },
   topImage: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
   },
   bottomImageContainer: {
-    width: '100%',
+    width: "100%",
     height: 150,
     marginTop: 20,
   },
   bottomImage: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
   },
+
   centerWrapper: {
-    flex: 0,
     justifyContent: "center",
     alignItems: "center",
   },
   centerContent: {
-    width: '100%',
+    width: "100%",
     paddingHorizontal: 20,
     alignItems: "center",
   },
+
+  /* Tabs */
   tabContainer: {
     width: 300,
     height: 55,
     borderRadius: 50,
     borderWidth: 2,
-    borderColor: "#9BD4A9",
+    borderColor: "#547DAD",
     justifyContent: "center",
     marginBottom: 40,
     position: "relative",
@@ -358,7 +361,7 @@ const styles = StyleSheet.create({
     right: 0,
     width: "50%",
     height: "100%",
-    backgroundColor: "#CFEFD8",
+    backgroundColor: "#E3E0F3",
     borderRadius: 50,
   },
   tabInner: {
@@ -370,91 +373,96 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   tabActive: {
-    textAlign: "left",
     fontSize: 20,
     fontWeight: "700",
-    color: "#4C8F66",
+    color: "#547DAD",
     zIndex: 10,
     marginRight: 20,
   },
   tabInactive: {
-    textAlign: "left",
     fontSize: 20,
     fontWeight: "700",
-    color: "#4C8F66",
+    color: "#7A8FB8",
     zIndex: 10,
     marginLeft: 35,
   },
+
+  /* Form */
   form: {
     width: "100%",
     maxWidth: 400,
     alignItems: "center",
   },
   inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    width: '100%',
+    flexDirection: "row",
+    alignItems: "center",
+    width: "100%",
     height: 50,
     borderWidth: 1,
-    borderColor: "#FF8E57",
+    borderColor: "#547DAD",
     borderRadius: 10,
     marginBottom: 20,
-    backgroundColor: "#FFF",
+    backgroundColor: "#FFFFFF",
     paddingHorizontal: 10,
   },
   inputIcon: {
     marginRight: 10,
     width: 25,
+    color: "#547DAD",
   },
   input: {
     flex: 1,
     fontSize: 16,
-    color: '#333',
+    color: "#2F3A4A",
     paddingVertical: 12,
   },
   passwordToggle: {
     padding: 5,
   },
+
+  /* Buttons */
   primaryButton: {
     width: "100%",
     height: 50,
-    backgroundColor: "#64A377",
+    backgroundColor: "#547DAD",
     borderRadius: 10,
     justifyContent: "center",
     alignItems: "center",
     marginTop: 10,
     elevation: 4,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
   },
   primaryButtonText: {
-    color: "white",
+    color: "#FFFFFF",
     fontWeight: "bold",
     fontSize: 16,
   },
   secondaryButton: {
     width: "100%",
     height: 50,
-    backgroundColor: "white",
+    backgroundColor: "#FFFFFF",
     borderWidth: 2,
-    borderColor: "#64A377",
+    borderColor: "#547DAD",
     borderRadius: 10,
     justifyContent: "center",
     alignItems: "center",
     marginTop: 15,
     marginBottom: 10,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
   },
   secondaryButtonText: {
-    color: "#64A377",
+    color: "#547DAD",
     fontWeight: "bold",
     fontSize: 16,
   },
+
+  /* Messages */
   message: {
     marginBottom: 15,
     textAlign: "center",
@@ -465,13 +473,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   success: {
-    color: "#2E7D32",
-    backgroundColor: "#E8F5E9",
-    borderColor: "#C8E6C9",
+    color: "#2F5F8F",
+    backgroundColor: "#E3E0F3",
+    borderColor: "#C9C5E8",
   },
   error: {
-    color: "#D32F2F",
-    backgroundColor: "#FFEBEE",
-    borderColor: "#FFCDD2",
+    color: "#7A2E2E",
+    backgroundColor: "#F3E6E6",
+    borderColor: "#E0B4B4",
   },
 });

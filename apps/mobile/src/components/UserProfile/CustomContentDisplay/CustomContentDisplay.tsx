@@ -21,6 +21,11 @@ const CustomContentDisplay = ({ customContent, gap = 16 }) => {
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.customContentTitle}>{customContent.name}</Text>
+        {customContent.description && (
+          <Text style={styles.customContentDescription}>
+            {customContent.description}
+          </Text>
+        )}
       </View>
 
       <ScrollView
@@ -28,7 +33,7 @@ const CustomContentDisplay = ({ customContent, gap = 16 }) => {
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={[
           styles.scrollContent,
-          { paddingHorizontal: gap }
+          // { paddingHorizontal: gap }
         ]}
         decelerationRate="fast"
         snapToInterval={cardWidth + gap}
@@ -54,6 +59,7 @@ const CustomContentDisplay = ({ customContent, gap = 16 }) => {
                   return acc;
                 }, {}),
               }}
+              cardLayout={true}
             />
           </View>
         ))}
@@ -76,19 +82,32 @@ const CustomContentDisplay = ({ customContent, gap = 16 }) => {
 const styles = StyleSheet.create({
   container: {
     marginVertical: 12,
-    paddingVertical: 16,
+    paddingVertical: 30,
+    paddingHorizontal: 20,
+    backgroundColor: 'transparent',
     maxWidth: 800,
-    marginBottom: 70,
+    marginBottom: 30,
   },
   header: {
-    paddingHorizontal: 20,
     marginBottom: 20,
+    paddingBottom: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E0DEFF',
   },
   customContentTitle: {
-    fontSize: 25,
+    fontSize: 32,
     fontWeight: "700",
-    color: "#1f2937",
+    color: "#202337",
+    marginBottom: 8,
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
     textAlign: "left",
+  },
+  customContentDescription: {
+    fontSize: 16,
+    color: "#414866",
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    textAlign: "left",
+    lineHeight: 22,
   },
   scrollContent: {
     paddingVertical: 8,

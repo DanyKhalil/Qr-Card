@@ -38,18 +38,20 @@ const Button = ({
         if (color === 'coral') {
             return {
                 ...baseStyle,
-                backgroundColor: disabled ? '#CCCCCC' : '#FF8559',
+                backgroundColor: disabled ? '#CCCCCC' : '#E3E0F3', // Soft Lavender
             };
         } else {
             return {
                 ...baseStyle,
-                backgroundColor: disabled ? '#CCCCCC' : '#82C294',
+                backgroundColor: disabled ? '#CCCCCC' : '#547DAD', // Muted Indigo Blue
             };
         }
     };
 
     const getTextColor = () => {
-        return disabled ? '#666666' : '#FFFFFF';
+        // Use darker text on secondary for readability
+        if (disabled) return '#666666';
+        return color === 'coral' ? '#547DAD' : '#FFFFFF';
     };
 
     return (

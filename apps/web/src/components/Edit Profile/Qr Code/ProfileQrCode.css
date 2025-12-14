@@ -1,3 +1,4 @@
+/* QR Container */
 .qr-container {
   display: flex;
   flex-direction: column;
@@ -8,16 +9,17 @@
 }
 
 .qr-container canvas {
-  border: 2px solid #ddd;
-  border-radius: 10px;
+  border: 2px solid #6B63FF; /* muted indigo */
+  border-radius: 12px;
   padding: 10px;
-  background: white;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  background-color: #F8F6FF; /* light lavender background */
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 
 .qr-title {
   font-size: 1.1rem;
   margin-bottom: 0.5rem;
+  color: #333;
 }
 
 .qr-caption {
@@ -26,16 +28,15 @@
   margin-top: 0.5rem;
 }
 
-/* QR Options Styles */
+/* QR Options */
 .qr-options-container {
   width: 100%;
   max-width: 300px;
-  background: white;
-  border: 1px solid #e1e1e1;
+  background: #fff;
+  border: 1px solid #E0DEFF; /* soft border */
   border-radius: 12px;
   padding: 20px;
-  margin-bottom: 15px;
-  margin-top:15px;
+  margin: 15px 0;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
@@ -44,7 +45,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 12px 0;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid #E0DEFF;
 }
 
 .qr-option:last-child {
@@ -68,13 +69,13 @@
   color: #333;
 }
 
-/* Custom Checkbox Styles */
+/* Custom Checkbox */
 .qr-checkbox {
   position: relative;
   display: inline-block;
-  cursor: pointer;
   width: 44px;
   height: 24px;
+  cursor: pointer;
 }
 
 .qr-checkbox-input {
@@ -90,26 +91,26 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: #e9e9e9;
+  background-color: #E0DEFF; /* soft lavender */
   border-radius: 24px;
-  transition: .4s;
+  transition: 0.4s;
 }
 
 .qr-checkbox-custom:before {
-  position: absolute;
   content: "";
+  position: absolute;
   height: 18px;
   width: 18px;
   left: 3px;
   bottom: 3px;
-  background-color: white;
+  background-color: #fff;
   border-radius: 50%;
-  transition: .4s;
+  transition: 0.4s;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .qr-checkbox-input:checked + .qr-checkbox-custom {
-  background-color: #4CAF50;
+  background-color: #6B63FF; /* muted indigo */
 }
 
 .qr-checkbox-input:checked + .qr-checkbox-custom:before {
@@ -117,10 +118,10 @@
 }
 
 .qr-checkbox-input:focus + .qr-checkbox-custom {
-  box-shadow: 0 0 1px #4CAF50;
+  box-shadow: 0 0 2px #6B63FF;
 }
 
-/* Color Picker Styles */
+/* Color Picker */
 .color-picker-container {
   position: relative;
   margin-top: 0.75rem;
@@ -133,11 +134,11 @@
   top: 100%;
   left: 0;
   width: 100%;
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 8px;
+  background: #fff;
+  border: 1px solid #E0DEFF;
+  border-radius: 12px;
   padding: 15px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   z-index: 100;
   margin-top: 8px;
 }
@@ -152,31 +153,30 @@
 .color-input {
   width: 50px;
   height: 50px;
-  border: none;
-  border-radius: 8px;
+  border: 2px solid #E0DEFF;
+  border-radius: 12px;
   cursor: pointer;
   padding: 0;
-  border: 2px solid #eee;
 }
 
 .color-input::-webkit-color-swatch-wrapper {
   padding: 0;
-  border-radius: 6px;
+  border-radius: 10px;
 }
 
 .color-input::-webkit-color-swatch {
   border: none;
-  border-radius: 6px;
+  border-radius: 10px;
 }
 
 .color-hex {
   font-family: monospace;
   font-size: 14px;
   color: #333;
-  background: #f5f5f5;
+  background: #F8F6FF;
   padding: 6px 12px;
-  border-radius: 6px;
-  border: 1px solid #ddd;
+  border-radius: 8px;
+  border: 1px solid #E0DEFF;
 }
 
 .preset-colors {
@@ -189,24 +189,24 @@
 .color-swatch {
   width: 40px;
   height: 40px;
-  border-radius: 8px;
+  border-radius: 12px;
   border: 2px solid transparent;
   cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
   transition: all 0.2s ease;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .color-swatch:hover {
-  border-color: #333;
+  border-color: #6B63FF;
   transform: scale(1.05);
 }
 
 .reset-color-btn {
   width: 100%;
   padding: 8px;
-  background: #f5f5f5;
-  border: 1px solid #ddd;
-  border-radius: 6px;
+  background: #F8F6FF;
+  border: 1px solid #E0DEFF;
+  border-radius: 12px;
   cursor: pointer;
   font-size: 14px;
   transition: background 0.2s ease;
@@ -214,10 +214,10 @@
 }
 
 .reset-color-btn:hover {
-  background: #e9e9e9;
+  background: #EDE9FF;
 }
 
-/* Remove old download button styles since we're replacing it */
+/* Remove old download button */
 .qr-download-btn {
-  display: none; /* Or remove this class entirely */
+  display: none;
 }

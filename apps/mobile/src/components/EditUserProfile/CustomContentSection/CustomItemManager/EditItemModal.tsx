@@ -1,24 +1,57 @@
 import React, { useState, useEffect } from 'react';
-import { View,  Text,  TextInput,   TouchableOpacity, ScrollView,  Switch, Alert,StyleSheet } from 'react-native';
+import { 
+  View, 
+  Text, 
+  TextInput, 
+  TouchableOpacity, 
+  ScrollView, 
+  Switch, 
+  Alert,
+  StyleSheet,
+  Image,
+  ActivityIndicator,
+  Platform
+} from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
 import Modal from '../../Modals/Modal/Modal';
 import Button from '../../../UserProfile/Button/Button';
+import { Ionicons } from '@expo/vector-icons';
 
 const EditItemModal = ({ visible, onClose, item, onUpdate, contentType }) => {
   const [title, setTitle] = useState('');
   const [visibility, setVisibility] = useState(true);
   const [fieldValues, setFieldValues] = useState({});
+  const [uploadingImages, setUploadingImages] = useState({});
+  const [imagePreviews, setImagePreviews] = useState({});
 
   useEffect(() => {
     if (visible && item && contentType) {
       setTitle(item.title || '');
       setVisibility(item.visibility !== false);
       
+      // Initialize field values from item data
       const initialValues = {};
+      const initialPreviews = {};
+      
       contentType.fields?.forEach(field => {
         const existingValue = item.values?.find(v => v.field_key === field.key);
-        initialValues[field.key] = existingValue?.value || getDefaultValue(field.type);
+        
+        if (field.type === 'image') {
+          // For image fields, check if we have an existing URL
+          if (existingValue?.value && typeof existingValue.value === 'string') {
+            initialValues[field.key] = existingValue.value; // Store URL
+            initialPreviews[field.key] = existingValue.value; // Set preview URL
+          } else {
+            initialValues[field.key] = '';
+          }
+        } else {
+          initialValues[field.key] = existingValue?.value || getDefaultValue(field.type);
+        }
       });
+      
       setFieldValues(initialValues);
+      setImagePreviews(initialPreviews);
+      setUploadingImages({});
     }
   }, [visible, item, contentType]);
 
@@ -30,6 +63,7 @@ const EditItemModal = ({ visible, onClose, item, onUpdate, contentType }) => {
       case 'boolean': return false;
       case 'date': return '';
       case 'json': return {};
+      case 'image': return ''; // Empty string for image URL
       default: return '';
     }
   };
@@ -41,13 +75,95 @@ const EditItemModal = ({ visible, onClose, item, onUpdate, contentType }) => {
     }));
   };
 
-  const handleSubmit = () => {
+  const pickImage = async (fieldKey) => {
+    // Request permissions
+    if (Platform.OS !== 'web') {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission required', 'Sorry, we need camera roll permissions to upload images.');
+        return;
+      }
+    }
+
+    // Launch image picker
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 0.8,
+    });
+
+    if (!result.canceled) {
+      // Show uploading state
+      setUploadingImages(prev => ({
+        ...prev,
+        [fieldKey]: true
+      }));
+
+      try {
+        const image = result.assets[0];
+        
+        // Create image data object
+        const imageData = {
+          uri: image.uri,
+          name: image.fileName || `image_${Date.now()}.jpg`,
+          type: image.type || 'image/jpeg',
+          size: image.fileSize || 0,
+          width: image.width,
+          height: image.height,
+        };
+
+        // Simulate upload delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        // Store the image data
+        handleFieldChange(fieldKey, imageData);
+        
+        // Update preview
+        setImagePreviews(prev => ({
+          ...prev,
+          [fieldKey]: image.uri
+        }));
+        
+        setUploadingImages(prev => ({
+          ...prev,
+          [fieldKey]: false
+        }));
+
+      } catch (error) {
+        Alert.alert('Upload Error', 'Failed to upload image. Please try again.');
+        setUploadingImages(prev => ({
+          ...prev,
+          [fieldKey]: false
+        }));
+      }
+    }
+  };
+
+  const removeImage = (fieldKey) => {
+    // Clear the field value
+    handleFieldChange(fieldKey, '');
+    
+    // Clear the preview
+    setImagePreviews(prev => ({
+      ...prev,
+      [fieldKey]: ''
+    }));
+  };
+
+  const handleSubmit = async () => {
     if (!item) return;
 
     // Validate required fields
     const requiredFields = contentType.fields?.filter(field => field.required) || [];
     const missingRequired = requiredFields.filter(field => {
       const value = fieldValues[field.key];
+      
+      // Special handling for image type
+      if (field.type === 'image') {
+        return !value || value === '';
+      }
+      
       return value === '' || value === null || value === undefined;
     });
 
@@ -59,10 +175,19 @@ const EditItemModal = ({ visible, onClose, item, onUpdate, contentType }) => {
       return;
     }
 
+    // Prepare field values for submission
     const valuesArray = Object.entries(fieldValues).map(([field_key, value]) => {
       const field = contentType.fields?.find(f => f.key === field_key);
       const existingValue = item.values?.find(v => v.field_key === field_key);
       
+      // Handle image data specially
+      let finalValue = value;
+      if (field?.type === 'image' && value && typeof value === 'object') {
+        // In a real app, you would have uploaded the image and gotten a URL
+        // For now, we'll use the local URI
+        finalValue = value.uri;
+      }
+
       return {
         id: existingValue?.id,
         field_id: field?.id,
@@ -70,7 +195,7 @@ const EditItemModal = ({ visible, onClose, item, onUpdate, contentType }) => {
         field_name: field?.name,
         field_label: field?.label,
         field_type: field?.type,
-        value: value
+        value: finalValue
       };
     });
 
@@ -85,6 +210,9 @@ const EditItemModal = ({ visible, onClose, item, onUpdate, contentType }) => {
   const renderFieldInput = (field) => {
     const value = fieldValues[field.key] || getDefaultValue(field.type);
     const fieldName = field.name || field.label || field.key;
+    const isUploading = uploadingImages[field.key];
+    const previewUrl = imagePreviews[field.key] || 
+                     (field.type === 'image' && typeof value === 'string' && value.startsWith('http') ? value : null);
 
     switch (field.type) {
       case 'text':
@@ -94,6 +222,7 @@ const EditItemModal = ({ visible, onClose, item, onUpdate, contentType }) => {
             onChangeText={(text) => handleFieldChange(field.key, text)}
             placeholder={`Enter ${fieldName.toLowerCase()}...`}
             style={styles.fieldInput}
+            required={field.required}
           />
         );
       
@@ -107,6 +236,7 @@ const EditItemModal = ({ visible, onClose, item, onUpdate, contentType }) => {
             multiline
             numberOfLines={4}
             textAlignVertical="top"
+            required={field.required}
           />
         );
       
@@ -118,6 +248,7 @@ const EditItemModal = ({ visible, onClose, item, onUpdate, contentType }) => {
             placeholder={`Enter ${fieldName.toLowerCase()}...`}
             style={styles.fieldInput}
             keyboardType="numeric"
+            required={field.required}
           />
         );
       
@@ -127,7 +258,7 @@ const EditItemModal = ({ visible, onClose, item, onUpdate, contentType }) => {
             <Switch
               value={value}
               onValueChange={(checked) => handleFieldChange(field.key, checked)}
-              trackColor={{ false: '#767577', true: '#82C294' }}
+              trackColor={{ false: '#767577', true: '#6B63FF' }}
               thumbColor={value ? '#f4f3f4' : '#f4f3f4'}
             />
             <Text style={styles.checkboxLabel}>{field.label || field.name}</Text>
@@ -141,6 +272,7 @@ const EditItemModal = ({ visible, onClose, item, onUpdate, contentType }) => {
             onChangeText={(text) => handleFieldChange(field.key, text)}
             placeholder="YYYY-MM-DD"
             style={styles.fieldInput}
+            required={field.required}
           />
         );
       
@@ -161,7 +293,69 @@ const EditItemModal = ({ visible, onClose, item, onUpdate, contentType }) => {
             multiline
             numberOfLines={4}
             textAlignVertical="top"
+            required={field.required}
           />
+        );
+      
+      case 'image':
+        return (
+          <View style={styles.imageUploadField}>
+            {/* Show existing image or uploaded preview */}
+            {previewUrl ? (
+              <View style={styles.imagePreviewContainer}>
+                <Image 
+                  source={{ uri: previewUrl }} 
+                  style={styles.imagePreview}
+                  resizeMode="contain"
+                />
+                <View style={styles.imageActions}>
+                  <Button
+                    text="Change"
+                    color="green"
+                    onPress={() => pickImage(field.key)}
+                    size="small"
+                    style={styles.imageActionBtn}
+                  />
+                  <Button
+                    text="Remove"
+                    color="coral"
+                    onPress={() => removeImage(field.key)}
+                    size="small"
+                    style={styles.imageActionBtn}
+                  />
+                </View>
+                {fieldValues[field.key] && typeof fieldValues[field.key] === 'object' && fieldValues[field.key].name && (
+                  <View style={styles.fileInfo}>
+                    <Text style={styles.fileInfoText}>
+                      <Text style={styles.fileInfoLabel}>
+                        {value === fieldValues[field.key] ? 'New file:' : 'File:'}
+                      </Text> {fieldValues[field.key].name}
+                    </Text>
+                    {fieldValues[field.key].size > 0 && (
+                      <Text style={styles.fileInfoText}>
+                        <Text style={styles.fileInfoLabel}>Size:</Text> {(fieldValues[field.key].size / 1024).toFixed(2)} KB
+                      </Text>
+                    )}
+                  </View>
+                )}
+              </View>
+            ) : isUploading ? (
+              <View style={styles.uploadingState}>
+                <ActivityIndicator size="small" color="#6B63FF" />
+                <Text style={styles.uploadingText}>Uploading image...</Text>
+              </View>
+            ) : (
+              <TouchableOpacity 
+                style={styles.imageUploadPlaceholder}
+                onPress={() => pickImage(field.key)}
+                activeOpacity={0.8}
+              >
+                <Ionicons name="cloud-upload-outline" size={40} color="#6B63FF" />
+                <Text style={styles.uploadText}>Tap to upload image</Text>
+                <Text style={styles.uploadHint}>Supports: JPG, PNG, GIF</Text>
+              </TouchableOpacity>
+            )}
+          </View>
         );
       
       default:
@@ -171,6 +365,7 @@ const EditItemModal = ({ visible, onClose, item, onUpdate, contentType }) => {
             onChangeText={(text) => handleFieldChange(field.key, text)}
             placeholder={`Enter ${fieldName.toLowerCase()}...`}
             style={styles.fieldInput}
+            required={field.required}
           />
         );
     }
@@ -183,8 +378,9 @@ const EditItemModal = ({ visible, onClose, item, onUpdate, contentType }) => {
       visible={visible} 
       onClose={onClose}
       title={`Edit ${contentType?.name || 'Item'}`}
+      size="large"
     >
-      <ScrollView style={styles.container}>
+      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         <View style={styles.formSection}>
           <Text style={styles.sectionTitle}>Basic Information</Text>
           
@@ -200,17 +396,6 @@ const EditItemModal = ({ visible, onClose, item, onUpdate, contentType }) => {
               autoFocus
             />
           </View>
-
-          {/* <View style={styles.formContent}>
-            <View style={styles.checkboxField}>
-              <Switch
-                value={visibility}
-                onValueChange={setVisibility}
-                trackColor={{ false: '#767577', true: '#82C294' }}
-              />
-              <Text style={styles.checkboxLabel}>Visible to visitors</Text>
-            </View>
-          </View> */}
         </View>
 
         {contentType?.fields && contentType.fields.length > 0 && (
@@ -220,14 +405,19 @@ const EditItemModal = ({ visible, onClose, item, onUpdate, contentType }) => {
               {contentType.fields
                 .sort((a, b) => (a.display_order || 0) - (b.display_order || 0))
                 .map((field) => (
-                <View key={field.id} style={styles.fieldGroup}>
-                  <Text style={styles.fieldLabel}>
-                    {field.label || field.name}
-                    {field.required && <Text style={styles.requiredStar}> *</Text>}
-                  </Text>
-                  <Text style={styles.fieldTypeHint}>
-                    {field.type}
-                  </Text>
+                <View key={field.id} style={[
+                  styles.fieldGroup,
+                  field.type === 'image' && styles.imageFieldGroup
+                ]}>
+                  <View style={styles.fieldHeader}>
+                    <Text style={styles.fieldLabel}>
+                      {field.label || field.name}
+                      {field.required && <Text style={styles.requiredStar}> *</Text>}
+                    </Text>
+                    <Text style={styles.fieldTypeHint}>
+                      {field.type === 'image' ? 'Image Upload' : field.type}
+                    </Text>
+                  </View>
                   {renderFieldInput(field)}
                 </View>
               ))}
@@ -263,13 +453,14 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     paddingBottom: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#e5e5e5',
+    borderBottomColor: '#E0DEFF',
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
     color: '#333',
-    marginBottom: 12,
+    marginBottom: 16,
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
   },
   formContent: {
     marginBottom: 16,
@@ -279,50 +470,62 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: '#333',
     marginBottom: 6,
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
   },
   input: {
     width: '100%',
     paddingVertical: 12,
     paddingHorizontal: 16,
-    borderWidth: 2,
-    borderColor: '#e5e5e5',
-    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#E0DEFF',
+    backgroundColor: '#F8F6FF',
+    borderRadius: 8,
     fontSize: 16,
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
   },
   fieldsGrid: {
     gap: 16,
   },
   fieldGroup: {
-    gap: 6,
+    gap: 8,
+  },
+  imageFieldGroup: {
+    // Image fields can take more space
+  },
+  fieldHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   fieldLabel: {
     fontSize: 15,
     fontWeight: '500',
     color: '#333',
-    flexDirection: 'row',
-    alignItems: 'center',
+    flex: 1,
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
   },
   requiredStar: {
-    color: '#d32f2f',
+    color: '#C5B3FF',
   },
   fieldTypeHint: {
     fontSize: 12,
-    color: '#666',
-    backgroundColor: '#f0f0f0',
+    color: '#6B63FF',
+    backgroundColor: '#F8F6FF',
     paddingHorizontal: 8,
-    paddingVertical: 3,
+    paddingVertical: 4,
     borderRadius: 4,
-    alignSelf: 'flex-start',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
   },
   fieldInput: {
     width: '100%',
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderWidth: 1,
-    borderColor: '#FF8559',
-    backgroundColor: '#fdf2ee',
+    borderColor: '#E0DEFF',
+    backgroundColor: '#F8F6FF',
     borderRadius: 8,
     fontSize: 16,
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
   },
   textArea: {
     minHeight: 100,
@@ -337,6 +540,88 @@ const styles = StyleSheet.create({
   checkboxLabel: {
     fontSize: 15,
     color: '#333',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+  },
+  // Image Upload Styles
+  imageUploadField: {
+    marginTop: 8,
+  },
+  imageUploadPlaceholder: {
+    borderWidth: 2,
+    borderStyle: 'dashed',
+    borderColor: '#C5B3FF',
+    borderRadius: 8,
+    padding: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#F8F6FF',
+  },
+  uploadText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#333',
+    marginTop: 10,
+    marginBottom: 5,
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+  },
+  uploadHint: {
+    fontSize: 12,
+    color: '#6B63FF',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+  },
+  imagePreviewContainer: {
+    marginTop: 8,
+  },
+  imagePreview: {
+    width: '100%',
+    height: 200,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E0DEFF',
+    backgroundColor: '#F8F6FF',
+    marginBottom: 12,
+  },
+  imageActions: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 12,
+  },
+  imageActionBtn: {
+    flex: 1,
+  },
+  fileInfo: {
+    padding: 10,
+    backgroundColor: '#F8F6FF',
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#E0DEFF',
+  },
+  fileInfoText: {
+    fontSize: 13,
+    color: '#555',
+    marginBottom: 4,
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+  },
+  fileInfoLabel: {
+    fontWeight: '600',
+  },
+  uploadingState: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    padding: 20,
+    borderWidth: 2,
+    borderStyle: 'dashed',
+    borderColor: '#6B63FF',
+    borderRadius: 8,
+    backgroundColor: '#EDE9FF',
+  },
+  uploadingText: {
+    color: '#6B63FF',
+    fontWeight: '500',
+    fontSize: 14,
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
   },
   formActions: {
     flexDirection: 'row',
@@ -344,7 +629,7 @@ const styles = StyleSheet.create({
     gap: 12,
     paddingTop: 20,
     borderTopWidth: 1,
-    borderTopColor: '#e5e5e5',
+    borderTopColor: '#E0DEFF',
     marginTop: 20,
   },
   actionBtn: {

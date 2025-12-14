@@ -21,6 +21,7 @@
     gap: 12px;
 }
 
+/* ---------------- Responsive ---------------- */
 @media (max-width: 768px) {
     .profile-section__wrapper {
         flex-direction: column;

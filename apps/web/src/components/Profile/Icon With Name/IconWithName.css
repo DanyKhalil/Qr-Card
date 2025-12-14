@@ -1,14 +1,20 @@
-.icon-with-name.clickable:hover {
-    opacity: 0.8;
-    text-decoration: underline;
+.icon-with-name.clickable {
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
 }
 
+.icon-with-name.clickable:hover {
+    opacity: 0.85; /* slightly less bright */
+    text-decoration: underline;
+}
 
 .icon-with-name {
     display: flex;
     align-items: center;
     width: 100%;
     gap: 8px;
+    color: #5961a6; /* muted indigo text */
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .icon-container {
@@ -16,16 +22,20 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    color: inherit; /* inherit muted indigo from parent */
 }
 
-
-
 .name-text {
+    color: inherit; /* inherit muted indigo or hover color */
     font-family: inherit;
-    color: inherit;
     line-height: 1.4;
     margin: 0;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    transition: color 0.2s ease-in-out;
+}
+
+.icon-with-name.clickable:hover .name-text {
+    color: #3AAFA9; /* teal accent on hover */
 }

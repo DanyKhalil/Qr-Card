@@ -10,6 +10,7 @@ import { DEVELOPMENT_CONFIG } from '../config/development';
 // import * as Contacts from "expo-contacts";
 import Contacts from 'react-native-contacts'
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import LockedAccountScreen from '../components/UserProfile/LockedAccount/LockedAccount';
 
 
 
@@ -18,6 +19,30 @@ const UserProfilePage = ({id}) => {
     const [userData, setUserData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+
+    const [token, setToken] = useState(null);
+    const [user, setUser] = useState(null);
+    useEffect(() => {
+        const loadUserData = async () => {
+        try {
+            const storedToken = await AsyncStorage.getItem("token");
+            const userString = await AsyncStorage.getItem("user");
+            
+            if (storedToken && userString) {
+                const parsedUser = JSON.parse(userString);
+                setToken(storedToken);
+                setUser(parsedUser);
+            } else {
+                setToken(null);
+                setUser(null);
+            }
+        } catch (error) {
+            console.error('Error loading user data:', error);
+        }
+        };
+
+        loadUserData();
+    }, []);
     
     const hasVisited = useRef(false);
 
@@ -275,6 +300,10 @@ const UserProfilePage = ({id}) => {
                 <Text style={{ marginTop: 16 }}>Loading user profile...</Text>
             </View>
         );
+    }
+
+    if(userData?.visibility === false && user?.role !== "admin") {
+        return (<LockedAccountScreen />)
     }
 
     if (error) {

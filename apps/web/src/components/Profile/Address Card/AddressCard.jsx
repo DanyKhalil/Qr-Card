@@ -34,7 +34,7 @@ const AddressCard = ({
         <div 
             className={`address-card ${className}`}
             style={{
-                borderColor: borderColor,
+                // borderColor: borderColor,
                 borderWidth: borderWidth
             }}
         >

@@ -84,7 +84,7 @@ const UserProfile = () => {
     }, [id, qrScan]);
 
     // Show locked account page if visibility is false
-    if (userData?.visibility === false && getCurrentUser().role !== "admin") {
+    if (userData?.visibility === false && getCurrentUser()?.role !== "admin") {
         return (
             <div className="locked-account-page">
                 <Header />

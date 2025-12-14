@@ -9,11 +9,11 @@ export default function AdminStackLayout() {
       screenOptions={{
         headerShown: true,
         headerStyle: {
-          backgroundColor: '#FF8559',
+          backgroundColor: '#547DAD', // primary
           elevation: 0,
           shadowOpacity: 0,
         },
-        headerTintColor: '#eee',
+        headerTintColor: '#F5F7FB', // soft white
         headerTitleStyle: {
           fontWeight: '600',
           fontSize: 17,
@@ -23,21 +23,21 @@ export default function AdminStackLayout() {
             onPress={() => router.back()}
             style={{ marginLeft: 15 }}
           >
-            <Ionicons name="arrow-back" size={24} color="#eee" />
+            <Ionicons name="arrow-back" size={24} color="#F5F7FB" />
           </TouchableOpacity>
         ),
       }}
     >
       <Stack.Screen
         name="index"
-        options={{ 
+        options={{
           title: '      Admin Panel',
           headerLeft: () => (
             <TouchableOpacity
               onPress={() => router.push('/(tabs)/profile')}
               style={{ marginLeft: 0 }}
             >
-              <Ionicons name="arrow-back" size={24} color="#eee" />
+              <Ionicons name="arrow-back" size={24} color="#F5F7FB" />
             </TouchableOpacity>
           ),
         }}

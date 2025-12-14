@@ -1,7 +1,7 @@
 .footer {
     width: 100%;
     max-width: 100%;
-    background-color: #FF8559;
+    background-color: #6366f1; /* Replaced bright orange with indigo */
     border-top: 1px solid #e9ecef;
     margin-top: auto;
 }
@@ -14,13 +14,12 @@
 }
 
 .footer-text {
-    color: #000;
+    color: #ffffff; /* Changed text to white for contrast */
     font-size: 0.9rem;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     margin: 0;
     line-height: 1.5;
 }
-
 
 @media (max-width: 768px) {
     .footer-content {

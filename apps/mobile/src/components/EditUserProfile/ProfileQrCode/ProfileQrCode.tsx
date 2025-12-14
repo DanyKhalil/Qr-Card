@@ -274,7 +274,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   qrContainer: {
-    backgroundColor: 'white',
+    backgroundColor: '#ffffff',
     padding: 16,
     borderRadius: 12,
     shadowColor: '#000',
@@ -289,7 +289,7 @@ const styles = StyleSheet.create({
   optionsContainer: {
     width: '100%',
     maxWidth: 400,
-    backgroundColor: 'white',
+    backgroundColor: '#E3E0F3', // Soft Lavender
     borderRadius: 12,
     padding: 20,
     marginTop: 16,
@@ -309,7 +309,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: '#547DAD', // Primary Indigo Blue for dividers
   },
   optionLeft: {
     flexDirection: 'row',
@@ -318,6 +318,7 @@ const styles = StyleSheet.create({
   },
   optionIcon: {
     marginRight: 12,
+    color: '#547DAD', // Primary Indigo Blue icons
   },
   optionLabel: {
     fontSize: 16,
@@ -327,7 +328,6 @@ const styles = StyleSheet.create({
   optionSwitch: {
     transform: [{ scaleX: 0.9 }, { scaleY: 0.9 }],
   },
-  // Modal Styles
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
@@ -336,7 +336,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   colorPickerModal: {
-    backgroundColor: 'white',
+    backgroundColor: '#E3E0F3', // Soft Lavender
     borderRadius: 16,
     padding: 20,
     width: '90%',
@@ -349,13 +349,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: '#547DAD', // Primary Indigo Blue
     paddingBottom: 15,
   },
   modalTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#333',
+    color: '#547DAD',
   },
   currentColorSection: {
     marginBottom: 20,
@@ -376,7 +376,7 @@ const styles = StyleSheet.create({
     height: 50,
     borderRadius: 10,
     borderWidth: 2,
-    borderColor: '#f0f0f0',
+    borderColor: '#547DAD',
   },
   colorHex: {
     fontFamily: 'monospace',
@@ -387,7 +387,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: '#547DAD',
   },
   presetTitle: {
     fontSize: 16,
@@ -418,7 +418,7 @@ const styles = StyleSheet.create({
   },
   selectedColorSwatch: {
     borderWidth: 3,
-    borderColor: '#82C294',
+    borderColor: '#547DAD', // Primary Indigo Blue highlight
   },
   resetButton: {
     flexDirection: 'row',
@@ -426,7 +426,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: '#f5f5f5',
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: '#547DAD', // Primary Indigo Blue
     borderRadius: 10,
     padding: 14,
     marginTop: 20,
@@ -435,8 +435,9 @@ const styles = StyleSheet.create({
   resetButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
+    color: '#547DAD',
   },
 });
+
 
 export default ProfileQrCode;

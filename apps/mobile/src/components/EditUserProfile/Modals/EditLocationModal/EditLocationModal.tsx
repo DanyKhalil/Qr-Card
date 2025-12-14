@@ -477,7 +477,7 @@ const styles = StyleSheet.create({
     label: {
         fontSize: 15,
         fontWeight: "500",
-        color: "#333",
+        color: "#111827", // dark text
         marginBottom: 6,
     },
     input: {
@@ -485,15 +485,16 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
         paddingHorizontal: 16,
         borderWidth: 2,
-        borderColor: "#e5e5e5",
+        borderColor: "#D1D5DB", // new gray border
         borderRadius: 10,
         fontSize: 16,
+        color: "#111827", // dark text
     },
     inputError: {
-        borderColor: "#ff4444",
+        borderColor: "#EF4444", // red error
     },
     errorText: {
-        color: "#ff4444",
+        color: "#EF4444",
         fontSize: 12,
         marginTop: 4,
         minHeight: 16,
@@ -503,12 +504,13 @@ const styles = StyleSheet.create({
         gap: 12,
         marginTop: 20,
         borderTopWidth: 1,
-        borderTopColor: "#e5e5e5",
+        borderTopColor: "#D1D5DB", // gray divider
         paddingTop: 20,
     },
     actionBtn: {
         width: "100%",
     },
 });
+
 
 export default EditLocationModal;

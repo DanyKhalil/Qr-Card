@@ -4,7 +4,7 @@
   position: relative;
   font-family: 'Prompt', sans-serif;
   min-height: 100vh;
-  background: white;
+  background: #f5f3ff; /* soft lavender background */
   overflow: hidden;
 }
 
@@ -27,13 +27,13 @@
 .title {
   font-size: 48px;
   font-weight: 700;
-  color: #3a9a60;
+  color: #4f46e5; /* indigo blue */
 }
 
 .subtitle {
   font-size: 26px;
   font-weight: 500;
-  color: #3a9a60;
+  color: #7c3aed; /* soft lavender accent */
   line-height: 1.4;
   margin-bottom: 20px;
 }
@@ -42,12 +42,12 @@
   max-width: 470px;
   line-height: 1.6;
   font-size: 16px;
-  color: #333;
+  color: #333; /* text-dark */
   margin-bottom: 30px;
 }
 
 .get-started-btn {
-  background: #3a9a60;
+  background: #4f46e5; /* indigo button */
   color: white;
   padding: 14px 28px;
   border-radius: 10px;
@@ -59,7 +59,7 @@
 }
 
 .get-started-btn:hover {
-  background: #2f8450;
+  background: #4338ca; /* darker indigo hover */
   transform: translateY(-2px);
 }
 
@@ -68,20 +68,19 @@
   position: absolute;
   right: 0;
   bottom: 0;
-  width: 53%;
+  width: 600px;
   height: auto;
   z-index: 0;
   pointer-events: none;
 }
 
 /* Top-left image */
-/* Top-left image pinned to the absolute top-left */
 .top-left-image {
   position: absolute;
-  top: 0;       /* flush with the top */
-  left: 0;      /* flush with the left */
-  transform: translate(0, 0); /* ensure no extra offset */
-  width: 320px;  /* slightly bigger */
+  top: 0;
+  left: 0;
+  transform: translate(0, 0);
+  width: 320px;
   height: auto;
   z-index: 0;
   pointer-events: none;
@@ -94,31 +93,28 @@
   }
 }
 
-
-
 @media (max-width: 768px) {
   .top-left-image {
     width: 200px;
   }
 }
 
-
-/* When width <= 1256px: slight resize & slight shift */
+/* When width <= 1256px */
 @media (max-width: 1256px) {
   .welcome-left {
-    margin-left: -40px;   /* was -120px — moves it slightly right */
+    margin-left: -40px;
   }
 
   .title {
-    font-size: 44px;      /* was 48px — just a little smaller */
+    font-size: 44px;
   }
 
   .subtitle {
-    font-size: 24px;      /* was 26px */
+    font-size: 24px;
   }
 
   .description {
-    font-size: 15px;      /* very small adjustment */
+    font-size: 15px;
   }
 
   .get-started-btn {
@@ -127,25 +123,22 @@
   }
 }
 
-
-
-
-/* When width <= 967px: slightly smaller & slightly more to the right */
+/* When width <= 967px */
 @media (max-width: 967px) {
   .welcome-left {
-    margin-left: -10px;   /* move further right */
+    margin-left: -10px;
   }
 
   .title {
-    font-size: 40px;      /* was 44px */
+    font-size: 40px;
   }
 
   .subtitle {
-    font-size: 22px;      /* was 24px */
+    font-size: 22px;
   }
 
   .description {
-    font-size: 14px;      /* gently smaller */
+    font-size: 14px;
   }
 
   .get-started-btn {

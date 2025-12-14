@@ -233,7 +233,7 @@ const styles = StyleSheet.create({
     label: {
         fontSize: 15,
         fontWeight: "500",
-        color: "#333",
+        color: "#2E2B5F", // Dark Indigo
         marginBottom: 6,
     },
     input: {
@@ -241,15 +241,17 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
         paddingHorizontal: 16,
         borderWidth: 2,
-        borderColor: "#e5e5e5",
+        borderColor: "#6C63FF", // Indigo border
         borderRadius: 10,
         fontSize: 16,
+        color: "#2E2B5F", // Dark Indigo text
+        backgroundColor: "#F5F4FF", // Light Lavender background
     },
     inputError: {
-        borderColor: "#ff4444",
+        borderColor: "#9A6CFF", // Soft Lavender error
     },
     errorText: {
-        color: "#ff4444",
+        color: "#9A6CFF", // Soft Lavender error
         fontSize: 12,
         marginTop: 4,
         minHeight: 16,
@@ -259,12 +261,13 @@ const styles = StyleSheet.create({
         gap: 12,
         marginTop: 20,
         borderTopWidth: 1,
-        borderTopColor: "#e5e5e5",
+        borderTopColor: "#DAD6FF", // Light Lavender divider
         paddingTop: 20,
     },
     actionBtn: {
         width: "100%",
     },
 });
+
 
 export default AddVideoModal;

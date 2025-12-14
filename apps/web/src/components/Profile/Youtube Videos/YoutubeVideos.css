@@ -15,8 +15,8 @@
 }
 
 .user-name {
-    color: #4CAF50;
-    background: linear-gradient(135deg, #4CAF50, #45a049);
+    color: #6366f1; /* Replaced green with muted indigo */
+    background: linear-gradient(135deg, #6366f1, #818cf8);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;

@@ -1,4 +1,4 @@
-/* Original styles (unchanged) */
+/* Original card container */
 .custom-card {
     background-color: #ffffff;
     border-radius: 12px;
@@ -6,11 +6,12 @@
     width: 100%;
 }
 
+/* Title */
 .custom-card-title {
     font-size: 1.4rem;
     font-weight: bold;
     margin-bottom: 15px;
-    color: #4e4d4d;
+    color: #2c2f48; /* muted deep indigo */
 }
 
 .custom-card-fields {
@@ -19,22 +20,25 @@
     gap: 10px;
 }
 
+/* FIELD BOX */
 .custom-card-field {
     display: flex;
     flex-direction: column;
-    border: 1px solid #FF8559;
+    border: 1px solid #b0b3d6; /* soft muted indigo border */
     padding: 10px 15px;
     border-radius: 8px;
 }
 
+/* special case for image field */
 .custom-card-field.image-field {
-    background-color: #fdf2ee;
+    background-color: #ebebf8; /* muted lavender-indigo tint */
     padding: 15px;
 }
 
+/* LABEL */
 .field-label {
     font-weight: 600;
-    color: #4CAF50; 
+    color: #3AAFA9; /* teal accent */
     margin-bottom: 3px;
 }
 
@@ -42,11 +46,13 @@
     margin-bottom: 8px;
 }
 
+/* TEXT VALUE */
 .field-value {
-    color: #333333;
+    color: #2c2f48; /* muted dark indigo */
     word-break: break-word;
 }
 
+/* IMAGE DISPLAY */
 .image-value-container {
     width: 100%;
     display: flex;
@@ -58,32 +64,33 @@
     max-width: 100%;
     max-height: 200px;
     border-radius: 6px;
-    border: 1px solid #FF8559;
+    border: 1px solid #b0b3d6; /* muted indigo border */
     object-fit: contain;
     background-color: white;
-    box-shadow: 0 2px 4px rgba(255, 133, 89, 0.1);
+    box-shadow: 0 2px 6px rgba(59, 68, 115, 0.12); /* muted indigo shadow */
 }
 
 .image-fallback {
     padding: 12px;
-    background-color: #fdf2ee;
-    border: 1px dashed #FF8559;
+    background-color: #ebebf8; /* muted lavender */
+    border: 1px dashed #b0b3d6;
     border-radius: 6px;
-    color: #333333;
+    color: #2c2f48;
     font-size: 0.9rem;
     text-align: center;
     width: 100%;
     font-style: italic;
 }
 
-/* New Card Layout Styles */
+/* -------------------- NEW CARD LAYOUT -------------------- */
+
 .custom-card-layout {
     background-color: #ffffff;
     border-radius: 16px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06); /* softer neutral shadow */
     overflow: hidden;
     width: 100%;
-    height: 100%; /* Take full height of grid cell */
+    height: 100%;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     display: flex;
     flex-direction: column;
@@ -91,13 +98,14 @@
 
 .custom-card-layout:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 8px 28px rgba(59, 68, 115, 0.15); /* muted indigo shadow */
 }
 
-/* Image Section - Updated */
+/* -------------------- IMAGE SECTION -------------------- */
+
 .card-image-section {
     position: relative;
-    background-color: #f8f9fa;
+    background-color: #f2f2f9; /* light muted indigo */
     display: flex;
     flex-direction: column;
 }
@@ -105,8 +113,8 @@
 .image-carousel {
     position: relative;
     width: 100%;
-    height: 220px; /* Fixed height */
-    overflow: hidden; /* Hide overflowing parts of the image */
+    height: 220px;
+    overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -115,12 +123,12 @@
 .carousel-image {
     width: 100%;
     height: 100%;
-    object-fit: cover; /* Cover the entire area, may crop edges */
-    object-position: center; /* Center the image */
-    background-color: #f8f9fa;
+    object-fit: cover;
+    object-position: center;
+    background-color: #f2f2f9;
 }
 
-/* Carousel Navigation */
+/* ---- Carousel Arrow Buttons ---- */
 .carousel-arrow {
     position: absolute;
     top: 50%;
@@ -134,64 +142,56 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
     transition: all 0.2s ease;
     z-index: 2;
 }
 
 .carousel-arrow:hover {
     background-color: #ffffff;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 12px rgba(59, 68, 115, 0.15); /* muted indigo */
     transform: translateY(-50%) scale(1.1);
 }
 
-.carousel-arrow:active {
-    transform: translateY(-50%) scale(0.95);
-}
-
 .carousel-arrow svg {
-    stroke: #333;
+    stroke: #2c2f48; /* muted indigo-neutral */
 }
 
-.carousel-arrow-left {
-    left: 16px;
-}
+.carousel-arrow-left { left: 16px; }
+.carousel-arrow-right { right: 16px; }
 
-.carousel-arrow-right {
-    right: 16px;
-}
-
-/* Image Indicators */
+/* ---- Indicators ---- */
 .image-indicators {
     display: flex;
     justify-content: center;
     gap: 8px;
     padding: 12px 0;
-    background-color: #f8f9fa;
+    background-color: #fff;
 }
 
 .indicator {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    border: none;
-    background-color: #cccccc;
+    background-color: #b0b3c6; /* muted gray-indigo */
     cursor: pointer;
+    border: none;
     padding: 0;
     transition: all 0.3s ease;
 }
 
 .indicator:hover {
-    background-color: #999999;
+    background-color: #8c8fa5;
     transform: scale(1.2);
 }
 
 .indicator.active {
-    background-color: #4CAF50;
+    background-color: #3AAFA9; /* teal accent remains */
     transform: scale(1.2);
 }
 
-/* Card Content */
+/* -------------------- CONTENT -------------------- */
+
 .card-content {
     padding: 24px;
     flex: 1;
@@ -202,20 +202,21 @@
 .card-title {
     font-size: 1.6rem;
     font-weight: 700;
-    color: #2c3e50;
+    color: #2c2f48; /* muted indigo */
     margin-bottom: 20px;
     padding-bottom: 16px;
-    border-bottom: 2px solid #f0f2f5;
+    border-bottom: 2px solid #e5e5f5; /* subtle muted indigo border */
 }
 
-/* Fields Grid */
+/* -------------------- FIELDS -------------------- */
+
 .card-fields {
     flex: 1;
 }
 
 .card-field {
     padding: 12px 0;
-    border-bottom: 1px solid #f0f2f5;
+    border-bottom: 1px solid #e5e5f5;
 }
 
 .card-field:last-child {
@@ -231,14 +232,14 @@
 
 .card-field .field-label {
     font-weight: 600;
-    color: #4CAF50;
+    color: #589794; /* teal */
     font-size: 0.95rem;
     min-width: 120px;
     flex-shrink: 0;
 }
 
 .card-field .field-value {
-    color: #333333;
+    color: #2c2f48;
     text-align: right;
     word-break: break-word;
     flex: 1;
@@ -246,117 +247,46 @@
     line-height: 1.5;
 }
 
-/* Responsive adjustments */
+/* -------------------- RESPONSIVE -------------------- */
+
 @media (max-width: 768px) {
-    /* Original responsive styles */
-    .custom-card {
-        padding: 15px;
-    }
+    .custom-card { padding: 15px; }
+    .custom-card-title { font-size: 1.4rem; }
 
-    .custom-card-title {
-        font-size: 1.4rem;
-    }
+    .custom-card-field { padding: 8px 12px; }
+    .custom-card-field.image-field { padding: 12px; }
+    .field-image { max-height: 150px; }
 
-    .custom-card-field {
-        padding: 8px 12px;
-    }
-    
-    .custom-card-field.image-field {
-        padding: 12px;
-    }
-    
-    .field-image {
-        max-height: 150px;
-    }
+    .custom-card-layout { border-radius: 12px; }
+    .card-content { padding: 20px 16px; }
+    .card-title { font-size: 1.4rem; }
 
-    /* Card layout responsive */
-    .custom-card-layout {
-        border-radius: 12px;
-    }
-    
-    .card-content {
-        padding: 20px 16px;
-    }
-    
-    .card-title {
-        font-size: 1.4rem;
-        margin-bottom: 16px;
-        padding-bottom: 12px;
-    }
-    
-    /* Fixed image height for mobile */
-    .image-carousel {
-        height: 200px; /* Slightly smaller on mobile */
-    }
-    
-    .carousel-arrow {
-        width: 36px;
-        height: 36px;
-    }
-    
-    .carousel-arrow-left {
-        left: 12px;
-    }
-    
-    .carousel-arrow-right {
-        right: 12px;
-    }
-    
+    .image-carousel { height: 200px; }
+    .carousel-arrow { width: 36px; height: 36px; }
+
     .card-field .field-header {
         flex-direction: column;
-        gap: 4px;
         align-items: flex-start;
     }
-    
-    .card-field .field-label {
-        min-width: auto;
-    }
-    
-    .card-field .field-value {
-        text-align: left;
-    }
+
+    .card-field .field-label { min-width: auto; }
+    .card-field .field-value { text-align: left; }
 }
 
 @media (max-width: 480px) {
-    .card-title {
-        font-size: 1.3rem;
-    }
-    
-    /* Fixed image height for small mobile */
-    .image-carousel {
-        height: 180px;
-    }
-    
-    .indicator {
-        width: 6px;
-        height: 6px;
-    }
-    
-    .carousel-arrow {
-        width: 32px;
-        height: 32px;
-    }
-    
-    .carousel-arrow svg {
-        width: 20px;
-        height: 20px;
-    }
-    
-    .image-indicators {
-        padding: 10px 0;
-    }
+    .card-title { font-size: 1.3rem; }
+    .image-carousel { height: 180px; }
+
+    .indicator { width: 6px; height: 6px; }
+    .carousel-arrow { width: 32px; height: 32px; }
 }
 
-/* Adjust for different screen sizes */
 @media (min-width: 1400px) {
-    .image-carousel {
-        height: 250px; /* Larger image on bigger screens */
-    }
+    .image-carousel { height: 250px; }
 }
 
-/* Special handling for portrait images */
 .carousel-image.portrait {
-    object-fit: contain; /* For portrait images, show full image */
+    object-fit: contain;
     padding: 20px;
-    background-color: #f8f9fa;
+    background-color: #f2f2f9;
 }

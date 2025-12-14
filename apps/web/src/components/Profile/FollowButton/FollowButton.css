@@ -7,46 +7,54 @@
     cursor: pointer;
     transition: all 0.2s ease-in-out;
     min-width: 120px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
+/* Follow (green) */
 .btn-follow {
-    background-color: #4CAF50;  /* green */
+    background-color: #3AAFA9;  /* muted teal */
     color: white;
+    border-color: transparent;
 }
 
 .btn-follow:hover {
-    background-color: #45a049;
+    background-color: #2d8c88;  /* darker teal */
 }
 
+/* Follow back (muted indigo instead of bright blue) */
 .btn-follow-back {
-    background-color: #007bff;  /* blue */
+    background-color: #5961a6;  /* muted indigo */
     color: white;
+    border-color: transparent;
 }
 
 .btn-follow-back:hover {
-    background-color: #0069d9;
+    background-color: #4a5190;  /* slightly darker indigo */
 }
 
+/* Unfollow (coral/soft red) */
 .btn-unfollow {
     background-color: white;
-    color: #f44336; /* red */
-    border: 2px solid #f44336;
+    color: #FF6F61; /* muted coral */
+    border: 2px solid #FF6F61;
 }
 
 .btn-unfollow:hover {
-    background-color: #f44336;
+    background-color: #FF6F61;
     color: white;
 }
 
+/* Friends (soft amber) */
 .btn-friends {
-    background-color: #f0ad4e; /* orange */
+    background-color: #d9a066; /* muted orange */
     color: white;
 }
 
 .btn-friends:hover {
-    background-color: #ec971f;
+    background-color: #c38b4c; /* slightly darker amber */
 }
 
+/* Remove focus outline */
 .follow-btn:focus {
     outline: none;
 }

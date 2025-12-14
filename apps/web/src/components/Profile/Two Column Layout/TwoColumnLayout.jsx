@@ -15,20 +15,19 @@ const TwoColumnLayout = ({
     contactLinks = [{name: "@dany-khalil", iconName: "instagram"},{name: "71 239 110", iconName: "phone"}],
     connectLinks = [{name: "@dany-khalil", iconName: "instagram"},{name: "71 239 110", iconName: "phone"}],
     websiteLink = [{name:"www.dany.com", iconName:"web"}],
-    bio = "Hello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello HelloHello HelloHello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello",
+    bio = "Hello HelloHello ...",
     userName = "John Doe",
     videos = [],
     locations = [],
     id = "User001",
     customContent,
-    QrCodeColor = "#fff",
+    QrCodeColor = "#6366f1", // Updated from white to muted indigo/purple
     profilePic,
     includeProfilePic,
     includeContact,
     includeSocialMedia,
     includeWebsite,
 }) => {
-
 
     function formatSocialLinks(links) {
         return links.map(({ id, url }) => {
@@ -57,14 +56,10 @@ const TwoColumnLayout = ({
 
     const profileUrlForQrCode = `${window.location.origin}/profile/${id}?qrScan=true`;
 
-
-    const getToken = () => {
-        return localStorage.getItem("token");
-    };
+    const getToken = () => localStorage.getItem("token");
     const getCurrentUser = () => {
         const userStr = localStorage.getItem("user");
         if (!userStr) return null;
-        
         try {
             return JSON.parse(userStr);
         } catch (error) {
@@ -73,7 +68,6 @@ const TwoColumnLayout = ({
         }
     };
     
-
     return (
         <div className={`two-column-layout ${className}`}>
             <div className="column left-column">
@@ -97,7 +91,7 @@ const TwoColumnLayout = ({
                 className="separator"
                 style={{
                     width: "5px",
-                    backgroundColor: "#4CAF50",
+                    backgroundColor: "#6366f1", // Updated separator color
                     marginLeft: gap,
                     marginRight: gap
                 }}
@@ -120,7 +114,6 @@ const TwoColumnLayout = ({
                         <CustomContentDisplay key={content.id} customContent={content} />
                     ))}
                 </div>
-
             </div>
         </div>
     );

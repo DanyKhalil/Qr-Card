@@ -37,7 +37,7 @@ const YouTubeVideos = ({
       <View style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.title}>
-            Videos of <Text style={styles.userName}>{userName}</Text>
+            Videos
           </Text>
         </View>
 

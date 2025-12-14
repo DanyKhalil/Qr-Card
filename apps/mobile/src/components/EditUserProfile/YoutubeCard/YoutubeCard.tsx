@@ -88,10 +88,10 @@ export default YouTubeCard;
 const styles = StyleSheet.create({
     card: {
         borderWidth: 1,
-        borderColor: "#FF8559",
+        borderColor: '#547DAD', // Primary Indigo Blue
         borderRadius: 12,
         padding: 20,
-        backgroundColor: "#ffffff",
+        backgroundColor: '#ffffff',
         width: "100%",
         shadowColor: "#000",
         shadowOpacity: 0.1,
@@ -124,9 +124,9 @@ const styles = StyleSheet.create({
     textField: {
         flex: 1,
         padding: 12,
-        backgroundColor: "#f8f9fa",
+        backgroundColor: '#E3E0F3', // Soft Lavender
         borderWidth: 1,
-        borderColor: "#e9ecef",
+        borderColor: '#547DAD', // Primary Indigo Blue
         borderRadius: 8,
         minHeight: 44,
         justifyContent: "center",
@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
         gap: 10,
         paddingTop: 12,
         borderTopWidth: 1,
-        borderTopColor: "#f0f0f0",
+        borderTopColor: '#547DAD', // Primary Indigo Blue
     },
     buttonsMobile: {
         flexDirection: "column",

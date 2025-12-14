@@ -25,6 +25,7 @@
   justify-content: center;
 }
 
+/* Disabled state */
 .fancy-btn__root:disabled {
   background-color: #cccccc !important;
   color: #666666 !important;
@@ -39,7 +40,7 @@
   background-color: #cccccc !important;
 }
 
-/* ---- Hover and Active Effects ---- */
+/* Hover and Active Effects */
 .fancy-btn__root:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
@@ -53,26 +54,31 @@
   font-weight: 700;
 }
 
+/* ============ NEW PALETTE ============ */
+
+/* Primary button (coral → Indigo Blue) */
 .fancy-btn__coral {
-  background-color: #ff8559;
+  background-color: #547DAD;
 }
 
 .fancy-btn__coral:hover:not(:disabled) {
-  background-color: #ff571a;
+  background-color: #3C5C89;
 }
 
 .fancy-btn__coral:active:not(:disabled) {
-  background-color: #ffae91;
+  background-color: #6F93C1;
 }
 
+/* Secondary button (green → Soft Lavender) */
 .fancy-btn__green {
-  background-color: #82c294;
+  background-color: #E3E0F3;      /* soft lavender */
+  color: #2A3550;                 /* dark indigo text for contrast */
 }
 
 .fancy-btn__green:hover:not(:disabled) {
-  background-color: #47855b;
+  background-color: #C9C5DA;      /* slightly darker lavender */
 }
 
 .fancy-btn__green:active:not(:disabled) {
-  background-color: #bcf4cb;
+  background-color: #F1EFFA;      /* light lavender */
 }

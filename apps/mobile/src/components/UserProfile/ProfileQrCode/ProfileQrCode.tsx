@@ -69,13 +69,13 @@ const ProfileQrCode = ({
         classic: {
             containerStyle: {
                 borderWidth: 2,
-                borderColor: color,
-                backgroundColor: '#ffffff',
+                borderColor: '#4A90E2',
+                backgroundColor: '#F4F4F4',
             },
             profileImageSize: 80,
             nameFontSize: 22,
             qrBorderWidth: 1,
-            qrBackgroundColor: '#f8f8f8',
+            qrBackgroundColor: '#FFFFFF',
             nameFontWeight: '700' as const,
             nameLetterSpacing: 0.5,
             containerPadding: 20,
@@ -84,12 +84,12 @@ const ProfileQrCode = ({
             containerStyle: {
                 borderWidth: 3,
                 borderColor: '#333333',
-                backgroundColor: '#f9f9f9',
+                backgroundColor: '#E8F0F7',
             },
             profileImageSize: 90,
             nameFontSize: 24,
             qrBorderWidth: 0,
-            qrBackgroundColor: '#ffffff',
+            qrBackgroundColor: '#FFFFFF',
             nameFontWeight: '600' as const,
             nameLetterSpacing: 1,
             containerPadding: 25,
@@ -97,13 +97,13 @@ const ProfileQrCode = ({
         elegant: {
             containerStyle: {
                 borderWidth: 1,
-                borderColor: '#555555',
-                backgroundColor: '#ffffff',
+                borderColor: '#7ED321',
+                backgroundColor: '#F4F4F4',
             },
             profileImageSize: 70,
             nameFontSize: 20,
             qrBorderWidth: 2,
-            qrBackgroundColor: '#f5f5f5',
+            qrBackgroundColor: '#FAFAFA',
             nameFontWeight: '500' as const,
             nameLetterSpacing: 0.8,
             nameTextTransform: 'uppercase' as const,
@@ -258,7 +258,7 @@ const ProfileQrCode = ({
                     </Text>
                     <View style={[
                         styles.previewSelectButton,
-                        { backgroundColor: isSelected ? color : '#4CAF50' }
+                        { backgroundColor: isSelected ? color : '#4c7fafff' }
                     ]}>
                         <Text style={styles.previewSelectButtonText}>
                             {isSelected ? 'Selected' : 'Select'}
@@ -516,6 +516,8 @@ const styles = StyleSheet.create({
         marginVertical: 15,
         alignItems: 'center',
         justifyContent: 'center',
+        borderColor: '#D9D9D9', // light gray border
+        backgroundColor: '#FFFFFF',
     },
     socialContainer: {
         width: '100%',
@@ -567,7 +569,7 @@ const styles = StyleSheet.create({
         marginBottom: 15,
     },
     selectedStyleCard: {
-        backgroundColor: '#f8fff8',
+        backgroundColor: '#E6F2FF', // light blue highlight
     },
     previewImageContainer: {
         height: 150,
@@ -629,6 +631,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         borderRadius: 6,
         alignItems: 'center',
+        backgroundColor: '#4A90E2', // primary accent
     },
     previewSelectButtonText: {
         color: 'white',
