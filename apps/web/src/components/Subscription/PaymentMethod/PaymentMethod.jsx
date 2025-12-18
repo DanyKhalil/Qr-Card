@@ -35,7 +35,7 @@ const PaymentMethod = ({ plan }) => {
 
     return (
         <div className="payment-methods-wrapper">
-            <h3>Payment for {plan.name}</h3>
+            {/* <h3>Payment for {plan.name}</h3> */}
             <div className="payment-methods-container">
                 {paymentMethods.map((method) => (
                     <div key={method.id} className="payment-method-card">

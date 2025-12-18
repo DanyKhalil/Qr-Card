@@ -77,6 +77,16 @@ export const subscribeToPlan = async (req, res) => {
       return res.status(400).json({ error: "User already has an active subscription" });
     }
 
+    // Check for uploaded receipt if payment method requires it
+    let receiptUrl = null;
+    if (req.files && req.files.length > 0) {
+      const receiptFile = req.files.find(file => file.fieldname === 'receipt');
+      if (receiptFile) {
+        // Save receipt URL to payment
+        receiptUrl = `/uploads/receipts/${receiptFile.filename}`;
+      }
+    }
+
     // Create new subscription
     const subscription = await UserSubscription.create({
       user_id: userId,
@@ -94,6 +104,7 @@ export const subscribeToPlan = async (req, res) => {
       currency: plan.currency,
       payment_method: payment_details?.method || "manual", // default to manual
       status: "pending",
+      receipt_url: receiptUrl, // ADD THIS LINE - was missing
       notes: payment_details?.notes || null
     });
 

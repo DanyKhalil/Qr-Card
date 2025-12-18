@@ -1,7 +1,7 @@
 // services/subscriptionApi.js
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:5050/api'; // adjust if needed
+const API_BASE_URL = 'http://localhost:5050/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -49,24 +49,35 @@ export const subscriptionApi = {
     }
   },
 
-  // **Subscribe and send receipt together**
-  subscribeToPlan: async (planId, paymentDetails = {}) => {
-    const res = await api.post('/subscription/subscribe', {
-      plan_id: planId,
-      payment_details: paymentDetails
-    });
-    return res.data;
+  // **FIXED: Send receipt as FormData, not JSON**
+  subscribeToPlan: async (planId, paymentDetails = {}, receiptFile = null) => {
+    try {
+      const formData = new FormData();
+      
+      // Add JSON data
+      formData.append('plan_id', planId);
+      formData.append('payment_details', JSON.stringify(paymentDetails));
+      
+      // Add receipt file if provided
+      if (receiptFile) {
+        formData.append('receipt', receiptFile);
+      }
+
+      const response = await api.post('/subscription/subscribe', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      
+      return response.data;
+    } catch (error) {
+      console.error("Subscribe to plan API error:", error);
+      throw error;
+    }
   },
 
-  uploadReceipt: async (subscriptionId, receiptFile) => {
-    const formData = new FormData();
-    formData.append('receipt', receiptFile);
-    formData.append('subscription_id', subscriptionId);
-
-    const res = await api.post('/subscription/upload-receipt', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    });
-
-    return res.data;
-  }
+  // **REMOVE THIS - not needed since receipt is part of subscribe**
+  // uploadReceipt: async (subscriptionId, receiptFile) => {
+  //   // This endpoint doesn't exist on backend
+  // }
 };
