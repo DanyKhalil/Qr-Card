@@ -7,6 +7,7 @@ import {
   cancelSubscription 
 } from "../controllers/subscriptionController.js";
 import { authenticate } from "../middleware/authMiddleware.js";
+import { uploadUserMedia } from "../middleware/uploadMiddleware.js"; // import multer
 
 const router = express.Router();
 
@@ -16,8 +17,8 @@ router.get("/current", authenticate, getCurrentSubscription);
 // GET /subscription/plans - get all available subscription plans
 router.get("/plans", authenticate, getAvailablePlans);
 
-// POST /subscription/subscribe - subscribe to a plan
-router.post("/subscribe", authenticate, subscribeToPlan);
+// POST /subscription/subscribe - subscribe to a plan with receipt upload
+router.post("/subscribe", authenticate, uploadUserMedia, subscribeToPlan);
 
 // POST /subscription/cancel - cancel current subscription
 router.post("/cancel", authenticate, cancelSubscription);

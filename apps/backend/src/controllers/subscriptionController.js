@@ -1,5 +1,5 @@
 // controllers/subscriptionController.js
-import { User, UserSubscription, SubscriptionPlan } from "../models/index.js";
+import { User, UserSubscription, SubscriptionPlan, Payment } from "../models/index.js";
 
 /**
  * Get current user's subscription
@@ -70,24 +70,38 @@ export const subscribeToPlan = async (req, res) => {
 
     // Check if user already has an active subscription
     const currentSub = await UserSubscription.findOne({
-      where: { user_id: userId, is_active: true }
+      where: { user_id: userId, status: "active" }
     });
 
     if (currentSub) {
       return res.status(400).json({ error: "User already has an active subscription" });
     }
 
+    // Create new subscription
     const subscription = await UserSubscription.create({
       user_id: userId,
       plan_id,
       start_date: new Date(),
       end_date: new Date(Date.now() + 30*24*60*60*1000), // Example: 30 days
-      status: "active",
-      payment_details: payment_details || null,
-      is_active: true
+      status: "pending", // start as pending until payment is confirmed
     });
 
-    res.status(201).json({ message: "Subscribed successfully", subscription });
+    // Create initial pending payment
+    const payment = await Payment.create({
+      user_id: userId,
+      subscription_id: subscription.id,
+      amount: plan.price,
+      currency: plan.currency,
+      payment_method: payment_details?.method || "manual", // default to manual
+      status: "pending",
+      notes: payment_details?.notes || null
+    });
+
+    res.status(201).json({ 
+      message: "Subscription created successfully. Payment is pending approval.", 
+      subscription, 
+      payment 
+    });
   } catch (error) {
     console.error("Error in subscribeToPlan:", error);
     res.status(500).json({ error: error.message });

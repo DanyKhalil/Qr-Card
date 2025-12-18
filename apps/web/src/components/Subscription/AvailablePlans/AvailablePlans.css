@@ -28,6 +28,11 @@
     box-shadow: 0 4px 12px rgba(0,0,0,0.08);
     text-align: center;
     transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+.plan-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.15);
 }
 
 .plan-card h4 {
@@ -58,4 +63,29 @@
     background: #0056b3;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0,123,255,0.25);
+}
+
+
+.plan-card.selected {
+    background: linear-gradient(135deg, #648ade, #4068e8);
+    color: #ffffff;
+    transform: scale(1.05);
+    box-shadow: 0 12px 30px rgba(37, 99, 235, 0.45);
+    border: 2px solid #1e3a8a;
+}
+
+.plan-card.selected h4,
+.plan-card.selected p {
+    color: #ffffff;
+}
+
+.plan-card.selected button {
+    background: #22c55e;
+    cursor: default;
+    box-shadow: none;
+}
+
+.plan-card.selected button:hover {
+    background: #22c55e;
+    transform: none;
 }

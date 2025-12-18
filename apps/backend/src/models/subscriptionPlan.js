@@ -26,6 +26,7 @@ const SubscriptionPlan = sequelize.define(
     },
     billing_interval: {
       type: DataTypes.ENUM("monthly", "yearly"),
+      allowNull: false,
       defaultValue: "monthly",
     },
     max_profiles: {

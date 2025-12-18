@@ -11,9 +11,10 @@ const uploadsRoot = path.join(__dirname, '../../uploads');
 const profilesDir = path.join(uploadsRoot, 'profiles');
 const coversDir = path.join(uploadsRoot, 'covers');
 const customContentDir = path.join(uploadsRoot, 'custom-content');
+const receiptsDir = path.join(uploadsRoot, 'receipts'); // added receipts folder
 
 // here creating folders if they don't exist
-[uploadsRoot, profilesDir, coversDir, customContentDir].forEach(dir => {
+[uploadsRoot, profilesDir, coversDir, customContentDir, receiptsDir].forEach(dir => {
     if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir, { recursive: true });
         console.log(`Folder has been created:: ${dir}`);
@@ -76,6 +77,8 @@ const uploadUserMedia = multer({
                 cb(null, profilesDir);
             } else if (file.fieldname === 'coverPhoto') {
                 cb(null, coversDir);
+            } else if (file.fieldname === 'receipt') { // added receipt support
+                cb(null, receiptsDir);
             } else if (file.fieldname && file.fieldname.startsWith('customImage_')) {
                 cb(null, customContentDir);
             } else {
@@ -91,6 +94,8 @@ const uploadUserMedia = multer({
                 cb(null, 'profile-' + uniqueSuffix + fileExtension);
             } else if (file.fieldname === 'coverPhoto') {
                 cb(null, 'cover-' + uniqueSuffix + fileExtension);
+            } else if (file.fieldname === 'receipt') { // added receipt support
+                cb(null, 'receipt-' + uniqueSuffix + fileExtension);
             } else if (file.fieldname && file.fieldname.startsWith('customImage_')) {
                 // Keep the original fieldname in the filename for reference
                 const fieldName = file.fieldname.replace(/[^a-zA-Z0-9_]/g, '_');

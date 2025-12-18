@@ -15,6 +15,7 @@ const Payment = sequelize.define(
     },
     subscription_id: {
       type: DataTypes.CHAR(36),
+      allowNull: true,
     },
     amount: {
       type: DataTypes.DECIMAL(10, 2),
@@ -39,6 +40,9 @@ const Payment = sequelize.define(
     },
     transaction_reference: {
       type: DataTypes.STRING(255),
+    },
+    receipt_url: {
+      type: DataTypes.STRING(500),
     },
     paid_at: {
       type: DataTypes.DATE,

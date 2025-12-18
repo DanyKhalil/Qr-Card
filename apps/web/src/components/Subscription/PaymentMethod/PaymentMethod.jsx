@@ -48,7 +48,7 @@ const PaymentMethod = ({ plan }) => {
                             className="payment-qr"
                         />
                         <p className="payment-description">{method.description}</p>
-                        <button className="pay-now-btn">Pay Now</button>
+                        {/* <button className="pay-now-btn">Pay Now</button> */}
                     </div>
                 ))}
             </div>
