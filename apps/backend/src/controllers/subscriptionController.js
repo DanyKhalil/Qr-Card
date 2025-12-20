@@ -1,5 +1,6 @@
 // controllers/subscriptionController.js
-import { User, UserSubscription, SubscriptionPlan, Payment } from "../models/index.js";
+import { User, UserSubscription, SubscriptionPlan, Payment, Profile } from "../models/index.js";
+import sequelize from "../config/db.js"
 
 /**
  * Get current user's subscription
@@ -147,5 +148,428 @@ export const cancelSubscription = async (req, res) => {
   } catch (error) {
     console.error("Error in cancelSubscription:", error);
     res.status(500).json({ error: error.message });
+  }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**
+ * Get all payments with user and subscription details (Admin only)
+ * GET /subscription/payments
+ * Query params: 
+ *   - status: filter by payment status
+ *   - payment_method: filter by payment method
+ *   - start_date, end_date: date range filter
+ *   - page, limit: pagination
+ */
+export const getAllPayments = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    // Check if user is admin
+    const user = await User.findByPk(userId);
+    if (!user || user.role !== 'admin') {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+
+    // Extract query parameters
+    const {
+      status,
+      payment_method,
+      start_date,
+      end_date,
+      search,
+      page = 1,
+      limit = 20
+    } = req.query;
+
+    const pageNum = parseInt(page);
+    const limitNum = parseInt(limit);
+    const offset = (pageNum - 1) * limitNum;
+
+    // Build where conditions
+    const whereConditions = {};
+
+    if (status) {
+      whereConditions.status = status;
+    }
+
+    if (payment_method) {
+      whereConditions.payment_method = payment_method;
+    }
+
+    // Date range filter
+    if (start_date || end_date) {
+      whereConditions.created_at = {};
+      if (start_date) {
+        whereConditions.created_at.$gte = new Date(start_date);
+      }
+      if (end_date) {
+        whereConditions.created_at.$lte = new Date(end_date);
+      }
+    }
+
+    // Search in user name or email
+    let userWhereConditions = {};
+    if (search) {
+      userWhereConditions = {
+        $or: [
+          { name: { $like: `%${search}%` } },
+          { email: { $like: `%${search}%` } }
+        ]
+      };
+    }
+
+    // Get total count for pagination
+    const totalCount = await Payment.count({
+      include: [{
+        model: User,
+        as: 'user',
+        where: userWhereConditions,
+        required: true
+      }],
+      where: whereConditions
+    });
+
+    // Get payments with all related information
+    const payments = await Payment.findAll({
+      where: whereConditions,
+      include: [
+        {
+          model: User,
+          as: 'user',
+          where: userWhereConditions,
+          required: true,
+          attributes: [
+            'id', 'name', 'email', 'role', 'verified', 
+            'is_active', 'created_at'
+          ],
+          include: [{
+            model: Profile,
+            as: 'profile',
+            attributes: [
+              'id', 'profile_pic_url', 'phone_number',
+              'bio', 'headline', 'website'
+            ]
+          }]
+        },
+        {
+          model: UserSubscription,
+          as: 'subscription',
+          include: [{
+            model: SubscriptionPlan,
+            as: 'plan',
+            attributes: ['id', 'name', 'price', 'currency', 'billing_interval']
+          }],
+          attributes: [
+            'id', 'status', 'start_date', 'end_date',
+            'next_billing_date', 'auto_renew', 'notes', 'created_at'
+          ]
+        },
+        {
+          model: User,
+          as: 'approved_by_admin',
+          attributes: ['id', 'name', 'email'],
+          required: false
+        }
+      ],
+      attributes: [
+        'id', 'amount', 'currency', 'payment_method', 'status',
+        'transaction_reference', 'receipt_url', 'paid_at', 
+        'approved_at', 'notes', 'created_at', 'updated_at'
+      ],
+      order: [['created_at', 'DESC']],
+      limit: limitNum,
+      offset: offset,
+      // Log the SQL for debugging
+      logging: console.log
+    });
+
+    // Format response with additional calculated fields
+    const formattedPayments = payments.map(payment => {
+      const paymentObj = payment.toJSON();
+      
+      // Calculate days pending (if payment is pending)
+      if (paymentObj.status === 'pending' && paymentObj.created_at) {
+        const createdDate = new Date(paymentObj.created_at);
+        const now = new Date();
+        const diffTime = Math.abs(now - createdDate);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        paymentObj.days_pending = diffDays;
+      }
+
+      // Format dates for better readability
+      paymentObj.formatted_created_at = paymentObj.created_at 
+        ? new Date(paymentObj.created_at).toLocaleString() 
+        : null;
+      paymentObj.formatted_paid_at = paymentObj.paid_at 
+        ? new Date(paymentObj.paid_at).toLocaleString() 
+        : null;
+      paymentObj.formatted_approved_at = paymentObj.approved_at 
+        ? new Date(paymentObj.approfile_at).toLocaleString() 
+        : null;
+
+      return paymentObj;
+    });
+
+    // Calculate summary statistics
+    const summary = {
+      total: totalCount,
+      pending: await Payment.count({ where: { status: 'pending' } }),
+      completed: await Payment.count({ where: { status: 'completed' } }),
+      failed: await Payment.count({ where: { status: 'failed' } }),
+      refunded: await Payment.count({ where: { status: 'refunded' } }),
+      total_amount: {
+        all: await Payment.sum('amount'),
+        completed: await Payment.sum('amount', { where: { status: 'completed' } }),
+        pending: await Payment.sum('amount', { where: { status: 'pending' } })
+      }
+    };
+
+    res.json({
+      success: true,
+      payments: formattedPayments,
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        total: totalCount,
+        pages: Math.ceil(totalCount / limitNum),
+        hasNext: pageNum < Math.ceil(totalCount / limitNum),
+        hasPrev: pageNum > 1
+      },
+      summary,
+      filters: {
+        status,
+        payment_method,
+        start_date,
+        end_date,
+        search
+      }
+    });
+
+  } catch (error) {
+    console.error("Error in getAllPayments:", error);
+    res.status(500).json({ 
+      success: false, 
+      error: error.message,
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
+  }
+};
+
+/**
+ * Update payment status (Admin only)
+ * PATCH /subscription/payments/:paymentId
+ */
+export const updatePaymentStatus = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    const { paymentId } = req.params;
+    const { status, notes, approved_by } = req.body;
+
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    // Check if user is admin
+    const user = await User.findByPk(userId);
+    if (!user || user.role !== 'admin') {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+
+    const payment = await Payment.findByPk(paymentId, {
+      include: [{
+        model: UserSubscription,
+        as: 'subscription'
+      }]
+    });
+
+    if (!payment) {
+      return res.status(404).json({ error: "Payment not found" });
+    }
+
+    // Update payment
+    const updateData = {};
+
+    if (status) {
+      if (!['pending', 'completed', 'failed', 'refunded'].includes(status)) {
+        return res.status(400).json({ error: "Invalid status value" });
+      }
+      updateData.status = status;
+    }
+
+    if (notes !== undefined) {
+      updateData.notes = notes;
+    }
+
+    // If marking as completed, update approved_at and approved_by
+    if (status === 'completed') {
+      updateData.approved_at = new Date();
+      updateData.approved_by = userId;
+      
+      // Also update the associated subscription to active
+      if (payment.subscription) {
+        await UserSubscription.update(
+          { 
+            status: 'active',
+            start_date: new Date(),
+            end_date: new Date(Date.now() + 30*24*60*60*1000) // 30 days from now
+          },
+          { where: { id: payment.subscription.id } }
+        );
+      }
+    }
+
+    await Payment.update(updateData, { where: { id: paymentId } });
+
+    // Get updated payment with all relationships
+    const updatedPayment = await Payment.findByPk(paymentId, {
+      include: [
+        {
+          model: User,
+          as: 'user',
+          attributes: ['id', 'name', 'email']
+        },
+        {
+          model: UserSubscription,
+          as: 'subscription',
+          include: [{
+            model: SubscriptionPlan,
+            as: 'plan'
+          }]
+        },
+        {
+          model: User,
+          as: 'approved_by_admin',
+          attributes: ['id', 'name', 'email']
+        }
+      ]
+    });
+
+    res.json({
+      success: true,
+      message: "Payment updated successfully",
+      payment: updatedPayment
+    });
+
+  } catch (error) {
+    console.error("Error in updatePaymentStatus:", error);
+    res.status(500).json({ 
+      success: false, 
+      error: error.message 
+    });
+  }
+};
+
+/**
+ * Get payment statistics (Admin only)
+ * GET /subscription/payments/stats
+ */
+export const getPaymentStats = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    // Check if user is admin
+    const user = await User.findByPk(userId);
+    if (!user || user.role !== 'admin') {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+
+    // Get stats for last 30 days
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    // Total revenue
+    const totalRevenue = await Payment.sum('amount', {
+      where: { status: 'completed' }
+    });
+
+    // Monthly revenue
+    const monthlyRevenue = await Payment.sum('amount', {
+      where: {
+        status: 'completed',
+        created_at: { $gte: thirtyDaysAgo }
+      }
+    });
+
+    // Payment method distribution
+    const paymentMethodStats = await Payment.findAll({
+      attributes: [
+        'payment_method',
+        [sequelize.fn('COUNT', sequelize.col('id')), 'count'],
+        [sequelize.fn('SUM', sequelize.col('amount')), 'total_amount']
+      ],
+      where: { status: 'completed' },
+      group: ['payment_method'],
+      raw: true
+    });
+
+    // Daily revenue for last 7 days
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    const dailyRevenue = await Payment.findAll({
+      attributes: [
+        [sequelize.fn('DATE', sequelize.col('created_at')), 'date'],
+        [sequelize.fn('COUNT', sequelize.col('id')), 'count'],
+        [sequelize.fn('SUM', sequelize.col('amount')), 'total_amount']
+      ],
+      where: {
+        status: 'completed',
+        created_at: { $gte: sevenDaysAgo }
+      },
+      group: [sequelize.fn('DATE', sequelize.col('created_at'))],
+      order: [[sequelize.fn('DATE', sequelize.col('created_at')), 'ASC']],
+      raw: true
+    });
+
+    // Pending payments needing attention
+    const pendingPayments = await Payment.count({
+      where: { status: 'pending' }
+    });
+
+    // Active subscriptions
+    const activeSubscriptions = await UserSubscription.count({
+      where: { status: 'active' }
+    });
+
+    res.json({
+      success: true,
+      stats: {
+        total_revenue: totalRevenue || 0,
+        monthly_revenue: monthlyRevenue || 0,
+        payment_methods: paymentMethodStats,
+        daily_revenue: dailyRevenue,
+        pending_payments: pendingPayments,
+        active_subscriptions: activeSubscriptions
+      }
+    });
+
+  } catch (error) {
+    console.error("Error in getPaymentStats:", error);
+    res.status(500).json({ 
+      success: false, 
+      error: error.message 
+    });
   }
 };
