@@ -1,5 +1,5 @@
 // controllers/subscriptionController.js
-import { User, UserSubscription, SubscriptionPlan, Payment, Profile } from "../models/index.js";
+import { User, UserSubscription, SubscriptionPlan, Payment, Profile, Notification } from "../models/index.js";
 import sequelize from "../config/db.js"
 
 /**
@@ -395,15 +395,30 @@ export const updatePaymentStatus = async (req, res) => {
     }
 
     const payment = await Payment.findByPk(paymentId, {
-      include: [{
-        model: UserSubscription,
-        as: 'subscription'
-      }]
+      include: [
+        {
+          model: User,
+          as: 'user',
+          attributes: ['id', 'name', 'email']
+        },
+        {
+          model: UserSubscription,
+          as: 'subscription',
+          include: [{
+            model: SubscriptionPlan,
+            as: 'plan',
+            attributes: ['name']
+          }]
+        }
+      ]
     });
 
     if (!payment) {
       return res.status(404).json({ error: "Payment not found" });
     }
+
+    // Store old status for comparison
+    const oldStatus = payment.status;
 
     // Update payment
     const updateData = {};
@@ -418,6 +433,10 @@ export const updatePaymentStatus = async (req, res) => {
     if (notes !== undefined) {
       updateData.notes = notes;
     }
+
+    let notificationMessage = '';
+    let notificationType = '';
+    let notificationTitle = '';
 
     // If marking as completed, update approved_at and approved_by
     if (status === 'completed') {
@@ -435,19 +454,70 @@ export const updatePaymentStatus = async (req, res) => {
           { where: { id: payment.subscription.id } }
         );
       }
+
+      // Create notification for payment completion
+      notificationType = 'payment_approved';
+      notificationTitle = 'Payment Approved';
+      notificationMessage = `Your payment of $${payment.amount} for ${payment.subscription?.plan?.name || 'subscription'} has been approved. Your subscription is now active!`;
     }
 
     // FIX: Also update subscription when payment is rejected (failed)
     if (status === 'failed' && payment.subscription) {
       await UserSubscription.update(
         { 
-          status: 'suspended', // Use 'suspended' status for UserSubscription
+          status: 'suspended',
         },
         { where: { id: payment.subscription.id } }
       );
+
+      // Create notification for payment rejection
+      notificationType = 'payment_rejected';
+      notificationTitle = 'Payment Rejected';
+      notificationMessage = `Your payment of $${payment.amount} for ${payment.subscription?.plan?.name || 'subscription'} has been rejected. Please contact support if you believe this is an error.`;
     }
 
+    // Handle refunded payments
+    if (status === 'refunded' && payment.subscription) {
+      await UserSubscription.update(
+        { 
+          status: 'cancelled',
+        },
+        { where: { id: payment.subscription.id } }
+      );
+
+      // Create notification for refund
+      notificationType = 'payment_refunded';
+      notificationTitle = 'Payment Refunded';
+      notificationMessage = `Your payment of $${payment.amount} for ${payment.subscription?.plan?.name || 'subscription'} has been refunded. Your subscription has been cancelled.`;
+    }
+
+    // Save payment updates
     await Payment.update(updateData, { where: { id: paymentId } });
+
+    // Create notification if status changed and we have a user to notify
+    if (status && status !== oldStatus && payment.user && notificationType) {
+      await Notification.create({
+        user_id: payment.user.id, // User who made the payment
+        sender_id: userId, // Admin who processed the payment
+        type: notificationType,
+        title: notificationTitle,
+        message: notificationMessage,
+        metadata: {
+          payment_id: paymentId,
+          amount: payment.amount,
+          currency: payment.currency,
+          subscription_id: payment.subscription?.id,
+          plan_name: payment.subscription?.plan?.name,
+          old_status: oldStatus,
+          new_status: status
+        },
+        action_url: status === 'completed' ? '/profile' : '/subscribe',
+        action_label: status === 'completed' ? 'Go to Profile' : 'View Plans',
+        is_read: false,
+        is_sent: false,
+        is_seen: false
+      });
+    }
 
     // Get updated payment with all relationships
     const updatedPayment = await Payment.findByPk(paymentId, {
@@ -476,7 +546,8 @@ export const updatePaymentStatus = async (req, res) => {
     res.json({
       success: true,
       message: "Payment updated successfully",
-      payment: updatedPayment
+      payment: updatedPayment,
+      notification_sent: notificationType ? true : false
     });
 
   } catch (error) {
