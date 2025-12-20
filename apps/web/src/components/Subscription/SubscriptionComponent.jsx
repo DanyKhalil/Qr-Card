@@ -7,8 +7,11 @@ import PaymentMethod from "./PaymentMethod/PaymentMethod.jsx";
 import ReceiptUploadModal from "./ReceiptUploadModal/ReceiptUploadModal.jsx";
 import { subscriptionApi } from "../../services/subscriptionApi.js";
 import "./SubscriptionComponent.css";
+import { useNavigate } from "react-router-dom";
 
 const SubscriptionComponent = ({ plans = [], currentUser, refreshPlans }) => {
+    const navigate = useNavigate();
+
     const [selectedPlan, setSelectedPlan] = useState(null);
     const [showPayment, setShowPayment] = useState(false);
     const [showReceiptModal, setShowReceiptModal] = useState(false);
@@ -88,6 +91,7 @@ const SubscriptionComponent = ({ plans = [], currentUser, refreshPlans }) => {
             
             // Refresh data
             refreshPlans();
+            navigate("/profile")
         } catch (error) {
             setSubscribeMessage(`Error: ${error.message}`);
         } finally {

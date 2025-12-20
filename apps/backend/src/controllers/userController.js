@@ -164,23 +164,44 @@ export const getUserProfile = async (req, res) => {
         ? new Date(subscriptionRecord.end_date)
         : null;
 
-      const isActive =
-        subscriptionRecord.status === "active" &&
-        endDate &&
-        endDate > now;
+      // CORRECTED: Determine if subscription is currently active
+      // Subscription is active if: status is "active" AND (no end date OR end date in future)
+      let isActive = false;
+      
+      if (subscriptionRecord.status === "active") {
+        if (endDate) {
+          // Subscription has an end date, check if it's in the future
+          isActive = endDate > now;
+        } else {
+          // Subscription has no end date (perpetual or manual control)
+          isActive = true;
+        }
+      }
+      // All other statuses: pending, expired, cancelled, suspended are not active
+      else {
+        isActive = false;
+      }
+
+      let daysRemaining = null;
+      if (endDate && endDate > now) {
+        daysRemaining = Math.max(
+          0,
+          Math.ceil((endDate - now) / (1000 * 60 * 60 * 24))
+        );
+      }
+
+      // CORRECTED: Map "suspended" to "failed" for frontend compatibility
+      const frontendStatus = subscriptionRecord.status === "suspended" 
+        ? "failed" 
+        : subscriptionRecord.status;
 
       subscription = {
         is_active: isActive,
-        status: subscriptionRecord.status,
+        status: frontendStatus, // Use mapped status for frontend
         plan_name: subscriptionRecord.plan?.name || null,
         expires_at: subscriptionRecord.end_date,
-        days_remaining: endDate
-          ? Math.max(
-              0,
-              Math.ceil((endDate - now) / (1000 * 60 * 60 * 24))
-            )
-          : null,
-        requires_payment: !isActive
+        days_remaining: daysRemaining,
+        requires_payment: !isActive // Payment required if not active
       };
     }
 

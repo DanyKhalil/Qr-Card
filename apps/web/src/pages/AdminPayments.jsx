@@ -213,7 +213,7 @@ const AdminPayments = () => {
   if (loading && payments.length === 0) {
     return (
       <div className="admin-payments-page">
-        <Header activeIndex={-1} />
+        <Header activeIndex={-2} />
         <div className="loading-container">
           <div className="loading-spinner"></div>
           <p>Loading payments...</p>
@@ -225,7 +225,7 @@ const AdminPayments = () => {
 
   return (
     <div className="admin-payments-page">
-      <Header activeIndex={-1} />
+      <Header activeIndex={-2} />
 
       {/* Receipt Modal */}
       {selectedReceipt && (
@@ -351,7 +351,7 @@ const AdminPayments = () => {
                 <th>Amount</th>
                 <th>Method</th>
                 <th>Status</th>
-                <th>Reference</th>
+                {/* <th>Reference</th> */}
                 <th>Receipt</th>
                 <th>Subscription</th>
                 <th>Actions</th>
@@ -381,7 +381,7 @@ const AdminPayments = () => {
                       <div className="user-cell">
                         {payment.user?.profile?.profile_pic_url ? (
                           <img 
-                            src={`http://localhost:5050${payment.user.profile.profile_pic_url}`}
+                            src={`${payment.user.profile.profile_pic_url}`}
                             alt={payment.user.name}
                             className="user-avatar"
                           />
@@ -413,14 +413,14 @@ const AdminPayments = () => {
                       </span>
                     </td>
 
-                    <td>
+                    {/* <td>
                       <div className="reference-cell">
                         {payment.transaction_reference ? (
                           <>
                             <div className="reference-main">{payment.transaction_reference}</div>
                             {payment.notes && (
                               <div className="reference-notes" title={payment.notes}>
-                                📝 Note
+                                Note
                               </div>
                             )}
                           </>
@@ -428,7 +428,7 @@ const AdminPayments = () => {
                           "No reference"
                         )}
                       </div>
-                    </td>
+                    </td> */}
 
                     <td>
                       {payment.receipt_url ? (
@@ -437,7 +437,7 @@ const AdminPayments = () => {
                           onClick={() => viewReceipt(payment.receipt_url)}
                           title="View receipt"
                         >
-                          📄 View
+                          View
                         </button>
                       ) : (
                         <span className="no-receipt">No receipt</span>
@@ -466,14 +466,14 @@ const AdminPayments = () => {
                               onClick={() => handleUpdateStatus(payment.id, "completed")}
                               title="Approve payment"
                             >
-                              ✅ Approve
+                              Approve
                             </button>
                             <button
                               className="reject-btn"
                               onClick={() => handleUpdateStatus(payment.id, "failed")}
                               title="Reject payment"
                             >
-                              ❌ Reject
+                              Reject
                             </button>
                           </>
                         )}
@@ -484,7 +484,7 @@ const AdminPayments = () => {
                             onClick={() => handleUpdateStatus(payment.id, "refunded")}
                             title="Mark as refunded"
                           >
-                            ↩️ Refund
+                            Refund
                           </button>
                         )}
 
@@ -494,7 +494,7 @@ const AdminPayments = () => {
                             onClick={() => handleUpdateStatus(payment.id, "pending")}
                             title="Mark for retry"
                           >
-                            🔄 Retry
+                            Retry
                           </button>
                         )}
 
@@ -504,7 +504,7 @@ const AdminPayments = () => {
                             onClick={() => alert(`Refunded on: ${formatDate(payment.approved_at)}`)}
                             title="View refund details"
                           >
-                            👁️ Details
+                            Details
                           </button>
                         )}
                       </div>

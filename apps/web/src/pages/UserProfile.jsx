@@ -93,6 +93,8 @@ const UserProfile = () => {
         getCurrentUser()?.role !== "admin"
     ) {
         const { status } = userData.subscription;
+        console.log(userData);
+        console.log("Status: ", status)
 
         let title = "Subscription Required";
         let message = "You must activate a subscription plan to continue.";
@@ -119,7 +121,7 @@ const UserProfile = () => {
             "Your subscription was cancelled. Please subscribe again to continue.";
         }
 
-        if (status === "suspended") {
+        if (status === "failed") {
             title = "Subscription Suspended";
             message =
             "Your subscription has been suspended. Please contact support.";

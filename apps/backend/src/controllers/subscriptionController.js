@@ -437,6 +437,16 @@ export const updatePaymentStatus = async (req, res) => {
       }
     }
 
+    // FIX: Also update subscription when payment is rejected (failed)
+    if (status === 'failed' && payment.subscription) {
+      await UserSubscription.update(
+        { 
+          status: 'suspended', // Use 'suspended' status for UserSubscription
+        },
+        { where: { id: payment.subscription.id } }
+      );
+    }
+
     await Payment.update(updateData, { where: { id: paymentId } });
 
     // Get updated payment with all relationships
