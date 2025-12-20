@@ -144,10 +144,10 @@ const AdminUsers = () => {
   // ======================
   return (
     <div className="admin-users-page">
-      <Header />
+      <Header activeIndex={-1}/>
 
       <div className="admin-users-container">
-        <h1>Admin Users</h1>
+        <h1>Admin Panel</h1>
 
         <div className="admin-search-add-container">
           <input

@@ -7,6 +7,8 @@ import scanQrIcon from "../../assets/images/icons/scan-qr-icon-white.png"
 import profileIcon from "../../assets/images/icons/profile-icon-white.png"
 import logoutIcon from "../../assets/images/icons/logout-icon.png"
 import notificationIcon from "../../assets/images/icons/notification-icon.png"
+import adminIcon from "../../assets/images/icons/admin-icon.png"
+import paymentIcon from "../../assets/images/icons/payment-icon.png"
 import { useNavigate, useParams } from 'react-router-dom';
 
 const Header = ({activeIndex}) => {
@@ -36,14 +38,18 @@ const Header = ({activeIndex}) => {
         navigate('/Login');
     }
     const goToNotification = () => {navigate(`/notifications`)}
+    const goToAdmin = () => {navigate(`/admin`)}
+    const goToPayments = () => {navigate(`/payments`)}
 
     let companyName = "QR CARD";
     let menuItems = [
-        {name: "Search", icon: searchIcon, action:goToSearch, active:(activeIndex === 0)},
-        {name: "Scan QR", icon: scanQrIcon, action: goToScanQrCode, active:(activeIndex === 1)},
-        {name: "Notifications", icon: notificationIcon, action:goToNotification, active:(activeIndex === 2)},
-        {name: "My Profile", icon: profileIcon, action: goToProfile, active:(activeIndex === 3)},
-        getCurrentUser()?.id ? {name: "Logout", icon: logoutIcon, action: logout, active:(activeIndex === 4)} : null ,
+        getCurrentUser()?.role == 'admin' ? {name: (getCurrentUser()?.role == 'admin' ? "" : "Payments"), icon: paymentIcon, action:goToPayments, active:(activeIndex === -2)} : null,
+        getCurrentUser()?.role == 'admin' ? {name: (getCurrentUser()?.role == 'admin' ? "" : "Admin"), icon: adminIcon, action:goToAdmin, active:(activeIndex === -1)} : null,
+        {name: (getCurrentUser()?.role == 'admin' ? "" : "Search"), icon: searchIcon, action:goToSearch, active:(activeIndex === 0)},
+        {name: (getCurrentUser()?.role == 'admin' ? "" : "Scan QR"), icon: scanQrIcon, action: goToScanQrCode, active:(activeIndex === 1)},
+        {name: (getCurrentUser()?.role == 'admin' ? "" : "Notifications"), icon: notificationIcon, action:goToNotification, active:(activeIndex === 2)},
+        {name: (getCurrentUser()?.role == 'admin' ? "" : "My Profile"), icon: profileIcon, action: goToProfile, active:(activeIndex === 3)},
+        getCurrentUser()?.id ? {name: (getCurrentUser()?.role == 'admin' ? "" : "Logout"), icon: logoutIcon, action: logout, active:(activeIndex === 4)} : null ,
     ].filter((obj) => obj !== null);
     return (
         <div className="header">

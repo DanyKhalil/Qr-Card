@@ -127,106 +127,211 @@ const UserProfile = () => {
             actionLink = "mailto:danikhalil2004@gmail.com";
         }
 
-        return (
-            <div className="subscription-block-page">
-                <Header />
-                <div className="subscription-block-container">
-                <h1>{title}</h1>
-                <p>{message}</p>
+        if(currentLoggedInUser.id != id) {
+            return (
+                <div className="subscription-block-page">
+                    <Header />
+                    <div className="subscription-block-container">
+                    <h1>Account not activated!</h1>
+                    <p>This account is not activated currently. Try to visit it later.</p>
 
-                <div className="subscription-actions">
-                    <a href={actionLink} className="primary-btn">
-                    {actionText}
-                    </a>
-                </div>
-                </div>
-                <Footer />
+                    <div className="subscription-actions">
+                        <a href={actionLink} className="primary-btn">
+                        {actionText}
+                        </a>
+                    </div>
+                    </div>
+                    <Footer />
 
-                <style jsx>{`
-                .subscription-block-page {
-                    min-height: 100vh;
-                    display: flex;
-                    flex-direction: column;
-                    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-                }
+                    <style jsx>{`
+                    .subscription-block-page {
+                        min-height: 100vh;
+                        display: flex;
+                        flex-direction: column;
+                        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+                    }
 
-                .subscription-block-container {
-                    flex: 1;
-                    max-width: 600px;
-                    margin: 120px auto 40px;
-                    background: #ffffff;
-                    border-radius: 20px;
-                    padding: 3rem;
-                    text-align: center;
-                    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-                    border: 1px solid #e9ecef;
-                }
-
-                .subscription-block-container h1 {
-                    font-size: 2.3rem;
-                    font-weight: 700;
-                    color: #343a40;
-                    margin-bottom: 1rem;
-                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                }
-
-                .subscription-block-container p {
-                    font-size: 1.05rem;
-                    color: #6c757d;
-                    line-height: 1.7;
-                    margin-bottom: 2.5rem;
-                }
-
-                .subscription-actions {
-                    display: flex;
-                    justify-content: center;
-                }
-
-                .primary-btn {
-                    padding: 0.9rem 2rem;
-                    background: #007bff;
-                    color: #ffffff;
-                    border-radius: 10px;
-                    font-size: 1rem;
-                    font-weight: 500;
-                    text-decoration: none;
-                    transition: all 0.3s ease;
-                }
-
-                .primary-btn:hover {
-                    background: #0056b3;
-                    transform: translateY(-2px);
-                    box-shadow: 0 6px 18px rgba(0, 123, 255, 0.3);
-                }
-
-                @media (max-width: 768px) {
                     .subscription-block-container {
-                    margin: 80px 1rem 40px;
-                    padding: 2rem;
+                        flex: 1;
+                        max-width: 600px;
+                        margin: 120px auto 40px;
+                        background: #ffffff;
+                        border-radius: 20px;
+                        padding: 3rem;
+                        text-align: center;
+                        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+                        border: 1px solid #e9ecef;
                     }
 
                     .subscription-block-container h1 {
-                    font-size: 1.9rem;
-                    }
-                }
-
-                @media (max-width: 480px) {
-                    .subscription-block-container {
-                    padding: 1.5rem;
+                        font-size: 2.3rem;
+                        font-weight: 700;
+                        color: #343a40;
+                        margin-bottom: 1rem;
+                        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
                     }
 
-                    .subscription-block-container h1 {
-                    font-size: 1.7rem;
+                    .subscription-block-container p {
+                        font-size: 1.05rem;
+                        color: #6c757d;
+                        line-height: 1.7;
+                        margin-bottom: 2.5rem;
+                    }
+
+                    .subscription-actions {
+                        display: flex;
+                        justify-content: center;
                     }
 
                     .primary-btn {
-                    width: 100%;
-                    text-align: center;
+                        padding: 0.9rem 2rem;
+                        background: #007bff;
+                        color: #ffffff;
+                        border-radius: 10px;
+                        font-size: 1rem;
+                        font-weight: 500;
+                        text-decoration: none;
+                        transition: all 0.3s ease;
                     }
-                }
-                `}</style>
-            </div>
-        );
+
+                    .primary-btn:hover {
+                        background: #0056b3;
+                        transform: translateY(-2px);
+                        box-shadow: 0 6px 18px rgba(0, 123, 255, 0.3);
+                    }
+
+                    @media (max-width: 768px) {
+                        .subscription-block-container {
+                        margin: 80px 1rem 40px;
+                        padding: 2rem;
+                        }
+
+                        .subscription-block-container h1 {
+                        font-size: 1.9rem;
+                        }
+                    }
+
+                    @media (max-width: 480px) {
+                        .subscription-block-container {
+                        padding: 1.5rem;
+                        }
+
+                        .subscription-block-container h1 {
+                        font-size: 1.7rem;
+                        }
+
+                        .primary-btn {
+                        width: 100%;
+                        text-align: center;
+                        }
+                    }
+                    `}</style>
+                </div>
+            );
+        }
+        else {
+
+            return (
+                <div className="subscription-block-page">
+                    <Header />
+                    <div className="subscription-block-container">
+                    <h1>{title}</h1>
+                    <p>{message}</p>
+
+                    <div className="subscription-actions">
+                        <a href={actionLink} className="primary-btn">
+                        {actionText}
+                        </a>
+                    </div>
+                    </div>
+                    <Footer />
+
+                    <style jsx>{`
+                    .subscription-block-page {
+                        min-height: 100vh;
+                        display: flex;
+                        flex-direction: column;
+                        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+                    }
+
+                    .subscription-block-container {
+                        flex: 1;
+                        max-width: 600px;
+                        margin: 120px auto 40px;
+                        background: #ffffff;
+                        border-radius: 20px;
+                        padding: 3rem;
+                        text-align: center;
+                        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+                        border: 1px solid #e9ecef;
+                    }
+
+                    .subscription-block-container h1 {
+                        font-size: 2.3rem;
+                        font-weight: 700;
+                        color: #343a40;
+                        margin-bottom: 1rem;
+                        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                    }
+
+                    .subscription-block-container p {
+                        font-size: 1.05rem;
+                        color: #6c757d;
+                        line-height: 1.7;
+                        margin-bottom: 2.5rem;
+                    }
+
+                    .subscription-actions {
+                        display: flex;
+                        justify-content: center;
+                    }
+
+                    .primary-btn {
+                        padding: 0.9rem 2rem;
+                        background: #007bff;
+                        color: #ffffff;
+                        border-radius: 10px;
+                        font-size: 1rem;
+                        font-weight: 500;
+                        text-decoration: none;
+                        transition: all 0.3s ease;
+                    }
+
+                    .primary-btn:hover {
+                        background: #0056b3;
+                        transform: translateY(-2px);
+                        box-shadow: 0 6px 18px rgba(0, 123, 255, 0.3);
+                    }
+
+                    @media (max-width: 768px) {
+                        .subscription-block-container {
+                        margin: 80px 1rem 40px;
+                        padding: 2rem;
+                        }
+
+                        .subscription-block-container h1 {
+                        font-size: 1.9rem;
+                        }
+                    }
+
+                    @media (max-width: 480px) {
+                        .subscription-block-container {
+                        padding: 1.5rem;
+                        }
+
+                        .subscription-block-container h1 {
+                        font-size: 1.7rem;
+                        }
+
+                        .primary-btn {
+                        width: 100%;
+                        text-align: center;
+                        }
+                    }
+                    `}</style>
+                </div>
+            );
+        }
 
     }
 
