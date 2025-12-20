@@ -38,7 +38,6 @@ const UserProfile = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const hasVisited = useRef(false);
-    console.log(userData);
 
     const fetchUserProfile = async (id) => {
         try {
@@ -93,8 +92,6 @@ const UserProfile = () => {
         getCurrentUser()?.role !== "admin"
     ) {
         const { status } = userData.subscription;
-        console.log(userData);
-        console.log("Status: ", status)
 
         let title = "Subscription Required";
         let message = "You must activate a subscription plan to continue.";
@@ -137,11 +134,11 @@ const UserProfile = () => {
                     <h1>Account not activated!</h1>
                     <p>This account is not activated currently. Try to visit it later.</p>
 
-                    <div className="subscription-actions">
+                    {/* <div className="subscription-actions">
                         <a href={actionLink} className="primary-btn">
                         {actionText}
                         </a>
-                    </div>
+                    </div> */}
                     </div>
                     <Footer />
 

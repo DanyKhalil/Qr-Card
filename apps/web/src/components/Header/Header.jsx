@@ -45,9 +45,9 @@ const Header = ({activeIndex}) => {
     let menuItems = [
         getCurrentUser()?.role == 'admin' ? {name: (getCurrentUser()?.role == 'admin' ? "" : "Payments"), icon: paymentIcon, action:goToPayments, active:(activeIndex === -2)} : null,
         getCurrentUser()?.role == 'admin' ? {name: (getCurrentUser()?.role == 'admin' ? "" : "Admin"), icon: adminIcon, action:goToAdmin, active:(activeIndex === -1)} : null,
-        {name: (getCurrentUser()?.role == 'admin' ? "" : "Search"), icon: searchIcon, action:goToSearch, active:(activeIndex === 0)},
+        getCurrentUser()?.id ? {name: (getCurrentUser()?.role == 'admin' ? "" : "Search"), icon: searchIcon, action:goToSearch, active:(activeIndex === 0)} : null,
         {name: (getCurrentUser()?.role == 'admin' ? "" : "Scan QR"), icon: scanQrIcon, action: goToScanQrCode, active:(activeIndex === 1)},
-        {name: (getCurrentUser()?.role == 'admin' ? "" : "Notifications"), icon: notificationIcon, action:goToNotification, active:(activeIndex === 2)},
+        getCurrentUser()?.id ? {name: (getCurrentUser()?.role == 'admin' ? "" : "Notifications"), icon: notificationIcon, action:goToNotification, active:(activeIndex === 2)} : null,
         {name: (getCurrentUser()?.role == 'admin' ? "" : "My Profile"), icon: profileIcon, action: goToProfile, active:(activeIndex === 3)},
         getCurrentUser()?.id ? {name: (getCurrentUser()?.role == 'admin' ? "" : "Logout"), icon: logoutIcon, action: logout, active:(activeIndex === 4)} : null ,
     ].filter((obj) => obj !== null);

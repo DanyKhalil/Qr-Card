@@ -5,6 +5,9 @@ import SubscriptionComponent from "../components/Subscription/SubscriptionCompon
 import { subscriptionApi } from "../services/subscriptionApi.js";
 
 const Subscription = () => {
+    const getToken = () => {
+        return localStorage.getItem("token");
+    };
     const getCurrentUser = () => {
         const userStr = localStorage.getItem("user");
         if (!userStr) return null;
@@ -38,7 +41,7 @@ const Subscription = () => {
     };
 
     useEffect(() => {
-        if (!currentUser) {
+        if (!currentUser || !getToken()) {
             window.location.href = "/login";
             return;
         }
