@@ -25,6 +25,7 @@ const SubscriptionComponent = ({ plans = [], currentUser, refreshPlans }) => {
     const [fileInputKey, setFileInputKey] = useState(Date.now()); // For resetting file input
 
     const currentSubscription = currentUser?.subscription || null;
+    console.log(currentUser)
 
     const handlePlanSelect = (plan) => {
         setSelectedPlan(plan);

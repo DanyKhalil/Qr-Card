@@ -34,6 +34,7 @@ const Header = ({activeIndex}) => {
     const goToSearch = () => {navigate(`/Filtering`)}
     const logout = () => {
         localStorage.removeItem("token");
+        localStorage.removeItem("subscription");
         localStorage.removeItem("user");
         navigate('/Login');
     }
