@@ -41,6 +41,10 @@ export default function StackLayout() {
         name="notifications/index" 
         options={{ title: 'Notifications' }} 
       />
+      <Stack.Screen 
+        name="subscribe/[id]" 
+        options={{ title: 'Subscribe' }} 
+      />
     </Stack>
   );
 }
