@@ -22,60 +22,111 @@ const Login = () => {
   const [checking, setChecking] = useState(true);
   const [error, setError] = useState("");
 
+  /* =========================
+     AUTH CHECK (LIKE WEB)
+  ========================= */
   useEffect(() => {
     const checkAuth = async () => {
       try {
         const token = await AsyncStorage.getItem("token");
-        const userString = await AsyncStorage.getItem("user");
-        
-        if (token && userString) {
-          const user = JSON.parse(userString);
-          
-          if (user.role === "admin") {
-            router.replace("/(tabs)/profile");
-          } else {
-            router.replace("/(tabs)/profile");
-          }
-        } else {
+
+        if (!token) {
           setChecking(false);
+          return;
         }
+
+        const res = await axios.get(
+          `${DEVELOPMENT_CONFIG.backendBaseUrl}/api/auth/me`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        await AsyncStorage.setItem(
+          "user",
+          JSON.stringify(res.data.user)
+        );
+
+        if (res.data.subscription) {
+          await AsyncStorage.setItem(
+            "subscription",
+            JSON.stringify(res.data.subscription)
+          );
+        } else {
+          await AsyncStorage.removeItem("subscription");
+        }
+
+        router.replace("/(tabs)/profile");
       } catch (err) {
-        console.error("Error checking authentication:", err);
+        console.error("Auth check failed:", err);
+        await AsyncStorage.multiRemove(["token", "user", "subscription"]);
         setChecking(false);
       }
     };
-    
+
     checkAuth();
   }, []);
 
+  /* =========================
+     LOGIN HANDLER (LIKE WEB)
+  ========================= */
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
       setError("Please enter both email and password");
       return;
     }
-    
+
     try {
-      const res = await axios.post(`${DEVELOPMENT_CONFIG.backendBaseUrl}/api/auth/login`, {
-        email,
-        password,
-      });
+      // 1️⃣ Login
+      const loginRes = await axios.post(
+        `${DEVELOPMENT_CONFIG.backendBaseUrl}/api/auth/login`,
+        { email, password }
+      );
 
-      await AsyncStorage.setItem("token", res.data.token);
-      await AsyncStorage.setItem("user", JSON.stringify(res.data.user));
+      const token = loginRes.data.token;
 
-      // Navigate based on user role
-      if (res.data.user.role === "admin") {
-        router.replace("/(tabs)/profile");
-      } else {
-        router.replace("/(tabs)/profile");
+      await AsyncStorage.setItem("token", token);
+      await AsyncStorage.setItem(
+        "user",
+        JSON.stringify(loginRes.data.user)
+      );
+
+      // 2️⃣ Fetch full user + subscription
+      try {
+        const meRes = await axios.get(
+          `${DEVELOPMENT_CONFIG.backendBaseUrl}/api/auth/me`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        await AsyncStorage.setItem(
+          "user",
+          JSON.stringify(meRes.data.user)
+        );
+
+        if (meRes.data.subscription) {
+          await AsyncStorage.setItem(
+            "subscription",
+            JSON.stringify(meRes.data.subscription)
+          );
+        } else {
+          await AsyncStorage.removeItem("subscription");
+        }
+      } catch (meErr) {
+        console.warn("Failed to fetch subscription:", meErr);
       }
+
+      router.replace("/(tabs)/profile");
     } catch (err) {
-      setError(err.response?.data?.error || "Login failed. Please check your credentials.");
+      setError(
+        err.response?.data?.error ||
+        "Login failed. Please check your credentials."
+      );
     }
   };
 
   const handleContinueWithoutAccount = () => {
-    // Navigate to the same page as if logged in, but without setting auth tokens
     router.replace("/(tabs)/search");
   };
 
@@ -83,6 +134,9 @@ const Login = () => {
     handleLogin();
   };
 
+  /* =========================
+     UI (UNCHANGED)
+  ========================= */
   if (checking) {
     return (
       <View style={styles.loading}>
@@ -98,7 +152,6 @@ const Login = () => {
         contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}
       >
-        {/* Top Image */}
         <View style={styles.topImageContainer}>
           <Image
             source={require('../../assets/images/LoginTop.png')}
@@ -124,7 +177,6 @@ const Login = () => {
             <View style={styles.form}>
               {error ? <Text style={styles.error}>{error}</Text> : null}
 
-              {/* Email Input with Icon */}
               <View style={styles.inputContainer}>
                 <Ionicons 
                   name="mail" 
@@ -144,7 +196,6 @@ const Login = () => {
                 />
               </View>
 
-              {/* Password Input with Icon */}
               <View style={styles.inputContainer}>
                 <Ionicons 
                   name="lock-closed" 
@@ -169,18 +220,18 @@ const Login = () => {
                 <Text style={styles.primaryButtonText}>Login</Text>
               </TouchableOpacity>
 
-              {/* Continue without account button */}
               <TouchableOpacity 
                 style={styles.secondaryButton} 
                 onPress={handleContinueWithoutAccount}
               >
-                <Text style={styles.secondaryButtonText}>Continue without account</Text>
+                <Text style={styles.secondaryButtonText}>
+                  Continue without account
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
         </View>
 
-        {/* Bottom Image */}
         <View style={styles.bottomImageContainer}>
           <Image
             source={require('../../assets/images/LoginBottom.png')}
@@ -195,6 +246,9 @@ const Login = () => {
 
 export default Login;
 
+/* =========================
+   STYLES (UNCHANGED)
+========================= */
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
@@ -242,8 +296,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     alignItems: "center",
   },
-
-  /* Tabs */
   tabContainer: {
     width: 300,
     height: 55,
@@ -285,8 +337,6 @@ const styles = StyleSheet.create({
     zIndex: 10,
     marginRight: 30,
   },
-
-  /* Form */
   form: {
     width: "100%",
     maxWidth: 400,
@@ -315,8 +365,6 @@ const styles = StyleSheet.create({
     color: "#2F3A4A",
     paddingVertical: 12,
   },
-
-  /* Buttons */
   primaryButton: {
     width: "100%",
     height: 50,
@@ -356,8 +404,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 16,
   },
-
-  /* Error */
   error: {
     color: "#7A2E2E",
     marginBottom: 15,

@@ -76,6 +76,7 @@ export default function ProfileTab() {
         if (userId) {
           await AsyncStorage.removeItem('token');
           await AsyncStorage.removeItem('user');
+          await AsyncStorage.removeItem("subscription");
           router.replace('/(auth)/login');
         } else {
           router.replace('/(auth)/login');
