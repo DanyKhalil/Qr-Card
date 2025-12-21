@@ -42,6 +42,20 @@ export default function AdminStackLayout() {
           ),
         }}
       />
+      <Stack.Screen
+        name="payments"
+        options={{
+          title: '      Payments Panel',
+          headerLeft: () => (
+            <TouchableOpacity
+              onPress={() => router.push('/(tabs)/profile')}
+              style={{ marginLeft: 0 }}
+            >
+              <Ionicons name="arrow-back" size={24} color="#F5F7FB" />
+            </TouchableOpacity>
+          ),
+        }}
+      />
     </Stack>
   );
 }
