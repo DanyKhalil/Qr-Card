@@ -1,20 +1,15 @@
-// import { useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
-import {View,Text,  ActivityIndicator,  Alert,ScrollView, Platform, PermissionsAndroid } from 'react-native';
-import {useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { View, Text, ActivityIndicator, Alert, Platform, PermissionsAndroid, Linking } from 'react-native';
+import { useFocusEffect, useLocalSearchParams, router } from 'expo-router';
 import UserProfileComponent from '../components/UserProfile/UserProfile';
 import { userApi } from '../services/userApi';
-import { profileAnalyticsApi} from '../services/profileAnalyticsApi';
+import { profileAnalyticsApi } from '../services/profileAnalyticsApi';
 import Button from '../components/UserProfile/Button/Button';
 import { DEVELOPMENT_CONFIG } from '../config/development';
-// import * as Contacts from "expo-contacts";
-import Contacts from 'react-native-contacts'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import LockedAccountScreen from '../components/UserProfile/LockedAccount/LockedAccount';
 
-
-
-const UserProfilePage = ({id}) => {
+const UserProfilePage = ({ id }) => {
     const { qrScan } = useLocalSearchParams();
     const [userData, setUserData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
@@ -22,34 +17,37 @@ const UserProfilePage = ({id}) => {
 
     const [token, setToken] = useState(null);
     const [user, setUser] = useState(null);
+
+    const hasVisited = useRef(false);
+
+    // Load logged-in user data
     useEffect(() => {
         const loadUserData = async () => {
-        try {
-            const storedToken = await AsyncStorage.getItem("token");
-            const userString = await AsyncStorage.getItem("user");
-            
-            if (storedToken && userString) {
-                const parsedUser = JSON.parse(userString);
-                setToken(storedToken);
-                setUser(parsedUser);
-            } else {
-                setToken(null);
-                setUser(null);
+            try {
+                const storedToken = await AsyncStorage.getItem("token");
+                const userString = await AsyncStorage.getItem("user");
+
+                if (storedToken && userString) {
+                    const parsedUser = JSON.parse(userString);
+                    setToken(storedToken);
+                    setUser(parsedUser);
+                } else {
+                    setToken(null);
+                    setUser(null);
+                }
+            } catch (error) {
+                console.error('Error loading user data:', error);
             }
-        } catch (error) {
-            console.error('Error loading user data:', error);
-        }
         };
 
         loadUserData();
     }, []);
-    
-    const hasVisited = useRef(false);
 
+    // Fetch user profile on focus
     useFocusEffect(
         React.useCallback(() => {
-            // This will run every time the screen comes into focus
-            fetchUserProfile(Array.isArray(id) ? id[0] : id);
+            const userId = Array.isArray(id) ? id[0] : id;
+            if (userId) fetchUserProfile(userId);
         }, [id])
     );
 
@@ -73,7 +71,7 @@ const UserProfilePage = ({id}) => {
             try {
                 const loggedInUserString = await AsyncStorage.getItem("user");
                 const loggedInUser = (loggedInUserString ? JSON.parse(loggedInUserString) : {});
-                if(loggedInUser.id !== userId){
+                if (loggedInUser.id !== userId) {
                     await profileAnalyticsApi.visitUserProfile(userId, isQrScan);
                 }
             } catch (err) {
@@ -86,213 +84,130 @@ const UserProfilePage = ({id}) => {
         if (id) {
             const userId = Array.isArray(id) ? id[0] : id;
             const isQrScan = qrScan === 'true';
-            
             fetchUserProfile(userId);
             visitProfile(userId, isQrScan);
         }
     }, [id, qrScan]);
 
-    // constructing contact links array becuase it is not an array in the respone of the backend
-    const processContactLinks = () => {
-        if (!userData) 
-            return [];
-        
-        const contactLinks = [];
+    // ----------------------
+    // Subscription logic
+    // ----------------------
+    const getSubscriptionMessage = () => {
+        if (!userData?.subscription || user?.role === 'admin') return null;
 
-        if (userData.email) {
-            contactLinks.push({name: userData.email, iconName: 'email', link: userData.email });
+        const { status, is_active } = userData.subscription;
+        if (is_active) return null;
+
+        let title = '';
+        let message = '';
+        let actionText = '';
+        let actionLink = '';
+
+        switch (status) {
+            case 'pending':
+                title = 'Payment Under Review';
+                message = 'We have received your payment. Our team is reviewing it and will activate your subscription shortly.';
+                actionText = 'Contact Support';
+                actionLink = 'mailto:danikhalil2004@gmail.com';
+                break;
+            case 'expired':
+                title = 'Subscription Expired';
+                message = 'Your subscription has expired. Please renew to regain access.';
+                actionText = 'Renew';
+                actionLink = '/subscribe/123';
+                break;
+            case 'cancelled':
+                title = 'Subscription Cancelled';
+                message = 'Your subscription was cancelled. Please subscribe again to continue.';
+                actionText = 'Subscribe Again';
+                actionLink = '/subscribe/123';
+                break;
+            case 'failed':
+                title = 'Subscription Suspended';
+                message = 'Your subscription has been suspended. Please contact support.';
+                actionText = 'Contact Support';
+                actionLink = 'mailto:danikhalil2004@gmail.com';
+                break;
+            default:
+                title = 'Subscription Required';
+                message = 'You must activate a subscription plan to continue.';
+                actionText = 'View Plans';
+                actionLink = '/subscribe/123';
         }
-        
-        if (userData.phone_number) {
-            contactLinks.push({name: userData.phone_number, iconName: 'phone', link: userData.phone_number });
-        }
-        
+
+        return { title, message, actionText, actionLink };
+    };
+
+    const subscriptionMessage = getSubscriptionMessage();
+
+    if (subscriptionMessage) {
+        const isSelf = user?.id === (Array.isArray(id) ? id[0] : id);
+        return (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+                <Text style={{ fontSize: 20, fontWeight: '700', marginBottom: 12 }}>
+                    {subscriptionMessage.title}
+                </Text>
+                <Text style={{ fontSize: 16, color: '#555', marginBottom: 24, textAlign: 'center' }}>
+                    {subscriptionMessage.message}
+                </Text>
+                {isSelf && subscriptionMessage.actionText && (
+                    <Button
+                        text={subscriptionMessage.actionText}
+                        onPress={() => {
+                            if (subscriptionMessage.actionLink.startsWith('mailto:')) {
+                                Linking.openURL(subscriptionMessage.actionLink);
+                            } else {
+                                router.push(subscriptionMessage.actionLink);
+                            }
+                        }}
+                    />
+                )}
+            </View>
+        );
+    }
+
+    // ----------------------
+    // Helper functions
+    // ----------------------
+    const processContactLinks = () => {
+        if (!userData) return [];
+        const contactLinks = [];
+        if (userData.email) contactLinks.push({ name: userData.email, iconName: 'email', link: userData.email });
+        if (userData.phone_number) contactLinks.push({ name: userData.phone_number, iconName: 'phone', link: userData.phone_number });
         return contactLinks;
     };
 
-    function normalizeUrl(url: string) {
+    const normalizeUrl = (url: string) => {
         if (!url) return null;
-        if (url.startsWith("http://") || url.startsWith("https://")) {
-            return url;
-        }
-        return "https://" + url;
-    }
-    
-    // constructing the conect links
-    const processConnectLinks = () => {
-        if (!userData?.social_media_links) 
-            return [];
+        if (url.startsWith('http://') || url.startsWith('https://')) return url;
+        return 'https://' + url;
+    };
 
+    const processConnectLinks = () => {
+        if (!userData?.social_media_links) return [];
         return userData.social_media_links.map((link: any) => {
             try {
-                let rawUrl = link.url || link;
-
+                const rawUrl = link.url || link;
                 const url = normalizeUrl(rawUrl);
-
-                const hostname = new URL(url).hostname.replace("www.", "");
-                const icon = hostname.split(".")[0];
-
-                const username = url.split("/").filter(Boolean).pop();
-
-                return {
-                    id: link.id,
-                    iconName: icon,
-                    name: `@${username}`,
-                    link: url
-                };
+                const hostname = new URL(url).hostname.replace('www.', '');
+                const icon = hostname.split('.')[0];
+                const username = url.split('/').filter(Boolean).pop();
+                return { id: link.id, iconName: icon, name: `@${username}`, link: url };
             } catch (error) {
-                console.error("Invalid URL:", link.url);
+                console.error('Invalid URL:', link.url);
                 return null;
             }
         }).filter(Boolean);
     };
 
-    // changing the url of images (TEMPORARYYYYY)
     const transformImageUrl = (url: string) => {
-        if (!url) 
-            return url;
-        let transformedUrl = url.replace('http://localhost:5050', DEVELOPMENT_CONFIG.backendBaseUrl)
-        return transformedUrl;
+        if (!url) return url;
+        return url.replace('http://localhost:5050', DEVELOPMENT_CONFIG.backendBaseUrl);
     };
 
-
-
-    // // function to save contacts:
-    // async function saveContact({ name, phone, email }) {
-    //     const { status } = await Contacts.requestPermissionsAsync();
-
-    //     if (status !== "granted") {
-    //         Alert.alert("Permission denied", "Cannot save contact without permission.");
-    //         return;
-    //     }
-
-    //     const contact: any = {
-    //         [Contacts.Fields.FirstName]: name || "",
-    //         [Contacts.Fields.PhoneNumbers]: phone ? [{ number: phone }] : [],
-    //         [Contacts.Fields.Emails]: email ? [{ email }] : [],
-    //         ...(Platform.OS === 'android' 
-    //             ? { accountType: 'com.android.localphone', accountName: 'Phone' } 
-    //             : {}),
-    //         };
-
-    //     try {
-    //         const contactId = await Contacts.addContactAsync(contact);
-    //         console.log("Saved contact ID:", contactId);
-
-    //         if (contactId) {
-    //             Alert.alert("Success", "Contact saved to your phone.");
-    //         }
-    //     } catch (err) {
-    //         console.error("CONTACT ERROR:", err);
-    //         Alert.alert("Error", "Failed to save contact.");
-    //     }
-    // }
-    // function to save contacts:
-    // async function saveContact({ name, phone, email }) {
-    //     let contactObject =  {
-    //         displayName: name,
-    //         phoneNumbers: [phone,],
-    //         emailAddresses: [email,],
-    //     }
-
-    //     try {
-    //         await Contacts.addContact(contactObject)
-    //         console.log('added contact')
-    //     } catch (err) {
-    //         console.error("CONTACT ERROR:", err);
-    //         Alert.alert("Error", "Failed to save contact.");
-    //     }
-    // }
-
-// async function saveContact({ nameInput, phoneInput, emailInput }) {
-//     try {
-//         console.log('Starting contact save...');
-//         console.log('Received parameters:', { nameInput, phoneInput, emailInput });
-
-//         // Validate input parameters
-//         if (!nameInput || !phoneInput) {
-//             Alert.alert('Invalid Data', 'Name and phone number are required to save a contact.');
-//             return;
-//         }
-
-//         // Clean and validate data
-//         const cleanName = (nameInput || '').trim();
-//         const cleanPhone = (phoneInput || '').toString().trim();
-//         const cleanEmail = (emailInput || '').trim();
-
-//         if (!cleanName) {
-//             Alert.alert('Invalid Name', 'Please provide a valid name.');
-//             return;
-//         }
-
-//         if (!cleanPhone) {
-//             Alert.alert('Invalid Phone', 'Please provide a valid phone number.');
-//             return;
-//         }
-
-//         console.log('Cleaned contact data:', { 
-//             name: cleanName, 
-//             phone: cleanPhone, 
-//             email: cleanEmail 
-//         });
-
-//         // Request permission first
-//         let permissionGranted = false;
-        
-//         if (Platform.OS === 'android') {
-//             const granted = await PermissionsAndroid.request(
-//                 PermissionsAndroid.PERMISSIONS.WRITE_CONTACTS,
-//                 {
-//                     title: 'Contacts Permission',
-//                     message: 'This app needs access to your contacts to save contact information.',
-//                     buttonNeutral: 'Ask Me Later',
-//                     buttonNegative: 'Cancel',
-//                     buttonPositive: 'OK',
-//                 }
-//             );
-//             permissionGranted = granted === PermissionsAndroid.RESULTS.GRANTED;
-//         } else {
-//             // For iOS, use the library's permission method
-//             permissionGranted = await Contacts.requestPermission();
-//         }
-
-//         if (!permissionGranted) {
-//             Alert.alert('Permission Denied', 'Cannot save contact without permission.');
-//             return;
-//         }
-
-//         // Build contact object with only valid data
-//         const contactObject = {
-//             givenName: cleanName,
-//             phoneNumbers: [{
-//                 label: 'mobile',
-//                 number: cleanPhone,
-//             }],
-//         };
-
-//         // Only add email if provided and valid
-//         if (cleanEmail && cleanEmail.includes('@')) {
-//             contactObject.emailAddresses = [{
-//                 label: 'work', 
-//                 email: cleanEmail,
-//             }];
-//         }
-
-//         console.log('Final contact object to save:', contactObject);
-
-//         // Save contact
-//         await Contacts.addContact(contactObject);
-//         console.log('Contact added successfully');
-//         Alert.alert('Success', 'Contact saved to your device!');
-        
-//     } catch (err) {
-//         console.error("CONTACT ERROR:", err);
-//         console.error("Error details:", err);
-//         Alert.alert("Error", "Failed to save contact: " + (err.message || 'Unknown error'));
-//     }
-// }
-
-
+    // ----------------------
+    // Loading / error / locked account
+    // ----------------------
     if (loading) {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -302,16 +217,16 @@ const UserProfilePage = ({id}) => {
         );
     }
 
-    if(userData?.visibility === false && user?.role !== "admin") {
-        return (<LockedAccountScreen />)
+    if (userData?.visibility === false && user?.role !== 'admin') {
+        return <LockedAccountScreen />;
     }
 
     if (error) {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
                 <Text style={{ color: 'red', marginBottom: 16 }}>Error: {error}</Text>
-                <Button 
-                    text="Retry" 
+                <Button
+                    text="Retry"
                     onPress={() => id && fetchUserProfile(Array.isArray(id) ? id[0] : id)}
                     color="coral"
                 />
@@ -343,19 +258,16 @@ const UserProfilePage = ({id}) => {
             bio={userData.bio}
             videos={userData.videos_links}
             locations={userData.locations}
-            followers = {userData.followers}
-            following = {userData.following}
+            followers={userData.followers}
+            following={userData.following}
             id={Array.isArray(id) ? id[0] : id || 'User001'}
             customContent={userData.custom_content}
-            fetchUserProfile = {fetchUserProfile}
-            QrCodeColor = {userData.qr_code_color}
-            includeProfilePic ={userData.qr_code_include_profile_pic}
+            fetchUserProfile={fetchUserProfile}
+            QrCodeColor={userData.qr_code_color}
+            includeProfilePic={userData.qr_code_include_profile_pic}
             includeContact={userData.qr_code_include_contact}
             includeSocialMedia={userData.qr_code_include_social}
             includeWebsite={userData.qr_code_include_website}
-            // saveContactFunction={saveContact}
-            // phoneNumber={userData.phone_number[0]}
-            // email={userData.email[0]}
         />
     );
 };

@@ -58,6 +58,16 @@ export default function ProfileTab() {
       color: '#7A8FB8',
     },
     {
+      title: 'My Plan',
+      description: 'View your profile plan',
+      onPress: () =>
+        userId
+          ? router.push(`/(stack)/subscribe/${userId}`)
+          : router.replace('/(auth)/login'),
+      iconName: 'wallet-outline',
+      color: '#7A8FB8',
+    },
+    {
       title: userId ? 'Logout' : 'Login',
       description: userId
         ? 'Sign out of your account'
@@ -66,6 +76,7 @@ export default function ProfileTab() {
         if (userId) {
           await AsyncStorage.removeItem('token');
           await AsyncStorage.removeItem('user');
+          await AsyncStorage.removeItem("subscription");
           router.replace('/(auth)/login');
         } else {
           router.replace('/(auth)/login');

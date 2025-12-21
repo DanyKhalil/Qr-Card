@@ -67,7 +67,7 @@ export default function TabLayout() {
                   {/* Notifications */}
                   <TouchableOpacity
                     onPress={() => router.push('/notifications')}
-                    style={{ marginRight: 15 }}
+                    style={{ marginRight: 0, paddingHorizontal: 10, }}
                   >
                     <Ionicons
                       name="notifications-outline"
@@ -78,7 +78,22 @@ export default function TabLayout() {
 
                   {/* Admin */}
                   {isAdmin && (
-                    <TouchableOpacity onPress={() => router.push('/admin-panel')}>
+                    <TouchableOpacity 
+                      onPress={() => router.push('/admin-panel/payments')}
+                      style={{ marginRight: 0, paddingHorizontal: 10}}
+                    >
+                      <Ionicons
+                        name="cash-outline"
+                        size={24}
+                        color="#F5F7FB"
+                      />
+                    </TouchableOpacity>
+                  )}
+                  {isAdmin && (
+                    <TouchableOpacity 
+                      onPress={() => router.push('/admin-panel')}
+                      style={{paddingHorizontal: 10}}
+                    >
                       <Ionicons
                         name="shield-outline"
                         size={24}
