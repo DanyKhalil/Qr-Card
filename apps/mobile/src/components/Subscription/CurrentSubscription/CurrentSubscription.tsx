@@ -186,7 +186,7 @@ const CurrentSubscription = () => {
         )}
         
         {/* Action button based on status */}
-        {!is_active && status !== 'pending' && (
+        {/* {!is_active && status !== 'pending' && (
           <TouchableOpacity
             style={styles.actionButton}
             // onPress={() => router.navigate('/subscribe')} // Using expo-router like your login
@@ -196,7 +196,7 @@ const CurrentSubscription = () => {
               {status === 'expired' ? 'Renew Subscription' : 'Subscribe Now'}
             </Text>
           </TouchableOpacity>
-        )}
+        )} */}
       </View>
     </ScrollView>
   );

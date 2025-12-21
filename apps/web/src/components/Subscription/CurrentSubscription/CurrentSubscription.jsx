@@ -158,14 +158,14 @@ const CurrentSubscription = () => {
             )}
             
             {/* Action button based on status */}
-            {!is_active && status !== 'pending' && (
+            {/* {!is_active && status !== 'pending' && (
                 <button 
                     className="action-btn"
                     onClick={() => window.location.href = '/subscribe'}
                 >
                     {status === 'expired' ? 'Renew Subscription' : 'Subscribe Now'}
                 </button>
-            )}
+            )} */}
         </div>
     );
 };

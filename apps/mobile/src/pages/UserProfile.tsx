@@ -114,13 +114,13 @@ const UserProfilePage = ({ id }) => {
                 title = 'Subscription Expired';
                 message = 'Your subscription has expired. Please renew to regain access.';
                 actionText = 'Renew';
-                actionLink = '/subscribe';
+                actionLink = '/subscribe/123';
                 break;
             case 'cancelled':
                 title = 'Subscription Cancelled';
                 message = 'Your subscription was cancelled. Please subscribe again to continue.';
                 actionText = 'Subscribe Again';
-                actionLink = '/subscribe';
+                actionLink = '/subscribe/123';
                 break;
             case 'failed':
                 title = 'Subscription Suspended';
