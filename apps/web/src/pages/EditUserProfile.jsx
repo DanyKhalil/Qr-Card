@@ -33,7 +33,7 @@ const EditUserProfile = () => {
     const currentLoggedInUser = getCurrentUser();
     const { id: urlId } = useParams(); // get visiting user id 
     const id = urlId || currentLoggedInUser?.id; // either a visiting id or a current logged in id
-    if (!id) {
+    if (!id || !getToken()) {
         window.location.href = "/login";
         return null;
     }

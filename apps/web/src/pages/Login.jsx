@@ -31,13 +31,36 @@ const Form = () => {
 
   // Check if user is already logged in
   useEffect(() => {
-    const checkAuth = () => {
+    const checkAuth = async () => {
       const token = localStorage.getItem("token");
       const user = localStorage.getItem("user");
       
       if (token && user) {
-        // User is logged in, redirect to filtering
-        navigate('/Filtering');
+        try {
+          // Fetch fresh user data with subscription
+          const response = await axios.get('http://localhost:5050/api/auth/me', {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          
+          // Update localStorage with fresh data
+          localStorage.setItem("user", JSON.stringify(response.data.user));
+          if (response.data.subscription) {
+            localStorage.setItem("subscription", JSON.stringify(response.data.subscription));
+          }
+          
+          // User is logged in, redirect based on role
+          if (response.data.user.role === "admin") {
+            navigate('/admin');
+          } else {
+            navigate('/profile');
+          }
+        } catch (error) {
+          // Token might be invalid, clear it
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          localStorage.removeItem("subscription");
+          setIsChecking(false);
+        }
       } else {
         setIsChecking(false);
       }
@@ -58,20 +81,43 @@ const Form = () => {
     e.preventDefault();
 
     try {
-      const res = await axios.post("http://localhost:5050/api/auth/login", {
+      // 1. Login to get token
+      const loginRes = await axios.post("http://localhost:5050/api/auth/login", {
         email,
         password,
       });
 
-      // save token + user info
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("user", JSON.stringify(res.data.user));
+      // Save basic user info and token
+      localStorage.setItem("token", loginRes.data.token);
+      localStorage.setItem("user", JSON.stringify(loginRes.data.user));
 
-      // redirect based on role
-      if (res.data.user.role === "admin") {
-        navigate("/admin");
-      } else {
-        navigate("/profile");
+      // 2. Fetch full user data with subscription
+      try {
+        const userRes = await axios.get('http://localhost:5050/api/auth/me', {
+          headers: { Authorization: `Bearer ${loginRes.data.token}` }
+        });
+
+        // Update localStorage with full user data and subscription
+        localStorage.setItem("user", JSON.stringify(userRes.data.user));
+        if (userRes.data.subscription) {
+          localStorage.setItem("subscription", JSON.stringify(userRes.data.subscription));
+        }
+
+        // Redirect based on role
+        if (userRes.data.user.role === "admin") {
+          navigate("/admin");
+        } else {
+          navigate("/profile");
+        }
+
+      } catch (userError) {
+        console.error("Error fetching user data:", userError);
+        // Still redirect with basic login data
+        if (loginRes.data.user.role === "admin") {
+          navigate("/admin");
+        } else {
+          navigate("/profile");
+        }
       }
 
     } catch (err) {

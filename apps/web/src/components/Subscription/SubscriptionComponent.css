@@ -1,0 +1,515 @@
+/* SubscriptionComponent.css */
+
+/* Main container */
+.subscription-container {
+    /* max-width: 1200px; */
+    margin: 0;
+    /* padding: 20px; */
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    min-height: 100vh;
+    /* background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); */
+}
+
+/* Payment Section */
+.payment-section {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 40px;
+    margin: 40px auto;
+    max-width: 700px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+    border: 1px solid #e5e7eb;
+    animation: slideUp 0.4s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.payment-section h3 {
+    margin: 0 0 24px 0;
+    font-size: 1.75rem;
+    color: #1f2937;
+    font-weight: 700;
+    text-align: center;
+    position: relative;
+    padding-bottom: 16px;
+}
+
+.payment-section h3::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 4px;
+    background: linear-gradient(90deg, #2563eb, #3b82f6);
+    border-radius: 2px;
+}
+
+.price-display {
+    font-size: 1.375rem;
+    color: #374151;
+    margin-bottom: 32px;
+    font-weight: 600;
+    text-align: center;
+    background: linear-gradient(90deg, #2563eb, #3b82f6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Payment Method Selection */
+.payment-method {
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.payment-method h4 {
+    margin: 0 0 16px 0;
+    font-size: 1.125rem;
+    color: #374151;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.payment-method h4::before {
+    content: '💳';
+    font-size: 1.2rem;
+}
+
+.payment-method select {
+    width: 100%;
+    padding: 16px;
+    border-radius: 12px;
+    border: 2px solid #d1d5db;
+    background: #ffffff;
+    font-size: 1rem;
+    color: #374151;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23374151' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    background-size: 16px;
+    padding-right: 48px;
+}
+
+.payment-method select:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+    transform: translateY(-2px);
+}
+
+.payment-method select:disabled {
+    background: #f9fafb;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* Receipt Upload */
+.receipt-upload {
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.receipt-upload h4 {
+    margin: 0 0 12px 0;
+    font-size: 1.125rem;
+    color: #374151;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.receipt-upload h4::before {
+    content: '📎';
+    font-size: 1.2rem;
+}
+
+.receipt-note {
+    margin: 0 0 20px 0;
+    color: #6b7280;
+    font-size: 0.95rem;
+    font-style: italic;
+}
+
+/* File Upload Area */
+.file-upload-area {
+    position: relative;
+}
+
+/* Hide the actual file input */
+#receipt-file-input {
+    position: absolute;
+    width: 0.1px;
+    height: 0.1px;
+    opacity: 0;
+    overflow: hidden;
+    z-index: -1;
+}
+
+/* Style the label as the visible upload area */
+.file-input-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 30px;
+    border: 3px dashed #cbd5e1;
+    border-radius: 16px;
+    background: #f8fafc;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    min-height: 180px;
+}
+
+.file-input-label:hover {
+    border-color: #3b82f6;
+    background: #eff6ff;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(59, 130, 246, 0.15);
+}
+
+.file-input-label:active {
+    transform: translateY(0);
+}
+
+.file-input-label:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    border-style: solid;
+}
+
+.upload-icon {
+    font-size: 3rem;
+    margin-bottom: 16px;
+    color: #3b82f6;
+    transition: transform 0.3s ease;
+}
+
+.file-input-label:hover .upload-icon {
+    transform: scale(1.1) rotate(5deg);
+}
+
+.upload-text {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 8px;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.upload-hint {
+    font-size: 0.875rem;
+    color: #64748b;
+}
+
+/* File Preview */
+.file-preview {
+    margin-top: 24px;
+    animation: slideUp 0.3s ease;
+}
+
+.file-info {
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    background: white;
+    border-radius: 12px;
+    border: 2px solid #e2e8f0;
+    gap: 16px;
+}
+
+.file-icon {
+    font-size: 2rem;
+    color: #3b82f6;
+}
+
+.file-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.file-details strong {
+    color: #1e293b;
+    font-weight: 600;
+    font-size: 0.95rem;
+    word-break: break-all;
+}
+
+.file-details span {
+    color: #64748b;
+    font-size: 0.85rem;
+}
+
+.remove-file-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #fee2e2;
+    border: 2px solid #fecaca;
+    color: #dc2626;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.remove-file-btn:hover:not(:disabled) {
+    background: #fca5a5;
+    border-color: #f87171;
+    color: white;
+    transform: rotate(90deg);
+}
+
+.remove-file-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Message Display */
+.message {
+    padding: 16px 20px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    font-size: 0.95rem;
+    text-align: center;
+    font-weight: 500;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.message.loading {
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    color: #1e40af;
+    border: 2px solid #bfdbfe;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+.message:not(.loading) {
+    background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+    color: #065f46;
+    border: 2px solid #a7f3d0;
+}
+
+/* Subscription Actions */
+.subscription-actions {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    padding-top: 24px;
+    border-top: 2px solid #e5e7eb;
+}
+
+.cancel-btn {
+    padding: 16px 32px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+    border: 2px solid #d1d5db;
+    color: #374151;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+    min-width: 140px;
+}
+
+.cancel-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #e5e7eb, #d1d5db);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(209, 213, 219, 0.4);
+}
+
+.subscribe-btn {
+    padding: 16px 40px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #2563eb, #3b82f6);
+    border: none;
+    color: #ffffff;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+    min-width: 200px;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.subscribe-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #1d4ed8, #2563eb);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(37, 99, 235, 0.35);
+}
+
+.subscribe-btn:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+}
+
+.subscribe-btn:disabled,
+.cancel-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.btn-spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid white;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Receipt Info (for existing subscriptions) */
+.receipt-info {
+    margin: 40px auto;
+    padding: 30px;
+    max-width: 800px;
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
+    border-radius: 16px;
+    text-align: center;
+    border: 3px solid #f59e0b;
+    box-shadow: 0 10px 30px rgba(245, 158, 11, 0.15);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.02);
+    }
+}
+
+.receipt-info p {
+    margin-bottom: 20px;
+    color: #92400e;
+    font-weight: 600;
+    line-height: 1.6;
+    font-size: 1.1rem;
+}
+
+.upload-receipt-btn {
+    padding: 16px 36px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #16a34a, #22c55e);
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    letter-spacing: 0.5px;
+    box-shadow: 0 8px 25px rgba(22, 163, 74, 0.25);
+}
+
+.upload-receipt-btn:hover {
+    background: linear-gradient(135deg, #15803d, #16a34a);
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 12px 35px rgba(22, 163, 74, 0.35);
+}
+
+.upload-receipt-btn:active {
+    transform: translateY(0) scale(1);
+    box-shadow: 0 4px 15px rgba(22, 163, 74, 0.3);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .subscription-container {
+        padding: 15px;
+    }
+    
+    .payment-section {
+        padding: 30px 20px;
+        margin: 30px auto;
+    }
+    
+    .payment-section h3 {
+        font-size: 1.5rem;
+    }
+    
+    .price-display {
+        font-size: 1.25rem;
+    }
+    
+    .subscription-actions {
+        flex-direction: column;
+        gap: 16px;
+    }
+    
+    .cancel-btn,
+    .subscribe-btn {
+        width: 100%;
+        min-width: unset;
+    }
+    
+    .receipt-info {
+        padding: 24px 20px;
+        margin: 30px 15px;
+    }
+    
+    .receipt-info p {
+        font-size: 1rem;
+    }
+    
+    .file-input-label {
+        padding: 30px 20px;
+        min-height: 150px;
+    }
+    
+    .upload-text {
+        font-size: 1rem;
+    }
+}

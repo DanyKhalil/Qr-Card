@@ -1,4 +1,4 @@
-import { User, Profile } from '../models/index.js';
+import { User, Profile, UserSubscription, SubscriptionPlan } from '../models/index.js';
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import dotenv from "dotenv";
@@ -83,6 +83,74 @@ export const registerUser = async (req, res) => {
 
   } catch (error) {
     console.error("Register error:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+
+
+
+// Add this to your authController.js
+export const getCurrentUserWithSubscription = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const user = await User.findOne({
+      where: { id: userId },
+      include: [
+        {
+          model: Profile,
+          as: 'profile'
+        }
+      ]
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Get subscription
+    const subscription = await UserSubscription.findOne({
+      where: { user_id: user.id },
+      include: [
+        {
+          model: SubscriptionPlan,
+          as: "plan",
+        }
+      ],
+      order: [["created_at", "DESC"]]
+    });
+
+    // Format subscription data
+    let subscriptionData = null;
+    if (subscription) {
+      subscriptionData = {
+        plan_name: subscription.plan?.name || null,
+        starts_at: subscription.start_date,
+        expires_at: subscription.end_date,
+        status: subscription.status,
+        is_active: subscription.status === "active" && 
+                  (!subscription.end_date || new Date(subscription.end_date) > new Date())
+      };
+    }
+
+    res.json({
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        profile_pic_url: user.profile?.profile_pic_url,
+        verified: user.verified,
+        is_active: user.is_active
+      },
+      subscription: subscriptionData
+    });
+  } catch (error) {
+    console.error("Error getting user with subscription:", error);
     res.status(500).json({ error: "Server error" });
   }
 };

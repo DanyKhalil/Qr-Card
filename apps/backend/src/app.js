@@ -1,16 +1,15 @@
 import express from "express";
 import sequelize from "./config/db.js";
 import userRoutes from "./routes/userRoutes.js";
-import profileAnalyticsRoutes from "./routes/profileAnalyticsRoutes.js"
+import profileAnalyticsRoutes from "./routes/profileAnalyticsRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import user2Routes from "./routes/user2Routes.js";
 import path from 'path';
 import { fileURLToPath } from 'url';
 import adminUsersRoutes from './routes/adminUsers.js';
 import profileFollowRoutes from "./routes/profileFollowRoutes.js";
-import subscriptionRoutes from './routes/subscriptionRoutes.js';
-
 import notificationRoutes from "./routes/notificationRoutes.js";
+import subscriptionRoutes from "./routes/subscriptionRoutes.js"; // <-- Import subscription routes
 
 const app = express();
 
@@ -22,7 +21,7 @@ app.use(express.json());
 
 const corsMiddleware = (req, res, next) => {
   res.header('Access-Control-Allow-Origin', 'http://localhost:5173');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept');
   
   if (req.method === 'OPTIONS') {
@@ -54,12 +53,11 @@ app.use((req, res, next) => {
 app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/users2", user2Routes);
-app.use("/api/profile-analytics", profileAnalyticsRoutes)
+app.use("/api/profile-analytics", profileAnalyticsRoutes);
 app.use("/api/users3", adminUsersRoutes);
 app.use("/api/follow", profileFollowRoutes);
-app.use("/api/subscription", subscriptionRoutes);
-
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/subscription", subscriptionRoutes); // <-- Add subscription routes
 
 app.get('/api/test-cors', (req, res) => {
   res.json({ message: 'CORS is working!' });

@@ -24,6 +24,7 @@ import NotificationsPage from './components/Profile/Notifications/NotificationsP
 // Subscription pages
 import SubscribePage from './pages/SubscribePage.jsx';
 import SubscriptionSuccess from './pages/SubscriptionSuccess.jsx';
+import AdminPayments from './pages/AdminPayments.jsx';
 
 function App() {
   return (    
@@ -41,6 +42,7 @@ function App() {
       <Route path="/scan-qr-code" element={<ScanQrCode/>}/>
       <Route path="/profile-analytics" element={<ProfileAnalytics/>}/>
       <Route path="/notifications" element={<NotificationsPage/>}/>
+      <Route path="/payments" element={<AdminPayments/>}/>
       <Route path="/admin" element={<Admin/>}/>
       <Route path="/admin/add-user" element={<AddUserPage/>}/>
       <Route path="/profile-list" element={<ProfileListPage />} />

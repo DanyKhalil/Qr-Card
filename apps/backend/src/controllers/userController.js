@@ -1,4 +1,17 @@
-import { User, Profile, SocialMedia, Video, Location, CustomContentType, ProfileFollow, CustomContentItem, CustomContentField, CustomContentValue } from '../models/index.js';
+import { 
+  User, 
+  Profile, 
+  SocialMedia, 
+  Video, 
+  Location, 
+  CustomContentType, 
+  ProfileFollow, 
+  CustomContentItem, 
+  CustomContentField, 
+  CustomContentValue,
+  UserSubscription,
+  SubscriptionPlan,
+} from '../models/index.js';
 
 // ---- To get all the users ----
 export const getUsers = async (req, res) => {
@@ -121,7 +134,79 @@ export const getUserProfile = async (req, res) => {
     const profileId = user.profile.id;
 
     // ---------------------------------------
-    // Followers: profiles that FOLLOW this profile
+    // ADD: fetch latest subscription
+    // ---------------------------------------
+    const subscriptionRecord = await UserSubscription.findOne({
+      where: { user_id: user.id },
+      include: [
+        {
+          model: SubscriptionPlan,
+          as: "plan",
+          attributes: ["name"]
+        }
+      ],
+      order: [["created_at", "DESC"]]
+    });
+
+    const now = new Date();
+
+    let subscription = {
+      is_active: false,
+      status: "none",
+      plan_name: null,
+      expires_at: null,
+      days_remaining: null,
+      requires_payment: true
+    };
+
+    if (subscriptionRecord) {
+      const endDate = subscriptionRecord.end_date
+        ? new Date(subscriptionRecord.end_date)
+        : null;
+
+      // CORRECTED: Determine if subscription is currently active
+      // Subscription is active if: status is "active" AND (no end date OR end date in future)
+      let isActive = false;
+      
+      if (subscriptionRecord.status === "active") {
+        if (endDate) {
+          // Subscription has an end date, check if it's in the future
+          isActive = endDate > now;
+        } else {
+          // Subscription has no end date (perpetual or manual control)
+          isActive = true;
+        }
+      }
+      // All other statuses: pending, expired, cancelled, suspended are not active
+      else {
+        isActive = false;
+      }
+
+      let daysRemaining = null;
+      if (endDate && endDate > now) {
+        daysRemaining = Math.max(
+          0,
+          Math.ceil((endDate - now) / (1000 * 60 * 60 * 24))
+        );
+      }
+
+      // CORRECTED: Map "suspended" to "failed" for frontend compatibility
+      const frontendStatus = subscriptionRecord.status === "suspended" 
+        ? "failed" 
+        : subscriptionRecord.status;
+
+      subscription = {
+        is_active: isActive,
+        status: frontendStatus, // Use mapped status for frontend
+        plan_name: subscriptionRecord.plan?.name || null,
+        expires_at: subscriptionRecord.end_date,
+        days_remaining: daysRemaining,
+        requires_payment: !isActive // Payment required if not active
+      };
+    }
+
+    // ---------------------------------------
+    // Followers
     // ---------------------------------------
     const followers = await ProfileFollow.findAll({
       where: { following_profile_id: profileId },
@@ -143,7 +228,7 @@ export const getUserProfile = async (req, res) => {
     });
 
     // ---------------------------------------
-    // Following: profiles this profile is FOLLOWING
+    // Following
     // ---------------------------------------
     const following = await ProfileFollow.findAll({
       where: { follower_profile_id: profileId },
@@ -164,11 +249,7 @@ export const getUserProfile = async (req, res) => {
       order: [['created_at', 'ASC']]
     });
 
-    // ---------------------------------------
-    // format to JSON-friendly structure
-    // ---------------------------------------
-
-    // Sort helper function
+    // Sort helper
     const sortByCreatedAt = (array) => {
       return array.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
     };
@@ -191,7 +272,6 @@ export const getUserProfile = async (req, res) => {
       website_link: user.profile.website,
       visibility: user.visibility,
 
-      // Social media sorted by created_at
       social_media_links: sortByCreatedAt(
         user.profile.social_media?.map(sm => ({
           id: sm.id,
@@ -201,7 +281,6 @@ export const getUserProfile = async (req, res) => {
         })) || []
       ),
 
-      // Videos sorted by created_at
       videos_links: sortByCreatedAt(
         user.profile.videos?.map(video => ({
           id: video.id,
@@ -213,7 +292,6 @@ export const getUserProfile = async (req, res) => {
         })) || []
       ),
 
-      // Locations sorted by created_at
       locations: sortByCreatedAt(
         user.profile.locations?.map(loc => ({
           id: loc.id,
@@ -232,8 +310,7 @@ export const getUserProfile = async (req, res) => {
           created_at: loc.created_at
         })) || []
       ),
-      
-      // Followers already sorted by ProfileFollow.created_at
+
       followers: followers.map(f => ({
         follow_id: f.id,
         profile_id: f.follower?.id,
@@ -245,7 +322,6 @@ export const getUserProfile = async (req, res) => {
         created_at: f.created_at
       })),
 
-      // Following already sorted by ProfileFollow.created_at
       following: following.map(f => ({
         follow_id: f.id,
         profile_id: f.following?.id,
@@ -257,7 +333,6 @@ export const getUserProfile = async (req, res) => {
         created_at: f.created_at
       })),
 
-      // Custom Content - Sort everything by created_at
       custom_content: sortByCreatedAt(
         user.profile.custom_types?.map(type => ({
           id: type.id,
@@ -266,7 +341,6 @@ export const getUserProfile = async (req, res) => {
           description: type.description,
           created_at: type.created_at,
 
-          // Sort fields by created_at
           fields: sortByCreatedAt(
             type.fields?.map(f => ({
               id: f.id,
@@ -281,15 +355,12 @@ export const getUserProfile = async (req, res) => {
             })) || []
           ),
 
-          // Sort items by created_at
           items: sortByCreatedAt(
             type.items?.map(item => ({
               id: item.id,
               title: item.title,
               visibility: item.visibility,
               created_at: item.created_at,
-
-              // Sort values by created_at
               values: sortByCreatedAt(
                 item.values?.map(v => ({
                   field_id: v.field?.id,
@@ -304,7 +375,8 @@ export const getUserProfile = async (req, res) => {
             })) || []
           )
         })) || []
-      )
+      ),
+      subscription
     };
 
     res.json(userProfile);
