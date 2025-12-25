@@ -137,7 +137,7 @@ export const getUserProfile = async (req, res) => {
     // ADD: fetch latest subscription
     // ---------------------------------------
     const subscriptionRecord = await UserSubscription.findOne({
-      where: { user_id: user.id },
+      where: { profile_id: user.profile.id },
       include: [
         {
           model: SubscriptionPlan,

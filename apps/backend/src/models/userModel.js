@@ -61,22 +61,28 @@ User.associate = function(models) {
     foreignKey: 'user_id',
     as: 'profile'
   });
+
   User.hasMany(models.ProfileAnalytics, {
     foreignKey: 'visitor_user_id',
-    as: 'profile_visits_made' // visits this user made to other profiles
+    as: 'profile_visits_made'
   });
+
   User.hasMany(models.Notification, {
     foreignKey: 'user_id',
     as: 'notifications'
   });
-  User.hasMany(models.UserSubscription, {
-    foreignKey: "user_id",
-    as: "subscriptions",
-  });
+
+  // REMOVE this, because UserSubscription no longer has user_id
+  // User.hasMany(models.UserSubscription, {
+  //   foreignKey: "user_id",
+  //   as: "subscriptions",
+  // });
+
   User.hasMany(models.Payment, {
     foreignKey: "user_id",
     as: "payments",
   });
+
   User.hasMany(models.Payment, {
     foreignKey: "approved_by",
     as: "approved_payments",

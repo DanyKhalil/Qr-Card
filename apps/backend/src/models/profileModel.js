@@ -116,6 +116,11 @@ Profile.associate = function(models) {
         foreignKey: "profile_id",
         as: "custom_items"
     });
+
+    Profile.hasMany(models.UserSubscription, {
+        foreignKey: 'profile_id',
+        as: 'subscriptions'
+    });
 };
 
 export default Profile;
