@@ -9,7 +9,7 @@ import { subscriptionApi } from "../../services/subscriptionApi.js";
 import "./SubscriptionComponent.css";
 import { useNavigate } from "react-router-dom";
 
-const SubscriptionComponent = ({ plans = [], currentUser, refreshPlans }) => {
+const SubscriptionComponent = ({ plans = [], currentUser, refreshPlans, profileId }) => {
     const navigate = useNavigate();
 
     const [selectedPlan, setSelectedPlan] = useState(null);
@@ -77,6 +77,7 @@ const SubscriptionComponent = ({ plans = [], currentUser, refreshPlans }) => {
             };
 
             const result = await subscriptionApi.subscribeToPlan(
+                profileId,
                 selectedPlan.id,
                 paymentDetails,
                 receiptFile

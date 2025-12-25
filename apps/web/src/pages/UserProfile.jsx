@@ -96,7 +96,7 @@ const UserProfile = () => {
         let title = "Subscription Required";
         let message = "You must activate a subscription plan to continue.";
         let actionText = "View Plans";
-        let actionLink = "/subscribe";
+        let actionLink = `/subscribe?profile_id=${userData.profile_id}`;
 
         if (status === "pending") {
             title = "Payment Under Review";

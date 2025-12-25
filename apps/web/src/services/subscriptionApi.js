@@ -19,9 +19,12 @@ api.interceptors.request.use(
 );
 
 export const subscriptionApi = {
-  getCurrentSubscription: async () => {
+  // profileId must be passed here
+  getCurrentSubscription: async (profileId) => {
     try {
-      const response = await api.get('/subscription/current');
+      const response = await api.get('/subscription/current', {
+        params: { profile_id: profileId } // pass profile_id as query param
+      });
       return response.data;
     } catch (error) {
       console.error("Get current subscription API error:", error);
@@ -39,9 +42,9 @@ export const subscriptionApi = {
     }
   },
 
-  cancelSubscription: async () => {
+  cancelSubscription: async (profileId) => {
     try {
-      const response = await api.post('/subscription/cancel');
+      const response = await api.post('/subscription/cancel', { profile_id: profileId });
       return response.data;
     } catch (error) {
       console.error("Cancel subscription API error:", error);
@@ -49,12 +52,15 @@ export const subscriptionApi = {
     }
   },
 
-  // **FIXED: Send receipt as FormData, not JSON**
-  subscribeToPlan: async (planId, paymentDetails = {}, receiptFile = null) => {
+  // Send profile_id in the body along with plan and receipt
+  subscribeToPlan: async (profileId, planId, paymentDetails = {}, receiptFile = null) => {
     try {
       const formData = new FormData();
       
-      // Add JSON data
+      // Add profile_id
+      formData.append('profile_id', profileId);
+
+      // Add plan and payment details
       formData.append('plan_id', planId);
       formData.append('payment_details', JSON.stringify(paymentDetails));
       
@@ -74,10 +80,5 @@ export const subscriptionApi = {
       console.error("Subscribe to plan API error:", error);
       throw error;
     }
-  },
-
-  // **REMOVE THIS - not needed since receipt is part of subscribe**
-  // uploadReceipt: async (subscriptionId, receiptFile) => {
-  //   // This endpoint doesn't exist on backend
-  // }
+  }
 };
