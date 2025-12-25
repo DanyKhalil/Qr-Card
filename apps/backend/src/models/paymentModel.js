@@ -9,7 +9,7 @@ const Payment = sequelize.define(
       primaryKey: true,
       defaultValue: DataTypes.UUIDV4,
     },
-    user_id: {
+    profile_id: {
       type: DataTypes.CHAR(36),
       allowNull: false,
     },
@@ -72,9 +72,9 @@ const Payment = sequelize.define(
 );
 
 Payment.associate = (models) => {
-  Payment.belongsTo(models.User, {
-    foreignKey: "user_id",
-    as: "user",
+  Payment.belongsTo(models.Profile, {
+    foreignKey: "profile_id",
+    as: "profile",
   });
 
   Payment.belongsTo(models.UserSubscription, {

@@ -256,6 +256,7 @@ export const getUserProfile = async (req, res) => {
 
     // Format Profile Base Info
     const userProfile = {
+      profile_id: user.profile.id,
       name: user.name,
       cover_photo_url: user.profile.cover_pic_url,
       profile_pic_url: user.profile.profile_pic_url,

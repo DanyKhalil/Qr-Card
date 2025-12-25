@@ -9,7 +9,7 @@ const UserSubscription = sequelize.define(
       primaryKey: true,
       defaultValue: DataTypes.UUIDV4,
     },
-    user_id: {
+    profile_id: {
       type: DataTypes.CHAR(36),
       allowNull: false,
     },
@@ -59,9 +59,9 @@ const UserSubscription = sequelize.define(
 );
 
 UserSubscription.associate = (models) => {
-  UserSubscription.belongsTo(models.User, {
-    foreignKey: "user_id",
-    as: "user",
+  UserSubscription.belongsTo(models.Profile, {
+    foreignKey: "profile_id",
+    as: "profile",
   });
 
   UserSubscription.belongsTo(models.SubscriptionPlan, {
