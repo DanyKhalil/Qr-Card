@@ -71,7 +71,7 @@ const Payment = sequelize.define(
   }
 );
 
-Payment.associate = (models) => {
+Payment.associate = function (models) {
   Payment.belongsTo(models.Profile, {
     foreignKey: "profile_id",
     as: "profile",
@@ -85,6 +85,7 @@ Payment.associate = (models) => {
   Payment.belongsTo(models.User, {
     foreignKey: "approved_by",
     as: "approved_by_admin",
+    constraints: false,
   });
 };
 

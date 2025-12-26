@@ -350,10 +350,12 @@ export const updatePaymentStatus = async (req, res) => {
 
     // Check if requester is admin
     const adminUser = await User.findByPk(adminId);
+
     if (!adminUser || adminUser.role !== 'admin') {
       return res.status(403).json({ error: "Admin access required" });
     }
 
+    // Fetch payment
     const payment = await Payment.findByPk(paymentId, {
       include: [
         {
@@ -383,6 +385,7 @@ export const updatePaymentStatus = async (req, res) => {
         }
       ]
     });
+
 
     if (!payment) {
       return res.status(404).json({ error: "Payment not found" });
@@ -427,7 +430,6 @@ export const updatePaymentStatus = async (req, res) => {
       notificationMessage = `Your payment of $${payment.amount} for ${payment.subscription?.plan?.name || 'subscription'} has been approved. Your subscription is now active!`;
     }
 
-    // Payment failed → suspend subscription
     if (status === 'failed' && payment.subscription) {
       await UserSubscription.update(
         { status: 'suspended' },
@@ -436,10 +438,9 @@ export const updatePaymentStatus = async (req, res) => {
 
       notificationType = 'payment_rejected';
       notificationTitle = 'Payment Rejected';
-      notificationMessage = `Your payment of $${payment.amount} for ${payment.subscription?.plan?.name || 'subscription'} has been rejected. Please contact support if you believe this is an error.`;
+      notificationMessage = `Your payment of $${payment.amount} for ${payment.subscription?.plan?.name || 'subscription'} has been rejected.`;
     }
 
-    // Payment refunded → cancel subscription
     if (status === 'refunded' && payment.subscription) {
       await UserSubscription.update(
         { status: 'cancelled' },
@@ -448,16 +449,15 @@ export const updatePaymentStatus = async (req, res) => {
 
       notificationType = 'payment_refunded';
       notificationTitle = 'Payment Refunded';
-      notificationMessage = `Your payment of $${payment.amount} for ${payment.subscription?.plan?.name || 'subscription'} has been refunded. Your subscription has been cancelled.`;
+      notificationMessage = `Your payment of $${payment.amount} for ${payment.subscription?.plan?.name || 'subscription'} has been refunded.`;
     }
 
-    // Update the payment
     await Payment.update(updateData, { where: { id: paymentId } });
 
     // Send notification if status changed
     if (status && status !== oldStatus && payment.profile?.user && notificationType) {
       await Notification.create({
-        user_id: payment.profile.user.id, // User who owns the profile
+        user_id: payment.profile.user.id,
         sender_id: adminId,
         type: notificationType,
         title: notificationTitle,
@@ -479,7 +479,6 @@ export const updatePaymentStatus = async (req, res) => {
       });
     }
 
-    // Retrieve updated payment with relationships
     const updatedPayment = await Payment.findByPk(paymentId, {
       include: [
         {
@@ -500,6 +499,7 @@ export const updatePaymentStatus = async (req, res) => {
       ]
     });
 
+
     res.json({
       success: true,
       message: "Payment updated successfully",
@@ -508,7 +508,7 @@ export const updatePaymentStatus = async (req, res) => {
     });
 
   } catch (error) {
-    console.error("Error in updatePaymentStatus:", error);
+    console.error("DEBUG: Error in updatePaymentStatus:", error);
     res.status(500).json({
       success: false,
       error: error.message

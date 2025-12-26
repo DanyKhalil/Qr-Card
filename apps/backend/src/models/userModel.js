@@ -78,10 +78,6 @@ User.associate = function(models) {
   //   as: "subscriptions",
   // });
 
-  User.hasMany(models.Payment, {
-    foreignKey: "user_id",
-    as: "payments",
-  });
 
   User.hasMany(models.Payment, {
     foreignKey: "approved_by",
