@@ -70,11 +70,12 @@ export const subscriptionApi = {
   },
 
   // Subscribe to a plan with receipt upload
-  subscribeToPlan: async (planId, paymentDetails = {}, receiptFile = null) => {
+  subscribeToPlan: async (profileId, planId, paymentDetails = {}, receiptFile = null) => {
     try {
       const formData = new FormData();
       
       // Add JSON data
+      formData.append('profile_id', profileId);
       formData.append('plan_id', planId);
       formData.append('payment_details', JSON.stringify(paymentDetails));
       

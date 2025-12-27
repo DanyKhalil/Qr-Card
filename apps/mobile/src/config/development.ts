@@ -1,7 +1,7 @@
 // this file will now save the ip of my pc to use it on other ifles
 export const DEVELOPMENT_CONFIG = {
-    baseUrl: 'http://192.168.0.102:8081', // the url of the expo app
-    backendBaseUrl: 'http://192.168.0.102:5050', // the url of the backend server
+    baseUrl: 'http://192.168.0.100:8081', // the url of the expo app
+    backendBaseUrl: 'http://192.168.0.100:5050', // the url of the backend server
 };
 
 // this will get me the url used for qr code profile

@@ -40,6 +40,7 @@ interface CurrentUser {
 }
 
 interface SubscriptionComponentProps {
+  profileId: any,
   plans?: Plan[];
   currentUser?: CurrentUser;
   refreshPlans?: () => void;
@@ -48,6 +49,7 @@ interface SubscriptionComponentProps {
 /* ===================== COMPONENT ===================== */
 
 const SubscriptionComponent: React.FC<SubscriptionComponentProps> = ({
+  profileId,
   plans = [],
   currentUser,
   refreshPlans,
@@ -118,6 +120,7 @@ const SubscriptionComponent: React.FC<SubscriptionComponentProps> = ({
       };
 
       await subscriptionApi.subscribeToPlan(
+        profileId,
         selectedPlan.id,
         paymentDetails,
         receiptFile

@@ -114,13 +114,13 @@ const UserProfilePage = ({ id }) => {
                 title = 'Subscription Expired';
                 message = 'Your subscription has expired. Please renew to regain access.';
                 actionText = 'Renew';
-                actionLink = '/subscribe/123';
+                actionLink = `/subscribe/123?profile_id=${userData.profile_id}`;
                 break;
             case 'cancelled':
                 title = 'Subscription Cancelled';
                 message = 'Your subscription was cancelled. Please subscribe again to continue.';
                 actionText = 'Subscribe Again';
-                actionLink = '/subscribe/123';
+                actionLink = `/subscribe/123?profile_id=${userData.profile_id}`;
                 break;
             case 'failed':
                 title = 'Subscription Suspended';
@@ -132,7 +132,7 @@ const UserProfilePage = ({ id }) => {
                 title = 'Subscription Required';
                 message = 'You must activate a subscription plan to continue.';
                 actionText = 'View Plans';
-                actionLink = '/subscribe/123';
+                actionLink = `/subscribe/123?profile_id=${userData.profile_id}`;
         }
 
         return { title, message, actionText, actionLink };
