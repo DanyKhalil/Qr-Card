@@ -13,6 +13,10 @@ const Profile = sequelize.define(
             type: DataTypes.CHAR(36),
             allowNull: false,
         },
+        name: {
+            type: DataTypes.STRING(255),
+            allowNull: false,
+        },
         profile_pic_url: {
             type: DataTypes.STRING(500),
         },

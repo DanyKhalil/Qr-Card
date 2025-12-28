@@ -15,21 +15,12 @@ export const followUser = async (req, res) => {
 
     // Find profiles of both users
     const [followerProfile, followingProfile] = await Promise.all([
-      Profile.findOne({ where: { user_id: follower_user_id } }),
+      Profile.findOne({ where: { user_id: follower_user_id }, attributes: ["id", "name"] }),
       Profile.findOne({ where: { user_id: following_user_id } })
     ]);
 
     if (!followerProfile || !followingProfile) {
       return res.status(404).json({ error: "One or both profiles not found" });
-    }
-
-    const followerUser = await User.findOne({
-      where: { id: follower_user_id },
-      attributes: ['name']
-    });
-
-    if (!followerUser) {
-      return res.status(404).json({ error: "Follower user not found" });
     }
 
     // Check if already following
@@ -50,16 +41,16 @@ export const followUser = async (req, res) => {
       following_profile_id: followingProfile.id
     });
 
-    // sending a notificationnnnn
+    // sending a notification
     await Notification.create({
-      user_id: following_user_id,
-      sender_id: follower_user_id,
+      receiver_profile_id: followingProfile.id,  // the user being followed
+      sender_profile_id: followerProfile.id,     // the user who followed
       type: "new_follower",
       title: "New Follower",
-      message: `${followerUser.name} started following you`,
+      message: `${followerProfile.name} started following you`,
       metadata: {
-        follower_id: follower_user_id,
-        profile_id: followerProfile.id
+        follower_id: followerProfile.id,
+        following_id: followingProfile.id
       },
       is_read: false,
       is_sent: false,
@@ -120,7 +111,8 @@ export const getUserFollowStatus = async (req, res) => {
 
     // Find user's profile
     const userProfile = await Profile.findOne({
-      where: { user_id: userId }
+      where: { user_id: userId },
+      attributes: ["id", "name", "profile_pic_url", "headline", "bio"]
     });
 
     if (!userProfile) {
@@ -134,12 +126,12 @@ export const getUserFollowStatus = async (req, res) => {
         {
           model: Profile,
           as: "follower",
-          attributes: ["id", "user_id", "profile_pic_url", "headline", "bio"],
+          attributes: ["id", "user_id", "profile_pic_url", "headline", "bio", "name"],
           include: [
             {
               model: User,
               as: "user",
-              attributes: ["id", "name", "email"]
+              attributes: ["id", "email"] // email is still on User
             }
           ]
         }
@@ -153,12 +145,12 @@ export const getUserFollowStatus = async (req, res) => {
         {
           model: Profile,
           as: "following",
-          attributes: ["id", "user_id", "profile_pic_url", "headline", "bio"],
+          attributes: ["id", "user_id", "profile_pic_url", "headline", "bio", "name"],
           include: [
             {
               model: User,
               as: "user",
-              attributes: ["id", "name", "email"]
+              attributes: ["id", "email"]
             }
           ]
         }
@@ -170,7 +162,7 @@ export const getUserFollowStatus = async (req, res) => {
       follow_id: f.id,
       profile_id: f.follower?.id,
       user_id: f.follower?.user?.id,
-      name: f.follower?.user?.name,
+      name: f.follower?.name,
       email: f.follower?.user?.email,
       profile_pic_url: f.follower?.profile_pic_url,
       headline: f.follower?.headline,
@@ -182,7 +174,7 @@ export const getUserFollowStatus = async (req, res) => {
       follow_id: f.id,
       profile_id: f.following?.id,
       user_id: f.following?.user?.id,
-      name: f.following?.user?.name,
+      name: f.following?.name,
       email: f.following?.user?.email,
       profile_pic_url: f.following?.profile_pic_url,
       headline: f.following?.headline,

@@ -145,7 +145,7 @@
     border: 1px solid #FFB74D;
 }
 
-.action-btn {
+.sub-action-btn {
     width: 100%;
     padding: 14px;
     background: linear-gradient(135deg, #2196F3, #1976D2);
@@ -159,7 +159,7 @@
     transition: all 0.2s;
 }
 
-.action-btn:hover {
+.sub-action-btn:hover {
     background: linear-gradient(135deg, #1976D2, #1565C0);
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);

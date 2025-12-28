@@ -11,10 +11,6 @@ const User = sequelize.define(
       primaryKey: true,
       defaultValue: DataTypes.UUIDV4,
     },
-    name: {
-      type: DataTypes.STRING(255),
-      allowNull: false,
-    },
     email: {
       type: DataTypes.STRING(255),
       allowNull: false,
@@ -66,18 +62,6 @@ User.associate = function(models) {
     foreignKey: 'visitor_user_id',
     as: 'profile_visits_made'
   });
-
-  // User.hasMany(models.Notification, {
-  //   foreignKey: 'user_id',
-  //   as: 'notifications'
-  // });
-
-  // REMOVE this, because UserSubscription no longer has user_id
-  // User.hasMany(models.UserSubscription, {
-  //   foreignKey: "user_id",
-  //   as: "subscriptions",
-  // });
-
 
   User.hasMany(models.Payment, {
     foreignKey: "approved_by",

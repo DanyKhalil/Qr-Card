@@ -164,21 +164,15 @@ export const getUserProfile = async (req, res) => {
         ? new Date(subscriptionRecord.end_date)
         : null;
 
-      // CORRECTED: Determine if subscription is currently active
-      // Subscription is active if: status is "active" AND (no end date OR end date in future)
       let isActive = false;
       
       if (subscriptionRecord.status === "active") {
         if (endDate) {
-          // Subscription has an end date, check if it's in the future
           isActive = endDate > now;
         } else {
-          // Subscription has no end date (perpetual or manual control)
           isActive = true;
         }
-      }
-      // All other statuses: pending, expired, cancelled, suspended are not active
-      else {
+      } else {
         isActive = false;
       }
 
@@ -190,18 +184,17 @@ export const getUserProfile = async (req, res) => {
         );
       }
 
-      // CORRECTED: Map "suspended" to "failed" for frontend compatibility
       const frontendStatus = subscriptionRecord.status === "suspended" 
         ? "failed" 
         : subscriptionRecord.status;
 
       subscription = {
         is_active: isActive,
-        status: frontendStatus, // Use mapped status for frontend
+        status: frontendStatus,
         plan_name: subscriptionRecord.plan?.name || null,
         expires_at: subscriptionRecord.end_date,
         days_remaining: daysRemaining,
-        requires_payment: !isActive // Payment required if not active
+        requires_payment: !isActive
       };
     }
 
@@ -214,12 +207,12 @@ export const getUserProfile = async (req, res) => {
         {
           model: Profile,
           as: "follower",
-          attributes: ["id", "profile_pic_url", "headline", "bio"],
+          attributes: ["id", "name", "profile_pic_url", "headline", "bio"],
           include: [
             {
               model: User,
               as: "user",
-              attributes: ["id", "name"]
+              attributes: ["id"]
             }
           ]
         }
@@ -236,12 +229,12 @@ export const getUserProfile = async (req, res) => {
         {
           model: Profile,
           as: "following",
-          attributes: ["id", "profile_pic_url", "headline", "bio"],
+          attributes: ["id", "name", "profile_pic_url", "headline", "bio"],
           include: [
             {
               model: User,
               as: "user",
-              attributes: ["id", "name"]
+              attributes: ["id"]
             }
           ]
         }
@@ -257,7 +250,7 @@ export const getUserProfile = async (req, res) => {
     // Format Profile Base Info
     const userProfile = {
       profile_id: user.profile.id,
-      name: user.name,
+      name: user.profile.name,
       cover_photo_url: user.profile.cover_pic_url,
       profile_pic_url: user.profile.profile_pic_url,
       qr_code_color: user.profile.qr_code_color, 
@@ -316,7 +309,7 @@ export const getUserProfile = async (req, res) => {
         follow_id: f.id,
         profile_id: f.follower?.id,
         user_id: f.follower?.user?.id,
-        name: f.follower?.user?.name,
+        name: f.follower?.name,
         profile_pic_url: f.follower?.profile_pic_url,
         headline: f.follower?.headline,
         bio: f.follower?.bio,
@@ -327,7 +320,7 @@ export const getUserProfile = async (req, res) => {
         follow_id: f.id,
         profile_id: f.following?.id,
         user_id: f.following?.user?.id,
-        name: f.following?.user?.name,
+        name: f.following?.name,
         profile_pic_url: f.following?.profile_pic_url,
         headline: f.following?.headline,
         bio: f.following?.bio,
@@ -387,6 +380,7 @@ export const getUserProfile = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
 
 // --- to start updating the user info on all tabels -
 export const updateUserProfile = async (req, res) => {
@@ -553,9 +547,6 @@ export const updateUserProfile = async (req, res) => {
       return true;
     }
 
-    const updateUser = await user.update({
-      name: userName.trim()
-    })
 
     let cleanDob = null;
     if (dob && !isNaN(new Date(dob).getTime())) {
@@ -563,6 +554,7 @@ export const updateUserProfile = async (req, res) => {
     }
 
     const updateProfile = await profile.update({
+      name: userName?.trim() || profile.name,
       headline: headline.trim(),
       dob: cleanDob,
       phone_number: phoneNumber,

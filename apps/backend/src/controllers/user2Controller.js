@@ -63,7 +63,7 @@ export const getFollowersAndFollowing = async (req, res) => {
         model: Profile,
         as: "profile",
         where: { id: profileIds },
-        attributes: ["id", "profile_pic_url"],
+        attributes: ["id", "name", "profile_pic_url"],
         include: [],
       },
     ];
@@ -87,30 +87,45 @@ export const getFollowersAndFollowing = async (req, res) => {
       });
     }
 
-    // 5️⃣ Build user where clause
+    // 5️⃣ Build user where clause (ONLY user-level fields)
     const whereClause = {
-      ...(role ? { [Op.and]: where(fn("LOWER", col("User.role")), Op.eq, role.toLowerCase()) } : {}),
-      ...(search ? { [Op.and]: where(fn("LOWER", col("User.name")), Op.like, `%${search.toLowerCase()}%`) } : {}),
+      ...(role
+        ? { [Op.and]: where(fn("LOWER", col("User.role")), Op.eq, role.toLowerCase()) }
+        : {}),
       ...(verified === "true" ? { verified: true } : {}),
     };
+
+    // Profile-level search (name)
+    if (search) {
+      includeOptions[0].where = {
+        ...includeOptions[0].where,
+        [Op.and]: where(
+          fn("LOWER", col("profile.name")),
+          Op.like,
+          `%${search.toLowerCase()}%`
+        ),
+      };
+    }
 
     const users = await User.findAll({
       include: includeOptions,
       where: whereClause,
-      attributes: ["id", "name", "role", "verified"],
-      order: [["name", sort.toUpperCase()]],
+      attributes: ["id", "role", "verified"],
+      order: [[col("profile.name"), sort.toUpperCase()]],
     });
 
     // 6️⃣ Filter mutual if requested
     let filteredUsers = users;
     if (mutual === "true") {
-      filteredUsers = users.filter(u => followersSet.has(u.profile.id) && followingSet.has(u.profile.id));
+      filteredUsers = users.filter(
+        u => followersSet.has(u.profile.id) && followingSet.has(u.profile.id)
+      );
     }
 
-    // 7️⃣ Map result for frontend
+    // 7️⃣ Map result for frontend (UNCHANGED SHAPE)
     const result = filteredUsers.map(u => ({
       id: u.id,
-      name: u.name,
+      name: u.profile.name,
       role: u.role,
       verified: u.verified,
       profile_pic_url: u.profile.profile_pic_url,

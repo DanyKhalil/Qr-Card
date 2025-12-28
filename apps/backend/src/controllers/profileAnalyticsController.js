@@ -1,12 +1,12 @@
 import { User, Profile, ProfileAnalytics, Notification } from '../models/index.js';
 
-// ---- To get all th user profile visit for a single user ----
+// ---- To get all the user profile visits for a single user ----
 export const getUserProfileAnalytics = async (req, res) => {
   try {
     const { id } = req.params;
 
     const user = await User.findOne({
-      where: { id: id },
+      where: { id },
       include: [{
         model: Profile,
         as: 'profile',
@@ -30,11 +30,11 @@ export const getUserProfileAnalytics = async (req, res) => {
       include: [{
         model: User,
         as: 'visitor',
-        attributes: ['id', 'name'],
+        attributes: ['id'],
         include: [{
           model: Profile,
           as: 'profile',
-          attributes: ['id', 'profile_pic_url']
+          attributes: ['id', 'name', 'profile_pic_url']
         }]
       }],
       order: [['visit_date_time', 'DESC']]
@@ -49,16 +49,18 @@ export const getUserProfileAnalytics = async (req, res) => {
       created_at: visit.created_at,
       visitor: visit.visitor ? {
         user_id: visit.visitor.id,
-        name: visit.visitor.name,
-        profile_pic_url: visit.visitor.profile?.profile_pic_url
+        name: visit.visitor.profile?.name || null,
+        profile_pic_url: visit.visitor.profile?.profile_pic_url || null
       } : null
     }));
 
     res.json(formattedAnalytics);
   } catch (error) {
+    console.error("getUserProfileAnalytics error:", error);
     res.status(500).json({ error: error.message });
   }
 };
+
 
 // ---- To create a new profile visit when the user visit another user  ----
 export const createProfileVisit = async (req, res) => {
