@@ -11,10 +11,19 @@ const JWT_SECRET = process.env.JWT_SECRET || "SECRET_KEY";
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const user = await User.findOne({ where: { email } });
+
+    const user = await User.findOne({
+      where: { email },
+      include: [{
+        model: Profile,
+        as: 'profiles', // updated association
+        attributes: ['id'], // get only IDs
+        order: [['created_at', 'ASC']] // get oldest profile first
+      }]
+    });
+
     if (!user) return res.status(404).json({ error: "User not found" });
 
-    // Block login if email not verified
     if (!user.verified) {
       return res.status(403).json({ error: "Please verify your email before logging in." });
     }
@@ -28,10 +37,19 @@ export const loginUser = async (req, res) => {
       { expiresIn: "1h" }
     );
 
+    // pick the first profile ID if multiple exist
+    const firstProfileId = user.profiles?.length > 0 ? user.profiles[0].id : null;
+
     res.json({
       message: "Login successful",
       token,
-      user: { id: user.id, email: user.email, name: user.name, role: user.role }
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        profile_id: firstProfileId
+      }
     });
   } catch (error) {
     console.error("Login error:", error);

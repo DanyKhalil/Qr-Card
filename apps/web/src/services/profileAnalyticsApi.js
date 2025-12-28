@@ -48,13 +48,14 @@ export const profileAnalyticsApi = {
         try {
             // Optional: Check if visiting own profile to avoid API call
             const currentUser = JSON.parse(localStorage.getItem("user"));
-            if (currentUser && currentUser.id === id) {
+            const currentUserProfileId = localStorage.getItem("profileId")
+            if (currentUser && currentUserProfileId === id) {
                 return { message: 'Skipped self-visit' };
             }
             
             const response = await api.post(`/profile-analytics/${id}`, {
                 qr_scan: qrScan,
-                sender_profile_id: localStorage.getItem("profileId"),
+                sender_profile_id: currentUserProfileId,
             });
             return response.data;
         } catch (error) {

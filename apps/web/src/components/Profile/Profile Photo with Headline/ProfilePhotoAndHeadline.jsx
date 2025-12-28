@@ -6,7 +6,7 @@ import Headline from "../Headline/Headline.jsx"
 import Button from '../Button/Button.jsx';
 import { IoPencil, IoTrash, IoAnalytics, IoSave, IoClose, IoAdd } from "react-icons/io5";
 
-const ProfilePhotoAndHeadline = ({id,photo, name, dob, headline, followers, following, fetchUserProfile}) => {
+const ProfilePhotoAndHeadline = ({id, profileId, photo, name, dob, headline, followers, following, fetchUserProfile}) => {
     const navigate = useNavigate();
 
     const handleAnalytics = () => {
@@ -31,6 +31,10 @@ const ProfilePhotoAndHeadline = ({id,photo, name, dob, headline, followers, foll
             return null;
         }
     };
+    const getCurrentUserProfileId = () => {
+        const profileId = localStorage.getItem("profileId");
+        return profileId;
+    };
 
 
     return (
@@ -41,7 +45,7 @@ const ProfilePhotoAndHeadline = ({id,photo, name, dob, headline, followers, foll
             </div>
 
             <div className="profile-section__right">
-                {id===getCurrentUser()?.id && (
+                {profileId===getCurrentUserProfileId() && (
                     <Button
                         text="Profile Analytics"
                         color="green"
@@ -50,7 +54,7 @@ const ProfilePhotoAndHeadline = ({id,photo, name, dob, headline, followers, foll
                         icon={<IoAnalytics size={18} />}
                     />
                 )}
-                {id===getCurrentUser()?.id && (
+                {profileId===getCurrentUserProfileId() && (
                     <Button
                         text="Edit Profile"
                         color="coral"

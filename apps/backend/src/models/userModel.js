@@ -53,9 +53,9 @@ const User = sequelize.define(
 );
 
 User.associate = function(models) {
-  User.hasOne(models.Profile, {
+  User.hasMany(models.Profile, {
     foreignKey: 'user_id',
-    as: 'profile'
+    as: 'profiles'
   });
 
   User.hasMany(models.Payment, {

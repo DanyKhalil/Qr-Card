@@ -160,7 +160,7 @@ const ProfileList = ({ profiles = [], onProfileClick = () => {} }) => {
             <div key={profile.follow_id || profile.user_id} className="visit-card">
               <div 
                 className="visitor-info"
-                onClick={() => navigate(`/profile/${profile.user_id}`)}
+                onClick={() => navigate(`/profile/${profile.profile_id}`)}
               >
                 {profile.profile_pic_url ? (
                   <img

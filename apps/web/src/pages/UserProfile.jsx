@@ -23,10 +23,16 @@ const UserProfile = () => {
         }
     };
 
+    const getCurrentUserProfileId = () => {
+        const profileId = localStorage.getItem("profileId");
+        return profileId;
+    };
+
     const [searchParams] = useSearchParams();
     const currentLoggedInUser = getCurrentUser();
+    const currentLoggedInUserProfileId = getCurrentUserProfileId();
     const { id: urlId } = useParams();
-    const id = urlId || currentLoggedInUser?.id;
+    const id = urlId || currentLoggedInUserProfileId; // currentLoggedInUser?.id;
     
     if (!id) {
         window.location.href = "/login";

@@ -90,7 +90,7 @@ const Form = () => {
       // Save basic user info and token
       localStorage.setItem("token", loginRes.data.token);
       localStorage.setItem("user", JSON.stringify(loginRes.data.user));
-
+      localStorage.setItem("profileId", loginRes.data.user.profile_id)
       // 2. Fetch full user data with subscription
       try {
         const userRes = await axios.get('http://localhost:5050/api/auth/me', {

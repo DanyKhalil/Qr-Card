@@ -1069,3 +1069,246 @@ export const updateUserProfileMobile = async (req, res) => {
     });
   }
 };
+
+
+
+
+
+// UPDATED TO USE PROFILE ID
+
+export const getProfileDetailsByProfileId = async (req, res) => {
+  try {
+    const { id } = req.params; // This is now the profile ID
+
+    // Find the profile and include user and related info
+    const profile = await Profile.findOne({
+      where: { id },
+      include: [
+        {
+          model: User,
+          as: 'user',
+          attributes: ['id', 'email', 'visibility']
+        },
+        {
+          model: SocialMedia,
+          as: 'social_media',
+          attributes: ['id', 'url', 'display_order', 'created_at']
+        },
+        {
+          model: Video,
+          as: 'videos',
+          attributes: ['id', 'video_url', 'title', 'description', 'display_order', 'created_at']
+        },
+        {
+          model: Location,
+          as: 'locations',
+          attributes: [
+            'id', 'title', 'country', 'state', 'city', 'street',
+            'building', 'floor', 'maps_url', 'latitude', 'longitude', 'created_at'
+          ]
+        },
+        {
+          model: CustomContentType,
+          as: 'custom_types',
+          include: [
+            {
+              model: CustomContentField,
+              as: 'fields',
+              attributes: [
+                'id', 'field_name', 'label', 'field_key',
+                'field_type', 'required', 'display_order', 'config', 'created_at'
+              ]
+            },
+            {
+              model: CustomContentItem,
+              as: 'items',
+              attributes: ['id', 'title', 'visibility', 'created_at'],
+              include: [
+                {
+                  model: CustomContentValue,
+                  as: 'values',
+                  attributes: ['id', 'value_text', 'value_json', 'created_at'],
+                  include: [
+                    {
+                      model: CustomContentField,
+                      as: 'field',
+                      attributes: [
+                        'id', 'field_key', 'field_name', 'label', 'field_type', 'created_at'
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    });
+
+    if (!profile) return res.status(404).json({ error: "Profile not found" });
+
+    const profileId = profile.id;
+
+    // ---------------------------------------
+    // Latest subscription
+    // ---------------------------------------
+    const subscriptionRecord = await UserSubscription.findOne({
+      where: { profile_id: profileId },
+      include: [{ model: SubscriptionPlan, as: 'plan', attributes: ['name'] }],
+      order: [['created_at', 'DESC']]
+    });
+
+    const now = new Date();
+    let subscription = {
+      is_active: false,
+      status: "none",
+      plan_name: null,
+      expires_at: null,
+      days_remaining: null,
+      requires_payment: true
+    };
+
+    if (subscriptionRecord) {
+      const endDate = subscriptionRecord.end_date ? new Date(subscriptionRecord.end_date) : null;
+      let isActive = subscriptionRecord.status === "active" && (!endDate || endDate > now);
+
+      let daysRemaining = endDate && endDate > now ? Math.ceil((endDate - now) / (1000 * 60 * 60 * 24)) : null;
+      const frontendStatus = subscriptionRecord.status === "suspended" ? "failed" : subscriptionRecord.status;
+
+      subscription = {
+        is_active: isActive,
+        status: frontendStatus,
+        plan_name: subscriptionRecord.plan?.name || null,
+        expires_at: subscriptionRecord.end_date,
+        days_remaining: daysRemaining,
+        requires_payment: !isActive
+      };
+    }
+
+    // ---------------------------------------
+    // Followers & Following
+    // ---------------------------------------
+    const followers = await ProfileFollow.findAll({
+      where: { following_profile_id: profileId },
+      include: [{ model: Profile, as: 'follower', include: [{ model: User, as: 'user', attributes: ['id'] }] }],
+      order: [['created_at', 'ASC']]
+    });
+
+    const following = await ProfileFollow.findAll({
+      where: { follower_profile_id: profileId },
+      include: [{ model: Profile, as: 'following', include: [{ model: User, as: 'user', attributes: ['id'] }] }],
+      order: [['created_at', 'ASC']]
+    });
+
+    const sortByCreatedAt = (array) => array.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+
+    const profileData = {
+      profile_id: profile.id,
+      name: profile.name,
+      cover_photo_url: profile.cover_pic_url,
+      profile_pic_url: profile.profile_pic_url,
+      qr_code_color: profile.qr_code_color,
+      qr_code_include_profile_pic: profile.qr_code_include_profile_pic,
+      qr_code_include_contact: profile.qr_code_include_contact,
+      qr_code_include_social: profile.qr_code_include_social,
+      qr_code_include_website: profile.qr_code_include_website,
+      dob: profile.dob,
+      headline: profile.headline,
+      bio: profile.bio,
+      phone_number: profile.phone_number ? [profile.phone_number] : [],
+      email: profile.user?.email ? [profile.user.email] : [],
+      website_link: profile.website,
+      visibility: profile.user?.visibility,
+
+      social_media_links: sortByCreatedAt(
+        profile.social_media?.map(sm => ({ id: sm.id, url: sm.url, display_order: sm.display_order, created_at: sm.created_at })) || []
+      ),
+      videos_links: sortByCreatedAt(
+        profile.videos?.map(v => ({ id: v.id, video_url: v.video_url, title: v.title, description: v.description, display_order: v.display_order, created_at: v.created_at })) || []
+      ),
+      locations: sortByCreatedAt(
+        profile.locations?.map(l => ({
+          id: l.id,
+          title: l.title,
+          country: l.country,
+          state: l.state,
+          city: l.city,
+          street: l.street,
+          building: l.building,
+          floor: l.floor,
+          maps_url: l.maps_url,
+          coordinates: l.latitude && l.longitude ? { latitude: l.latitude, longitude: l.longitude } : null,
+          created_at: l.created_at
+        })) || []
+      ),
+      followers: followers.map(f => ({
+        follow_id: f.id,
+        profile_id: f.follower?.id,
+        user_id: f.follower?.user?.id,
+        name: f.follower?.name,
+        profile_pic_url: f.follower?.profile_pic_url,
+        headline: f.follower?.headline,
+        bio: f.follower?.bio,
+        created_at: f.created_at
+      })),
+      following: following.map(f => ({
+        follow_id: f.id,
+        profile_id: f.following?.id,
+        user_id: f.following?.user?.id,
+        name: f.following?.name,
+        profile_pic_url: f.following?.profile_pic_url,
+        headline: f.following?.headline,
+        bio: f.following?.bio,
+        created_at: f.created_at
+      })),
+      custom_content: sortByCreatedAt(
+        profile.custom_types?.map(type => ({
+          id: type.id,
+          name: type.name,
+          slug: type.slug,
+          description: type.description,
+          created_at: type.created_at,
+          fields: sortByCreatedAt(
+            type.fields?.map(f => ({
+              id: f.id,
+              name: f.field_name,
+              label: f.label,
+              key: f.field_key,
+              type: f.field_type,
+              required: f.required,
+              display_order: f.display_order,
+              config: f.config,
+              created_at: f.created_at
+            })) || []
+          ),
+          items: sortByCreatedAt(
+            type.items?.map(item => ({
+              id: item.id,
+              title: item.title,
+              visibility: item.visibility,
+              created_at: item.created_at,
+              values: sortByCreatedAt(
+                item.values?.map(v => ({
+                  field_id: v.field?.id,
+                  field_key: v.field?.field_key,
+                  field_name: v.field?.field_name,
+                  field_label: v.field?.label,
+                  field_type: v.field?.field_type,
+                  value: v.value_json ?? v.value_text,
+                  created_at: v.created_at
+                })) || []
+              )
+            })) || []
+          )
+        })) || []
+      ),
+      subscription
+    };
+
+    res.json(profileData);
+
+  } catch (error) {
+    console.error('Error in getProfileDetailsByProfileId:', error);
+    res.status(500).json({ error: error.message });
+  }
+};

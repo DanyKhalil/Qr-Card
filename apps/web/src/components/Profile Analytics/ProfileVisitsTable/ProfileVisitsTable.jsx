@@ -77,7 +77,7 @@ const ProfileVisitsTable = ({ visits, dateRange }) => {
               <>
                 <div 
                   className="visitor-info"
-                  onClick={() => handleProfileClick(visit.visitor.user_id)}
+                  onClick={() => handleProfileClick(visit.visitor.profile_id)}
                 >
                   {visit.visitor.profile_pic_url != null ? (
                     <img 
@@ -100,7 +100,7 @@ const ProfileVisitsTable = ({ visits, dateRange }) => {
                 </div>
                 <button 
                   className="view-profile-btn"
-                  onClick={() => handleViewProfileClick(visit.visitor.user_id)}
+                  onClick={() => handleViewProfileClick(visit.visitor.profile_id)}
                 >
                   View Profile
                 </button>
