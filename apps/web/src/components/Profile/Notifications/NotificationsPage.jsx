@@ -29,7 +29,6 @@ const NotificationsPage = () => {
       setLoading(false);
     }
   };
-  console.log(notifications)
 
 //   const handleNotificationClick = (notification) => {
 //     console.log("Notification clicked:", notification);

@@ -98,6 +98,7 @@ export const getCurrentUserWithSubscription = async (req, res) => {
       return res.status(401).json({ error: "Unauthorized" });
     }
 
+    // Get user with their profile(s)
     const user = await User.findOne({
       where: { id: userId },
       include: [
@@ -112,9 +113,15 @@ export const getCurrentUserWithSubscription = async (req, res) => {
       return res.status(404).json({ error: "User not found" });
     }
 
-    // Get subscription
+    if (!user.profile) {
+      return res.status(404).json({ error: "Profile not found for this user" });
+    }
+
+    const profileId = user.profile.id;
+
+    // Get subscription for this profile
     const subscription = await UserSubscription.findOne({
-      where: { user_id: user.id },
+      where: { profile_id: profileId },
       include: [
         {
           model: SubscriptionPlan,
@@ -132,7 +139,7 @@ export const getCurrentUserWithSubscription = async (req, res) => {
         starts_at: subscription.start_date,
         expires_at: subscription.end_date,
         status: subscription.status,
-        is_active: subscription.status === "active" && 
+        is_active: subscription.status === "active" &&
                   (!subscription.end_date || new Date(subscription.end_date) > new Date())
       };
     }
