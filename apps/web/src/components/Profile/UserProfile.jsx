@@ -1,10 +1,10 @@
+import { useEffect } from "react"; // <-- import useEffect
 import Footer from '../Footer/Footer.jsx'
 import Header from '../Header/Header.jsx'
 import CoverPhoto from './Cover Photo/CoverPhoto.jsx'
 import PopupComponent from './Popup/PopupComponent.jsx'
 import ProfilePhotoAndHeadline from './Profile Photo with Headline/ProfilePhotoAndHeadline.jsx'
 import TwoColumnLayout from './Two Column Layout/TwoColumnLayout.jsx'
-
 
 const UserProfile = ({
   coverPhoto = null,
@@ -25,6 +25,7 @@ const UserProfile = ({
   followers = [],
   following = [],
   id = "User001",
+  profileId,
   customContent,
   fetchUserProfile,
   QrCodeColor="#fff",
@@ -34,9 +35,27 @@ const UserProfile = ({
   includeWebsite,
 }
 ) => {
+
+  useEffect(() => {
+    const userStr = localStorage.getItem("user");
+    if (!userStr) return;
+
+    try {
+      const currentUser = JSON.parse(userStr);
+
+      // Only update profileId if the current user matches the profile being viewed
+      if (currentUser?.id === id && profileId) {
+        localStorage.setItem("profileId", profileId);
+      }
+    } catch (error) {
+      console.error("Error parsing user data:", error);
+    }
+  }, [profileId, id]);
+
   const getToken = () => {
         return localStorage.getItem("token");
     };
+
   const getCurrentUser = () => {
       const userStr = localStorage.getItem("user");
       if (!userStr) return null;

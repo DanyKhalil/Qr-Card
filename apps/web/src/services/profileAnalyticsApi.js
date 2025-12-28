@@ -53,7 +53,8 @@ export const profileAnalyticsApi = {
             }
             
             const response = await api.post(`/profile-analytics/${id}`, {
-                qr_scan: qrScan
+                qr_scan: qrScan,
+                sender_profile_id: localStorage.getItem("profileId"),
             });
             return response.data;
         } catch (error) {

@@ -597,6 +597,7 @@ const UserProfile = () => {
                 followers = {userData.followers}
                 following = {userData.following}
                 id = {id}
+                profileId = {userData.profile_id}
                 customContent = {userData.custom_content}
                 fetchUserProfile = {fetchUserProfile}
                 QrCodeColor = {userData.qr_code_color}
