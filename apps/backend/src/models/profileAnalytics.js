@@ -13,7 +13,7 @@ const ProfileAnalytics = sequelize.define(
             type: DataTypes.CHAR(36),
             allowNull: false,
         },
-        visitor_user_id: {
+        visitor_profile_id: {
             type: DataTypes.CHAR(36),
             allowNull: true,
         },
@@ -37,14 +37,16 @@ const ProfileAnalytics = sequelize.define(
 );
 
 ProfileAnalytics.associate = function(models) {
+    // Profile that is being visited
     ProfileAnalytics.belongsTo(models.Profile, {
         foreignKey: 'profile_id',
         as: 'profile'
     });
-    
-    ProfileAnalytics.belongsTo(models.User, {
-        foreignKey: 'visitor_user_id',
-        as: 'visitor'
+
+    // Profile who visited
+    ProfileAnalytics.belongsTo(models.Profile, {
+        foreignKey: "visitor_profile_id",
+        as: "visitor",
     });
 };
 

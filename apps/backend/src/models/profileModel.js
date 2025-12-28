@@ -98,6 +98,10 @@ Profile.associate = function(models) {
         foreignKey: 'profile_id',
         as: 'analytics'
     });
+    Profile.hasMany(models.ProfileAnalytics, {
+        foreignKey: 'visitor_profile_id',
+        as: 'profile_visits_made'
+    });
 
 
     // Profiles *following* other profiles
