@@ -57,8 +57,11 @@ const Login = () => {
         } else {
           await AsyncStorage.removeItem("subscription");
         }
-
-        router.replace("/(tabs)/profile");
+        // router.replace("/(tabs)/profile");
+        // router.push(`/(stack)/user-profile/${res.data.user.id}`);
+        router.replace("/(tabs)/profile"); // create back target
+        router.push("/(tabs)/profile"); // create back target
+        router.push(`/(stack)/user-profile/${res.data.user.id}`);
       } catch (err) {
         console.error("Auth check failed:", err);
         await AsyncStorage.multiRemove(["token", "user", "subscription"]);
@@ -122,7 +125,11 @@ const Login = () => {
       //   console.warn("Failed to fetch subscription:", meErr);
       // }
 
-      router.replace("/(tabs)/profile");
+      // router.replace("/(tabs)/profile");
+      // router.push(`/(stack)/user-profile/${loginRes.data.user.id}`);
+      router.replace("/(tabs)/profile"); // create back target
+      router.push("/(tabs)/profile"); // create back target
+      router.push(`/(stack)/user-profile/${loginRes.data.user.id}`);
     } catch (err) {
       setError(
         err.response?.data?.error ||
