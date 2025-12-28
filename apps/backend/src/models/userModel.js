@@ -67,10 +67,10 @@ User.associate = function(models) {
     as: 'profile_visits_made'
   });
 
-  User.hasMany(models.Notification, {
-    foreignKey: 'user_id',
-    as: 'notifications'
-  });
+  // User.hasMany(models.Notification, {
+  //   foreignKey: 'user_id',
+  //   as: 'notifications'
+  // });
 
   // REMOVE this, because UserSubscription no longer has user_id
   // User.hasMany(models.UserSubscription, {

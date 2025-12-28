@@ -121,6 +121,19 @@ Profile.associate = function(models) {
         foreignKey: 'profile_id',
         as: 'subscriptions'
     });
+
+    // Notifications received by this profile
+    Profile.hasMany(models.Notification, {
+        foreignKey: "receiver_profile_id",
+        as: "notifications"
+    });
+
+    // Notifications sent by this profile
+    Profile.hasMany(models.Notification, {
+        foreignKey: "sender_profile_id",
+        as: "sent_notifications"
+    });
+
 };
 
 export default Profile;

@@ -64,7 +64,8 @@ export const getUserProfileAnalytics = async (req, res) => {
 export const createProfileVisit = async (req, res) => {
   try {
     const { id } = req.params;
-    const { qr_scan = false } = req.body;
+    const { qr_scan = false, sender_profile_id } = req.body;
+    console.log(sender_profile_id)
 
     // Get the visitor user ID from the bearer token (if available)
     const visitorUserId = req.userId || null;
@@ -103,13 +104,13 @@ export const createProfileVisit = async (req, res) => {
 
     if (visitorUserId) {
       await Notification.create({
-        user_id: id, // The profile owner
-        sender_id: visitorUserId, // The visitor
+        receiver_profile_id: profileId,          // the profile being visited
+        sender_profile_id: sender_profile_id, // visitor's profile ID, if available
         type: "profile_visit",
         title: "Profile Viewed",
         message: `${req.user?.name || "Someone"} viewed your profile`,
         metadata: {
-          visitor_id: visitorUserId,
+          visitor_user_id: visitorUserId,
           qr_scan: qr_scan
         },
         is_read: false,
