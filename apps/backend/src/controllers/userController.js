@@ -491,7 +491,7 @@ export const updateUserProfile = async (req, res) => {
     // --------------------------------------------------------------
     // DATABASE OPERATIONS
     // --------------------------------------------------------------
-    
+
     const user = await User.findOne({
       where: {id: id}
     })
@@ -1312,3 +1312,489 @@ export const getProfileDetailsByProfileId = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+
+
+export const updateProfileById = async (req, res) => {
+  try {
+    const { id } = req.params; // now this is profile ID
+    const {
+      userName, dob, phoneNumber, 
+      headline, bio, websiteUrl, 
+      connectLinks, videos, locations, customContent,
+      coverPhotoPath, profilePhotoPath,
+      qrCodeColor, qr_code_include_profile_pic, qr_code_include_contact, qr_code_include_social, qr_code_include_website
+    } = req.body;
+
+    if (!id) {
+      return res.status(403).json({
+        success:false,
+        message: 'Unauthorized Profile'
+      })
+    }
+
+    // Parse JSON strings
+    const parsedConnectLinks = connectLinks ? JSON.parse(connectLinks) : [];
+    const parsedVideos = videos ? JSON.parse(videos) : [];
+    const parsedLocations = locations ? JSON.parse(locations) : [];
+    const parsedCustomContent = customContent ? JSON.parse(customContent) : [];
+    
+    // --------------------------------------------------------------
+    // HANDLE ALL IMAGE UPLOADS
+    // --------------------------------------------------------------
+    
+    let finalProfilePhotoPath = profilePhotoPath;
+    let finalCoverPhotoPath = coverPhotoPath;
+
+    if (req.files && req.files.profilePicture) {
+      const profileFile = req.files.profilePicture[0];
+      finalProfilePhotoPath = `http://localhost:5050/uploads/profiles/${profileFile.filename}`;
+    } else {
+      finalProfilePhotoPath = profilePhotoPath || null;
+    }
+
+    if (req.files && req.files.coverPhoto) {
+      const coverFile = req.files.coverPhoto[0];
+      finalCoverPhotoPath = `http://localhost:5050/uploads/covers/${coverFile.filename}`;
+    } else {
+      finalCoverPhotoPath = coverPhotoPath || null;
+    }
+
+    const customImageFiles = {};
+    if (req.files && Array.isArray(req.files)) {
+      req.files.forEach((file) => {
+        if (file.fieldname && file.fieldname.startsWith('customImage_')) {
+          customImageFiles[file.fieldname] = `http://localhost:5050/uploads/custom-content/${file.filename}`;
+        }
+      });
+    } else if (req.files && typeof req.files === 'object') {
+      Object.keys(req.files).forEach(key => {
+        if (key.startsWith('customImage_')) {
+          const file = req.files[key][0];
+          customImageFiles[key] = `http://localhost:5050/uploads/custom-content/${file.filename}`;
+        }
+      });
+    }
+
+    const processedCustomContent = parsedCustomContent.map(contentType => ({
+      ...contentType,
+      items: contentType.items?.map(item => ({
+        ...item,
+        values: item.values?.map(value => {
+          if (value.field_type === 'image' && value.value && typeof value.value === 'string' && value.value.startsWith('__IMAGE_PLACEHOLDER_')) {
+            const placeholderMatch = value.value.match(/__IMAGE_PLACEHOLDER_(.*)__/);
+            if (placeholderMatch && placeholderMatch[1]) {
+              const imageKey = `customImage_${placeholderMatch[1]}`;
+              if (customImageFiles[imageKey]) {
+                return { ...value, value: customImageFiles[imageKey] };
+              }
+            }
+          }
+          return value;
+        })
+      }))
+    }));
+
+    // --------------------------------------------------------------
+    // DATABASE OPERATIONS
+    // --------------------------------------------------------------
+
+    const profile = await Profile.findOne({
+      where: { id } // now using profile ID directly
+    });
+
+    if (!profile){
+      return res.status(404).json({
+        success: false,
+        message: "Profile Not Found"
+      })
+    }
+
+    const user = await User.findOne({ where: { id: profile.user_id } }); // fetch user via profile.user_id
+    const socialMediaLinks = await SocialMedia.findAll({ where: { profile_id: profile.id } });
+    const userVideos = await Video.findAll({ where: { profile_id: profile.id } });
+    const userLocations = await Location.findAll({ where: { profile_id: profile.id } });
+    const existingCustomTypes = await CustomContentType.findAll({
+      where: { profile_id: profile.id },
+      include: [
+        { model: CustomContentField, as: 'fields' },
+        { model: CustomContentItem, as: 'items', include: [{ model: CustomContentValue, as: 'values' }] }
+      ]
+    });
+
+    if (!user){
+      return res.status(404).json({
+        success: false,
+        message: "User Not Found"
+      })
+    }
+
+    const checkIfDeleted = (id, objects) => objects.every(obj => obj.id !== id);
+    const checkIfNew = (id, objects) => objects.every(obj => obj.id !== id);
+
+    let cleanDob = null;
+    if (dob && !isNaN(new Date(dob).getTime())) {
+      cleanDob = new Date(dob).toISOString().split("T")[0];
+    }
+
+    const updateProfile = await profile.update({
+      name: userName?.trim() || profile.name,
+      headline: headline.trim(),
+      dob: cleanDob,
+      phone_number: phoneNumber,
+      bio: bio,
+      website: websiteUrl,
+      cover_pic_url: finalCoverPhotoPath,
+      profile_pic_url: finalProfilePhotoPath,
+      qr_code_color: qrCodeColor || "#000000",
+      qr_code_include_profile_pic: qr_code_include_profile_pic || true,
+      qr_code_include_contact: qr_code_include_contact || true,
+      qr_code_include_social: qr_code_include_social || true,
+      qr_code_include_website: qr_code_include_website || true,
+    })
+
+    // Social media links update
+    for (let link of socialMediaLinks) {
+      let deleted = checkIfDeleted(link.id, parsedConnectLinks);
+      if (deleted) {
+        await SocialMedia.destroy({ where: {id: link.id}})
+      }
+      else {
+        let incomingLink = parsedConnectLinks.find(curLink => curLink.id === link.id);
+        if (incomingLink && incomingLink.url) {
+          await link.update({
+            url: incomingLink.url,
+          })
+        }
+      }
+    }
+    for (let link of parsedConnectLinks) {
+      let newLink = checkIfNew(link.id, socialMediaLinks);
+      if (newLink) {
+        if (link.url) {
+          await SocialMedia.create({
+            profile_id: profile.id,
+            url: link.url
+          })
+        }
+      }
+    }
+
+    // Videos links update
+    for (let link of userVideos) {
+      let deleted = checkIfDeleted(link.id, parsedVideos);
+      if (deleted) {
+        await Video.destroy({ where: {id: link.id}})
+      }
+      else {
+        let incomingLink = parsedVideos.find(curLink => curLink.id === link.id);
+        await link.update({
+          video_url: incomingLink.video_url,
+          title: incomingLink.title,
+          description: incomingLink.description,
+        })
+      }
+    }
+    for (let link of parsedVideos) {
+      let newLink = checkIfNew(link.id, userVideos);
+      if (newLink) {
+        await Video.create({
+          profile_id: profile.id,
+          video_url: link.video_url,
+          title: link.title,
+          description: link.description,
+        })
+      }
+    }
+
+    // Locations update
+    for (let link of userLocations) {
+      let deleted = checkIfDeleted(link.id, parsedLocations);
+      if (deleted) {
+        await Location.destroy({ where: {id: link.id}})
+      }
+      else {
+        let incomingLink = parsedLocations.find(curLink => curLink.id === link.id);
+        await link.update({
+          floor: incomingLink.floor,
+          building: incomingLink.building,
+          street: incomingLink.street,
+          city: incomingLink.city,
+          state: incomingLink.state,
+          country: incomingLink.country,
+          maps_url: incomingLink.maps_url,
+          title: incomingLink.title,
+        })
+      }
+    }
+    for (let link of parsedLocations) {
+      let newLink = checkIfNew(link.id, userLocations);
+      if (newLink) {
+        await Location.create({
+          profile_id: profile.id,
+          floor: link.floor,
+          building: link.building,
+          street: link.street,
+          city: link.city,
+          state: link.state,
+          country: link.country,
+          maps_url: link.maps_url,
+          title: link.title,
+        })
+      }
+    }
+
+    // CUSTOM CONTENT UPDATE - with image handling
+    for (let incomingType of processedCustomContent) {
+      let existingType = existingCustomTypes.find(type => type.id === incomingType.id);
+      
+      if (!existingType) {
+        // CREATE NEW TYPE
+        const newTypeRecord = await CustomContentType.create({
+          profile_id: profile.id,
+          name: incomingType.name,
+          slug: incomingType.slug,
+          description: incomingType.description
+        });
+
+        // Create field mapping for temporary IDs
+        const fieldIdMap = {};
+        
+        // Add fields for the new type
+        for (let incomingField of incomingType.fields || []) {
+          const newField = await CustomContentField.create({
+            content_type_id: newTypeRecord.id,
+            field_name: incomingField.name,
+            label: incomingField.label,
+            field_key: incomingField.key,
+            field_type: incomingField.type,
+            required: incomingField.required,
+            display_order: incomingField.display_order,
+            config: incomingField.config
+          });
+          // Map temporary frontend ID to real backend ID
+          fieldIdMap[incomingField.id] = newField.id;
+        }
+
+        // Add items for the new type
+        for (let incomingItem of incomingType.items || []) {
+          const newItemRecord = await CustomContentItem.create({
+            content_type_id: newTypeRecord.id,
+            profile_id: profile.id,
+            title: incomingItem.title,
+            visibility: incomingItem.visibility
+          });
+
+          // Add values for the new item
+          for (let incomingValue of incomingItem.values || []) {
+            const realFieldId = fieldIdMap[incomingValue.field_id];
+            if (realFieldId) {
+              // For image type, store URL in value_text (since it's a string)
+              if (incomingValue.field_type === 'image') {
+                await CustomContentValue.create({
+                  content_item_id: newItemRecord.id,
+                  content_field_id: realFieldId,
+                  value_text: incomingValue.value, // Image URL
+                  value_json: null
+                });
+              } else {
+                await CustomContentValue.create({
+                  content_item_id: newItemRecord.id,
+                  content_field_id: realFieldId,
+                  value_text: ['longtext', 'text'].includes(incomingValue.field_type) ? incomingValue.value : null,
+                  value_json: !['longtext', 'text'].includes(incomingValue.field_type) ? incomingValue.value : null
+                });
+              }
+            }
+          }
+        }
+      } else {
+        // UPDATE EXISTING TYPE
+        await existingType.update({
+          name: incomingType.name,
+          slug: incomingType.slug,
+          description: incomingType.description
+        });
+
+        // Handle fields for this type - with ID mapping
+        const fieldIdMap = {};
+        const existingFields = existingType.fields || [];
+
+        for (let incomingField of incomingType.fields || []) {
+          let existingField = existingFields.find(f => f.id === incomingField.id);
+          
+          if (!existingField) {
+            // CREATE NEW FIELD
+            const newField = await CustomContentField.create({
+              content_type_id: existingType.id,
+              field_name: incomingField.name,
+              label: incomingField.label,
+              field_key: incomingField.key,
+              field_type: incomingField.type,
+              required: incomingField.required,
+              display_order: incomingField.display_order,
+              config: incomingField.config
+            });
+            fieldIdMap[incomingField.id] = newField.id;
+          } else {
+            // UPDATE EXISTING FIELD
+            await existingField.update({
+              field_name: incomingField.name,
+              label: incomingField.label,
+              field_key: incomingField.key,
+              field_type: incomingField.type,
+              required: incomingField.required,
+              display_order: incomingField.display_order,
+              config: incomingField.config
+            });
+            fieldIdMap[incomingField.id] = existingField.id;
+          }
+        }
+
+        // Delete fields that were removed
+        for (let existingField of existingFields) {
+          let fieldExists = incomingType.fields?.find(f => f.id === existingField.id);
+          if (!fieldExists) {
+            await CustomContentField.destroy({ where: { id: existingField.id } });
+          }
+        }
+
+        // Handle items for this type
+        const existingItems = existingType.items || [];
+
+        for (let incomingItem of incomingType.items || []) {
+          let existingItem = existingItems.find(it => it.id === incomingItem.id);
+          
+          if (!existingItem) {
+            // CREATE NEW ITEM
+            const newItemRecord = await CustomContentItem.create({
+              content_type_id: existingType.id,
+              profile_id: profile.id,
+              title: incomingItem.title,
+              visibility: incomingItem.visibility
+            });
+
+            // Add values for the new item
+            for (let incomingValue of incomingItem.values || []) {
+              const realFieldId = fieldIdMap[incomingValue.field_id] || incomingValue.field_id;
+              const fieldExists = await CustomContentField.findOne({
+                where: { id: realFieldId, content_type_id: existingType.id }
+              });
+              
+              if (fieldExists) {
+                // For image type, store URL in value_text
+                if (incomingValue.field_type === 'image') {
+                  await CustomContentValue.create({
+                    content_item_id: newItemRecord.id,
+                    content_field_id: realFieldId,
+                    value_text: incomingValue.value, // Image URL
+                    value_json: null
+                  });
+                } else {
+                  await CustomContentValue.create({
+                    content_item_id: newItemRecord.id,
+                    content_field_id: realFieldId,
+                    value_text: ['longtext', 'text'].includes(incomingValue.field_type) ? incomingValue.value : null,
+                    value_json: !['longtext', 'text'].includes(incomingValue.field_type) ? incomingValue.value : null
+                  });
+                }
+              }
+            }
+          } else {
+            // UPDATE EXISTING ITEM
+            await existingItem.update({
+              title: incomingItem.title,
+              visibility: incomingItem.visibility
+            });
+
+            // Handle values for this item
+            const existingValues = existingItem.values || [];
+
+            // Update or create values
+            for (let incomingValue of incomingItem.values || []) {
+              const realFieldId = fieldIdMap[incomingValue.field_id] || incomingValue.field_id;
+              let existingValue = existingValues.find(v => v.content_field_id === realFieldId);
+
+              if (existingValue) {
+                // UPDATE EXISTING VALUE
+                if (incomingValue.field_type === 'image') {
+                  await existingValue.update({
+                    value_text: incomingValue.value, // Image URL
+                    value_json: null
+                  });
+                } else {
+                  await existingValue.update({
+                    value_text: ['longtext', 'text'].includes(incomingValue.field_type) ? incomingValue.value : null,
+                    value_json: !['longtext', 'text'].includes(incomingValue.field_type) ? incomingValue.value : null
+                  });
+                }
+              } else {
+                // CREATE NEW VALUE
+                const fieldExists = await CustomContentField.findOne({
+                  where: { id: realFieldId, content_type_id: existingType.id }
+                });
+                
+                if (fieldExists) {
+                  if (incomingValue.field_type === 'image') {
+                    await CustomContentValue.create({
+                      content_item_id: existingItem.id,
+                      content_field_id: realFieldId,
+                      value_text: incomingValue.value, // Image URL
+                      value_json: null
+                    });
+                  } else {
+                    await CustomContentValue.create({
+                      content_item_id: existingItem.id,
+                      content_field_id: realFieldId,
+                      value_text: ['longtext', 'text'].includes(incomingValue.field_type) ? incomingValue.value : null,
+                      value_json: !['longtext', 'text'].includes(incomingValue.field_type) ? incomingValue.value : null
+                    });
+                  }
+                }
+              }
+            }
+
+            // Delete values that were removed
+            for (let existingValue of existingValues) {
+              let valueExists = incomingItem.values?.find(v => {
+                const realFieldId = fieldIdMap[v.field_id] || v.field_id;
+                return realFieldId === existingValue.content_field_id;
+              });
+              if (!valueExists) {
+                await CustomContentValue.destroy({ where: { id: existingValue.id } });
+              }
+            }
+          }
+        }
+
+        // Delete items that were removed
+        for (let existingItem of existingItems) {
+          let itemExists = incomingType.items?.find(it => it.id === existingItem.id);
+          if (!itemExists) {
+            await CustomContentItem.destroy({ where: { id: existingItem.id } });
+          }
+        }
+      }
+    }
+
+    // Delete types that were removed
+    for (let existingType of existingCustomTypes) {
+      let typeExists = processedCustomContent.find(type => type.id === existingType.id);
+      if (!typeExists) {
+        await CustomContentType.destroy({ where: { id: existingType.id } });
+      }
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Profile updated successfully',
+    });
+
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+}

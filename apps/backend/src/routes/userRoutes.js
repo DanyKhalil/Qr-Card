@@ -5,9 +5,10 @@ import {
   updateUser, 
   deleteUser, 
   getUserProfile, 
-  updateUserProfile , 
+  // updateUserProfile , 
   updateUserProfileMobile, 
   getProfileDetailsByProfileId,
+  updateProfileById,
 } from "../controllers/userController.js";
 import { uploadUserMedia } from "../middleware/uploadMiddleware.js";
 
@@ -20,7 +21,7 @@ router.route("/")
 router.route("/:id")
   // .get(getUserProfile)
   .get(getProfileDetailsByProfileId)
-  .put(uploadUserMedia, updateUserProfile)
+  .put(uploadUserMedia, updateProfileById)
   .delete(deleteUser);
 
 router.route("/:id/mobile")
