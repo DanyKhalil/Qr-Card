@@ -46,6 +46,8 @@ const Login = () => {
           "user",
           JSON.stringify(res.data.user)
         );
+        // console.log(res.data.user)
+        // console.log(AsyncStorage.getItem("user"))
 
         if (res.data.subscription) {
           await AsyncStorage.setItem(
@@ -90,32 +92,35 @@ const Login = () => {
         "user",
         JSON.stringify(loginRes.data.user)
       );
+        // console.log(loginRes.data.user)
+        // console.log(AsyncStorage.getItem("user").parse())
 
-      // 2️⃣ Fetch full user + subscription
-      try {
-        const meRes = await axios.get(
-          `${DEVELOPMENT_CONFIG.backendBaseUrl}/api/auth/me`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
 
-        await AsyncStorage.setItem(
-          "user",
-          JSON.stringify(meRes.data.user)
-        );
+      // // 2️⃣ Fetch full user + subscription
+      // try {
+      //   const meRes = await axios.get(
+      //     `${DEVELOPMENT_CONFIG.backendBaseUrl}/api/auth/me`,
+      //     {
+      //       headers: { Authorization: `Bearer ${token}` },
+      //     }
+      //   );
 
-        if (meRes.data.subscription) {
-          await AsyncStorage.setItem(
-            "subscription",
-            JSON.stringify(meRes.data.subscription)
-          );
-        } else {
-          await AsyncStorage.removeItem("subscription");
-        }
-      } catch (meErr) {
-        console.warn("Failed to fetch subscription:", meErr);
-      }
+      //   await AsyncStorage.setItem(
+      //     "user",
+      //     JSON.stringify(meRes.data.user)
+      //   );
+
+      //   if (meRes.data.subscription) {
+      //     await AsyncStorage.setItem(
+      //       "subscription",
+      //       JSON.stringify(meRes.data.subscription)
+      //     );
+      //   } else {
+      //     await AsyncStorage.removeItem("subscription");
+      //   }
+      // } catch (meErr) {
+      //   console.warn("Failed to fetch subscription:", meErr);
+      // }
 
       router.replace("/(tabs)/profile");
     } catch (err) {

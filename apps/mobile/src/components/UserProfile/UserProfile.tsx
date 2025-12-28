@@ -43,6 +43,7 @@ const UserProfile = ({
         videos = [],
         locations = [],
         id = "User001",
+        profileId,
         customContent = [],
         followers,
         following,
@@ -56,6 +57,30 @@ const UserProfile = ({
         // phoneNumber,
         // email,
     }: UserProfileProps) => {
+
+        useEffect(() => {
+            const updateProfileId = async () => {
+                try {
+                const userStr = await AsyncStorage.getItem("user");
+                if (!userStr) return;
+
+                console.log(userStr);
+
+                const currentUser = JSON.parse(userStr);
+                console.log(currentUser);
+
+                // Only update profileId if the current user matches the profile being viewed
+                if (currentUser?.id === id && profileId) {
+                    await AsyncStorage.setItem("profileId", profileId);
+                }
+                } catch (error) {
+                console.error("Error parsing user data:", error);
+                }
+            };
+
+            updateProfileId();
+        }, [profileId, id]);
+
 
         const getLoggedInUserId = async () => {
             try {

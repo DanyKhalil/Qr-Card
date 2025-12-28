@@ -261,6 +261,7 @@ const UserProfilePage = ({ id }) => {
             followers={userData.followers}
             following={userData.following}
             id={Array.isArray(id) ? id[0] : id || 'User001'}
+            profileId={userData.profile_id}
             customContent={userData.custom_content}
             fetchUserProfile={fetchUserProfile}
             QrCodeColor={userData.qr_code_color}
