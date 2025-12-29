@@ -264,7 +264,7 @@ const AdminUsers = () => {
                       <>
                         <button
                           className="admin-update-button"
-                          onClick={() => handleUpdate(user.id)}
+                          onClick={() => handleUpdate(user.profile_id)}
                         >
                           Save
                         </button>
@@ -278,6 +278,12 @@ const AdminUsers = () => {
                     ) : (
                       <>
                         <button
+                          className="admin-view-button"
+                          onClick={() => navigate(`/profile/${user.profile_id}`)}
+                        >
+                          View
+                        </button>
+                        <button
                           className="admin-update-button"
                           onClick={() => handleEdit(user)}
                         >
@@ -285,7 +291,7 @@ const AdminUsers = () => {
                         </button>
                         <button
                           className="admin-delete-button"
-                          onClick={() => handleDelete(user.id)}
+                          onClick={() => handleDelete(user.profile_id)}
                         >
                           Delete
                         </button>
