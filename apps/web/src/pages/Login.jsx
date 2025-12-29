@@ -45,6 +45,7 @@ const Form = () => {
           // Update localStorage with fresh data
           localStorage.setItem("user", JSON.stringify(response.data.user));
           if (response.data.subscription) {
+            console.log("Subscription",response.data.subscription)
             localStorage.setItem("subscription", JSON.stringify(response.data.subscription));
           }
           
@@ -93,13 +94,15 @@ const Form = () => {
       localStorage.setItem("profileId", loginRes.data.user.profile_id)
       // 2. Fetch full user data with subscription
       try {
-        const userRes = await axios.get(`http://localhost:5050/api/auth/profile/${loginRes.data.profile_id}/subscription`, {
+        const userRes = await axios.get(`http://localhost:5050/api/auth/profile/${loginRes.data.user.profile_id}/subscription`, {
           headers: { Authorization: `Bearer ${loginRes.data.token}` }
         });
 
         // Update localStorage with full user data and subscription
         localStorage.setItem("user", JSON.stringify(userRes.data.user));
+        console.log("USERRES.DATA", userRes.data);
         if (userRes.data.subscription) {
+            console.log("Subscription",userRes.data.subscription)
           localStorage.setItem("subscription", JSON.stringify(userRes.data.subscription));
         }
 

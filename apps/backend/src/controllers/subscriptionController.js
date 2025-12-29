@@ -348,44 +348,51 @@ export const updatePaymentStatus = async (req, res) => {
       return res.status(401).json({ error: "Unauthorized" });
     }
 
-    // Check if requester is admin
-    const adminUser = await User.findByPk(adminId);
+    const adminUser = await User.findByPk(adminId, {
+      include: [
+        {
+          model: Profile,
+          as: "profiles",
+          attributes: ["id", "name"]
+        }
+      ]
+    });
 
-    if (!adminUser || adminUser.role !== 'admin') {
+    if (!adminUser || adminUser.role !== "admin") {
       return res.status(403).json({ error: "Admin access required" });
     }
+
+    const adminProfileId =
+      adminUser.profiles?.length > 0 ? adminUser.profiles[0].id : null;
 
     // Fetch payment
     const payment = await Payment.findByPk(paymentId, {
       include: [
         {
           model: Profile,
-          as: 'profile',
-          attributes: ['id'],
-          include: [{
-            model: User,
-            as: 'user',
-            attributes: ['id', 'name', 'email']
-          }]
+          as: "profile",
+          attributes: ["id", "name"],
+          include: [
+            {
+              model: User,
+              as: "user",
+              attributes: ["id", "email"]
+            }
+          ]
         },
         {
           model: UserSubscription,
-          as: 'subscription',
-          include: [{
-            model: SubscriptionPlan,
-            as: 'plan',
-            attributes: ['name']
-          }]
-        },
-        {
-          model: User,
-          as: 'approved_by_admin',
-          attributes: ['id', 'name', 'email'],
-          required: false
+          as: "subscription",
+          include: [
+            {
+              model: SubscriptionPlan,
+              as: "plan",
+              attributes: ["name"]
+            }
+          ]
         }
       ]
     });
-
 
     if (!payment) {
       return res.status(404).json({ error: "Payment not found" });
@@ -395,7 +402,7 @@ export const updatePaymentStatus = async (req, res) => {
     const updateData = {};
 
     if (status) {
-      if (!['pending', 'completed', 'failed', 'refunded'].includes(status)) {
+      if (!["pending", "completed", "failed", "refunded"].includes(status)) {
         return res.status(400).json({ error: "Invalid status value" });
       }
       updateData.status = status;
@@ -405,19 +412,19 @@ export const updatePaymentStatus = async (req, res) => {
       updateData.notes = notes;
     }
 
-    let notificationMessage = '';
-    let notificationType = '';
-    let notificationTitle = '';
+    let notificationMessage = "";
+    let notificationType = "";
+    let notificationTitle = "";
 
     // Payment approved → activate subscription
-    if (status === 'completed') {
+    if (status === "completed") {
       updateData.approved_at = new Date();
       updateData.approved_by = adminId;
 
       if (payment.subscription) {
         await UserSubscription.update(
           {
-            status: 'active',
+            status: "active",
             start_date: new Date(),
             end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
           },
@@ -425,40 +432,42 @@ export const updatePaymentStatus = async (req, res) => {
         );
       }
 
-      notificationType = 'payment_approved';
-      notificationTitle = 'Payment Approved';
-      notificationMessage = `Your payment of $${payment.amount} for ${payment.subscription?.plan?.name || 'subscription'} has been approved. Your subscription is now active!`;
+      notificationType = "payment_approved";
+      notificationTitle = "Payment Approved";
+      notificationMessage = `Your payment of $${payment.amount} for ${
+        payment.subscription?.plan?.name || "subscription"
+      } has been approved.`;
     }
 
-    if (status === 'failed' && payment.subscription) {
+    if (status === "failed" && payment.subscription) {
       await UserSubscription.update(
-        { status: 'suspended' },
+        { status: "suspended" },
         { where: { id: payment.subscription.id } }
       );
 
-      notificationType = 'payment_rejected';
-      notificationTitle = 'Payment Rejected';
-      notificationMessage = `Your payment of $${payment.amount} for ${payment.subscription?.plan?.name || 'subscription'} has been rejected.`;
+      notificationType = "payment_rejected";
+      notificationTitle = "Payment Rejected";
+      notificationMessage = `Your payment of $${payment.amount} has been rejected.`;
     }
 
-    if (status === 'refunded' && payment.subscription) {
+    if (status === "refunded" && payment.subscription) {
       await UserSubscription.update(
-        { status: 'cancelled' },
+        { status: "cancelled" },
         { where: { id: payment.subscription.id } }
       );
 
-      notificationType = 'payment_refunded';
-      notificationTitle = 'Payment Refunded';
-      notificationMessage = `Your payment of $${payment.amount} for ${payment.subscription?.plan?.name || 'subscription'} has been refunded.`;
+      notificationType = "payment_refunded";
+      notificationTitle = "Payment Refunded";
+      notificationMessage = `Your payment of $${payment.amount} has been refunded.`;
     }
 
     await Payment.update(updateData, { where: { id: paymentId } });
 
-    // Send notification if status changed
+    // ✅ Notification now uses PROFILE name + sender_profile_id
     if (status && status !== oldStatus && payment.profile?.user && notificationType) {
       await Notification.create({
-        user_id: payment.profile.user.id,
-        sender_id: adminId,
+        receiver_profile_id: payment.profile.id,
+        sender_profile_id: adminProfileId,
         type: notificationType,
         title: notificationTitle,
         message: notificationMessage,
@@ -471,8 +480,8 @@ export const updatePaymentStatus = async (req, res) => {
           old_status: oldStatus,
           new_status: status
         },
-        action_url: status === 'completed' ? '/profile' : '/subscribe',
-        action_label: status === 'completed' ? 'Go to Profile' : 'View Plans',
+        action_url: status === "completed" ? "/profile" : "/subscribe",
+        action_label: status === "completed" ? "Go to Profile" : "View Plans",
         is_read: false,
         is_sent: false,
         is_seen: false
@@ -483,28 +492,23 @@ export const updatePaymentStatus = async (req, res) => {
       include: [
         {
           model: Profile,
-          as: 'profile',
-          include: [{ model: User, as: 'user', attributes: ['id', 'name', 'email'] }]
+          as: "profile",
+          attributes: ["id", "name"],
+          include: [{ model: User, as: "user", attributes: ["id", "email"] }]
         },
         {
           model: UserSubscription,
-          as: 'subscription',
-          include: [{ model: SubscriptionPlan, as: 'plan' }]
-        },
-        {
-          model: User,
-          as: 'approved_by_admin',
-          attributes: ['id', 'name', 'email']
+          as: "subscription",
+          include: [{ model: SubscriptionPlan, as: "plan" }]
         }
       ]
     });
-
 
     res.json({
       success: true,
       message: "Payment updated successfully",
       payment: updatedPayment,
-      notification_sent: notificationType ? true : false
+      notification_sent: !!notificationType
     });
 
   } catch (error) {
@@ -515,6 +519,7 @@ export const updatePaymentStatus = async (req, res) => {
     });
   }
 };
+
 
 /**
  * Get payment statistics (Admin only)

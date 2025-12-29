@@ -132,7 +132,7 @@ const UserProfile = () => {
             actionLink = "mailto:danikhalil2004@gmail.com";
         }
 
-        if(currentLoggedInUser.id != id) {
+        if(currentLoggedInUserProfileId != id) {
             return (
                 <div className="subscription-block-page">
                     <Header />
