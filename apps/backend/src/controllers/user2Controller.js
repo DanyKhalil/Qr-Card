@@ -1,9 +1,9 @@
-import { User, Profile, ProfileFollow, Video, Location } from "../models/index.js";
 import { Op, fn, col, where } from "sequelize";
+import { Profile, ProfileFollow, Video, Location, User } from "../models/index.js";
 
 export const getFollowersAndFollowing = async (req, res) => {
   const {
-    userId,
+    profileId,
     search = "",
     filter = "",
     role = "",
@@ -14,19 +14,19 @@ export const getFollowersAndFollowing = async (req, res) => {
     sort = "asc",
   } = req.query;
 
-  if (!userId) return res.status(400).json({ error: "userId is required" });
+  if (!profileId) return res.status(400).json({ error: "profileId is required" });
 
   try {
-    // 1️⃣ Get current user's profile
+    // 1️⃣ Get the specific profile
     const myProfile = await Profile.findOne({
-      where: { user_id: userId },
+      where: { id: profileId },
       attributes: ["id"],
     });
 
     if (!myProfile) return res.status(404).json({ error: "Profile not found" });
     const myProfileId = myProfile.id;
 
-    // 2️⃣ Get follow relations
+    // 2️⃣ Get follow relations for this profile
     const relations = await ProfileFollow.findAll({
       where: {
         [Op.or]: [
@@ -57,80 +57,71 @@ export const getFollowersAndFollowing = async (req, res) => {
 
     if (!profileIds.length) return res.json([]);
 
-    // 4️⃣ Fetch users with filters
+    // 4️⃣ Fetch profiles with filters
     const includeOptions = [
       {
-        model: Profile,
-        as: "profile",
-        where: { id: profileIds },
-        attributes: ["id", "name", "profile_pic_url"],
-        include: [],
+        model: User,
+        as: "user",
+        attributes: ["id", "role", "verified"],
+        where: {
+          ...(role ? { [Op.and]: where(fn("LOWER", col("user.role")), Op.eq, role.toLowerCase()) } : {}),
+          ...(verified === "true" ? { verified: true } : {}),
+        }
       },
-    ];
-
-    if (hasVideos === "true") {
-      includeOptions[0].include.push({
+      {
         model: Video,
         as: "videos",
         attributes: ["id"],
-        required: true,
-      });
-    }
-
-    if (location) {
-      includeOptions[0].include.push({
+        required: hasVideos === "true",
+      },
+      {
         model: Location,
         as: "locations",
-        where: { city: location },
+        where: location ? { city: location } : undefined,
         attributes: ["id", "city"],
-        required: true,
-      });
-    }
+        required: !!location,
+      }
+    ];
 
-    // 5️⃣ Build user where clause (ONLY user-level fields)
-    const whereClause = {
-      ...(role
-        ? { [Op.and]: where(fn("LOWER", col("User.role")), Op.eq, role.toLowerCase()) }
-        : {}),
-      ...(verified === "true" ? { verified: true } : {}),
+    // Profile-level search
+    const profileWhere = {
+      [Op.and]: [
+        { id: profileIds }, // always filter by these profile IDs
+      ],
     };
 
-    // Profile-level search (name)
     if (search) {
-      includeOptions[0].where = {
-        ...includeOptions[0].where,
-        [Op.and]: where(
-          fn("LOWER", col("profile.name")),
-          Op.like,
-          `%${search.toLowerCase()}%`
-        ),
-      };
-    }
-
-    const users = await User.findAll({
-      include: includeOptions,
-      where: whereClause,
-      attributes: ["id", "role", "verified"],
-      order: [[col("profile.name"), sort.toUpperCase()]],
-    });
-
-    // 6️⃣ Filter mutual if requested
-    let filteredUsers = users;
-    if (mutual === "true") {
-      filteredUsers = users.filter(
-        u => followersSet.has(u.profile.id) && followingSet.has(u.profile.id)
+      profileWhere[Op.and].push(
+        where(fn("LOWER", col("Profile.name")), {
+          [Op.like]: `%${search.toLowerCase()}%`
+        })
       );
     }
 
-    // 7️⃣ Map result for frontend (UNCHANGED SHAPE)
-    const result = filteredUsers.map(u => ({
-      id: u.id,
-      name: u.profile.name,
-      role: u.role,
-      verified: u.verified,
-      profile_pic_url: u.profile.profile_pic_url,
-      isFollower: followersSet.has(u.profile.id),
-      isFollowing: followingSet.has(u.profile.id),
+    const profiles = await Profile.findAll({
+      where: profileWhere,
+      include: includeOptions,
+      order: [["name", sort.toUpperCase()]],
+    });
+
+    // 5️⃣ Filter mutual if requested
+    let filteredProfiles = profiles;
+    if (mutual === "true") {
+      filteredProfiles = profiles.filter(
+        p => followersSet.has(p.id) && followingSet.has(p.id)
+      );
+    }
+
+    // 6️⃣ Map result for frontend
+    const result = filteredProfiles.map(p => ({
+      id: p.user.id,
+      profile_id: p.id,
+      name: p.name,
+      role: p.user.role,
+      verified: p.user.verified,
+      profile_pic_url: p.profile_pic_url,
+      isFollower: followersSet.has(p.id),
+      isFollowing: followingSet.has(p.id),
     }));
 
     res.json(result);
