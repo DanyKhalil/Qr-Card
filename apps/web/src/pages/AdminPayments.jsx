@@ -342,16 +342,16 @@ const AdminPayments = () => {
                         {payment.profile?.profile_pic_url ? (
                           <img 
                             src={payment.profile.profile_pic_url} 
-                            alt={payment.profile?.user?.name || "User"} 
+                            alt={payment.profile?.name || "User"} 
                             className="user-avatar" 
                           />
                         ) : (
                           <div className="avatar-placeholder">
-                            {payment.profile?.user?.name?.charAt(0) || "U"}
+                            {payment.profile?.name?.charAt(0) || "U"}
                           </div>
                         )}
                         <div className="user-info">
-                          <div className="user-name">{payment.profile?.user?.name || "N/A"}</div>
+                          <div className="user-name">{payment.profile?.name || "N/A"}</div>
                           <div className="user-email">{payment.profile?.user?.email || "N/A"}</div>
                         </div>
                       </div>

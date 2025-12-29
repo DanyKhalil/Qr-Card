@@ -38,7 +38,7 @@ const Form = () => {
       if (token && user) {
         try {
           // Fetch fresh user data with subscription
-          const response = await axios.get('http://localhost:5050/api/auth/me', {
+          const response = await axios.get(`http://localhost:5050/api/auth/profile/${localStorage.getItem("profileId")}/subscription`, {
             headers: { Authorization: `Bearer ${token}` }
           });
           
@@ -93,7 +93,7 @@ const Form = () => {
       localStorage.setItem("profileId", loginRes.data.user.profile_id)
       // 2. Fetch full user data with subscription
       try {
-        const userRes = await axios.get('http://localhost:5050/api/auth/me', {
+        const userRes = await axios.get(`http://localhost:5050/api/auth/profile/${loginRes.data.profile_id}/subscription`, {
           headers: { Authorization: `Bearer ${loginRes.data.token}` }
         });
 

@@ -230,12 +230,12 @@ export const getAllPayments = async (req, res) => {
         {
           model: Profile,
           as: 'profile',
-          attributes: ['id', 'profile_pic_url', 'phone_number', 'bio', 'headline', 'website'],
+          attributes: ['id', 'name', 'profile_pic_url', 'phone_number', 'bio', 'headline', 'website'],
           include: [
             {
               model: User,
               as: 'user',
-              attributes: ['id', 'name', 'email', 'role', 'verified', 'is_active', 'created_at']
+              attributes: ['id', 'email', 'role', 'verified', 'is_active', 'created_at']
             }
           ]
         },
@@ -257,7 +257,7 @@ export const getAllPayments = async (req, res) => {
         {
           model: User,
           as: 'approved_by_admin',
-          attributes: ['id', 'name', 'email'],
+          attributes: ['id', 'email'],
           required: false
         }
       ],
