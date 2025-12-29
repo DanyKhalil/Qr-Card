@@ -4,6 +4,7 @@ import { TouchableOpacity, Text, ActivityIndicator, StyleSheet } from "react-nat
 
 const FollowButton = ({
   currentUserId,
+  currentProfileId,
   profileId,
   followers = [],
   following = [],
@@ -48,13 +49,13 @@ const FollowButton = ({
 
     try {
       if (isFollowing) {
-        await profileFollowApi.unfollowUser(currentUserId, profileId);
+        await profileFollowApi.unfollowUser(currentProfileId, profileId);
         setIsFollowing(false);
         if (isFollower) {
           setIsFollower(false);
         }
       } else {
-        await profileFollowApi.followUser(currentUserId, profileId);
+        await profileFollowApi.followUser(currentProfileId, profileId);
         setIsFollowing(true);
       }
       

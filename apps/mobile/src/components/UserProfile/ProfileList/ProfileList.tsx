@@ -17,50 +17,67 @@ import { profileFollowApi } from "../../../services/profileFollowApi";
 import { DEVELOPMENT_CONFIG } from '../../../../src/config/development';
 import { router } from "expo-router";
 
-
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 const ProfileList = ({ profiles = [], onProfileClick = () => {} }) => {
   const navigation = useNavigation();
+
   const [followers, setFollowers] = useState([]);
   const [following, setFollowing] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [loggedInUserId, setLoggedInUserId] = useState(null);
 
+  const [loggedInUserId, setLoggedInUserId] = useState(null);
+  const [loggedInUserProfileId, setLoggedInUserProfileId] = useState(null);
 
   const transformImageUrl = (url: string) => {
-    if (!url) 
-        return url;
-    let transformedUrl = url.replace('http://localhost:5050', DEVELOPMENT_CONFIG.backendBaseUrl)
-    return transformedUrl;
+    if (!url) return url;
+    return url.replace(
+      "http://localhost:5050",
+      DEVELOPMENT_CONFIG.backendBaseUrl
+    );
   };
 
+  /* =========================
+     LOAD AUTH DATA (ONCE)
+  ========================= */
   useEffect(() => {
-    const fetchCurrentUser = async () => {
+    const loadAuthData = async () => {
       try {
         const userStr = await AsyncStorage.getItem("user");
+        const profileId = await AsyncStorage.getItem("profileId");
+
         if (userStr) {
           const user = JSON.parse(userStr);
           setLoggedInUserId(user.id);
-          return user.id;
         }
-        return null;
+
+        if (profileId) {
+          setLoggedInUserProfileId(profileId);
+        }
       } catch (error) {
-        console.error("Error parsing user data:", error);
-        return null;
+        console.error("Error loading auth data:", error);
       }
     };
 
-    const fetchFollowData = async () => {
-      const userId = await fetchCurrentUser();
-      if (!userId) return;
+    loadAuthData();
+  }, []);
 
+  /* =========================
+     FETCH FOLLOW DATA (WHEN PROFILE ID EXISTS)
+  ========================= */
+  useEffect(() => {
+    if (!loggedInUserProfileId) return;
+
+    const fetchFollowData = async () => {
       setLoading(true);
       setError(null);
 
       try {
-        const data = await profileFollowApi.getUserFollowStatus(userId);
+        const data = await profileFollowApi.getUserFollowStatus(
+          loggedInUserProfileId
+        );
+
         setFollowers(data.followers || []);
         setFollowing(data.following || []);
       } catch (err) {
@@ -74,13 +91,18 @@ const ProfileList = ({ profiles = [], onProfileClick = () => {} }) => {
     };
 
     fetchFollowData();
-  }, []);
+  }, [loggedInUserProfileId]);
 
   const getRelationshipStatus = (profileUserId) => {
-    if (!loggedInUserId || loggedInUserId === profileUserId) return null;
+    if (!loggedInUserProfileId || loggedInUserProfileId === profileUserId)
+      return null;
 
-    const isFollowing = following.some((f) => f.user_id === profileUserId);
-    const isFollower = followers.some((f) => f.user_id === profileUserId);
+    const isFollowing = following.some(
+      (f) => f.profile_id === profileUserId
+    );
+    const isFollower = followers.some(
+      (f) => f.profile_id === profileUserId
+    );
 
     return { isFollowing, isFollower };
   };
@@ -106,27 +128,46 @@ const ProfileList = ({ profiles = [], onProfileClick = () => {} }) => {
   };
 
   const handleFollowAction = async (profileUserId, currentIsFollowing) => {
-    if (!loggedInUserId) {
+    if (!loggedInUserProfileId) {
       Alert.alert("Login Required", "Please login to follow users");
       return;
     }
 
     try {
       if (currentIsFollowing) {
-        await profileFollowApi.unfollowUser(loggedInUserId, profileUserId);
-        setFollowing((prev) => prev.filter((f) => f.user_id !== profileUserId));
-        const wasFollower = followers.some((f) => f.user_id === profileUserId);
+        await profileFollowApi.unfollowUser(
+          loggedInUserProfileId,
+          profileUserId
+        );
+
+        setFollowing((prev) =>
+          prev.filter((f) => f.profile_id !== profileUserId)
+        );
+
+        const wasFollower = followers.some(
+          (f) => f.profile_id === profileUserId
+        );
+
         if (wasFollower) {
-          setFollowers((prev) => prev.filter((f) => f.user_id !== profileUserId));
+          setFollowers((prev) =>
+            prev.filter((f) => f.profile_id !== profileUserId)
+          );
         }
       } else {
-        await profileFollowApi.followUser(loggedInUserId, profileUserId);
-        const profileToFollow = profiles.find((p) => p.user_id === profileUserId);
+        await profileFollowApi.followUser(
+          loggedInUserProfileId,
+          profileUserId
+        );
+
+        const profileToFollow = profiles.find(
+          (p) => p.profile_id === profileUserId
+        );
+
         if (profileToFollow) {
           setFollowing((prev) => [
             ...prev,
             {
-              user_id: profileUserId,
+              profile_id: profileUserId,
               name: profileToFollow.name,
               profile_pic_url: profileToFollow.profile_pic_url,
               headline: profileToFollow.headline,
@@ -136,12 +177,15 @@ const ProfileList = ({ profiles = [], onProfileClick = () => {} }) => {
       }
     } catch (err) {
       console.error("Error in follow action:", err);
-      Alert.alert("Error", err.response?.data?.error || "Something went wrong");
+      Alert.alert(
+        "Error",
+        err.response?.data?.error || "Something went wrong"
+      );
     }
   };
 
-  const navigateToProfile = (userId) => {
-    router.push(`user-profile/${userId}`)
+  const navigateToProfile = (profileId) => {
+    router.push(`user-profile/${profileId}`);
   };
 
   if (!profiles.length) {
@@ -176,38 +220,48 @@ const ProfileList = ({ profiles = [], onProfileClick = () => {} }) => {
         <Text style={styles.headerTitle}>Profiles</Text>
         <View style={styles.countBadge}>
           <Text style={styles.countText}>
-            {profiles.length} {profiles.length === 1 ? "profile" : "profiles"}
+            {profiles.length}{" "}
+            {profiles.length === 1 ? "profile" : "profiles"}
           </Text>
         </View>
       </View>
 
-      <ScrollView 
+      <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
         {profiles.map((profile) => {
-          const relationship = getRelationshipStatus(profile.user_id);
+          const relationship = getRelationshipStatus(profile.profile_id);
           const buttonLabel = relationship
-            ? getButtonLabel(relationship.isFollowing, relationship.isFollower)
+            ? getButtonLabel(
+                relationship.isFollowing,
+                relationship.isFollower
+              )
             : null;
 
           return (
             <TouchableOpacity
-              key={profile.follow_id || profile.user_id}
+              key={profile.follow_id || profile.profile_id}
               style={styles.card}
               activeOpacity={0.9}
-              onPress={() => navigateToProfile(profile.user_id)}
+              onPress={() => navigateToProfile(profile.profile_id)}
             >
               <View style={styles.cardContent}>
                 <View style={styles.profileInfo}>
                   {profile.profile_pic_url ? (
                     <Image
-                      source={{ uri: transformImageUrl(profile.profile_pic_url) }}
+                      source={{
+                        uri: transformImageUrl(profile.profile_pic_url),
+                      }}
                       style={styles.avatar}
                     />
                   ) : (
                     <View style={styles.defaultAvatar}>
-                      <Ionicons name="person-outline" size={28} color="#64748b" />
+                      <Ionicons
+                        name="person-outline"
+                        size={28}
+                        color="#64748b"
+                      />
                     </View>
                   )}
 
@@ -223,19 +277,26 @@ const ProfileList = ({ profiles = [], onProfileClick = () => {} }) => {
                   </View>
                 </View>
 
-                {relationship && loggedInUserId !== profile.user_id && (
+                {relationship && loggedInUserProfileId !== profile.profile_id && (
                   <TouchableOpacity
-                    style={[styles.followButton, getButtonStyle(buttonLabel)]}
+                    style={[
+                      styles.followButton,
+                      getButtonStyle(buttonLabel),
+                    ]}
                     onPress={(e) => {
                       e.stopPropagation();
-                      handleFollowAction(profile.user_id, relationship.isFollowing);
+                      handleFollowAction(
+                        profile.profile_id,
+                        relationship.isFollowing
+                      );
                     }}
                     activeOpacity={0.7}
                   >
                     <Text
                       style={[
                         styles.buttonText,
-                        buttonLabel === "Unfollow" && styles.unfollowText,
+                        buttonLabel === "Unfollow" &&
+                          styles.unfollowText,
                       ]}
                     >
                       {buttonLabel}
@@ -250,6 +311,8 @@ const ProfileList = ({ profiles = [], onProfileClick = () => {} }) => {
     </View>
   );
 };
+
+
 
 const styles = StyleSheet.create({
   container: {

@@ -3,20 +3,16 @@ import { Profile, ProfileAnalytics, User, Notification } from '../models/index.j
 // ---- To get all the user profile visits for a single user ----
 export const getUserProfileAnalytics = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { id: profileId } = req.params;
 
-    const profile = await Profile.findOne({
-      where: { user_id: id },
+    const profile = await Profile.findByPk(profileId, {
       attributes: ['id']
     });
 
     if (!profile) {
-      return res.status(404).json({ error: 'Profile not found for this user' });
+      return res.status(404).json({ error: 'Profile not found' });
     }
 
-    const profileId = profile.id;
-
-    // Get all visits for this profile with visitor profile information
     const analytics = await ProfileAnalytics.findAll({
       where: { profile_id: profileId },
       include: [
@@ -29,19 +25,20 @@ export const getUserProfileAnalytics = async (req, res) => {
       order: [['visit_date_time', 'DESC']]
     });
 
-    // Format the response to include visitor information
     const formattedAnalytics = analytics.map(visit => ({
       id: visit.id,
       profile_id: visit.profile_id,
       qr_scan: visit.qr_scan,
       visit_date_time: visit.visit_date_time,
       created_at: visit.created_at,
-      visitor: visit.visitor ? {
-        user_id: visit.visitor.user_id,
-        profile_id: visit.visitor.id, // <-- added visitor's profile ID
-        name: visit.visitor.name,
-        profile_pic_url: visit.visitor.profile_pic_url
-      } : null
+      visitor: visit.visitor
+        ? {
+            user_id: visit.visitor.user_id,
+            profile_id: visit.visitor.id,
+            name: visit.visitor.name,
+            profile_pic_url: visit.visitor.profile_pic_url
+          }
+        : null
     }));
 
     res.json(formattedAnalytics);
@@ -50,6 +47,7 @@ export const getUserProfileAnalytics = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
 
 
 

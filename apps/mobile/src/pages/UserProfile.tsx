@@ -20,6 +20,13 @@ const UserProfilePage = ({ id }) => {
 
     const hasVisited = useRef(false);
 
+    const getLoggedInUserProfileId = async () => {
+        const profileId = await AsyncStorage.getItem("profileId");
+        return profileId;
+    }
+
+    const profileId = getLoggedInUserProfileId();
+
     // Load logged-in user data
     useEffect(() => {
         const loadUserData = async () => {
@@ -141,7 +148,7 @@ const UserProfilePage = ({ id }) => {
     const subscriptionMessage = getSubscriptionMessage();
 
     if (subscriptionMessage) {
-        const isSelf = user?.id === (Array.isArray(id) ? id[0] : id);
+        const isSelf = user?.profile_id === (Array.isArray(profileId) ? profileId[0] : profileId);
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
                 <Text style={{ fontSize: 20, fontWeight: '700', marginBottom: 12 }}>

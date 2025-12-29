@@ -95,13 +95,27 @@ const UserProfile = ({
                 return null;
             }
         }
+        const getCurrentUserProfileId = async () => {
+            try {
+                const profileId = await AsyncStorage.getItem("profileId");
+                return profileId;
+            } catch (error) {
+                console.error("Error getting profile ID:", error);
+                return null;
+            }
+        }
 
         const [loggedInUserId, setLoggedInUserId] = useState(null);
+        const [loggedInUserProfileId, setLoggedInUserProfileId] = useState(null);
+
+        console.log("LOGGED IN PROFILE ID:", loggedInUserProfileId)
 
         useEffect(() => {
             const fetchUserId = async () => {
                 const userId = await getLoggedInUserId();
+                const profileId = await getCurrentUserProfileId();
                 setLoggedInUserId(userId);
+                setLoggedInUserProfileId(profileId);
             };
             
             fetchUserId();
@@ -113,7 +127,7 @@ const UserProfile = ({
                     <CoverPhoto photo={coverPhoto} height={150} />
                     <View style={styles.profileSection}>
                         <ProfilePic photo={profilePic} size="xxlarge" />
-                        {( loggedInUserId === id ? 
+                        {( loggedInUserProfileId === profileId ? 
                             <View style={styles.buttonsColumn}>
                                 <Button 
                                     text="Profile Analytics"
@@ -134,7 +148,7 @@ const UserProfile = ({
                             </View>
                         )}
                     </View>
-                    <Headline name={userName} dob={dob} headline={headline} id={id} followers={followers} following={following} fetchUserProfile={fetchUserProfile}/>
+                    <Headline name={userName} profileId={profileId} dob={dob} headline={headline} id={id} followers={followers} following={following} fetchUserProfile={fetchUserProfile}/>
 
                     <DescriptionText text={bio} />
 
@@ -165,7 +179,7 @@ const UserProfile = ({
                     <TitleAndLinks title="Connect" links={connectLinks}/>
                     {websiteLink && <TitleAndLinks title="Website" links={[{name:websiteLink, iconName:"web"}]}/>}
 
-                    {loggedInUserId==id && (<ProfileQrCode id={id} color={QrCodeColor}
+                    {loggedInUserProfileId==profileId && (<ProfileQrCode id={id} color={QrCodeColor}
                         name={userName}
                         userLinks={
                                 (includeContact ? contactLinks : []).concat(
@@ -174,7 +188,7 @@ const UserProfile = ({
                                 )}
                         image={includeProfilePic ? profilePic : null}
                     />)}
-                    {loggedInUserId!=id && (
+                    {loggedInUserProfileId!=profileId && (
                         <>
                             <View style={{ height: 16 }} />
                             <View style={{ height: 16 }} />

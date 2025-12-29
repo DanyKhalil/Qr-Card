@@ -35,23 +35,19 @@ const Login = () => {
           return;
         }
 
+        const profileId = await AsyncStorage.getItem("profileId");
+
         const res = await axios.get(
-          `${DEVELOPMENT_CONFIG.backendBaseUrl}/api/auth/me`,
+          `${DEVELOPMENT_CONFIG.backendBaseUrl}/api/auth/profile/${profileId}/subscription`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
 
-        await AsyncStorage.setItem(
-          "user",
-          JSON.stringify(res.data.user)
-        );
+        await AsyncStorage.setItem("user",JSON.stringify(res.data.user));
 
         if (res.data.subscription) {
-          await AsyncStorage.setItem(
-            "subscription",
-            JSON.stringify(res.data.subscription)
-          );
+          await AsyncStorage.setItem("subscription",JSON.stringify(res.data.subscription));
         } else {
           await AsyncStorage.removeItem("subscription");
         }
@@ -59,10 +55,10 @@ const Login = () => {
         // router.push(`/(stack)/user-profile/${res.data.user.id}`);
         router.replace("/(tabs)/profile"); // create back target
         router.push("/(tabs)/profile"); // create back target
-        router.push(`/(stack)/user-profile/${res.data.user.id}`);
+        router.push(`/(stack)/user-profile/${profileId}`);
       } catch (err) {
         console.error("Auth check failed:", err);
-        await AsyncStorage.multiRemove(["token", "user", "subscription"]);
+        await AsyncStorage.multiRemove(["token", "user", "subscription", "profileId"]);
         setChecking(false);
       }
     };
@@ -87,18 +83,17 @@ const Login = () => {
       );
 
       const token = loginRes.data.token;
+      const profileId = loginRes.data.user.profile_id;
 
       await AsyncStorage.setItem("token", token);
-      await AsyncStorage.setItem(
-        "user",
-        JSON.stringify(loginRes.data.user)
-      );
+      await AsyncStorage.setItem("user",JSON.stringify(loginRes.data.user));
+      await AsyncStorage.setItem("profileId", profileId);
 
       // router.replace("/(tabs)/profile");
       // router.push(`/(stack)/user-profile/${loginRes.data.user.id}`);
       router.replace("/(tabs)/profile"); // create back target
       router.push("/(tabs)/profile"); // create back target
-      router.push(`/(stack)/user-profile/${loginRes.data.user.id}`);
+      router.push(`/(stack)/user-profile/${profileId}`);
     } catch (err) {
       setError(
         err.response?.data?.error ||

@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 
 export default function ProfileTab() {
   const [userId, setUserId] = useState(null);
+  const [profileId, setProfileId] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -16,6 +17,8 @@ export default function ProfileTab() {
           const user = JSON.parse(userString);
           setUserId(user.id);
         }
+        const profileId = await AsyncStorage.getItem("profileId");
+        setProfileId(profileId);
       } catch (error) {
         console.error("Error loading user data from storage:", error);
       } finally {
@@ -31,8 +34,8 @@ export default function ProfileTab() {
       title: 'View My Profile',
       description: 'See how others see your profile',
       onPress: () =>
-        userId
-          ? router.push(`/(stack)/user-profile/${userId}`)
+        profileId
+          ? router.push(`/(stack)/user-profile/${profileId}`)
           : router.replace('/(auth)/login'),
       iconName: 'person-outline',
       color: '#547DAD',
@@ -41,8 +44,8 @@ export default function ProfileTab() {
       title: 'Edit Profile',
       description: 'Update your personal information',
       onPress: () =>
-        userId
-          ? router.push(`/(stack)/edit-profile/${userId}`)
+        profileId
+          ? router.push(`/(stack)/edit-profile/${profileId}`)
           : router.replace('/(auth)/login'),
       iconName: 'create-outline',
       color: '#6B84B8',
@@ -51,8 +54,8 @@ export default function ProfileTab() {
       title: 'Profile Analytics',
       description: 'View your profile statistics',
       onPress: () =>
-        userId
-          ? router.push(`/(stack)/profile-analytics/${userId}`)
+        profileId
+          ? router.push(`/(stack)/profile-analytics/${profileId}`)
           : router.replace('/(auth)/login'),
       iconName: 'bar-chart-outline',
       color: '#7A8FB8',
@@ -68,22 +71,23 @@ export default function ProfileTab() {
     //   color: '#7A8FB8',
     // },
     {
-      title: userId ? 'Logout' : 'Login',
-      description: userId
+      title: profileId ? 'Logout' : 'Login',
+      description: profileId
         ? 'Sign out of your account'
         : 'Sign in to access your profile',
       onPress: async () => {
-        if (userId) {
+        if (profileId) {
           await AsyncStorage.removeItem('token');
           await AsyncStorage.removeItem('user');
           await AsyncStorage.removeItem("subscription");
+          await AsyncStorage.removeItem("profileId");
           router.replace('/(auth)/login');
         } else {
           router.replace('/(auth)/login');
         }
       },
-      iconName: userId ? 'log-out-outline' : 'log-in-outline',
-      color: userId ? '#8B3A3A' : '#547DAD',
+      iconName: profileId ? 'log-out-outline' : 'log-in-outline',
+      color: profileId ? '#8B3A3A' : '#547DAD',
     },
   ];
 
@@ -110,15 +114,15 @@ export default function ProfileTab() {
             marginBottom: 8,
           }}
         >
-          {userId ? 'My Profile' : 'Profile'}
+          {profileId ? 'My Profile' : 'Profile'}
         </Text>
         <Text style={{ color: '#6B7280' }}>
-          {userId
+          {profileId
             ? 'Manage your account and settings'
             : 'Sign in to access your profile features'}
         </Text>
 
-        {!userId && (
+        {!profileId && (
           <View
             style={{
               marginTop: 15,
@@ -182,7 +186,7 @@ export default function ProfileTab() {
         </Pressable>
       ))}
 
-      {!userId && (
+      {!profileId && (
         <View style={{ marginTop: 30, alignItems: 'center' }}>
           <Text
             style={{

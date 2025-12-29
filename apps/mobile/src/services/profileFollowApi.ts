@@ -1,11 +1,11 @@
 import api from './api'; 
 
 export const profileFollowApi = {
-  followUser: async (followerUserId, followingUserId) => {
+  followUser: async (followerProfileId, followingProfileId) => {
     try {
       const response = await api.post('/follow', {
-        follower_user_id: followerUserId,
-        following_user_id: followingUserId
+        follower_profile_id: followerProfileId,  // Changed to snake_case
+        following_profile_id: followingProfileId // Changed to snake_case
       });
       return response.data;
     } catch (error) {
@@ -14,12 +14,12 @@ export const profileFollowApi = {
     }
   },
 
-  unfollowUser: async (followerUserId, followingUserId) => {
+  unfollowUser: async (followerProfileId, followingProfileId) => {
     try {
       const response = await api.delete('/follow', {
         data: { 
-          follower_user_id: followerUserId,
-          following_user_id: followingUserId
+          follower_profile_id: followerProfileId,  // Changed to snake_case
+        following_profile_id: followingProfileId // Changed to snake_case
         }
       });
       return response.data;
@@ -29,9 +29,10 @@ export const profileFollowApi = {
     }
   },
 
-  getUserFollowStatus: async (userId) => {
+  getUserFollowStatus: async (profileId) => {
     try {
-      const response = await api.get(`/follow/${userId}`);
+      console.log("PROFILE ID:", profileId)
+      const response = await api.get(`/follow/${profileId}`);
       return response.data;
     } catch (error) {
       console.error("Get follow status API error:", error);
@@ -39,9 +40,9 @@ export const profileFollowApi = {
     }
   },
 
-  getFollowersAndFollowing: async (userId) => {
+  getFollowersAndFollowing: async (profileId) => {
     try {
-      const response = await api.get(`/follow/${userId}`);
+      const response = await api.get(`/follow/${profileId}`);
       return response.data;
     } catch (error) {
       console.error("Get followers and following API error:", error);

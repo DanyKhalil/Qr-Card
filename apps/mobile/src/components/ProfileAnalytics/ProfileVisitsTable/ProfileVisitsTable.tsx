@@ -101,7 +101,7 @@ const ProfileVisitsTable = ({ visits, dateRange }) => {
           <TouchableOpacity 
             key={visit.id} 
             style={[styles.visitCard, responsiveStyles.visitCard]}
-            onPress={() => visit.visitor && handleProfileClick(visit.visitor.user_id)}
+            onPress={() => visit.visitor && handleProfileClick(visit.visitor.profile_id)}
           >
             {visit.visitor ? (
               <View style={[styles.visitorInfo, responsiveStyles.visitorInfo]}>

@@ -49,7 +49,7 @@ export default function SearchTab() {
 
   const renderUserCard = ({ item }) => (
     <Pressable
-      onPress={() => router.push(`/(stack)/user-profile/${item.id}`)}
+      onPress={() => router.push(`/(stack)/user-profile/${item.profile_id}`)}
       style={({ pressed }) => [
         styles.card,
         pressed && styles.cardPressed
