@@ -41,7 +41,7 @@ const ProfilePhotoAndHeadline = ({id, profileId, photo, name, dob, headline, fol
         <div className="profile-section__wrapper">
             <div className="profile-section__left">
                 <ProfilePic photo={photo} />
-                <Headline id={id} name={name} dob={dob} headline={headline} followers={followers} following={following} fetchUserProfile={fetchUserProfile}/>
+                <Headline id={id} profileId={profileId} name={name} dob={dob} headline={headline} followers={followers} following={following} fetchUserProfile={fetchUserProfile}/>
             </div>
 
             <div className="profile-section__right">

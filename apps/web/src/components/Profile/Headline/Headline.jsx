@@ -5,6 +5,7 @@ import FollowButton from '../FollowButton/FollowButton';
 
 const Headline = ({ 
     id,          // profile id (user_id)
+    profileId,
     name, 
     dob, 
     headline,
@@ -26,8 +27,13 @@ const Headline = ({
             return null;
         }
     };
+    const getCurrentUserProfileId = () => {
+        const profileId = localStorage.getItem("profileId");
+        return profileId
+    };
     
     const loggedInUserId = getCurrentUser()?.id;
+    const loggedInUserProfileId = getCurrentUserProfileId();
 
     const calculateAge = (birthDate) => {
         if (!birthDate) return null;
@@ -70,10 +76,11 @@ const Headline = ({
                 </span>
             </div>
 
-            {loggedInUserId && loggedInUserId !== id && (
+            {loggedInUserProfileId && loggedInUserProfileId !== profileId && (
                 <FollowButton
                     currentUserId={loggedInUserId}
-                    profileId={id}
+                    currentProfileId={loggedInUserProfileId}
+                    profileId={profileId}
                     followers={followers}
                     following={following}
                     onFollowUpdate={onProfileRefresh} // callback to refresh profile

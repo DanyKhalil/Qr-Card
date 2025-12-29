@@ -36,6 +36,7 @@ const Header = ({activeIndex}) => {
         localStorage.removeItem("token");
         localStorage.removeItem("subscription");
         localStorage.removeItem("user");
+        localStorage.removeItem("profileId");
         navigate('/Login');
     }
     const goToNotification = () => {navigate(`/notifications`)}

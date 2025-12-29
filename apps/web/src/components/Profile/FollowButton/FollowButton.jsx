@@ -4,6 +4,7 @@ import { profileFollowApi } from "../../../services/profileFollowApi";
 
 const FollowButton = ({
   currentUserId,
+  currentProfileId,
   profileId,
   followers = [],
   following = [],
@@ -49,7 +50,7 @@ const FollowButton = ({
     try {
       if (isFollowing) {
         // unfollow
-        await profileFollowApi.unfollowUser(currentUserId, profileId);
+        await profileFollowApi.unfollowUser(currentProfileId, profileId);
         setIsFollowing(false);
         // If we were mutual friends, update follower status too
         if (isFollower) {
@@ -57,7 +58,7 @@ const FollowButton = ({
         }
       } else {
         // follow
-        await profileFollowApi.followUser(currentUserId, profileId);
+        await profileFollowApi.followUser(currentProfileId, profileId);
         setIsFollowing(true);
         // Check if the other user is already following us to become friends
         if (isFollower) {

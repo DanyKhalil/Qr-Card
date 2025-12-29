@@ -15,6 +15,6 @@ router.post("/", authenticate, followUser);
 router.delete("/", authenticate, unfollowUser);
 
 // GET /follow/:userId - get user's followers and following
-router.get("/:userId", authenticate, getUserFollowStatus);
+router.get("/:profileId", authenticate, getUserFollowStatus);
 
 export default router;
