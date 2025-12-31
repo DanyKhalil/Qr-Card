@@ -9,6 +9,8 @@ import {
   updateUserProfileMobile, 
   getProfileDetailsByProfileId,
   updateProfileById,
+  getAllProfilesByProfileId,
+  createProfileForUserByProfileId,
 } from "../controllers/userController.js";
 import { uploadUserMedia } from "../middleware/uploadMiddleware.js";
 
@@ -26,5 +28,19 @@ router.route("/:id")
 
 router.route("/:id/mobile")
   .put(updateUserProfileMobile);
+
+
+
+
+
+router.get(
+  "/profiles/by-profile/:profileId",
+  getAllProfilesByProfileId
+);
+
+router.post(
+  "/profiles/create-from/:profileId",
+  createProfileForUserByProfileId
+);
 
 export default router;

@@ -1798,3 +1798,72 @@ export const updateProfileById = async (req, res) => {
     });
   }
 }
+
+
+
+
+
+
+// DIFFERENT PROFIELSSS
+
+export const getAllProfilesByProfileId = async (req, res) => {
+  try {
+    const { profileId } = req.params;
+
+    const profile = await Profile.findByPk(profileId);
+
+    if (!profile) {
+      return res.status(404).json({ message: "Profile not found" });
+    }
+
+    const profiles = await Profile.findAll({
+      where: { user_id: profile.user_id },
+    });
+
+    return res.status(200).json({
+      user_id: profile.user_id,
+      profiles,
+    });
+  } catch (error) {
+    console.error("Error fetching profiles:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+
+
+export const createProfileForUserByProfileId = async (req, res) => {
+  try {
+    const { profileId } = req.params;
+    const { name } = req.body; // required for new profile
+
+    if (!name) {
+      return res.status(400).json({ message: "Profile name is required" });
+    }
+
+    // 1️⃣ Find the existing profile
+    const existingProfile = await Profile.findByPk(profileId);
+    if (!existingProfile) {
+      return res.status(404).json({ message: "Profile not found" });
+    }
+
+    const userId = existingProfile.user_id;
+
+    // 2️⃣ Create a new profile for the same user
+    const newProfile = await Profile.create({
+      user_id: userId,
+      name,
+      // all other fields will take defaults
+    });
+
+    return res.status(201).json({
+      message: "Profile created successfully",
+      profile: newProfile,
+    });
+
+  } catch (error) {
+    console.error("Error creating profile:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
