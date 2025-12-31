@@ -67,8 +67,12 @@ const UserProfile = ({
           return null;
       }
   };
+  const getCurrentUserProfileId = () => {
+      const profileId = localStorage.getItem("profileId");
+      return profileId
+  };
 
-  let activeIndex = getCurrentUser()?.id === id ? 3 : null;
+  let activeIndex = getCurrentUserProfileId() === id ? 3 : null;
 
   return (    
     <div>
