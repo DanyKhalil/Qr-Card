@@ -10,7 +10,7 @@ import { userApi } from '../services/userApi';
 import { profileAnalyticsApi } from '../services/profileAnalyticsApi';
 import { DEVELOPMENT_CONFIG } from '../config/development';
 
-const UserProfilePage = ({ id }) => {
+const UserProfilePage = ({ id, scrollToBottom }) => {
     const { qrScan } = useLocalSearchParams();
     const [userData, setUserData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
@@ -302,6 +302,7 @@ const UserProfilePage = ({ id }) => {
             includeContact={userData.qr_code_include_contact}
             includeSocialMedia={userData.qr_code_include_social}
             includeWebsite={userData.qr_code_include_website}
+            scrollToBottom={scrollToBottom}
         />
     );
 };

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import CoverPhoto from './CoverPhoto/CoverPhoto';
 import ProfilePic from './ProfilePIc/ProfilePic';
@@ -14,7 +14,6 @@ import CustomContentDisplay from './CustomContentDisplay/CustomContentDisplay';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import PopupComponent from './Popup/Popup';
 
-
 interface UserProfileProps {
     coverPhoto?: string;
     profilePic?: string;
@@ -28,6 +27,17 @@ interface UserProfileProps {
     videos?: any[];
     locations?: any[];
     id?: string;
+    profileId?: string;
+    customContent?: any[];
+    followers?: number;
+    following?: number;
+    fetchUserProfile?: any;
+    QrCodeColor?: string;
+    includeContact?: boolean;
+    includeSocialMedia?: boolean;
+    includeWebsite?: boolean;
+    includeProfilePic?: boolean;
+    scrollToBottom?: boolean;
 }
 
 const UserProfile = ({
@@ -53,11 +63,22 @@ const UserProfile = ({
         includeSocialMedia,
         includeWebsite,
         includeProfilePic,
-        // saveContactFunction,
-        // phoneNumber,
-        // email,
+        scrollToBottom = false,
     }: UserProfileProps) => {
 
+        const scrollRef = useRef<ScrollView>(null);
+
+        // ---------------------- Scroll to bottom if requested ----------------------
+        useEffect(() => {
+            if (scrollToBottom) {
+                // wait a short time to ensure content is rendered
+                setTimeout(() => {
+                    scrollRef.current?.scrollToEnd({ animated: true });
+                }, 100);
+            }
+        }, [scrollToBottom]);
+
+        // ---------------------- Update profileId in AsyncStorage ----------------------
         useEffect(() => {
             const updateProfileId = async () => {
                 try {
@@ -75,64 +96,45 @@ const UserProfile = ({
                 console.error("Error parsing user data:", error);
                 }
             };
-
             updateProfileId();
         }, [profileId, id]);
 
-
-        const getLoggedInUserId = async () => {
-            try {
-                const loggedInUserString = await AsyncStorage.getItem("user");
-                if (loggedInUserString) {
-                    const loggedInUser = JSON.parse(loggedInUserString);
-                    return loggedInUser.id || null;
-                }
-                return null;
-            } catch (error) {
-                console.error("Error getting user ID:", error);
-                return null;
-            }
-        }
-        const getCurrentUserProfileId = async () => {
-            try {
-                const profileId = await AsyncStorage.getItem("profileId");
-                return profileId;
-            } catch (error) {
-                console.error("Error getting profile ID:", error);
-                return null;
-            }
-        }
-
-        const [loggedInUserId, setLoggedInUserId] = useState(null);
-        const [loggedInUserProfileId, setLoggedInUserProfileId] = useState(null);
-
+        // ---------------------- Get logged-in user ID & profile ----------------------
+        const [loggedInUserId, setLoggedInUserId] = useState<string | null>(null);
+        const [loggedInUserProfileId, setLoggedInUserProfileId] = useState<string | null>(null);
 
         useEffect(() => {
             const fetchUserId = async () => {
-                const userId = await getLoggedInUserId();
-                const profileId = await getCurrentUserProfileId();
-                setLoggedInUserId(userId);
-                setLoggedInUserProfileId(profileId);
+                try {
+                    const loggedInUserString = await AsyncStorage.getItem("user");
+                    const profileIdStored = await AsyncStorage.getItem("profileId");
+
+                    if (loggedInUserString) {
+                        const loggedInUser = JSON.parse(loggedInUserString);
+                        setLoggedInUserId(loggedInUser.id || null);
+                    }
+                    setLoggedInUserProfileId(profileIdStored || null);
+                } catch (error) {
+                    console.error("Error fetching logged-in user data:", error);
+                }
             };
-            
             fetchUserId();
         }, []);
 
-
         return (
-                <ScrollView style={{ flex: 1 }}>
+                <ScrollView ref={scrollRef} style={{ flex: 1 }}>
                     <CoverPhoto photo={coverPhoto} height={150} />
                     <View style={styles.profileSection}>
                         <ProfilePic photo={profilePic} size="xxlarge" />
-                        {( loggedInUserProfileId === profileId ? 
+                        {loggedInUserProfileId === profileId ? (
                             <View style={styles.buttonsColumn}>
-                                <Button 
+                                <Button
                                     text="Profile Analytics"
                                     color="green"
                                     onPress={() => router.push(`/(stack)/profile-analytics/${id}`)}
                                     width={180}
                                 />
-                                <Button 
+                                <Button
                                     text="Edit Profile"
                                     color="coral"
                                     onPress={() => router.push(`/(stack)/edit-profile/${id}`)}
@@ -140,66 +142,66 @@ const UserProfile = ({
                                     style={{ marginTop: 12 }}
                                 />
                             </View>
-                            :
-                            <View style={styles.buttonsColumn}>
-                            </View>
+                        ) : (
+                            <View style={styles.buttonsColumn} />
                         )}
                     </View>
-                    <Headline name={userName} profileId={profileId} dob={dob} headline={headline} id={id} followers={followers} following={following} fetchUserProfile={fetchUserProfile}/>
 
-                    <DescriptionText text={bio} />
+                <Headline
+                    name={userName}
+                    profileId={profileId}
+                    dob={dob}
+                    headline={headline}
+                    id={id}
+                    followers={followers}
+                    following={following}
+                    fetchUserProfile={fetchUserProfile}
+                />
 
-                    <YouTubeVideos
-                        userName={userName}
-                        videos={videos}
+                <DescriptionText text={bio} />
+
+                <YouTubeVideos userName={userName} videos={videos} />
+                <Locations locations={locations} />
+
+                {customContent.map((content) => (
+                    <CustomContentDisplay key={content.id} customContent={content} />
+                ))}
+
+                <TitleAndLinks title="Contact" links={contactLinks} />
+                <TitleAndLinks title="Connect" links={connectLinks} />
+                {websiteLink && (
+                    <TitleAndLinks
+                        title="Website"
+                        links={[{ name: websiteLink, iconName: "web" }]}
                     />
-                    <Locations locations={locations}/>
+                )}
 
-                    <View>
-                        {customContent.map((content) => (
-                            <CustomContentDisplay key={content.id} customContent={content} />
-                        ))}
-                    </View>
-
-
-                    <TitleAndLinks title="Contact" links={contactLinks}/>
-                    {/* <Button 
-                        text="Save as Contact"
-                        color="green"
-                        onPress={() => saveContactFunction({nameInput: userName,
-                                                            phoneInput: phoneNumber,
-                                                            emailInput: email})}
-                        width={180}
-                        style={{ marginTop: 12 }}
-                    /> */}
-
-                    <TitleAndLinks title="Connect" links={connectLinks}/>
-                    {websiteLink && <TitleAndLinks title="Website" links={[{name:websiteLink, iconName:"web"}]}/>}
-
-                    {loggedInUserProfileId==profileId && (<ProfileQrCode id={id} color={QrCodeColor}
+                {loggedInUserProfileId === profileId && (
+                    <ProfileQrCode
+                        id={id}
+                        color={QrCodeColor}
                         name={userName}
                         userLinks={
-                                (includeContact ? contactLinks : []).concat(
-                                    (includeSocialMedia ? connectLinks : [])).concat(
-                                        (includeWebsite ? [{name:websiteLink, iconName:"web"}].filter(link => link.name && String(link.name).trim() !== '') : [])
-                                )}
+                            (includeContact ? contactLinks : [])
+                                .concat(includeSocialMedia ? connectLinks : [])
+                                .concat(
+                                    includeWebsite
+                                        ? [{ name: websiteLink, iconName: "web" }].filter(
+                                            (link) => link.name && String(link.name).trim() !== ''
+                                        )
+                                        : []
+                                )
+                        }
                         image={includeProfilePic ? profilePic : null}
-                    />)}
-                    {loggedInUserProfileId!=profileId && (
-                        <>
-                            <View style={{ height: 16 }} />
-                            <View style={{ height: 16 }} />
-                            <View style={{ height: 16 }} />
-                            <View style={{ height: 16 }} />
-                        </>
-                    )}
-                    {!loggedInUserId && (<PopupComponent />)}
-                    
-                    
-                </ScrollView>
+                    />
+                )}
+
+                {loggedInUserProfileId !== profileId && <View style={{ height: 64 }} />}
+
+                {!loggedInUserId && <PopupComponent />}
+            </ScrollView>
         );
 };
-
 
 const styles = StyleSheet.create({
     profileSection: {

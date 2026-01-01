@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 export default function UserProfileScreen() {
     const [id, setId] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [scrollToBottom, setScrollToBottom] = useState(false);
     const params = useLocalSearchParams();
 
 
@@ -27,6 +28,14 @@ export default function UserProfileScreen() {
 
         loadUserData();
     }, [params]);
+    useEffect(() => {
+        const userIdFromParams = params.userId || params.id;
+        if (userIdFromParams) setId(String(userIdFromParams));
+
+        if (params.scrollToBottom === 'true') setScrollToBottom(true);
+
+        setLoading(false);
+    }, [params]);
 
     if (loading) {
         return (
@@ -44,5 +53,5 @@ export default function UserProfileScreen() {
         );
     }
 
-    return <UserProfilePage id={id} />;
+    return <UserProfilePage id={id} scrollToBottom={scrollToBottom}/>;
 }
