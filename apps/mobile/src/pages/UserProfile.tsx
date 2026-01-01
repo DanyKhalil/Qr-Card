@@ -26,7 +26,6 @@ const UserProfilePage = ({ id }) => {
     // Load logged-in user data
     // ----------------------
     useEffect(() => {
-        console.log('[DEBUG] Loading user data...');
         const loadUserData = async () => {
             try {
                 const storedToken = await AsyncStorage.getItem('token');
@@ -35,9 +34,7 @@ const UserProfilePage = ({ id }) => {
                 if (storedToken && userString) {
                     setToken(storedToken);
                     setUser(JSON.parse(userString));
-                    console.log('[DEBUG] Loaded user:', userString);
                 } else {
-                    console.log('[DEBUG] No token or user found in storage');
                     setToken(null);
                     setUser(null);
                 }
@@ -53,12 +50,10 @@ const UserProfilePage = ({ id }) => {
     // Load logged-in profileId
     // ----------------------
     useEffect(() => {
-        console.log('[DEBUG] Loading profileId from AsyncStorage...');
         const loadProfileId = async () => {
             try {
                 const storedProfileId = await AsyncStorage.getItem('profileId');
                 setProfileId(storedProfileId); // can be null
-                console.log('[DEBUG] Loaded profileId:', storedProfileId);
             } catch (err) {
                 console.error('[DEBUG] Error loading profileId:', err);
                 setProfileId(null);
@@ -71,13 +66,11 @@ const UserProfilePage = ({ id }) => {
     // Fetch user profile immediately (no need to wait for profileId)
     // ----------------------
     const fetchUserProfile = async (userId: string) => {
-        console.log('[DEBUG] Fetching user profile for userId:', userId);
         try {
             setLoading(true);
             setError(null);
             const data = await userApi.getUserProfile(userId);
             setUserData(data);
-            console.log('[DEBUG] Fetched user profile:', data);
         } catch (err: any) {
             setError(err.response?.data?.error || 'Failed to fetch user profile');
             console.error('[DEBUG] Error in fetchUserProfile:', err);
@@ -93,19 +86,10 @@ const UserProfilePage = ({ id }) => {
         if (!hasVisited.current) {
             hasVisited.current = true;
             try {
-                console.log(
-                    '[DEBUG] Sending visit analytics. visitedUserId:',
-                    visitedUserId,
-                    'profileId:',
-                    profileId
-                );
-
                 // Send visit analytics, allow anonymous if profileId is null
                 if (visitedUserId !== profileId) {
                     await profileAnalyticsApi.visitUserProfile(visitedUserId, isQrScan);
-                    console.log('[DEBUG] Visit analytics sent');
                 } else {
-                    console.log('[DEBUG] Skipping visit analytics for own profile');
                 }
             } catch (err) {
                 console.error('[DEBUG] Error in visitProfile:', err);
