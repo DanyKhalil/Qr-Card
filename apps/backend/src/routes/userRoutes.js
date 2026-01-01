@@ -11,6 +11,7 @@ import {
   updateProfileById,
   getAllProfilesByProfileId,
   createProfileForUserByProfileId,
+  deleteProfileByProfileId,
 } from "../controllers/userController.js";
 import { uploadUserMedia } from "../middleware/uploadMiddleware.js";
 
@@ -41,6 +42,11 @@ router.get(
 router.post(
   "/profiles/create-from/:profileId",
   createProfileForUserByProfileId
+);
+
+router.delete(
+  "/profiles/delete/:profileId",
+  deleteProfileByProfileId
 );
 
 export default router;

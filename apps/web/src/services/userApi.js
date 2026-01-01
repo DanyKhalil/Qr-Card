@@ -85,6 +85,18 @@ export const userApi = {
             console.error('Error creating new profile:', error);
             throw error;
         }
+    },
+
+    deleteProfileByProfileId: async (profileId) => {
+        try {
+            const response = await api.delete(
+                `/users/profiles/delete/${profileId}`
+            );
+            return response.data;
+        } catch (error) {
+            console.error('Error deleting profile:', error);
+            throw error;
+        }
     }
 };
 

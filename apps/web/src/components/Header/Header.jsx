@@ -9,6 +9,7 @@ import logoutIcon from "../../assets/images/icons/logout-icon.png";
 import notificationIcon from "../../assets/images/icons/notification-icon.png";
 import adminIcon from "../../assets/images/icons/admin-icon.png";
 import paymentIcon from "../../assets/images/icons/payment-icon.png";
+
 import { useNavigate } from 'react-router-dom';
 import { userApi } from "../../services/userApi";
 
@@ -19,6 +20,7 @@ const Header = ({ activeIndex }) => {
     const [newProfileName, setNewProfileName] = useState("");
     const popupRef = useRef(null);
 
+    const navigate = useNavigate();
     const currentProfileId = localStorage.getItem("profileId");
 
     const getCurrentUser = () => {
@@ -31,8 +33,7 @@ const Header = ({ activeIndex }) => {
         }
     };
 
-    const navigate = useNavigate();
-
+    /* ---------- Navigation ---------- */
     const goToProfile = () => navigate(`/profile`);
     const goToScanQrCode = () => navigate(`/scan-qr-code`);
     const goToSearch = () => navigate(`/Filtering`);
@@ -45,6 +46,7 @@ const Header = ({ activeIndex }) => {
         navigate('/Login');
     };
 
+    /* ---------- Profile Popup ---------- */
     const handleProfileRightClick = async (e) => {
         e.preventDefault();
 
@@ -70,11 +72,17 @@ const Header = ({ activeIndex }) => {
         window.location.reload();
     };
 
+    /* ---------- Create Profile ---------- */
     const handleAddProfile = async () => {
         if (!newProfileName.trim()) return;
+
         try {
-            const response = await userApi.createProfileFromProfileId(currentProfileId, newProfileName.trim());
-            setUserProfiles((prev) => [...prev, response.profile]);
+            const response = await userApi.createProfileFromProfileId(
+                currentProfileId,
+                newProfileName.trim()
+            );
+
+            setUserProfiles(prev => [...prev, response.profile]);
             setNewProfileName("");
             setAddingProfile(false);
         } catch (error) {
@@ -82,7 +90,37 @@ const Header = ({ activeIndex }) => {
         }
     };
 
-    // click outside to close
+    /* ---------- Delete Profile ---------- */
+    const handleDeleteProfile = async (e, profileId) => {
+        e.stopPropagation();
+
+        const confirmDelete = window.confirm(
+            "Are you sure you want to delete this profile?"
+        );
+        if (!confirmDelete) return;
+
+        try {
+            await userApi.deleteProfileByProfileId(profileId);
+
+            setUserProfiles(prev => {
+                const remaining = prev.filter(p => p.id !== profileId);
+
+                if (profileId === currentProfileId && remaining.length > 0) {
+                    localStorage.setItem("profileId", remaining[0].id);
+                    window.location.reload();
+                }
+
+                return remaining;
+            });
+        } catch (error) {
+            alert(
+                error.response?.data?.message ||
+                "Failed to delete profile"
+            );
+        }
+    };
+
+    /* ---------- Click Outside ---------- */
     useEffect(() => {
         const handleClickOutside = (e) => {
             if (popupRef.current && !popupRef.current.contains(e.target)) {
@@ -126,7 +164,7 @@ const Header = ({ activeIndex }) => {
     return (
         <div className="header">
             <div className="header-left">
-                <img src={companyLogo} alt={`${companyName} logo`} className="logo" />
+                <img src={companyLogo} alt="QR CARD logo" className="logo" />
                 <span className="company-name">{companyName}</span>
             </div>
 
@@ -152,13 +190,11 @@ const Header = ({ activeIndex }) => {
                 <div
                     ref={popupRef}
                     className="profile-popup"
-                    style={{
-                        top: profilePopup.top,
-                        left: profilePopup.left,
-                    }}
+                    style={profilePopup}
                 >
-                    {userProfiles.map((profile) => {
+                    {userProfiles.map(profile => {
                         const isActive = profile.id === currentProfileId;
+
                         return (
                             <div
                                 key={profile.id}
@@ -170,12 +206,24 @@ const Header = ({ activeIndex }) => {
                                     alt={profile.name}
                                     className="profile-popup-avatar"
                                 />
-                                <span className="profile-popup-name">{profile.name}</span>
+
+                                <span className="profile-popup-name">
+                                    {profile.name}
+                                </span>
+
+                                <button
+                                    className="profile-popup-delete-btn"
+                                    title="Delete profile"
+                                    onClick={(e) =>
+                                        handleDeleteProfile(e, profile.id)
+                                    }
+                                >
+                                    ✕
+                                </button>
                             </div>
                         );
                     })}
 
-                    {/* Add new profile section */}
                     {addingProfile ? (
                         <div className="profile-popup-add">
                             <input

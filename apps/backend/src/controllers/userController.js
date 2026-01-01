@@ -1867,3 +1867,38 @@ export const createProfileForUserByProfileId = async (req, res) => {
   }
 };
 
+
+
+export const deleteProfileByProfileId = async (req, res) => {
+  try {
+    const { profileId } = req.params;
+
+    const profile = await Profile.findByPk(profileId);
+
+    if (!profile) {
+      return res.status(404).json({ message: "Profile not found" });
+    }
+
+    const userId = profile.user_id;
+
+    const profileCount = await Profile.count({
+      where: { user_id: userId },
+    });
+
+    if (profileCount <= 1) {
+      return res.status(400).json({
+        message: "User must have at least one profile",
+      });
+    }
+
+    await profile.destroy();
+
+    return res.status(200).json({
+      message: "Profile deleted successfully",
+    });
+
+  } catch (error) {
+    console.error("Error deleting profile:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
