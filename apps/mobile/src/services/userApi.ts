@@ -115,4 +115,37 @@ export const userApi = {
             throw error;
         }
     },
+
+    getProfilesByProfileId: async (profileId) => {
+        try {
+            const response = await api.get(
+                `/users/profiles/by-profile/${profileId}`
+            );
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching profiles by profile ID:', error);
+            throw error;
+        }
+    },
+    createProfileFromProfileId: async (profileId, name) => {
+        if (!name) throw new Error("Profile name is required");
+        try {
+            const response = await api.post(`/users/profiles/create-from/${profileId}`, { name });
+            return response.data;
+        } catch (error) {
+            console.error('Error creating new profile:', error);
+            throw error;
+        }
+    },
+    deleteProfileByProfileId: async (profileId) => {
+        try {
+            const response = await api.delete(
+                `/users/profiles/delete/${profileId}`
+            );
+            return response.data;
+        } catch (error) {
+            console.error('Error deleting profile:', error);
+            throw error;
+        }
+    }
 };

@@ -170,7 +170,10 @@ const UserProfilePage = ({ id }) => {
     const subscriptionMessage = getSubscriptionMessage();
 
     if (subscriptionMessage) {
-        const isSelf = user?.profile_id === profileId;
+        const isSelf = id === profileId;
+        console.log("ISSELF:", isSelf)
+        console.log("USER", user?.profile_id)
+        console.log("PROFILE", profileId)
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
                 <Text style={{ fontSize: 20, fontWeight: '700', marginBottom: 12 }}>
