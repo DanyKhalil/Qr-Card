@@ -1,13 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, ActivityIndicator, Alert, Platform, PermissionsAndroid, Linking } from 'react-native';
+import { View, Text, ActivityIndicator, Linking } from 'react-native';
 import { useFocusEffect, useLocalSearchParams, router } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import UserProfileComponent from '../components/UserProfile/UserProfile';
+import LockedAccountScreen from '../components/UserProfile/LockedAccount/LockedAccount';
+import Button from '../components/UserProfile/Button/Button';
 import { userApi } from '../services/userApi';
 import { profileAnalyticsApi } from '../services/profileAnalyticsApi';
-import Button from '../components/UserProfile/Button/Button';
 import { DEVELOPMENT_CONFIG } from '../config/development';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import LockedAccountScreen from '../components/UserProfile/LockedAccount/LockedAccount';
 
 const UserProfilePage = ({ id }) => {
     const { qrScan } = useLocalSearchParams();
@@ -15,93 +16,130 @@ const UserProfilePage = ({ id }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    const [token, setToken] = useState(null);
-    const [user, setUser] = useState(null);
+    const [token, setToken] = useState<string | null>(null);
+    const [user, setUser] = useState<any>(null);
+    const [profileId, setProfileId] = useState<string | null | undefined>(undefined);
 
     const hasVisited = useRef(false);
 
-    const getLoggedInUserProfileId = async () => {
-        const profileId = await AsyncStorage.getItem("profileId");
-        return profileId;
-    }
-
-    const profileId = getLoggedInUserProfileId();
-
+    // ----------------------
     // Load logged-in user data
+    // ----------------------
     useEffect(() => {
+        console.log('[DEBUG] Loading user data...');
         const loadUserData = async () => {
             try {
-                const storedToken = await AsyncStorage.getItem("token");
-                const userString = await AsyncStorage.getItem("user");
+                const storedToken = await AsyncStorage.getItem('token');
+                const userString = await AsyncStorage.getItem('user');
 
                 if (storedToken && userString) {
-                    const parsedUser = JSON.parse(userString);
                     setToken(storedToken);
-                    setUser(parsedUser);
+                    setUser(JSON.parse(userString));
+                    console.log('[DEBUG] Loaded user:', userString);
                 } else {
+                    console.log('[DEBUG] No token or user found in storage');
                     setToken(null);
                     setUser(null);
                 }
-            } catch (error) {
-                console.error('Error loading user data:', error);
+            } catch (err) {
+                console.error('[DEBUG] Error loading user data:', err);
             }
         };
 
         loadUserData();
     }, []);
 
-    // Fetch user profile on focus
-    useFocusEffect(
-        React.useCallback(() => {
-            const userId = Array.isArray(id) ? id[0] : id;
-            if (userId) fetchUserProfile(userId);
-        }, [id])
-    );
+    // ----------------------
+    // Load logged-in profileId
+    // ----------------------
+    useEffect(() => {
+        console.log('[DEBUG] Loading profileId from AsyncStorage...');
+        const loadProfileId = async () => {
+            try {
+                const storedProfileId = await AsyncStorage.getItem('profileId');
+                setProfileId(storedProfileId); // can be null
+                console.log('[DEBUG] Loaded profileId:', storedProfileId);
+            } catch (err) {
+                console.error('[DEBUG] Error loading profileId:', err);
+                setProfileId(null);
+            }
+        };
+        loadProfileId();
+    }, []);
 
+    // ----------------------
+    // Fetch user profile immediately (no need to wait for profileId)
+    // ----------------------
     const fetchUserProfile = async (userId: string) => {
+        console.log('[DEBUG] Fetching user profile for userId:', userId);
         try {
             setLoading(true);
             setError(null);
             const data = await userApi.getUserProfile(userId);
             setUserData(data);
+            console.log('[DEBUG] Fetched user profile:', data);
         } catch (err: any) {
             setError(err.response?.data?.error || 'Failed to fetch user profile');
-            console.error('Error in fetchUserProfile:', err);
+            console.error('[DEBUG] Error in fetchUserProfile:', err);
         } finally {
             setLoading(false);
         }
     };
 
-    const visitProfile = async (userId: string, isQrScan: boolean) => {
+    // ----------------------
+    // Visit profile analytics (waits until profileId is loaded)
+    // ----------------------
+    const visitProfile = async (visitedUserId: string, isQrScan: boolean) => {
         if (!hasVisited.current) {
             hasVisited.current = true;
             try {
-                const loggedInUserString = await AsyncStorage.getItem("user");
-                const loggedInUser = (loggedInUserString ? JSON.parse(loggedInUserString) : {});
-                if (loggedInUser.id !== userId) {
-                    await profileAnalyticsApi.visitUserProfile(userId, isQrScan);
+                console.log(
+                    '[DEBUG] Sending visit analytics. visitedUserId:',
+                    visitedUserId,
+                    'profileId:',
+                    profileId
+                );
+
+                // Send visit analytics, allow anonymous if profileId is null
+                if (visitedUserId !== profileId) {
+                    await profileAnalyticsApi.visitUserProfile(visitedUserId, isQrScan);
+                    console.log('[DEBUG] Visit analytics sent');
+                } else {
+                    console.log('[DEBUG] Skipping visit analytics for own profile');
                 }
             } catch (err) {
-                console.error('Error in visitProfile:', err);
+                console.error('[DEBUG] Error in visitProfile:', err);
             }
         }
     };
 
+    // ----------------------
+    // useEffect: fetch profile whenever id changes
+    // ----------------------
     useEffect(() => {
-        if (id) {
-            const userId = Array.isArray(id) ? id[0] : id;
-            const isQrScan = qrScan === 'true';
-            fetchUserProfile(userId);
-            visitProfile(userId, isQrScan);
-        }
+        if (!id) return;
+        const userId = Array.isArray(id) ? id[0] : id;
+        const isQrScan = qrScan === 'true';
+        fetchUserProfile(userId);
     }, [id, qrScan]);
+
+    // ----------------------
+    // useEffect: send visit analytics once profileId has loaded
+    // ----------------------
+    useEffect(() => {
+        if (!id) return;
+        if (profileId === undefined) return; // wait until AsyncStorage is read
+
+        const userId = Array.isArray(id) ? id[0] : id;
+        const isQrScan = qrScan === 'true';
+        visitProfile(userId, isQrScan);
+    }, [id, qrScan, profileId]);
 
     // ----------------------
     // Subscription logic
     // ----------------------
     const getSubscriptionMessage = () => {
         if (!userData?.subscription || user?.role === 'admin') return null;
-
         const { status, is_active } = userData.subscription;
         if (is_active) return null;
 
@@ -148,7 +186,7 @@ const UserProfilePage = ({ id }) => {
     const subscriptionMessage = getSubscriptionMessage();
 
     if (subscriptionMessage) {
-        const isSelf = user?.profile_id === (Array.isArray(profileId) ? profileId[0] : profileId);
+        const isSelf = user?.profile_id === profileId;
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
                 <Text style={{ fontSize: 20, fontWeight: '700', marginBottom: 12 }}>
@@ -174,52 +212,13 @@ const UserProfilePage = ({ id }) => {
     }
 
     // ----------------------
-    // Helper functions
-    // ----------------------
-    const processContactLinks = () => {
-        if (!userData) return [];
-        const contactLinks = [];
-        if (userData.email) contactLinks.push({ name: userData.email, iconName: 'email', link: userData.email });
-        if (userData.phone_number) contactLinks.push({ name: userData.phone_number, iconName: 'phone', link: userData.phone_number });
-        return contactLinks;
-    };
-
-    const normalizeUrl = (url: string) => {
-        if (!url) return null;
-        if (url.startsWith('http://') || url.startsWith('https://')) return url;
-        return 'https://' + url;
-    };
-
-    const processConnectLinks = () => {
-        if (!userData?.social_media_links) return [];
-        return userData.social_media_links.map((link: any) => {
-            try {
-                const rawUrl = link.url || link;
-                const url = normalizeUrl(rawUrl);
-                const hostname = new URL(url).hostname.replace('www.', '');
-                const icon = hostname.split('.')[0];
-                const username = url.split('/').filter(Boolean).pop();
-                return { id: link.id, iconName: icon, name: `@${username}`, link: url };
-            } catch (error) {
-                console.error('Invalid URL:', link.url);
-                return null;
-            }
-        }).filter(Boolean);
-    };
-
-    const transformImageUrl = (url: string) => {
-        if (!url) return url;
-        return url.replace('http://localhost:5050', DEVELOPMENT_CONFIG.backendBaseUrl);
-    };
-
-    // ----------------------
     // Loading / error / locked account
     // ----------------------
     if (loading) {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                 <ActivityIndicator size="large" color="#82C294" />
-                <Text style={{ marginTop: 16 }}>Loading user profile...</Text>
+                <Text style={{ marginTop: 16 }}>[DEBUG] Loading user profile...</Text>
             </View>
         );
     }
@@ -249,8 +248,48 @@ const UserProfilePage = ({ id }) => {
         );
     }
 
-    const contactLinks = processContactLinks();
-    const connectLinks = processConnectLinks();
+    // ----------------------
+    // Helper functions
+    // ----------------------
+    const processContactLinks = () => {
+        if (!userData) return [];
+        const contactLinks = [];
+        if (userData.email)
+            contactLinks.push({ name: userData.email, iconName: 'email', link: userData.email });
+        if (userData.phone_number)
+            contactLinks.push({ name: userData.phone_number, iconName: 'phone', link: userData.phone_number });
+        return contactLinks;
+    };
+
+    const normalizeUrl = (url: string) => {
+        if (!url) return null;
+        if (url.startsWith('http://') || url.startsWith('https://')) return url;
+        return 'https://' + url;
+    };
+
+    const processConnectLinks = () => {
+        if (!userData?.social_media_links) return [];
+        return userData.social_media_links
+            .map((link: any) => {
+                try {
+                    const rawUrl = link.url || link;
+                    const url = normalizeUrl(rawUrl);
+                    const hostname = new URL(url).hostname.replace('www.', '');
+                    const icon = hostname.split('.')[0];
+                    const username = url.split('/').filter(Boolean).pop();
+                    return { id: link.id, iconName: icon, name: `@${username}`, link: url };
+                } catch (error) {
+                    console.error('Invalid URL:', link.url);
+                    return null;
+                }
+            })
+            .filter(Boolean);
+    };
+
+    const transformImageUrl = (url: string) => {
+        if (!url) return url;
+        return url.replace('http://localhost:5050', DEVELOPMENT_CONFIG.backendBaseUrl);
+    };
 
     return (
         <UserProfileComponent
@@ -259,8 +298,8 @@ const UserProfilePage = ({ id }) => {
             userName={userData.name}
             dob={userData.dob}
             headline={userData.headline}
-            contactLinks={contactLinks}
-            connectLinks={connectLinks}
+            contactLinks={processContactLinks()}
+            connectLinks={processConnectLinks()}
             websiteLink={userData.website_link}
             bio={userData.bio}
             videos={userData.videos_links}

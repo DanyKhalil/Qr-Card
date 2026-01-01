@@ -8,6 +8,8 @@ export default function UserProfileScreen() {
     const [loading, setLoading] = useState(true);
     const params = useLocalSearchParams();
 
+    console.log("LOADING: ", loading)
+
     useEffect(() => {
         function loadUserData() {
             try {

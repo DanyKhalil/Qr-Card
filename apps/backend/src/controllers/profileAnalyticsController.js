@@ -66,7 +66,7 @@ export const createProfileVisit = async (req, res) => {
         attributes: ['id', 'user_id', 'name']
       });
       const visitor_profile = await Profile.findOne({
-        where: { sender_profile_id },
+        where: { id: sender_profile_id },
         attributes: ['id', 'user_id', 'name']
       });
 
