@@ -31,7 +31,6 @@ export const profileFollowApi = {
 
   getUserFollowStatus: async (profileId) => {
     try {
-      console.log("PROFILE ID:", profileId)
       const response = await api.get(`/follow/${profileId}`);
       return response.data;
     } catch (error) {

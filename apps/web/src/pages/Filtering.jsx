@@ -78,7 +78,6 @@ const Filtering = () => {
     );
   };
 
-  console.log(users)
   return (
     <>
       <Header activeIndex={0} />

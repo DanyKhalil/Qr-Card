@@ -45,7 +45,6 @@ const Form = () => {
           // Update localStorage with fresh data
           localStorage.setItem("user", JSON.stringify(response.data.user));
           if (response.data.subscription) {
-            console.log("Subscription",response.data.subscription)
             localStorage.setItem("subscription", JSON.stringify(response.data.subscription));
           }
           
@@ -75,7 +74,7 @@ const Form = () => {
   };
 
   const handleContinueWithoutAccount = () => {
-    navigate('/Filtering');
+    navigate('/scan-qr-code');
   };
 
   const handleLogin = async (e) => {
@@ -100,9 +99,7 @@ const Form = () => {
 
         // Update localStorage with full user data and subscription
         localStorage.setItem("user", JSON.stringify(userRes.data.user));
-        console.log("USERRES.DATA", userRes.data);
         if (userRes.data.subscription) {
-            console.log("Subscription",userRes.data.subscription)
           localStorage.setItem("subscription", JSON.stringify(userRes.data.subscription));
         }
 

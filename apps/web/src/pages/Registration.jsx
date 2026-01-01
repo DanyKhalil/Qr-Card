@@ -50,7 +50,7 @@ const RegistrationForm = () => {
   };
 
   const handleContinueWithoutAccount = () => {
-    navigate('/Filtering');
+    navigate('/scan-qr-code');
   };
 
   const handleSubmit = async (e) => {

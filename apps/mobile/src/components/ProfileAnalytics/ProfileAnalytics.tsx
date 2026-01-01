@@ -25,7 +25,6 @@ const ProfileAnalytics = ({ userId }) => {
   const [scanChartType, setScanChartType] = useState('pie');
 
   const fetchProfileAnalytics = async (id) => {
-    console.log("trying to fetch using: ", userId)
     try {
       setLoading(true);
       setError(null);

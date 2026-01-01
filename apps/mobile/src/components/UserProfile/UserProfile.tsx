@@ -64,10 +64,8 @@ const UserProfile = ({
                 const userStr = await AsyncStorage.getItem("user");
                 if (!userStr) return;
 
-                console.log(userStr);
 
                 const currentUser = JSON.parse(userStr);
-                console.log(currentUser);
 
                 // Only update profileId if the current user matches the profile being viewed
                 if (currentUser?.id === id && profileId) {
@@ -108,7 +106,6 @@ const UserProfile = ({
         const [loggedInUserId, setLoggedInUserId] = useState(null);
         const [loggedInUserProfileId, setLoggedInUserProfileId] = useState(null);
 
-        console.log("LOGGED IN PROFILE ID:", loggedInUserProfileId)
 
         useEffect(() => {
             const fetchUserId = async () => {

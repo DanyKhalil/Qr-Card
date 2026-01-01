@@ -4,7 +4,6 @@ export const notificationsApi = {
   // Get user's notifications
   getUserNotifications: async (profileId) => {
     try {
-      console.log("profileId",profileId)
       const response = await api.get('/notifications', {
         params: { profile_id: profileId },
       });

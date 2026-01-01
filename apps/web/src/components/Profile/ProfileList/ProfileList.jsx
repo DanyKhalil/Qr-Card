@@ -60,7 +60,6 @@ const ProfileList = ({ profiles = [], onProfileClick = () => {} }) => {
   const getRelationshipStatus = (profileUserId) => {
     if (!loggedInUserProfileId || loggedInUserProfileId === profileUserId) return null;
     // Check if current user follows this profile
-    console.log(following)
     const isFollowing = following.some(f => f.profile_id === profileUserId);
     // Check if this profile follows current user
     const isFollower = followers.some(f => f.profile_id === profileUserId);
@@ -191,7 +190,6 @@ const ProfileList = ({ profiles = [], onProfileClick = () => {} }) => {
                   className={`follow-button ${buttonLabel?.toLowerCase().replace(' ', '-')}`}
                   onClick={(e) => {
                     e.stopPropagation();
-                    console.log(profile)
                     handleFollowAction(profile.profile_id, relationship.isFollowing);
                   }}
                 >

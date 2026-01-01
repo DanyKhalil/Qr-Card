@@ -24,7 +24,6 @@ api.interceptors.request.use(
 // services/profileFollowApi.js
 export const profileFollowApi = {
   followUser: async (followerProfileId, followingProfileId) => {
-    console.log(followerProfileId, followingProfileId)
     try {
       const response = await api.post('/follow', {
         follower_profile_id: followerProfileId,  // Changed to snake_case
@@ -38,7 +37,6 @@ export const profileFollowApi = {
   },
 
   unfollowUser: async (followerProfileId, followingProfileId) => {
-    console.log(followerProfileId, followingProfileId)
     try {
       const response = await api.delete('/follow', {
         data: { 

@@ -111,7 +111,6 @@ const Camera = () => {
                     alert('Could not find a QR code in the image. Please try with a different image.');
                 } else {
                     alert('Error scanning QR code from image. Please try again.');
-                    console.log(scanError)
                 }
                 
                 setUploading(false);
