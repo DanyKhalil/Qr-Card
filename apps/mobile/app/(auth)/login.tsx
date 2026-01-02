@@ -29,42 +29,42 @@ const Login = () => {
     const checkAuth = async () => {
       try {
         const token = await AsyncStorage.getItem("token");
+        const profileId = await AsyncStorage.getItem("profileId");
 
-        if (!token) {
-          setChecking(false);
+        if (!token || !profileId) {
+          setChecking(false); // no token → show login
           return;
         }
 
-        const profileId = await AsyncStorage.getItem("profileId");
-
+        // Validate token by calling subscription endpoint
         const res = await axios.get(
           `${DEVELOPMENT_CONFIG.backendBaseUrl}/api/auth/profile/${profileId}/subscription`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
+          { headers: { Authorization: `Bearer ${token}` } }
         );
 
-        await AsyncStorage.setItem("user",JSON.stringify(res.data.user));
+        await AsyncStorage.setItem("user", JSON.stringify(res.data.user));
 
         if (res.data.subscription) {
-          await AsyncStorage.setItem("subscription",JSON.stringify(res.data.subscription));
+          await AsyncStorage.setItem("subscription", JSON.stringify(res.data.subscription));
         } else {
           await AsyncStorage.removeItem("subscription");
         }
-        // router.replace("/(tabs)/profile");
-        // router.push(`/(stack)/user-profile/${res.data.user.id}`);
-        router.replace("/(tabs)/profile"); // create back target
-        router.push("/(tabs)/profile"); // create back target
+
+        // Navigate directly to user profile
+        router.replace("/(tabs)/profile");
         router.push(`/(stack)/user-profile/${profileId}`);
       } catch (err) {
-        console.error("Auth check failed:", err);
+        console.log("Auth check failed:", err.response?.status || err.message);
+
+        // Token invalid → clear everything
         await AsyncStorage.multiRemove(["token", "user", "subscription", "profileId"]);
-        setChecking(false);
+        setChecking(false); // show login
       }
     };
 
     checkAuth();
   }, []);
+
 
   /* =========================
      LOGIN HANDLER (LIKE WEB)
