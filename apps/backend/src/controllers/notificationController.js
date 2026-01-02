@@ -147,3 +147,32 @@ export const markAllNotificationsAsRead = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+/**
+ * Get unread notifications count for a profile
+ * GET /notifications/unread-count?profile_id=123
+ */
+export const getUnreadNotificationCount = async (req, res) => {
+  try {
+    const { profile_id } = req.query;
+
+    if (!profile_id) {
+      return res.status(400).json({ error: "profile_id is required" });
+    }
+
+    const unreadCount = await Notification.count({
+      where: {
+        receiver_profile_id: profile_id,
+        is_read: false,
+      },
+    });
+
+    res.json({
+      profile_id,
+      unread_count: unreadCount,
+    });
+  } catch (error) {
+    console.error("Error getting unread notification count:", error);
+    res.status(500).json({ error: error.message });
+  }
+};

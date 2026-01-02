@@ -12,12 +12,14 @@ import paymentIcon from "../../assets/images/icons/payment-icon.png";
 
 import { useNavigate } from 'react-router-dom';
 import { userApi } from "../../services/userApi";
+import { notificationsApi } from "../../services/notificationApi";
 
 const Header = ({ activeIndex }) => {
     const [profilePopup, setProfilePopup] = useState(null);
     const [userProfiles, setUserProfiles] = useState([]);
     const [addingProfile, setAddingProfile] = useState(false);
     const [newProfileName, setNewProfileName] = useState("");
+    const [unreadCount, setUnreadCount] = useState(0);
     const popupRef = useRef(null);
 
     const navigate = useNavigate();
@@ -139,14 +141,35 @@ const Header = ({ activeIndex }) => {
         };
     }, [profilePopup]);
 
+    useEffect(() => {
+        const fetchUnreadCount = async () => {
+            if (!currentProfileId) return;
+
+            try {
+                const data = await notificationsApi.getUnreadCount(currentProfileId);
+                setUnreadCount(data.unread_count || 0);
+            } catch (error) {
+                console.error("Failed to fetch unread notifications count:", error);
+            }
+        };
+
+        fetchUnreadCount();
+
+        // Optional: refresh every 30 seconds
+        const interval = setInterval(fetchUnreadCount, 30000);
+
+        return () => clearInterval(interval);
+    }, [currentProfileId]);
+
+
     let companyName = "QR CARD";
 
     let menuItems = [
         getCurrentUser()?.role === 'admin'
-            ? { name: "", icon: paymentIcon, action: goToPayments, active: activeIndex === -2 }
+            ? { name: "Payments", icon: paymentIcon, action: goToPayments, active: activeIndex === -2 }
             : null,
         getCurrentUser()?.role === 'admin'
-            ? { name: "", icon: adminIcon, action: goToAdmin, active: activeIndex === -1 }
+            ? { name: "Admin Panel", icon: adminIcon, action: goToAdmin, active: activeIndex === -1 }
             : null,
         getCurrentUser()?.id
             ? { name: "Search", icon: searchIcon, action: goToSearch, active: activeIndex === 0 }
@@ -180,8 +203,16 @@ const Header = ({ activeIndex }) => {
                                 : undefined
                         }
                     >
-                        <img src={item.icon} alt={item.name} className="menu-icon" />
-                        <span className="menu-name">{item.name}</span>
+                        <div className="notification-icon-wrapper">
+                            <img src={item.icon} alt={item.name} className="menu-icon" />
+
+                            {item.name === "Notifications" && unreadCount > 0 && (
+                                <span className="notification-badge">
+                                {unreadCount > 99 ? "99+" : unreadCount}
+                                </span>
+                            )}
+                        </div>
+                        <span className="menu-name">{getCurrentUser()?.role == 'admin' ? "" : item.name}</span>
                     </div>
                 ))}
             </div>
