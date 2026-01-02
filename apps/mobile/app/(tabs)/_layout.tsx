@@ -1,3 +1,5 @@
+import { useFocusEffect } from 'expo-router';
+import { useCallback } from 'react';
 import { Tabs } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -6,12 +8,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { TouchableOpacity, View } from 'react-native';
 import { router } from 'expo-router';
 import { Text } from 'react-native';
+import notificationsApi from '../../src/services/notificationsApi';
 
 export default function TabLayout() {
   const insets = useSafeAreaInsets();
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [profileId, setProfileId] = useState(null);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const getProfileId = async () => {
     const profileId = await AsyncStorage.getItem("profileId");
@@ -23,6 +27,41 @@ export default function TabLayout() {
     checkAdminStatus();
     getProfileId()
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      const fetchUnreadCount = async () => {
+        if (!profileId) return;
+
+        try {
+          const data = await notificationsApi.getUnreadCount(profileId);
+          setUnreadCount(data.unread_count || 0);
+        } catch (error) {
+          console.error('Failed to fetch unread count:', error);
+        }
+      };
+
+      fetchUnreadCount();
+    }, [profileId])
+  );
+
+  
+  useEffect(() => {
+    if (!profileId) return;
+
+    const interval = setInterval(async () => {
+      try {
+        const data = await notificationsApi.getUnreadCount(profileId);
+        setUnreadCount(data.unread_count || 0);
+      } catch (error) {
+        console.error('Failed to fetch unread count via polling:', error);
+      }
+    }, 30000); // every 30 seconds
+
+    return () => clearInterval(interval);
+  }, [profileId]);
+
+
 
   const checkAdminStatus = async () => {
     try {
@@ -132,11 +171,40 @@ export default function TabLayout() {
                     onPress={() => router.push('/notifications')}
                     style={{ paddingHorizontal: 10 }}
                   >
-                    <Ionicons
-                      name="notifications-outline"
-                      size={24}
-                      color="#F5F7FB"
-                    />
+                    <View style={{ position: 'relative' }}>
+                      <Ionicons
+                        name="notifications-outline"
+                        size={24}
+                        color="#F5F7FB"
+                      />
+
+                      {unreadCount > 0 && (
+                        <View
+                          style={{
+                            position: 'absolute',
+                            top: -4,
+                            right: -6,
+                            minWidth: 16,
+                            height: 16,
+                            paddingHorizontal: 4,
+                            backgroundColor: '#EF4444',
+                            borderRadius: 999,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          <Text
+                            style={{
+                              color: '#FFFFFF',
+                              fontSize: 10,
+                              fontWeight: '700',
+                            }}
+                          >
+                            {unreadCount > 99 ? '99+' : unreadCount}
+                          </Text>
+                        </View>
+                      )}
+                    </View>
                   </TouchableOpacity>
 
                   {isAdmin && (
