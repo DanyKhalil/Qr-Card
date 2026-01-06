@@ -21,6 +21,7 @@ const UserProfilePage = ({ id, scrollToBottom }) => {
     const [profileId, setProfileId] = useState<string | null | undefined>(undefined);
 
     const hasVisited = useRef(false);
+    const VISIT_COOLDOWN_MINUTES = 30; // User can visit again after 30 minutes
 
     // ----------------------
     // Load logged-in user data
@@ -70,6 +71,15 @@ const UserProfilePage = ({ id, scrollToBottom }) => {
             setLoading(true);
             setError(null);
             const data = await userApi.getUserProfile(userId);
+            
+            // Check if user's visibility is false (account locked)
+            if (data.visibility === false) {
+                // If account is locked, set data but don't proceed with normal loading
+                setUserData(data);
+                setLoading(false);
+                return;
+            }
+            
             setUserData(data);
         } catch (err: any) {
             setError(err.response?.data?.error || 'Failed to fetch user profile');
@@ -80,17 +90,55 @@ const UserProfilePage = ({ id, scrollToBottom }) => {
     };
 
     // ----------------------
-    // Visit profile analytics (waits until profileId is loaded)
+    // Visit profile analytics (with 30-minute cooldown)
     // ----------------------
     const visitProfile = async (visitedUserId: string, isQrScan: boolean) => {
         if (!hasVisited.current) {
             hasVisited.current = true;
+            
             try {
-                // Send visit analytics, allow anonymous if profileId is null
-                if (visitedUserId !== profileId) {
-                    await profileAnalyticsApi.visitUserProfile(visitedUserId, isQrScan);
-                } else {
+                // Don't track if user is viewing their own profile
+                if (visitedUserId === profileId) {
+                    return;
                 }
+                
+                // Create a unique key for this profile visit
+                const visitKey = `visited_${visitedUserId}`;
+                
+                // Check AsyncStorage for previous visit
+                const lastVisitStr = await AsyncStorage.getItem(visitKey);
+                const now = Date.now();
+                
+                if (lastVisitStr) {
+                    const lastVisit = JSON.parse(lastVisitStr);
+                    const timeSinceLastVisit = now - lastVisit.timestamp;
+                    const cooldownMs = VISIT_COOLDOWN_MINUTES * 60 * 1000;
+                    
+                    // If visited within cooldown period, don't send request
+                    if (timeSinceLastVisit < cooldownMs) {
+                        
+                        // Update last visit time but don't send to server
+                        await AsyncStorage.setItem(visitKey, JSON.stringify({
+                            timestamp: now,
+                            count: (lastVisit.count || 0) + 1,
+                            qrScan: isQrScan || lastVisit.qrScan
+                        }));
+                        return;
+                    }
+                }
+                
+                // This is either first visit or past cooldown period
+                
+                // Send visit request to server
+                await profileAnalyticsApi.visitUserProfile(visitedUserId, isQrScan);
+                
+                // Store visit in AsyncStorage with timestamp
+                await AsyncStorage.setItem(visitKey, JSON.stringify({
+                    timestamp: now,
+                    count: 1,
+                    qrScan: isQrScan
+                }));
+                
             } catch (err) {
                 console.error('[DEBUG] Error in visitProfile:', err);
             }
@@ -120,13 +168,16 @@ const UserProfilePage = ({ id, scrollToBottom }) => {
     }, [id, qrScan, profileId]);
 
     // ----------------------
-    // Subscription logic
+    // Subscription logic (updated to match web logic)
     // ----------------------
     const getSubscriptionMessage = () => {
         if (!userData?.subscription || user?.role === 'admin') return null;
         const { status, is_active } = userData.subscription;
         if (is_active) return null;
 
+        // Check if current viewer is the profile owner
+        const isProfileOwner = profileId === userData.profile_id;
+        
         let title = '';
         let message = '';
         let actionText = '';
@@ -164,42 +215,62 @@ const UserProfilePage = ({ id, scrollToBottom }) => {
                 actionLink = `/subscribe/123?profile_id=${userData.profile_id}`;
         }
 
-        return { title, message, actionText, actionLink };
+        return { title, message, actionText, actionLink, isProfileOwner };
     };
 
     const subscriptionMessage = getSubscriptionMessage();
 
+    // Show subscription block if user doesn't have active subscription
     if (subscriptionMessage) {
-        const isSelf = id === profileId;
-        console.log("ISSELF:", isSelf)
-        console.log("USER", user?.profile_id)
-        console.log("PROFILE", profileId)
-        return (
-            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
-                <Text style={{ fontSize: 20, fontWeight: '700', marginBottom: 12 }}>
-                    {subscriptionMessage.title}
-                </Text>
-                <Text style={{ fontSize: 16, color: '#555', marginBottom: 24, textAlign: 'center' }}>
-                    {subscriptionMessage.message}
-                </Text>
-                {isSelf && subscriptionMessage.actionText && (
-                    <Button
-                        text={subscriptionMessage.actionText}
-                        onPress={() => {
-                            if (subscriptionMessage.actionLink.startsWith('mailto:')) {
-                                Linking.openURL(subscriptionMessage.actionLink);
-                            } else {
-                                router.push(subscriptionMessage.actionLink);
-                            }
-                        }}
-                    />
-                )}
-            </View>
-        );
+        // Different message for profile owner vs visitor
+        if (subscriptionMessage.isProfileOwner) {
+            // Show subscription message with action button for profile owner
+            return (
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+                    <Text style={{ fontSize: 20, fontWeight: '700', marginBottom: 12, textAlign: 'center' }}>
+                        {subscriptionMessage.title}
+                    </Text>
+                    <Text style={{ fontSize: 16, color: '#555', marginBottom: 24, textAlign: 'center' }}>
+                        {subscriptionMessage.message}
+                    </Text>
+                    {subscriptionMessage.actionText && (
+                        <Button
+                            text={subscriptionMessage.actionText}
+                            onPress={() => {
+                                if (subscriptionMessage.actionLink.startsWith('mailto:')) {
+                                    Linking.openURL(subscriptionMessage.actionLink);
+                                } else {
+                                    router.push(subscriptionMessage.actionLink);
+                                }
+                            }}
+                        />
+                    )}
+                </View>
+            );
+        } else {
+            // Show different message for visitors viewing a non-active profile
+            return (
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+                    <Text style={{ fontSize: 20, fontWeight: '700', marginBottom: 12, textAlign: 'center' }}>
+                        Account not activated!
+                    </Text>
+                    <Text style={{ fontSize: 16, color: '#555', marginBottom: 24, textAlign: 'center' }}>
+                        This account is not activated currently. Try to visit it later.
+                    </Text>
+                </View>
+            );
+        }
     }
 
     // ----------------------
-    // Loading / error / locked account
+    // Show locked account page if visibility is false
+    // ----------------------
+    if (userData?.visibility === false && user?.role !== 'admin') {
+        return <LockedAccountScreen />;
+    }
+
+    // ----------------------
+    // Loading / error states
     // ----------------------
     if (loading) {
         return (
