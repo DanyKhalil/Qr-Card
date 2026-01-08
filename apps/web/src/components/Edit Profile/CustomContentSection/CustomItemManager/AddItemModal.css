@@ -272,3 +272,16 @@
     grid-column: span 3;
   }
 }
+
+.input-with-counter {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.char-counter {
+  font-size: 12px;
+  color: #64748b;
+  text-align: right;
+  margin-top: 4px;
+}
