@@ -513,3 +513,75 @@
         font-size: 1rem;
     }
 }
+
+
+
+.payment-preview {
+    margin-top: 20px;
+    padding: 18px 22px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    animation: fadeSlideIn 0.35s ease;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+}
+
+.pm-logo {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.pm-logo img {
+    max-width: 70%;
+    max-height: 70%;
+    object-fit: contain;
+}
+
+
+.pm-info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.pm-info strong {
+    font-size: 1.05rem;
+    font-weight: 700;
+}
+
+.pm-info span {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.payment-preview.bank_transfer {
+    background: linear-gradient(135deg, #1e3a8a, #2563eb);
+    color: white;
+}
+
+.payment-preview.paypal {
+    background: linear-gradient(135deg, #003087, #009cde);
+    color: white;
+}
+
+.payment-preview.crypto {
+    background: linear-gradient(135deg, #f59e0b, #fbbf24);
+    color: #1f2937;
+}
+
+.payment-preview.cash {
+    background: linear-gradient(135deg, #16a34a, #22c55e);
+    color: white;
+}
+
+.payment-preview.manual {
+    background: linear-gradient(135deg, #64748b, #94a3b8);
+    color: white;
+}
