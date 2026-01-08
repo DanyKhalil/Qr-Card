@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const VerifyEmail = () => {
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const { token } = useParams();
   const [message, setMessage] = useState("Verifying email...");
   const navigate = useNavigate();
@@ -10,7 +11,7 @@ const VerifyEmail = () => {
   useEffect(() => {
     const verify = async () => {
       try {
-        const res = await axios.get(`http://localhost:5050/api/auth/verify-email/${token}`);
+        const res = await axios.get(`${API_BASE_URL}/api/auth/verify-email/${token}`);
         setMessage(res.data.message);
 
         // Redirect after 2 seconds

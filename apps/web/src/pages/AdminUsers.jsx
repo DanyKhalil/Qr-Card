@@ -6,6 +6,7 @@ import Footer from "../components/Footer/Footer";
 import { useNavigate } from "react-router-dom";
 
 const AdminUsers = () => {
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const [users, setUsers] = useState([]);
   const [search, setSearch] = useState("");
   const [editingUserId, setEditingUserId] = useState(null);
@@ -31,7 +32,7 @@ const AdminUsers = () => {
   const fetchUsers = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:5050/api/users3?search=${search}`,
+        `${API_BASE_URL}/api/users3?search=${search}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -57,7 +58,7 @@ const AdminUsers = () => {
     if (!window.confirm("Are you sure you want to delete this user?")) return;
 
     try {
-      await axios.delete(`http://localhost:5050/api/users3/${id}`, {
+      await axios.delete(`${API_BASE_URL}/api/users3/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -109,7 +110,7 @@ const AdminUsers = () => {
   const handleUpdate = async (id) => {
     try {
       const res = await axios.put(
-        `http://localhost:5050/api/users3/${id}`,
+        `${API_BASE_URL}/api/users3/${id}`,
         editForm,
         {
           headers: { Authorization: `Bearer ${token}` },

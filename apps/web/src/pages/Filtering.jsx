@@ -5,6 +5,7 @@ import Footer from "../components/Footer/Footer";
 import "../Style/Filtering.css";
 
 const Filtering = () => {
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const [users, setUsers] = useState([]);
   const [search, setSearch] = useState("");
   const [filters, setFilters] = useState([]); // followers / following
@@ -43,7 +44,7 @@ const Filtering = () => {
 
     try {
       const res = await fetch(
-        `http://localhost:5050/api/users2/follow?profileId=${profileId}&search=${searchQuery}&filter=${filterQuery}${roleQuery}${verifiedQuery}${mutualQuery}${hasVideosQuery}${sortQuery}`
+        `${API_BASE_URL}/api/users2/follow?profileId=${profileId}&search=${searchQuery}&filter=${filterQuery}${roleQuery}${verifiedQuery}${mutualQuery}${hasVideosQuery}${sortQuery}`
       );
       const data = await res.json();
       setUsers(data);

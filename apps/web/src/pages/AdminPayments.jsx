@@ -6,6 +6,7 @@ import Footer from "../components/Footer/Footer";
 import { useNavigate } from "react-router-dom";
 
 const AdminPayments = () => {
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const [payments, setPayments] = useState([]);
   const [filteredPayments, setFilteredPayments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -68,7 +69,7 @@ const AdminPayments = () => {
       });
 
       const res = await axios.get(
-        `http://localhost:5050/api/subscription/payments?${params}`,
+        `${API_BASE_URL}/api/subscription/payments?${params}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -93,7 +94,7 @@ const AdminPayments = () => {
   const fetchStats = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:5050/api/subscription/payments/stats`,
+        `${API_BASE_URL}/api/subscription/payments/stats`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setStats(res.data.stats);
@@ -108,7 +109,7 @@ const AdminPayments = () => {
 
     try {
       await axios.patch(
-        `http://localhost:5050/api/subscription/payments/${paymentId}`,
+        `${API_BASE_URL}/api/subscription/payments/${paymentId}`,
         { status: newStatus },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -150,7 +151,7 @@ const AdminPayments = () => {
       alert("No receipt available for this payment");
       return;
     }
-    setSelectedReceipt(`http://localhost:5050${receiptUrl}`);
+    setSelectedReceipt(`${API_BASE_URL}${receiptUrl}`);
   };
 
   // Close receipt viewer
