@@ -95,6 +95,7 @@ const Login = () => {
       router.push("/(tabs)/profile"); // create back target
       router.push(`/(stack)/user-profile/${profileId}`);
     } catch (err) {
+      console.log(err)
       setError(
         err.response?.data?.error ||
         "Login failed. Please check your credentials."
