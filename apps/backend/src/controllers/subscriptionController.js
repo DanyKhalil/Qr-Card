@@ -1,6 +1,7 @@
 // controllers/subscriptionController.js
 import { User, UserSubscription, SubscriptionPlan, Payment, Profile, Notification } from "../models/index.js";
 import sequelize from "../config/db.js"
+import { Op } from "sequelize";
 
 /**
  * Get current user's subscription
@@ -75,7 +76,11 @@ export const subscribeToPlan = async (req, res) => {
 
     // Check if profile already has an active subscription
     const currentSub = await UserSubscription.findOne({
-      where: { profile_id, status: "active" }
+      where: {
+        profile_id,
+        status: "active",
+        end_date: { [Op.gt]: new Date() }
+      }
     });
 
     if (currentSub) {

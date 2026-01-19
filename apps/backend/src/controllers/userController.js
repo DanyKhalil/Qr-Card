@@ -1342,22 +1342,20 @@ export const updateProfileById = async (req, res) => {
     // --------------------------------------------------------------
     // HANDLE ALL IMAGE UPLOADS
     // --------------------------------------------------------------
-    
     let finalProfilePhotoPath = profilePhotoPath;
     let finalCoverPhotoPath = coverPhotoPath;
 
-    if (req.files && req.files.profilePicture) {
-      const profileFile = req.files.profilePicture[0];
-      finalProfilePhotoPath = `http://localhost:5050/uploads/profiles/${profileFile.filename}`;
-    } else {
-      finalProfilePhotoPath = profilePhotoPath || null;
-    }
+    if (req.files && Array.isArray(req.files)) {
+      const profileFile = req.files.find(file => file.fieldname === 'profilePicture');
+      const coverFile = req.files.find(file => file.fieldname === 'coverPhoto');
 
-    if (req.files && req.files.coverPhoto) {
-      const coverFile = req.files.coverPhoto[0];
-      finalCoverPhotoPath = `http://localhost:5050/uploads/covers/${coverFile.filename}`;
-    } else {
-      finalCoverPhotoPath = coverPhotoPath || null;
+      if (profileFile) {
+        finalProfilePhotoPath = `http://localhost:5050/uploads/profiles/${profileFile.filename}`;
+      }
+
+      if (coverFile) {
+        finalCoverPhotoPath = `http://localhost:5050/uploads/covers/${coverFile.filename}`;
+      }
     }
 
     const customImageFiles = {};
