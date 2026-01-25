@@ -17,11 +17,20 @@ export default function TabLayout() {
   const [profileId, setProfileId] = useState(null);
   const [unreadCount, setUnreadCount] = useState(0);
 
+
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
   const getProfileId = async () => {
-    const profileId = await AsyncStorage.getItem("profileId");
-    setProfileId(profileId);
-    return profileId;
-  }
+    const storedProfileId = await AsyncStorage.getItem("profileId");
+    if (storedProfileId) {
+      setProfileId(storedProfileId);
+      setIsLoggedIn(true);
+    } else {
+      setProfileId(null);
+      setIsLoggedIn(false);
+    }
+  };
+
 
   useEffect(() => {
     checkAdminStatus();
@@ -31,35 +40,48 @@ export default function TabLayout() {
   useFocusEffect(
     useCallback(() => {
       const fetchUnreadCount = async () => {
-        if (!profileId) return;
+        if (!isLoggedIn || !profileId) return;
 
         try {
           const data = await notificationsApi.getUnreadCount(profileId);
           setUnreadCount(data.unread_count || 0);
         } catch (error) {
-          console.error('Failed to fetch unread count:', error);
+          if (error?.response?.status !== 401) {
+            console.log('Failed to fetch unread count:', error);
+          }
         }
       };
 
       fetchUnreadCount();
-    }, [profileId])
+    }, [isLoggedIn, profileId])
   );
+
+
 
   
   useEffect(() => {
-    if (!profileId) return;
+    if (!isLoggedIn || !profileId) return;
 
     const interval = setInterval(async () => {
       try {
         const data = await notificationsApi.getUnreadCount(profileId);
         setUnreadCount(data.unread_count || 0);
       } catch (error) {
-        console.error('Failed to fetch unread count via polling:', error);
+        if (error?.response?.status === 401) {
+          // Token expired or user logged out
+          setProfileId(null);
+          setIsLoggedIn(false);
+          setUnreadCount(0);
+        } else {
+          console.log('Failed to fetch unread count via polling:', error);
+        }
       }
-    }, 30000); // every 30 seconds
+    }, 30000);
 
     return () => clearInterval(interval);
-  }, [profileId]);
+  }, [isLoggedIn, profileId]);
+
+
 
 
 
@@ -71,7 +93,7 @@ export default function TabLayout() {
         setIsAdmin(user.role === "admin");
       }
     } catch (error) {
-      console.error("Error checking admin status:", error);
+      console.log("Error checking admin status:", error);
     } finally {
       setLoading(false);
     }

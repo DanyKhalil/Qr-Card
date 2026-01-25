@@ -85,13 +85,17 @@ export const notificationsApi = {
   // Get unread notifications count
   getUnreadCount: async (profileId) => {
     try {
-      const response = await api.get('/notifications/unread-count', {
-        params: { profile_id: profileId },
-      });
-      return response.data;
+      if (profileId) {
+        console.log(profileId)
+        const response = await api.get('/notifications/unread-count', {
+          params: { profile_id: profileId },
+        });
+        return response.data;
+      }
     } catch (error) {
-      console.error("Get unread count API error:", error);
-      throw error;
+      console.log("Get unread count API error:", error);
+      // hello
+      // throw error;
     }
   }
 };
