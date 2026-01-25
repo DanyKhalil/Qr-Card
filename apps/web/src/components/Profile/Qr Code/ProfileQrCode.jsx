@@ -135,54 +135,102 @@ const ProfileQrCode = ({
     };
 
     const config = styleConfigs[style] || styleConfigs.classic;
-    
-    // Smaller canvas for preview
+
     const padding = 20;
     const borderWidth = config.borderWidth;
     const profileImageSize = config.profileImageSize;
     const imageMargin = config.imageMargin;
-    const nameHeight = name ? 30 : 0;
     const qrCodeSize = qrSize * config.qrCodeSizeFactor;
-    
-    // Calculate layout for vertical icons (show max 2 for preview)
+
+    // ---- NAME WRAPPING + HEIGHT CALCULATION ----
+    let nameLines = [];
+    let nameBlockHeight = 0;
+
+    if (name) {
+      const nameFontSize =
+        style === "modern" ? 18 : style === "elegant" ? 16 : 17;
+      const nameFontFamily =
+        style === "elegant"
+          ? "'Lucida Handwriting', cursive"
+          : style === "modern"
+          ? "'Helvetica', Arial, sans-serif"
+          : "'Georgia', serif";
+
+      const tempCanvas = document.createElement("canvas");
+      const tempCtx = tempCanvas.getContext("2d");
+      tempCtx.font = `bold ${nameFontSize}px ${nameFontFamily}`;
+
+      const maxNameWidth = qrCodeSize + 40;
+      const words = name.split(" ");
+      let currentLine = "";
+
+      for (let i = 0; i < words.length; i++) {
+        const testLine = currentLine + words[i] + " ";
+        if (
+          tempCtx.measureText(testLine).width > maxNameWidth &&
+          currentLine !== ""
+        ) {
+          nameLines.push(currentLine.trim());
+          currentLine = words[i] + " ";
+        } else {
+          currentLine = testLine;
+        }
+      }
+      nameLines.push(currentLine.trim());
+
+      nameLines = nameLines.slice(0, 2); // max 2 lines
+      const lineHeight = nameFontSize + 6;
+      nameBlockHeight = nameLines.length * lineHeight + 10;
+    }
+
+    // ---- SOCIAL ICON LAYOUT ----
     const maxIconsToShow = Math.min(userLinks.length, 2);
     const iconItemHeight = 25;
     const totalSocialHeight = maxIconsToShow * iconItemHeight;
-    
-    // Calculate max width needed
+
     const iconImages = await loadIconImages();
     const iconSize = 16;
-    const iconTextSize = style === 'elegant' ? 10 : style === 'modern' ? 11 : 12;
-    
-    const tempCanvas = document.createElement("canvas");
-    const tempCtx = tempCanvas.getContext("2d");
-    tempCtx.font = `${iconTextSize}px 'Segoe UI', Arial, sans-serif`;
-    
+    const iconTextSize = style === "elegant" ? 10 : style === "modern" ? 11 : 12;
+
+    const tempCanvas2 = document.createElement("canvas");
+    const tempCtx2 = tempCanvas2.getContext("2d");
+    tempCtx2.font = `${iconTextSize}px 'Segoe UI', Arial, sans-serif`;
+
     let maxTextWidth = 0;
-    for (let i = 0; i < Math.min(maxIconsToShow, userLinks.length); i++) {
+    for (let i = 0; i < maxIconsToShow; i++) {
       const link = userLinks[i];
       const displayName = link.name || "";
-      const textWidth = tempCtx.measureText(displayName).width;
+      const textWidth = tempCtx2.measureText(displayName).width;
       maxTextWidth = Math.max(maxTextWidth, textWidth);
     }
-    
+
     const totalContentWidth = iconSize + 10 + maxTextWidth;
-    const minWidth = Math.max(qrCodeSize + (padding * 2), totalContentWidth + (padding * 2));
+    const minWidth = Math.max(
+      qrCodeSize + padding * 2,
+      totalContentWidth + padding * 2
+    );
     const totalWidth = minWidth;
-    
-    const totalHeight = profileImageSize + imageMargin + nameHeight + qrCodeSize + 
-                        (padding * 2) + totalSocialHeight + 20;
-    
+
+    const totalHeight =
+      padding +
+      profileImageSize +
+      imageMargin +
+      nameBlockHeight +
+      qrCodeSize +
+      totalSocialHeight +
+      padding +
+      20;
+
     const previewCanvas = document.createElement("canvas");
     previewCanvas.width = totalWidth;
     previewCanvas.height = totalHeight;
     const ctx = previewCanvas.getContext("2d");
 
-    // Fill background
+    // ---- BACKGROUND ----
     ctx.fillStyle = config.backgroundColor;
     ctx.fillRect(0, 0, totalWidth, totalHeight);
 
-    // Draw outer border
+    // ---- BORDER ----
     ctx.strokeStyle = config.borderColor;
     ctx.lineWidth = borderWidth;
     ctx.strokeRect(
@@ -192,13 +240,13 @@ const ProfileQrCode = ({
       totalHeight - borderWidth
     );
 
-    // Draw profile image
+    // ---- PROFILE IMAGE ----
     if (image) {
       try {
         const profileImg = await loadImage(image);
         const imageX = totalWidth / 2 - profileImageSize / 2;
         const imageY = padding;
-        
+
         ctx.save();
         ctx.beginPath();
         ctx.arc(
@@ -210,11 +258,10 @@ const ProfileQrCode = ({
         );
         ctx.closePath();
         ctx.clip();
-        
+
         ctx.drawImage(profileImg, imageX, imageY, profileImageSize, profileImageSize);
         ctx.restore();
-        
-        // Border around image
+
         ctx.beginPath();
         ctx.arc(
           totalWidth / 2,
@@ -224,11 +271,9 @@ const ProfileQrCode = ({
           Math.PI * 2
         );
         ctx.strokeStyle = color;
-        ctx.lineWidth = style === 'elegant' ? 2 : 3;
+        ctx.lineWidth = style === "elegant" ? 2 : 3;
         ctx.stroke();
-        
-      } catch (error) {
-        // Fallback placeholder
+      } catch {
         ctx.beginPath();
         ctx.arc(
           totalWidth / 2,
@@ -242,8 +287,8 @@ const ProfileQrCode = ({
         ctx.strokeStyle = color;
         ctx.lineWidth = 3;
         ctx.stroke();
-        
-        ctx.font = `bold ${profileImageSize/2}px 'Segoe UI', Arial, sans-serif`;
+
+        ctx.font = `bold ${profileImageSize / 2}px 'Segoe UI', Arial, sans-serif`;
         ctx.fillStyle = "#666";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
@@ -255,15 +300,50 @@ const ProfileQrCode = ({
       }
     }
 
-    // Draw QR code
-    const qrY = padding + profileImageSize + imageMargin + nameHeight;
+    // ---- NAME ----
+    if (nameLines.length > 0) {
+      const nameFontSize =
+        style === "modern" ? 18 : style === "elegant" ? 16 : 17;
+      const nameFontFamily =
+        style === "elegant"
+          ? "'Lucida Handwriting', cursive"
+          : style === "modern"
+          ? "'Helvetica', Arial, sans-serif"
+          : "'Georgia', serif";
+
+      ctx.font = `bold ${nameFontSize}px ${nameFontFamily}`;
+      ctx.fillStyle =
+        style === "elegant" ? "#222" : style === "modern" ? "#111" : "#333";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+
+      const startY =
+        padding + profileImageSize + imageMargin + nameFontSize / 2;
+
+      nameLines.forEach((line, index) => {
+        ctx.fillText(
+          line,
+          totalWidth / 2,
+          startY + index * (nameFontSize + 6)
+        );
+      });
+    }
+
+    // ---- QR CODE ----
+    const qrY =
+      padding +
+      profileImageSize +
+      imageMargin +
+      nameBlockHeight +
+      10;
     const qrX = (totalWidth - qrCodeSize) / 2;
-    
-    // QR code background
+
     if (config.showGradient) {
       const gradient = ctx.createLinearGradient(
-        qrX - 8, qrY - 8, 
-        qrX + qrCodeSize + 8, qrY + qrCodeSize + 8
+        qrX - 8,
+        qrY - 8,
+        qrX + qrCodeSize + 8,
+        qrY + qrCodeSize + 8
       );
       gradient.addColorStop(0, "#f8f8f8");
       gradient.addColorStop(1, "#f0f0f0");
@@ -272,73 +352,61 @@ const ProfileQrCode = ({
       ctx.fillStyle = "#f5f5f5";
     }
     ctx.fillRect(qrX - 8, qrY - 8, qrCodeSize + 16, qrCodeSize + 16);
-    
+
     ctx.strokeStyle = "#e0e0e0";
     ctx.lineWidth = 1;
     ctx.strokeRect(qrX - 8, qrY - 8, qrCodeSize + 16, qrCodeSize + 16);
 
-    // Draw QR code
     ctx.drawImage(canvas, qrX, qrY, qrCodeSize, qrCodeSize);
 
-    // Draw name
-    if (name) {
-      ctx.font = config.nameFont;
-      ctx.fillStyle = style === 'elegant' ? "#222" : style === 'modern' ? "#111" : "#333";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      const nameY = padding + profileImageSize + imageMargin;
-      
-      // Truncate name if too long for preview
-      let displayName = name;
-      if (displayName.length > 15) {
-        displayName = displayName.substring(0, 12) + '...';
-      }
-      
-      ctx.fillText(displayName, totalWidth / 2, nameY);
-    }
-
-    // Draw social media icons (max 2 for preview)
+    // ---- SOCIAL ICONS ----
     if (userLinks.length > 0) {
       const groupStartX = totalWidth / 2;
       const groupStartY = qrY + qrCodeSize + 20;
-      
+
       for (let i = 0; i < maxIconsToShow; i++) {
         const link = userLinks[i];
-        const y = groupStartY + (i * iconItemHeight);
-        
+        const y = groupStartY + i * iconItemHeight;
+
         const displayName = link.name || "";
         ctx.font = config.socialFont;
         const textWidth = ctx.measureText(displayName).width;
         const itemWidth = iconSize + 8 + textWidth;
-        const itemStartX = groupStartX - (itemWidth / 2);
-        
-        // Draw icon
+        const itemStartX = groupStartX - itemWidth / 2;
+
         const iconName = link.iconName?.toLowerCase();
         if (iconImages[iconName]) {
-          ctx.drawImage(iconImages[iconName], itemStartX, y - iconSize/2, iconSize, iconSize);
+          ctx.drawImage(
+            iconImages[iconName],
+            itemStartX,
+            y - iconSize / 2,
+            iconSize,
+            iconSize
+          );
         } else {
           ctx.font = `bold ${iconSize}px Arial`;
           ctx.fillStyle = color;
           ctx.textAlign = "left";
           ctx.fillText(iconName?.charAt(0).toUpperCase() || "?", itemStartX, y);
         }
-        
-        // Draw username (truncated for preview)
+
         ctx.font = config.socialFont;
-        ctx.fillStyle = style === 'elegant' ? "#555" : style === 'modern' ? "#444" : "#666";
+        ctx.fillStyle =
+          style === "elegant" ? "#555" : style === "modern" ? "#444" : "#666";
         ctx.textAlign = "left";
-        
+
         let displayText = displayName;
         if (displayText && displayText.length > 12) {
-          displayText = displayText.substring(0, 10) + '...';
+          displayText = displayText.substring(0, 10) + "...";
         }
-        
+
         ctx.fillText(displayText, itemStartX + iconSize + 5, y + 4);
       }
     }
 
     return previewCanvas.toDataURL("image/png");
   }, [profileUrl, name, userLinks, image, color, qrSize]);
+
 
   // Generate previews when modal opens
   useEffect(() => {
@@ -366,7 +434,6 @@ const ProfileQrCode = ({
     const canvas = qrRef.current.querySelector("canvas");
     if (!canvas) return null;
 
-    // Full size configurations for download
     const styleConfigs = {
       classic: {
         profileImageSize: 100,
@@ -404,26 +471,25 @@ const ProfileQrCode = ({
     };
 
     const config = styleConfigs[style] || styleConfigs.classic;
-    
+
     const padding = 40;
     const borderWidth = config.borderWidth;
     const profileImageSize = config.profileImageSize;
     const imageMargin = config.imageMargin;
-    const nameHeight = name ? 40 : 0;
     const qrCodeSize = qrSize * config.qrCodeSizeFactor;
-    
+
     const maxIconsToShow = Math.min(userLinks.length, 6);
     const iconItemHeight = 35;
     const totalSocialHeight = maxIconsToShow * iconItemHeight;
-    
+
     const iconImages = await loadIconImages();
     const iconSize = 20;
     const iconTextSize = style === 'elegant' ? 12 : style === 'modern' ? 13 : 14;
-    
+
     const tempCanvas = document.createElement("canvas");
     const tempCtx = tempCanvas.getContext("2d");
     tempCtx.font = `${iconTextSize}px 'Segoe UI', Arial, sans-serif`;
-    
+
     let maxTextWidth = 0;
     for (let i = 0; i < maxIconsToShow; i++) {
       const link = userLinks[i];
@@ -431,14 +497,49 @@ const ProfileQrCode = ({
       const textWidth = tempCtx.measureText(displayName).width;
       maxTextWidth = Math.max(maxTextWidth, textWidth);
     }
-    
+
     const totalContentWidth = iconSize + 15 + maxTextWidth;
     const minWidth = Math.max(qrCodeSize + (padding * 2), totalContentWidth + (padding * 2));
     const totalWidth = minWidth;
-    
-    const totalHeight = profileImageSize + imageMargin + nameHeight + qrCodeSize + 
-                        (padding * 2) + totalSocialHeight + 40;
-    
+
+    // ----- NAME WRAPPING LOGIC -----
+    const ctxMeasure = tempCtx;
+    ctxMeasure.font = config.nameFont;
+    const maxNameWidth = totalWidth - 80;
+    let nameLines = [];
+
+    if (name) {
+      const words = name.split(" ");
+      let currentLine = "";
+
+      for (let i = 0; i < words.length; i++) {
+        const testLine = currentLine + words[i] + " ";
+        const metrics = ctxMeasure.measureText(testLine);
+        if (metrics.width > maxNameWidth && currentLine !== "") {
+          nameLines.push(currentLine.trim());
+          currentLine = words[i] + " ";
+        } else {
+          currentLine = testLine;
+        }
+      }
+      nameLines.push(currentLine.trim());
+      nameLines = nameLines.slice(0, 2); // max 2 lines
+    }
+
+    const lineHeight = 34;
+    const nameBlockHeight = nameLines.length > 0 ? nameLines.length * lineHeight + 20 : 0;
+
+    const totalHeight =
+      padding +
+      profileImageSize +
+      imageMargin +
+      nameBlockHeight +
+      30 + // spacing between name and QR
+      qrCodeSize +
+      40 +
+      totalSocialHeight +
+      padding;
+
     const downloadCanvas = document.createElement("canvas");
     downloadCanvas.width = totalWidth * 3;
     downloadCanvas.height = totalHeight * 3;
@@ -446,11 +547,11 @@ const ProfileQrCode = ({
 
     ctx.scale(3, 3);
 
-    // Fill background
+    // Background
     ctx.fillStyle = config.backgroundColor;
     ctx.fillRect(0, 0, totalWidth, totalHeight);
 
-    // Draw outer border
+    // Outer border
     ctx.strokeStyle = config.borderColor;
     ctx.lineWidth = borderWidth;
     ctx.strokeRect(
@@ -460,7 +561,7 @@ const ProfileQrCode = ({
       totalHeight - borderWidth
     );
 
-    // Draw subtle inner border
+    // Inner border
     ctx.strokeStyle = style === 'elegant' ? "#ddd" : "#f0f0f0";
     ctx.lineWidth = 1;
     ctx.strokeRect(
@@ -470,13 +571,13 @@ const ProfileQrCode = ({
       totalHeight - borderWidth - 20
     );
 
-    // Draw profile image
+    // Profile image
     if (image) {
       try {
         const profileImg = await loadImage(image);
         const imageX = totalWidth / 2 - profileImageSize / 2;
         const imageY = padding;
-        
+
         ctx.save();
         ctx.beginPath();
         ctx.arc(
@@ -488,11 +589,9 @@ const ProfileQrCode = ({
         );
         ctx.closePath();
         ctx.clip();
-        
         ctx.drawImage(profileImg, imageX, imageY, profileImageSize, profileImageSize);
         ctx.restore();
-        
-        // Border around image
+
         ctx.beginPath();
         ctx.arc(
           totalWidth / 2,
@@ -504,9 +603,7 @@ const ProfileQrCode = ({
         ctx.strokeStyle = color;
         ctx.lineWidth = style === 'elegant' ? 3 : 4;
         ctx.stroke();
-        
       } catch (error) {
-        // Fallback placeholder
         ctx.beginPath();
         ctx.arc(
           totalWidth / 2,
@@ -520,8 +617,8 @@ const ProfileQrCode = ({
         ctx.strokeStyle = color;
         ctx.lineWidth = 4;
         ctx.stroke();
-        
-        ctx.font = `bold ${profileImageSize/2}px 'Segoe UI', Arial, sans-serif`;
+
+        ctx.font = `bold ${profileImageSize / 2}px 'Segoe UI', Arial, sans-serif`;
         ctx.fillStyle = "#666";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
@@ -533,14 +630,41 @@ const ProfileQrCode = ({
       }
     }
 
-    // Draw QR code
-    const qrY = padding + profileImageSize + imageMargin + nameHeight;
+    // Draw name (wrapped)
+    let currentY = padding + profileImageSize + imageMargin;
+    if (nameLines.length > 0) {
+      ctx.font = config.nameFont;
+      ctx.fillStyle = style === 'elegant' ? "#222" : style === 'modern' ? "#111" : "#333";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+
+      ctx.shadowColor = "rgba(0, 0, 0, 0.08)";
+      ctx.shadowBlur = style === 'elegant' ? 1 : 2;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 1;
+
+      nameLines.forEach((line, index) => {
+        ctx.fillText(
+          line,
+          totalWidth / 2,
+          currentY + index * lineHeight
+        );
+      });
+
+      ctx.shadowColor = "transparent";
+      currentY += nameBlockHeight;
+    }
+
+    // Space before QR
+    currentY += 30;
+
+    // QR background
     const qrX = (totalWidth - qrCodeSize) / 2;
-    
-    // QR code background
+    const qrY = currentY;
+
     if (config.showGradient) {
       const gradient = ctx.createLinearGradient(
-        qrX - 10, qrY - 10, 
+        qrX - 10, qrY - 10,
         qrX + qrCodeSize + 10, qrY + qrCodeSize + 10
       );
       gradient.addColorStop(0, "#f8f8f8");
@@ -549,13 +673,13 @@ const ProfileQrCode = ({
     } else {
       ctx.fillStyle = "#f5f5f5";
     }
+
     ctx.fillRect(qrX - 10, qrY - 10, qrCodeSize + 20, qrCodeSize + 20);
-    
     ctx.strokeStyle = "#e0e0e0";
     ctx.lineWidth = 2;
     ctx.strokeRect(qrX - 10, qrY - 10, qrCodeSize + 20, qrCodeSize + 20);
 
-    // Draw QR code with shadow
+    // QR with shadow
     ctx.shadowColor = "rgba(0, 0, 0, 0.1)";
     ctx.shadowBlur = 5;
     ctx.shadowOffsetX = 0;
@@ -563,70 +687,53 @@ const ProfileQrCode = ({
     ctx.drawImage(canvas, qrX, qrY, qrCodeSize, qrCodeSize);
     ctx.shadowColor = "transparent";
 
-    // Draw name
-    if (name) {
-      ctx.font = config.nameFont;
-      ctx.fillStyle = style === 'elegant' ? "#222" : style === 'modern' ? "#111" : "#333";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      const nameY = padding + profileImageSize + imageMargin;
-      
-      ctx.shadowColor = "rgba(0, 0, 0, 0.08)";
-      ctx.shadowBlur = style === 'elegant' ? 1 : 2;
-      ctx.shadowOffsetX = 0;
-      ctx.shadowOffsetY = 1;
-      ctx.fillText(name, totalWidth / 2, nameY);
-      ctx.shadowColor = "transparent";
-    }
-
-    // Draw social media icons
+    // Social links
     if (userLinks.length > 0) {
       const groupStartX = totalWidth / 2;
       const groupStartY = qrY + qrCodeSize + 40;
-      
+
       for (let i = 0; i < maxIconsToShow; i++) {
         const link = userLinks[i];
         const y = groupStartY + (i * iconItemHeight);
-        
+
         const displayName = link.name || "";
         ctx.font = config.socialFont;
         const textWidth = ctx.measureText(displayName).width;
         const itemWidth = iconSize + 15 + textWidth;
         const itemStartX = groupStartX - (itemWidth / 2);
-        
-        // Draw icon background
+
+        // Icon background
         ctx.beginPath();
-        ctx.arc(itemStartX + iconSize/2, y, iconSize/2 + 4, 0, Math.PI * 2);
+        ctx.arc(itemStartX + iconSize / 2, y, iconSize / 2 + 4, 0, Math.PI * 2);
         ctx.fillStyle = style === 'modern' ? `${color}15` : `${color}20`;
         ctx.fill();
-        
-        // Draw icon
+
         const iconName = link.iconName?.toLowerCase();
         if (iconImages[iconName]) {
-          ctx.drawImage(iconImages[iconName], itemStartX, y - iconSize/2, iconSize, iconSize);
+          ctx.drawImage(iconImages[iconName], itemStartX, y - iconSize / 2, iconSize, iconSize);
         } else {
           ctx.font = `bold ${iconSize}px Arial`;
           ctx.fillStyle = color;
           ctx.textAlign = "left";
           ctx.fillText(iconName?.charAt(0).toUpperCase() || "?", itemStartX, y);
         }
-        
-        // Draw username
+
         ctx.font = config.socialFont;
         ctx.fillStyle = style === 'elegant' ? "#555" : style === 'modern' ? "#444" : "#666";
         ctx.textAlign = "left";
-        
+
         let displayText = displayName;
         if (displayText && displayText.length > 25) {
           displayText = displayText.substring(0, 22) + '...';
         }
-        
+
         ctx.fillText(displayText, itemStartX + iconSize + 10, y + 5);
       }
     }
 
     return downloadCanvas.toDataURL("image/png");
   };
+
 
   const handleDownloadClick = () => {
     setShowStyleModal(true);
