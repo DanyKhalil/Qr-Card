@@ -871,9 +871,10 @@ const ProfileQrCode = ({
         }}>
           <QRCodeCanvas 
             value={profileUrl} 
-            size={qrSize}
+            size={Math.floor(qrSize * 0.65)}  // match your final display size
+            level="H"                         // HIGH error correction
             bgColor="#ffffff"
-            fgColor={color}
+            fgColor="#000000"                 // pure black = best scan reliability
           />
         </div>
         
