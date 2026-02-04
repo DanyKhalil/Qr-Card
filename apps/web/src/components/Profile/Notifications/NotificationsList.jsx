@@ -144,15 +144,20 @@ const NotificationsList = ({ notifications = [], onNotificationClick = () => {} 
           const titleInfo = getNotificationTitle(notification.type);
           const isUnread = !notification.is_read;
           const profilePic = notification.sender?.profile_pic_url;
-          
           return (
             <div 
               key={notification.id} 
               className={`notification-card ${isUnread ? 'unread' : ''}`}
-              onClick={() => handleNotificationClick(notification)}
+              onClick={ 
+                titleInfo.text !== "Notification"
+                  ? () => handleNotificationClick(notification)
+                  : undefined
+              }
+              style={{
+                cursor: titleInfo.text !== "notification" ? "pointer" : "default"
+              }}
             >
               <div className="notification-indicator">
-                {/* {isUnread && <div className="unread-dot"></div>} */}
                 {getNotificationIcon(notification.type, profilePic)}
               </div>
 
@@ -167,11 +172,10 @@ const NotificationsList = ({ notifications = [], onNotificationClick = () => {} 
                 </div>
 
                 <p className="notification-message">{notification.message}</p>
-                
-                {/* Removed the sender info section from bottom */}
               </div>
             </div>
           );
+
         })}
       </div>
     </div>
