@@ -2,12 +2,32 @@ import React, { useState, useEffect } from "react";
 import { IoPersonOutline, IoCheckmark, IoEye } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 import './NotificationsList.css';
+import notificationsApi from '../../../services/notificationApi'; // adjust path if needed
+
 
 const NotificationsList = ({ notifications = [], onNotificationClick = () => {} }) => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [unreadCount, setUnreadCount] = useState(0);
+
+  const handleClearAll = async () => {
+    try {
+      setLoading(true);
+      const currentProfileId = localStorage.getItem("profileId");
+      if (!currentProfileId) {
+        console.error("No profile ID found. Cannot mark notifications as seen.");
+        return;
+      }
+      await notificationsApi.markAllAsSeen(currentProfileId);
+      setLoading(false);
+      window.location.reload();
+    } catch (err) {
+      console.error("Clear all notifications error:", err);
+      setError("Failed to clear notifications");
+      setLoading(false);
+    }
+  };
 
   // Calculate unread count
   useEffect(() => {
@@ -135,6 +155,15 @@ const NotificationsList = ({ notifications = [], onNotificationClick = () => {} 
           {unreadCount > 0 && (
             <span className="unread-badge">{unreadCount} unread</span>
           )}
+
+          <button
+            className="clear-all-btn"
+            onClick={handleClearAll}
+            disabled={loading}
+          >
+            {loading ? "Clearing..." : "Clear all"}
+          </button>
+
           <span className="notifications-count">{notifications.length}</span>
         </div>
       </div>

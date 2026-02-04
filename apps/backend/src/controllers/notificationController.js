@@ -56,7 +56,10 @@ export const getUserNotifications = async (req, res) => {
     }
 
     const notifications = await Notification.findAll({
-      where: { receiver_profile_id: profile_id },
+      where: { 
+        receiver_profile_id: profile_id,
+        is_seen: false,
+      },
       order: [["created_at", "DESC"]],
       limit: 50,
       include: [
@@ -147,6 +150,35 @@ export const markAllNotificationsAsRead = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+// this will be considered as clear.
+export const markAllNotificationsAsSeen = async (req, res) => {
+  try {
+    const { profile_id } = req.body; // receiver_profile_id
+
+    const [updatedCount] = await Notification.update(
+      {
+        is_seen: true,
+        seen_at: new Date()
+      },
+      {
+        where: {
+          receiver_profile_id: profile_id,
+          is_seen: false
+        }
+      }
+    );
+
+    return res.status(200).json({
+      message: `${updatedCount} notifications marked as seen`,
+      updatedCount
+    });
+  } catch (error) {
+    console.error("markAllNotificationsAsSeen error:", error);
+    res.status(400).json({ error: error.message });
+  }
+};
+
 
 /**
  * Get unread notifications count for a profile

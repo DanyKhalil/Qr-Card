@@ -337,3 +337,29 @@
     font-size: 11px;
   }
 }
+
+
+
+
+.clear-all-btn {
+  background: transparent;
+  border: 2px solid #e2e8f0;
+  color: #64748b;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.clear-all-btn:hover:not(:disabled) {
+  background: #3AAFA9;
+  border-color: #3AAFA9;
+  color: white;
+}
+
+.clear-all-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
