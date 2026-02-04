@@ -49,9 +49,7 @@ const Header = ({ activeIndex }) => {
     };
 
     /* ---------- Profile Popup ---------- */
-    const handleProfileRightClick = async (e) => {
-        e.preventDefault();
-
+    const handleProfileHover = async (e) => {
         const rect = e.currentTarget.getBoundingClientRect();
         setProfilePopup({
             top: rect.bottom + window.scrollY + 6,
@@ -120,6 +118,13 @@ const Header = ({ activeIndex }) => {
                 "Failed to delete profile"
             );
         }
+    };
+
+
+    const handleProfileLeave = () => {
+        setProfilePopup(null);
+        setAddingProfile(false);
+        setNewProfileName("");
     };
 
     /* ---------- Click Outside ---------- */
@@ -197,9 +202,9 @@ const Header = ({ activeIndex }) => {
                         key={index}
                         className={item.active ? "menu-item active" : "menu-item"}
                         onClick={item.action}
-                        onContextMenu={
+                        onMouseEnter={
                             item.name === "My Profile"
-                                ? handleProfileRightClick
+                                ? handleProfileHover
                                 : undefined
                         }
                     >
@@ -222,6 +227,11 @@ const Header = ({ activeIndex }) => {
                     ref={popupRef}
                     className="profile-popup"
                     style={profilePopup}
+                    onMouseEnter={() => {
+                        // keep open
+                        setProfilePopup(profilePopup);
+                    }}
+                    onMouseLeave={handleProfileLeave}
                 >
                     {userProfiles.map(profile => {
                         const isActive = profile.id === currentProfileId;
