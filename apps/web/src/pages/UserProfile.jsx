@@ -23,10 +23,16 @@ const UserProfile = () => {
         }
     };
 
+    const getCurrentUserProfileId = () => {
+        const profileId = localStorage.getItem("profileId");
+        return profileId;
+    };
+
     const [searchParams] = useSearchParams();
     const currentLoggedInUser = getCurrentUser();
+    const currentLoggedInUserProfileId = getCurrentUserProfileId();
     const { id: urlId } = useParams();
-    const id = urlId || currentLoggedInUser?.id;
+    const id = urlId || currentLoggedInUserProfileId; // currentLoggedInUser?.id;
     
     if (!id) {
         window.location.href = "/login";
@@ -38,6 +44,7 @@ const UserProfile = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const hasVisited = useRef(false);
+    const VISIT_COOLDOWN_MINUTES = 30; // User can visit again after 30 minutes
 
     const fetchUserProfile = async (id) => {
         try {
@@ -65,8 +72,60 @@ const UserProfile = () => {
     const visitProfile = async (id, qrScan) => {
         if (!hasVisited.current) {
             hasVisited.current = true;
+            
             try {
+                // Get current visitor's token (if logged in)
+                const visitorToken = getToken();
+                
+                // Check if this is a visitor (not the profile owner)
+                // Only track visits if:
+                // 1. Visitor is logged in AND visiting someone else's profile
+                // OR
+                // 2. Visitor is not logged in (anonymous visit)
+                const isViewingOwnProfile = currentLoggedInUserProfileId === id;
+                
+                // Don't track if user is viewing their own profile
+                if (isViewingOwnProfile) {
+                    return;
+                }
+                
+                // Create a unique key for this profile visit
+                const visitKey = `visited_${id}`;
+                
+                // Check localStorage for previous visit
+                const lastVisitStr = localStorage.getItem(visitKey);
+                const now = Date.now();
+                
+                if (lastVisitStr) {
+                    const lastVisit = JSON.parse(lastVisitStr);
+                    const timeSinceLastVisit = now - lastVisit.timestamp;
+                    const cooldownMs = VISIT_COOLDOWN_MINUTES * 60 * 1000;
+                    
+                    // If visited within cooldown period, don't send request
+                    if (timeSinceLastVisit < cooldownMs) {
+                        
+                        // Update last visit time but don't send to server
+                        localStorage.setItem(visitKey, JSON.stringify({
+                            timestamp: now,
+                            count: (lastVisit.count || 0) + 1,
+                            qrScan: qrScan || lastVisit.qrScan
+                        }));
+                        return;
+                    }
+                }
+                
+                // This is either first visit or past cooldown period
+                
+                // Send visit request to server
                 let res = await profileAnalyticsApi.visitUserProfile(id, qrScan);
+                
+                // Store visit in localStorage with timestamp
+                localStorage.setItem(visitKey, JSON.stringify({
+                    timestamp: now,
+                    count: 1,
+                    qrScan: qrScan
+                }));
+                
             } catch (err) {
                 console.error('Error in visitProfile:', err);
             }
@@ -96,7 +155,7 @@ const UserProfile = () => {
         let title = "Subscription Required";
         let message = "You must activate a subscription plan to continue.";
         let actionText = "View Plans";
-        let actionLink = "/subscribe";
+        let actionLink = `/subscribe?profile_id=${userData.profile_id}`;
 
         if (status === "pending") {
             title = "Payment Under Review";
@@ -126,7 +185,7 @@ const UserProfile = () => {
             actionLink = "mailto:danikhalil2004@gmail.com";
         }
 
-        if(currentLoggedInUser.id != id) {
+        if(currentLoggedInUserProfileId != id) {
             return (
                 <div className="subscription-block-page">
                     <Header />
@@ -597,6 +656,7 @@ const UserProfile = () => {
                 followers = {userData.followers}
                 following = {userData.following}
                 id = {id}
+                profileId = {userData.profile_id}
                 customContent = {userData.custom_content}
                 fetchUserProfile = {fetchUserProfile}
                 QrCodeColor = {userData.qr_code_color}

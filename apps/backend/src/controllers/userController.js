@@ -137,7 +137,7 @@ export const getUserProfile = async (req, res) => {
     // ADD: fetch latest subscription
     // ---------------------------------------
     const subscriptionRecord = await UserSubscription.findOne({
-      where: { user_id: user.id },
+      where: { profile_id: user.profile.id },
       include: [
         {
           model: SubscriptionPlan,
@@ -164,21 +164,15 @@ export const getUserProfile = async (req, res) => {
         ? new Date(subscriptionRecord.end_date)
         : null;
 
-      // CORRECTED: Determine if subscription is currently active
-      // Subscription is active if: status is "active" AND (no end date OR end date in future)
       let isActive = false;
       
       if (subscriptionRecord.status === "active") {
         if (endDate) {
-          // Subscription has an end date, check if it's in the future
           isActive = endDate > now;
         } else {
-          // Subscription has no end date (perpetual or manual control)
           isActive = true;
         }
-      }
-      // All other statuses: pending, expired, cancelled, suspended are not active
-      else {
+      } else {
         isActive = false;
       }
 
@@ -190,18 +184,17 @@ export const getUserProfile = async (req, res) => {
         );
       }
 
-      // CORRECTED: Map "suspended" to "failed" for frontend compatibility
       const frontendStatus = subscriptionRecord.status === "suspended" 
         ? "failed" 
         : subscriptionRecord.status;
 
       subscription = {
         is_active: isActive,
-        status: frontendStatus, // Use mapped status for frontend
+        status: frontendStatus,
         plan_name: subscriptionRecord.plan?.name || null,
         expires_at: subscriptionRecord.end_date,
         days_remaining: daysRemaining,
-        requires_payment: !isActive // Payment required if not active
+        requires_payment: !isActive
       };
     }
 
@@ -214,12 +207,12 @@ export const getUserProfile = async (req, res) => {
         {
           model: Profile,
           as: "follower",
-          attributes: ["id", "profile_pic_url", "headline", "bio"],
+          attributes: ["id", "name", "profile_pic_url", "headline", "bio"],
           include: [
             {
               model: User,
               as: "user",
-              attributes: ["id", "name"]
+              attributes: ["id"]
             }
           ]
         }
@@ -236,12 +229,12 @@ export const getUserProfile = async (req, res) => {
         {
           model: Profile,
           as: "following",
-          attributes: ["id", "profile_pic_url", "headline", "bio"],
+          attributes: ["id", "name", "profile_pic_url", "headline", "bio"],
           include: [
             {
               model: User,
               as: "user",
-              attributes: ["id", "name"]
+              attributes: ["id"]
             }
           ]
         }
@@ -256,7 +249,8 @@ export const getUserProfile = async (req, res) => {
 
     // Format Profile Base Info
     const userProfile = {
-      name: user.name,
+      profile_id: user.profile.id,
+      name: user.profile.name,
       cover_photo_url: user.profile.cover_pic_url,
       profile_pic_url: user.profile.profile_pic_url,
       qr_code_color: user.profile.qr_code_color, 
@@ -315,7 +309,7 @@ export const getUserProfile = async (req, res) => {
         follow_id: f.id,
         profile_id: f.follower?.id,
         user_id: f.follower?.user?.id,
-        name: f.follower?.user?.name,
+        name: f.follower?.name,
         profile_pic_url: f.follower?.profile_pic_url,
         headline: f.follower?.headline,
         bio: f.follower?.bio,
@@ -326,7 +320,7 @@ export const getUserProfile = async (req, res) => {
         follow_id: f.id,
         profile_id: f.following?.id,
         user_id: f.following?.user?.id,
-        name: f.following?.user?.name,
+        name: f.following?.name,
         profile_pic_url: f.following?.profile_pic_url,
         headline: f.following?.headline,
         bio: f.following?.bio,
@@ -386,6 +380,7 @@ export const getUserProfile = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
 
 // --- to start updating the user info on all tabels -
 export const updateUserProfile = async (req, res) => {
@@ -496,7 +491,7 @@ export const updateUserProfile = async (req, res) => {
     // --------------------------------------------------------------
     // DATABASE OPERATIONS
     // --------------------------------------------------------------
-    
+
     const user = await User.findOne({
       where: {id: id}
     })
@@ -552,9 +547,6 @@ export const updateUserProfile = async (req, res) => {
       return true;
     }
 
-    const updateUser = await user.update({
-      name: userName.trim()
-    })
 
     let cleanDob = null;
     if (dob && !isNaN(new Date(dob).getTime())) {
@@ -562,6 +554,7 @@ export const updateUserProfile = async (req, res) => {
     }
 
     const updateProfile = await profile.update({
+      name: userName?.trim() || profile.name,
       headline: headline.trim(),
       dob: cleanDob,
       phone_number: phoneNumber,
@@ -1074,5 +1067,836 @@ export const updateUserProfileMobile = async (req, res) => {
       success: false,
       message: error.message
     });
+  }
+};
+
+
+
+
+
+// UPDATED TO USE PROFILE ID
+
+export const getProfileDetailsByProfileId = async (req, res) => {
+  try {
+    const { id } = req.params; // This is now the profile ID
+
+    // Find the profile and include user and related info
+    const profile = await Profile.findOne({
+      where: { id },
+      include: [
+        {
+          model: User,
+          as: 'user',
+          attributes: ['id', 'email', 'visibility']
+        },
+        {
+          model: SocialMedia,
+          as: 'social_media',
+          attributes: ['id', 'url', 'display_order', 'created_at']
+        },
+        {
+          model: Video,
+          as: 'videos',
+          attributes: ['id', 'video_url', 'title', 'description', 'display_order', 'created_at']
+        },
+        {
+          model: Location,
+          as: 'locations',
+          attributes: [
+            'id', 'title', 'country', 'state', 'city', 'street',
+            'building', 'floor', 'maps_url', 'latitude', 'longitude', 'created_at'
+          ]
+        },
+        {
+          model: CustomContentType,
+          as: 'custom_types',
+          include: [
+            {
+              model: CustomContentField,
+              as: 'fields',
+              attributes: [
+                'id', 'field_name', 'label', 'field_key',
+                'field_type', 'required', 'display_order', 'config', 'created_at'
+              ]
+            },
+            {
+              model: CustomContentItem,
+              as: 'items',
+              attributes: ['id', 'title', 'visibility', 'created_at'],
+              include: [
+                {
+                  model: CustomContentValue,
+                  as: 'values',
+                  attributes: ['id', 'value_text', 'value_json', 'created_at'],
+                  include: [
+                    {
+                      model: CustomContentField,
+                      as: 'field',
+                      attributes: [
+                        'id', 'field_key', 'field_name', 'label', 'field_type', 'created_at'
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    });
+
+    if (!profile) return res.status(404).json({ error: "Profile not found" });
+
+    const profileId = profile.id;
+
+    // ---------------------------------------
+    // Latest subscription
+    // ---------------------------------------
+    const subscriptionRecord = await UserSubscription.findOne({
+      where: { profile_id: profileId },
+      include: [{ model: SubscriptionPlan, as: 'plan', attributes: ['name'] }],
+      order: [['created_at', 'DESC']]
+    });
+
+    const now = new Date();
+    let subscription = {
+      is_active: false,
+      status: "none",
+      plan_name: null,
+      expires_at: null,
+      days_remaining: null,
+      requires_payment: true
+    };
+
+    if (subscriptionRecord) {
+      const endDate = subscriptionRecord.end_date ? new Date(subscriptionRecord.end_date) : null;
+      let isActive = subscriptionRecord.status === "active" && (!endDate || endDate > now);
+
+      let daysRemaining = endDate && endDate > now ? Math.ceil((endDate - now) / (1000 * 60 * 60 * 24)) : null;
+      const frontendStatus = subscriptionRecord.status === "suspended" ? "failed" : subscriptionRecord.status;
+
+      subscription = {
+        is_active: isActive,
+        status: frontendStatus,
+        plan_name: subscriptionRecord.plan?.name || null,
+        expires_at: subscriptionRecord.end_date,
+        days_remaining: daysRemaining,
+        requires_payment: !isActive
+      };
+    }
+
+    // ---------------------------------------
+    // Followers & Following
+    // ---------------------------------------
+    const followers = await ProfileFollow.findAll({
+      where: { following_profile_id: profileId },
+      include: [{ model: Profile, as: 'follower', include: [{ model: User, as: 'user', attributes: ['id'] }] }],
+      order: [['created_at', 'ASC']]
+    });
+
+    const following = await ProfileFollow.findAll({
+      where: { follower_profile_id: profileId },
+      include: [{ model: Profile, as: 'following', include: [{ model: User, as: 'user', attributes: ['id'] }] }],
+      order: [['created_at', 'ASC']]
+    });
+
+    const sortByCreatedAt = (array) => array.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+
+    const profileData = {
+      profile_id: profile.id,
+      name: profile.name,
+      cover_photo_url: profile.cover_pic_url,
+      profile_pic_url: profile.profile_pic_url,
+      qr_code_color: profile.qr_code_color,
+      qr_code_include_profile_pic: profile.qr_code_include_profile_pic,
+      qr_code_include_contact: profile.qr_code_include_contact,
+      qr_code_include_social: profile.qr_code_include_social,
+      qr_code_include_website: profile.qr_code_include_website,
+      dob: profile.dob,
+      headline: profile.headline,
+      bio: profile.bio,
+      phone_number: profile.phone_number ? [profile.phone_number] : [],
+      email: profile.user?.email ? [profile.user.email] : [],
+      website_link: profile.website,
+      visibility: profile.user?.visibility,
+
+      social_media_links: sortByCreatedAt(
+        profile.social_media?.map(sm => ({ id: sm.id, url: sm.url, display_order: sm.display_order, created_at: sm.created_at })) || []
+      ),
+      videos_links: sortByCreatedAt(
+        profile.videos?.map(v => ({ id: v.id, video_url: v.video_url, title: v.title, description: v.description, display_order: v.display_order, created_at: v.created_at })) || []
+      ),
+      locations: sortByCreatedAt(
+        profile.locations?.map(l => ({
+          id: l.id,
+          title: l.title,
+          country: l.country,
+          state: l.state,
+          city: l.city,
+          street: l.street,
+          building: l.building,
+          floor: l.floor,
+          maps_url: l.maps_url,
+          coordinates: l.latitude && l.longitude ? { latitude: l.latitude, longitude: l.longitude } : null,
+          created_at: l.created_at
+        })) || []
+      ),
+      followers: followers.map(f => ({
+        follow_id: f.id,
+        profile_id: f.follower?.id,
+        user_id: f.follower?.user?.id,
+        name: f.follower?.name,
+        profile_pic_url: f.follower?.profile_pic_url,
+        headline: f.follower?.headline,
+        bio: f.follower?.bio,
+        created_at: f.created_at
+      })),
+      following: following.map(f => ({
+        follow_id: f.id,
+        profile_id: f.following?.id,
+        user_id: f.following?.user?.id,
+        name: f.following?.name,
+        profile_pic_url: f.following?.profile_pic_url,
+        headline: f.following?.headline,
+        bio: f.following?.bio,
+        created_at: f.created_at
+      })),
+      custom_content: sortByCreatedAt(
+        profile.custom_types?.map(type => ({
+          id: type.id,
+          name: type.name,
+          slug: type.slug,
+          description: type.description,
+          created_at: type.created_at,
+          fields: sortByCreatedAt(
+            type.fields?.map(f => ({
+              id: f.id,
+              name: f.field_name,
+              label: f.label,
+              key: f.field_key,
+              type: f.field_type,
+              required: f.required,
+              display_order: f.display_order,
+              config: f.config,
+              created_at: f.created_at
+            })) || []
+          ),
+          items: sortByCreatedAt(
+            type.items?.map(item => ({
+              id: item.id,
+              title: item.title,
+              visibility: item.visibility,
+              created_at: item.created_at,
+              values: sortByCreatedAt(
+                item.values?.map(v => ({
+                  field_id: v.field?.id,
+                  field_key: v.field?.field_key,
+                  field_name: v.field?.field_name,
+                  field_label: v.field?.label,
+                  field_type: v.field?.field_type,
+                  value: v.value_json ?? v.value_text,
+                  created_at: v.created_at
+                })) || []
+              )
+            })) || []
+          )
+        })) || []
+      ),
+      subscription
+    };
+
+    res.json(profileData);
+
+  } catch (error) {
+    console.error('Error in getProfileDetailsByProfileId:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
+
+export const updateProfileById = async (req, res) => {
+  try {
+    const { id } = req.params; // now this is profile ID
+    const {
+      userName, dob, phoneNumber, 
+      headline, bio, websiteUrl, 
+      connectLinks, videos, locations, customContent,
+      coverPhotoPath, profilePhotoPath,
+      qrCodeColor, qr_code_include_profile_pic, qr_code_include_contact, qr_code_include_social, qr_code_include_website
+    } = req.body;
+
+    if (!id) {
+      return res.status(403).json({
+        success:false,
+        message: 'Unauthorized Profile'
+      })
+    }
+
+    // Parse JSON strings
+    const parsedConnectLinks = connectLinks ? JSON.parse(connectLinks) : [];
+    const parsedVideos = videos ? JSON.parse(videos) : [];
+    const parsedLocations = locations ? JSON.parse(locations) : [];
+    const parsedCustomContent = customContent ? JSON.parse(customContent) : [];
+    
+    // --------------------------------------------------------------
+    // HANDLE ALL IMAGE UPLOADS
+    // --------------------------------------------------------------
+    let finalProfilePhotoPath = profilePhotoPath;
+    let finalCoverPhotoPath = coverPhotoPath;
+
+    if (req.files && Array.isArray(req.files)) {
+      const profileFile = req.files.find(file => file.fieldname === 'profilePicture');
+      const coverFile = req.files.find(file => file.fieldname === 'coverPhoto');
+
+      if (profileFile) {
+        finalProfilePhotoPath = `http://localhost:5050/uploads/profiles/${profileFile.filename}`;
+      }
+
+      if (coverFile) {
+        finalCoverPhotoPath = `http://localhost:5050/uploads/covers/${coverFile.filename}`;
+      }
+    }
+
+    const customImageFiles = {};
+    if (req.files && Array.isArray(req.files)) {
+      req.files.forEach((file) => {
+        if (file.fieldname && file.fieldname.startsWith('customImage_')) {
+          customImageFiles[file.fieldname] = `http://localhost:5050/uploads/custom-content/${file.filename}`;
+        }
+      });
+    } else if (req.files && typeof req.files === 'object') {
+      Object.keys(req.files).forEach(key => {
+        if (key.startsWith('customImage_')) {
+          const file = req.files[key][0];
+          customImageFiles[key] = `http://localhost:5050/uploads/custom-content/${file.filename}`;
+        }
+      });
+    }
+
+    const processedCustomContent = parsedCustomContent.map(contentType => ({
+      ...contentType,
+      items: contentType.items?.map(item => ({
+        ...item,
+        values: item.values?.map(value => {
+          if (value.field_type === 'image' && value.value && typeof value.value === 'string' && value.value.startsWith('__IMAGE_PLACEHOLDER_')) {
+            const placeholderMatch = value.value.match(/__IMAGE_PLACEHOLDER_(.*)__/);
+            if (placeholderMatch && placeholderMatch[1]) {
+              const imageKey = `customImage_${placeholderMatch[1]}`;
+              if (customImageFiles[imageKey]) {
+                return { ...value, value: customImageFiles[imageKey] };
+              }
+            }
+          }
+          return value;
+        })
+      }))
+    }));
+
+    // --------------------------------------------------------------
+    // DATABASE OPERATIONS
+    // --------------------------------------------------------------
+
+    const profile = await Profile.findOne({
+      where: { id } // now using profile ID directly
+    });
+
+    if (!profile){
+      return res.status(404).json({
+        success: false,
+        message: "Profile Not Found"
+      })
+    }
+
+    const user = await User.findOne({ where: { id: profile.user_id } }); // fetch user via profile.user_id
+    const socialMediaLinks = await SocialMedia.findAll({ where: { profile_id: profile.id } });
+    const userVideos = await Video.findAll({ where: { profile_id: profile.id } });
+    const userLocations = await Location.findAll({ where: { profile_id: profile.id } });
+    const existingCustomTypes = await CustomContentType.findAll({
+      where: { profile_id: profile.id },
+      include: [
+        { model: CustomContentField, as: 'fields' },
+        { model: CustomContentItem, as: 'items', include: [{ model: CustomContentValue, as: 'values' }] }
+      ]
+    });
+
+    if (!user){
+      return res.status(404).json({
+        success: false,
+        message: "User Not Found"
+      })
+    }
+
+    const checkIfDeleted = (id, objects) => objects.every(obj => obj.id !== id);
+    const checkIfNew = (id, objects) => objects.every(obj => obj.id !== id);
+
+    let cleanDob = null;
+    if (dob && !isNaN(new Date(dob).getTime())) {
+      cleanDob = new Date(dob).toISOString().split("T")[0];
+    }
+
+    const updateProfile = await profile.update({
+      name: userName?.trim() || profile.name,
+      headline: headline.trim(),
+      dob: cleanDob,
+      phone_number: phoneNumber,
+      bio: bio,
+      website: websiteUrl,
+      cover_pic_url: finalCoverPhotoPath,
+      profile_pic_url: finalProfilePhotoPath,
+      qr_code_color: qrCodeColor || "#000000",
+      qr_code_include_profile_pic: qr_code_include_profile_pic || true,
+      qr_code_include_contact: qr_code_include_contact || true,
+      qr_code_include_social: qr_code_include_social || true,
+      qr_code_include_website: qr_code_include_website || true,
+    })
+
+    // Social media links update
+    for (let link of socialMediaLinks) {
+      let deleted = checkIfDeleted(link.id, parsedConnectLinks);
+      if (deleted) {
+        await SocialMedia.destroy({ where: {id: link.id}})
+      }
+      else {
+        let incomingLink = parsedConnectLinks.find(curLink => curLink.id === link.id);
+        if (incomingLink && incomingLink.url) {
+          await link.update({
+            url: incomingLink.url,
+          })
+        }
+      }
+    }
+    for (let link of parsedConnectLinks) {
+      let newLink = checkIfNew(link.id, socialMediaLinks);
+      if (newLink) {
+        if (link.url) {
+          await SocialMedia.create({
+            profile_id: profile.id,
+            url: link.url
+          })
+        }
+      }
+    }
+
+    // Videos links update
+    for (let link of userVideos) {
+      let deleted = checkIfDeleted(link.id, parsedVideos);
+      if (deleted) {
+        await Video.destroy({ where: {id: link.id}})
+      }
+      else {
+        let incomingLink = parsedVideos.find(curLink => curLink.id === link.id);
+        await link.update({
+          video_url: incomingLink.video_url,
+          title: incomingLink.title,
+          description: incomingLink.description,
+        })
+      }
+    }
+    for (let link of parsedVideos) {
+      let newLink = checkIfNew(link.id, userVideos);
+      if (newLink) {
+        await Video.create({
+          profile_id: profile.id,
+          video_url: link.video_url,
+          title: link.title,
+          description: link.description,
+        })
+      }
+    }
+
+    // Locations update
+    for (let link of userLocations) {
+      let deleted = checkIfDeleted(link.id, parsedLocations);
+      if (deleted) {
+        await Location.destroy({ where: {id: link.id}})
+      }
+      else {
+        let incomingLink = parsedLocations.find(curLink => curLink.id === link.id);
+        await link.update({
+          floor: incomingLink.floor,
+          building: incomingLink.building,
+          street: incomingLink.street,
+          city: incomingLink.city,
+          state: incomingLink.state,
+          country: incomingLink.country,
+          maps_url: incomingLink.maps_url,
+          title: incomingLink.title,
+        })
+      }
+    }
+    for (let link of parsedLocations) {
+      let newLink = checkIfNew(link.id, userLocations);
+      if (newLink) {
+        await Location.create({
+          profile_id: profile.id,
+          floor: link.floor,
+          building: link.building,
+          street: link.street,
+          city: link.city,
+          state: link.state,
+          country: link.country,
+          maps_url: link.maps_url,
+          title: link.title,
+        })
+      }
+    }
+
+    // CUSTOM CONTENT UPDATE - with image handling
+    for (let incomingType of processedCustomContent) {
+      let existingType = existingCustomTypes.find(type => type.id === incomingType.id);
+      
+      if (!existingType) {
+        // CREATE NEW TYPE
+        const newTypeRecord = await CustomContentType.create({
+          profile_id: profile.id,
+          name: incomingType.name,
+          slug: incomingType.slug,
+          description: incomingType.description
+        });
+
+        // Create field mapping for temporary IDs
+        const fieldIdMap = {};
+        
+        // Add fields for the new type
+        for (let incomingField of incomingType.fields || []) {
+          const newField = await CustomContentField.create({
+            content_type_id: newTypeRecord.id,
+            field_name: incomingField.name,
+            label: incomingField.label,
+            field_key: incomingField.key,
+            field_type: incomingField.type,
+            required: incomingField.required,
+            display_order: incomingField.display_order,
+            config: incomingField.config
+          });
+          // Map temporary frontend ID to real backend ID
+          fieldIdMap[incomingField.id] = newField.id;
+        }
+
+        // Add items for the new type
+        for (let incomingItem of incomingType.items || []) {
+          const newItemRecord = await CustomContentItem.create({
+            content_type_id: newTypeRecord.id,
+            profile_id: profile.id,
+            title: incomingItem.title,
+            visibility: incomingItem.visibility
+          });
+
+          // Add values for the new item
+          for (let incomingValue of incomingItem.values || []) {
+            const realFieldId = fieldIdMap[incomingValue.field_id];
+            if (realFieldId) {
+              // For image type, store URL in value_text (since it's a string)
+              if (incomingValue.field_type === 'image') {
+                await CustomContentValue.create({
+                  content_item_id: newItemRecord.id,
+                  content_field_id: realFieldId,
+                  value_text: incomingValue.value, // Image URL
+                  value_json: null
+                });
+              } else {
+                await CustomContentValue.create({
+                  content_item_id: newItemRecord.id,
+                  content_field_id: realFieldId,
+                  value_text: ['longtext', 'text'].includes(incomingValue.field_type) ? incomingValue.value : null,
+                  value_json: !['longtext', 'text'].includes(incomingValue.field_type) ? incomingValue.value : null
+                });
+              }
+            }
+          }
+        }
+      } else {
+        // UPDATE EXISTING TYPE
+        await existingType.update({
+          name: incomingType.name,
+          slug: incomingType.slug,
+          description: incomingType.description
+        });
+
+        // Handle fields for this type - with ID mapping
+        const fieldIdMap = {};
+        const existingFields = existingType.fields || [];
+
+        for (let incomingField of incomingType.fields || []) {
+          let existingField = existingFields.find(f => f.id === incomingField.id);
+          
+          if (!existingField) {
+            // CREATE NEW FIELD
+            const newField = await CustomContentField.create({
+              content_type_id: existingType.id,
+              field_name: incomingField.name,
+              label: incomingField.label,
+              field_key: incomingField.key,
+              field_type: incomingField.type,
+              required: incomingField.required,
+              display_order: incomingField.display_order,
+              config: incomingField.config
+            });
+            fieldIdMap[incomingField.id] = newField.id;
+          } else {
+            // UPDATE EXISTING FIELD
+            await existingField.update({
+              field_name: incomingField.name,
+              label: incomingField.label,
+              field_key: incomingField.key,
+              field_type: incomingField.type,
+              required: incomingField.required,
+              display_order: incomingField.display_order,
+              config: incomingField.config
+            });
+            fieldIdMap[incomingField.id] = existingField.id;
+          }
+        }
+
+        // Delete fields that were removed
+        for (let existingField of existingFields) {
+          let fieldExists = incomingType.fields?.find(f => f.id === existingField.id);
+          if (!fieldExists) {
+            await CustomContentField.destroy({ where: { id: existingField.id } });
+          }
+        }
+
+        // Handle items for this type
+        const existingItems = existingType.items || [];
+
+        for (let incomingItem of incomingType.items || []) {
+          let existingItem = existingItems.find(it => it.id === incomingItem.id);
+          
+          if (!existingItem) {
+            // CREATE NEW ITEM
+            const newItemRecord = await CustomContentItem.create({
+              content_type_id: existingType.id,
+              profile_id: profile.id,
+              title: incomingItem.title,
+              visibility: incomingItem.visibility
+            });
+
+            // Add values for the new item
+            for (let incomingValue of incomingItem.values || []) {
+              const realFieldId = fieldIdMap[incomingValue.field_id] || incomingValue.field_id;
+              const fieldExists = await CustomContentField.findOne({
+                where: { id: realFieldId, content_type_id: existingType.id }
+              });
+              
+              if (fieldExists) {
+                // For image type, store URL in value_text
+                if (incomingValue.field_type === 'image') {
+                  await CustomContentValue.create({
+                    content_item_id: newItemRecord.id,
+                    content_field_id: realFieldId,
+                    value_text: incomingValue.value, // Image URL
+                    value_json: null
+                  });
+                } else {
+                  await CustomContentValue.create({
+                    content_item_id: newItemRecord.id,
+                    content_field_id: realFieldId,
+                    value_text: ['longtext', 'text'].includes(incomingValue.field_type) ? incomingValue.value : null,
+                    value_json: !['longtext', 'text'].includes(incomingValue.field_type) ? incomingValue.value : null
+                  });
+                }
+              }
+            }
+          } else {
+            // UPDATE EXISTING ITEM
+            await existingItem.update({
+              title: incomingItem.title,
+              visibility: incomingItem.visibility
+            });
+
+            // Handle values for this item
+            const existingValues = existingItem.values || [];
+
+            // Update or create values
+            for (let incomingValue of incomingItem.values || []) {
+              const realFieldId = fieldIdMap[incomingValue.field_id] || incomingValue.field_id;
+              let existingValue = existingValues.find(v => v.content_field_id === realFieldId);
+
+              if (existingValue) {
+                // UPDATE EXISTING VALUE
+                if (incomingValue.field_type === 'image') {
+                  await existingValue.update({
+                    value_text: incomingValue.value, // Image URL
+                    value_json: null
+                  });
+                } else {
+                  await existingValue.update({
+                    value_text: ['longtext', 'text'].includes(incomingValue.field_type) ? incomingValue.value : null,
+                    value_json: !['longtext', 'text'].includes(incomingValue.field_type) ? incomingValue.value : null
+                  });
+                }
+              } else {
+                // CREATE NEW VALUE
+                const fieldExists = await CustomContentField.findOne({
+                  where: { id: realFieldId, content_type_id: existingType.id }
+                });
+                
+                if (fieldExists) {
+                  if (incomingValue.field_type === 'image') {
+                    await CustomContentValue.create({
+                      content_item_id: existingItem.id,
+                      content_field_id: realFieldId,
+                      value_text: incomingValue.value, // Image URL
+                      value_json: null
+                    });
+                  } else {
+                    await CustomContentValue.create({
+                      content_item_id: existingItem.id,
+                      content_field_id: realFieldId,
+                      value_text: ['longtext', 'text'].includes(incomingValue.field_type) ? incomingValue.value : null,
+                      value_json: !['longtext', 'text'].includes(incomingValue.field_type) ? incomingValue.value : null
+                    });
+                  }
+                }
+              }
+            }
+
+            // Delete values that were removed
+            for (let existingValue of existingValues) {
+              let valueExists = incomingItem.values?.find(v => {
+                const realFieldId = fieldIdMap[v.field_id] || v.field_id;
+                return realFieldId === existingValue.content_field_id;
+              });
+              if (!valueExists) {
+                await CustomContentValue.destroy({ where: { id: existingValue.id } });
+              }
+            }
+          }
+        }
+
+        // Delete items that were removed
+        for (let existingItem of existingItems) {
+          let itemExists = incomingType.items?.find(it => it.id === existingItem.id);
+          if (!itemExists) {
+            await CustomContentItem.destroy({ where: { id: existingItem.id } });
+          }
+        }
+      }
+    }
+
+    // Delete types that were removed
+    for (let existingType of existingCustomTypes) {
+      let typeExists = processedCustomContent.find(type => type.id === existingType.id);
+      if (!typeExists) {
+        await CustomContentType.destroy({ where: { id: existingType.id } });
+      }
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Profile updated successfully',
+    });
+
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+}
+
+
+
+
+
+
+// DIFFERENT PROFIELSSS
+
+export const getAllProfilesByProfileId = async (req, res) => {
+  try {
+    const { profileId } = req.params;
+
+    const profile = await Profile.findByPk(profileId);
+
+    if (!profile) {
+      return res.status(404).json({ message: "Profile not found" });
+    }
+
+    const profiles = await Profile.findAll({
+      where: { user_id: profile.user_id },
+    });
+
+    return res.status(200).json({
+      user_id: profile.user_id,
+      profiles,
+    });
+  } catch (error) {
+    console.error("Error fetching profiles:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+
+
+export const createProfileForUserByProfileId = async (req, res) => {
+  try {
+    const { profileId } = req.params;
+    const { name } = req.body; // required for new profile
+
+    if (!name) {
+      return res.status(400).json({ message: "Profile name is required" });
+    }
+
+    // 1️⃣ Find the existing profile
+    const existingProfile = await Profile.findByPk(profileId);
+    if (!existingProfile) {
+      return res.status(404).json({ message: "Profile not found" });
+    }
+
+    const userId = existingProfile.user_id;
+
+    // 2️⃣ Create a new profile for the same user
+    const newProfile = await Profile.create({
+      user_id: userId,
+      name,
+      // all other fields will take defaults
+    });
+
+    return res.status(201).json({
+      message: "Profile created successfully",
+      profile: newProfile,
+    });
+
+  } catch (error) {
+    console.error("Error creating profile:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+
+
+export const deleteProfileByProfileId = async (req, res) => {
+  try {
+    const { profileId } = req.params;
+
+    const profile = await Profile.findByPk(profileId);
+
+    if (!profile) {
+      return res.status(404).json({ message: "Profile not found" });
+    }
+
+    const userId = profile.user_id;
+
+    const profileCount = await Profile.count({
+      where: { user_id: userId },
+    });
+
+    if (profileCount <= 1) {
+      return res.status(400).json({
+        message: "User must have at least one profile",
+      });
+    }
+
+    await profile.destroy();
+
+    return res.status(200).json({
+      message: "Profile deleted successfully",
+    });
+
+  } catch (error) {
+    console.error("Error deleting profile:", error);
+    return res.status(500).json({ message: "Internal server error" });
   }
 };

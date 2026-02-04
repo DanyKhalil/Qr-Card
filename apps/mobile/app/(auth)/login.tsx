@@ -29,43 +29,42 @@ const Login = () => {
     const checkAuth = async () => {
       try {
         const token = await AsyncStorage.getItem("token");
+        const profileId = await AsyncStorage.getItem("profileId");
 
-        if (!token) {
-          setChecking(false);
+        if (!token || !profileId) {
+          setChecking(false); // no token → show login
           return;
         }
 
+        // Validate token by calling subscription endpoint
         const res = await axios.get(
-          `${DEVELOPMENT_CONFIG.backendBaseUrl}/api/auth/me`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
+          `${DEVELOPMENT_CONFIG.backendBaseUrl}/api/auth/profile/${profileId}/subscription`,
+          { headers: { Authorization: `Bearer ${token}` } }
         );
 
-        await AsyncStorage.setItem(
-          "user",
-          JSON.stringify(res.data.user)
-        );
+        await AsyncStorage.setItem("user", JSON.stringify(res.data.user));
 
         if (res.data.subscription) {
-          await AsyncStorage.setItem(
-            "subscription",
-            JSON.stringify(res.data.subscription)
-          );
+          await AsyncStorage.setItem("subscription", JSON.stringify(res.data.subscription));
         } else {
           await AsyncStorage.removeItem("subscription");
         }
 
+        // Navigate directly to user profile
         router.replace("/(tabs)/profile");
+        router.push(`/(stack)/user-profile/${profileId}`);
       } catch (err) {
-        console.error("Auth check failed:", err);
-        await AsyncStorage.multiRemove(["token", "user", "subscription"]);
-        setChecking(false);
+        console.log("Auth check failed:", err.response?.status || err.message);
+
+        // Token invalid → clear everything
+        await AsyncStorage.multiRemove(["token", "user", "subscription", "profileId"]);
+        setChecking(false); // show login
       }
     };
 
     checkAuth();
   }, []);
+
 
   /* =========================
      LOGIN HANDLER (LIKE WEB)
@@ -84,41 +83,19 @@ const Login = () => {
       );
 
       const token = loginRes.data.token;
+      const profileId = loginRes.data.user.profile_id;
 
       await AsyncStorage.setItem("token", token);
-      await AsyncStorage.setItem(
-        "user",
-        JSON.stringify(loginRes.data.user)
-      );
+      await AsyncStorage.setItem("user",JSON.stringify(loginRes.data.user));
+      await AsyncStorage.setItem("profileId", profileId);
 
-      // 2️⃣ Fetch full user + subscription
-      try {
-        const meRes = await axios.get(
-          `${DEVELOPMENT_CONFIG.backendBaseUrl}/api/auth/me`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-
-        await AsyncStorage.setItem(
-          "user",
-          JSON.stringify(meRes.data.user)
-        );
-
-        if (meRes.data.subscription) {
-          await AsyncStorage.setItem(
-            "subscription",
-            JSON.stringify(meRes.data.subscription)
-          );
-        } else {
-          await AsyncStorage.removeItem("subscription");
-        }
-      } catch (meErr) {
-        console.warn("Failed to fetch subscription:", meErr);
-      }
-
-      router.replace("/(tabs)/profile");
+      // router.replace("/(tabs)/profile");
+      // router.push(`/(stack)/user-profile/${loginRes.data.user.id}`);
+      router.replace("/(tabs)/profile"); // create back target
+      router.push("/(tabs)/profile"); // create back target
+      router.push(`/(stack)/user-profile/${profileId}`);
     } catch (err) {
+      console.log(err)
       setError(
         err.response?.data?.error ||
         "Login failed. Please check your credentials."

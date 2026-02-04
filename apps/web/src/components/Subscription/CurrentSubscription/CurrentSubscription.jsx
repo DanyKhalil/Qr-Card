@@ -4,6 +4,7 @@ import './CurrentSubscription.css';
 const CurrentSubscription = () => {
     const [subscription, setSubscription] = useState(null);
     const [loading, setLoading] = useState(true);
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
     useEffect(() => {
         // Load subscription from localStorage
@@ -50,7 +51,7 @@ const CurrentSubscription = () => {
             const token = localStorage.getItem('token');
             if (!token) return;
 
-            const response = await fetch('http://localhost:5050/api/auth/me', {
+            const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             

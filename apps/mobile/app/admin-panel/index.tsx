@@ -377,7 +377,7 @@ export default function AdminUsersMobile() {
                       
                       <TouchableOpacity
                         style={[styles.actionButton, styles.deleteButton]}
-                        onPress={() => handleDelete(user.id)}
+                        onPress={() => handleDelete(user.profile_id)}
                       >
                         <Text style={styles.actionButtonText}>Delete</Text>
                       </TouchableOpacity>
@@ -458,7 +458,7 @@ export default function AdminUsersMobile() {
                         <View style={styles.editFormActions}>
                           <TouchableOpacity
                             style={[styles.editFormButton, styles.saveButton]}
-                            onPress={() => handleUpdate(user.id)}
+                            onPress={() => handleUpdate(user.profile_id)}
                           >
                             <Text style={styles.editFormButtonText}>Save</Text>
                           </TouchableOpacity>

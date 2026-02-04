@@ -8,8 +8,11 @@ import ReceiptUploadModal from "./ReceiptUploadModal/ReceiptUploadModal.jsx";
 import { subscriptionApi } from "../../services/subscriptionApi.js";
 import "./SubscriptionComponent.css";
 import { useNavigate } from "react-router-dom";
+import bankIcon from "../../assets/images/payments/bank.png";
+import paypalIcon from "../../assets/images/payments/paypal.png";
+import cryptoIcon from "../../assets/images/payments/crypto.png";
 
-const SubscriptionComponent = ({ plans = [], currentUser, refreshPlans }) => {
+const SubscriptionComponent = ({ plans = [], currentUser, refreshPlans, profileId }) => {
     const navigate = useNavigate();
 
     const [selectedPlan, setSelectedPlan] = useState(null);
@@ -25,7 +28,6 @@ const SubscriptionComponent = ({ plans = [], currentUser, refreshPlans }) => {
     const [fileInputKey, setFileInputKey] = useState(Date.now()); // For resetting file input
 
     const currentSubscription = currentUser?.subscription || null;
-    console.log(currentUser)
 
     const handlePlanSelect = (plan) => {
         setSelectedPlan(plan);
@@ -77,6 +79,7 @@ const SubscriptionComponent = ({ plans = [], currentUser, refreshPlans }) => {
             };
 
             const result = await subscriptionApi.subscribeToPlan(
+                profileId,
                 selectedPlan.id,
                 paymentDetails,
                 receiptFile
@@ -130,12 +133,24 @@ const SubscriptionComponent = ({ plans = [], currentUser, refreshPlans }) => {
         setFileInputKey(Date.now());
     };
 
+    const PaymentPreview = ({ icon, title, subtitle }) => (
+        <>
+            <div className="pm-logo">
+                <img src={icon} alt={title} />
+            </div>
+            <div className="pm-info">
+                <strong>{title}</strong>
+                <span>{subtitle}</span>
+            </div>
+        </>
+    );
+
     return (
         <div className="subscription-container">
             <Header activeIndex={-1} />
 
             {/* Current Subscription Info */}
-            <CurrentSubscription subscription={currentSubscription} />
+            {/* <CurrentSubscription subscription={currentSubscription} /> */}
 
             {/* Available Plans */}
             <AvailablePlans
@@ -175,11 +190,35 @@ const SubscriptionComponent = ({ plans = [], currentUser, refreshPlans }) => {
                             disabled={subscribing}
                         >
                             <option value="bank_transfer">Bank Transfer</option>
-                            <option value="cash">Cash</option>
                             <option value="paypal">PayPal</option>
                             <option value="crypto">Cryptocurrency</option>
-                            <option value="manual">Manual Payment</option>
                         </select>
+                        {/* Payment Method Preview */}
+                        <div className={`payment-preview ${paymentMethod}`}>
+                            {paymentMethod === "bank_transfer" && (
+                                <PaymentPreview
+                                    icon={bankIcon}
+                                    title="Bank Transfer"
+                                    subtitle="Complete the transfer and upload your receipt"
+                                />
+                            )}
+
+                            {paymentMethod === "paypal" && (
+                                <PaymentPreview
+                                    icon={paypalIcon}
+                                    title="PayPal"
+                                    subtitle="Secure payment via PayPal (no receipt required)"
+                                />
+                            )}
+
+                            {paymentMethod === "crypto" && (
+                                <PaymentPreview
+                                    icon={cryptoIcon}
+                                    title="Cryptocurrency"
+                                    subtitle="Send crypto and upload transaction proof"
+                                />
+                            )}
+                        </div>
                     </div>
 
                     {/* Receipt Upload - Part of subscription flow */}
@@ -270,7 +309,7 @@ const SubscriptionComponent = ({ plans = [], currentUser, refreshPlans }) => {
             )}
 
             {/* QR Payment Methods (Always shown for reference) */}
-            <PaymentMethod plan={selectedPlan} />
+            {/* <PaymentMethod plan={selectedPlan} /> */}
 
             {/* Receipt Upload Modal */}
             {showReceiptModal && (
@@ -286,6 +325,7 @@ const SubscriptionComponent = ({ plans = [], currentUser, refreshPlans }) => {
                     message={uploadMessage}
                 />
             )}
+            <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
 
             <Footer />
         </div>

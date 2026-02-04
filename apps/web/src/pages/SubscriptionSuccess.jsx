@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 
 const SubscriptionSuccess = () => {
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const [status, setStatus] = useState("Checking...");
 
   useEffect(() => {
@@ -9,7 +10,7 @@ const SubscriptionSuccess = () => {
 
     const checkSubscription = async () => {
       try {
-        const res = await fetch(`http://localhost:5050/api/subscription-status/${userId}`);
+        const res = await fetch(`${API_BASE_URL}/api/subscription-status/${userId}`);
         const data = await res.json();
         if (data.status === "active") {
           setStatus("Subscription successful! 🎉");

@@ -240,7 +240,7 @@
 
 .card-field .field-value {
     color: #2c2f48;
-    text-align: right;
+    text-align: left;
     word-break: break-word;
     flex: 1;
     font-size: 0.95rem;

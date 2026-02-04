@@ -34,6 +34,10 @@ const ProfileAnalytics = () => {
             return null;
         }
     };
+
+    const getCurrentProfileId = () => {
+      return localStorage.getItem("profileId");
+    }
     
     const currentLoggedInUser = getCurrentUser();
     const { id: urlId } = useParams(); // get visiting user id 
@@ -58,7 +62,7 @@ const ProfileAnalytics = () => {
   };
 
   useEffect(() => {
-    fetchProfileAnalytics(id);
+    fetchProfileAnalytics(getCurrentProfileId());
   }, [id]);
 
   const filterVisitsByDateRange = (visits, range) => {
@@ -110,7 +114,7 @@ const ProfileAnalytics = () => {
         <Header />
         <div className="error-container">
           <p>Error: {error}</p>
-          <button onClick={() => fetchProfileAnalytics(id)}>Retry</button>
+          <button onClick={() => fetchProfileAnalytics(getCurrentProfileId())}>Retry</button>
         </div>
         <Footer />
       </div>

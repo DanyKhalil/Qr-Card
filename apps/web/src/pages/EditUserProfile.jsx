@@ -28,11 +28,17 @@ const EditUserProfile = () => {
         }
     };
 
+    const getCurrentUserProfileId = () => {
+        const profileId = localStorage.getItem("profileId");
+        return profileId;
+    };
+
     
 
     const currentLoggedInUser = getCurrentUser();
+    const currentLoggedInUserProfileId = getCurrentUserProfileId();
     const { id: urlId } = useParams(); // get visiting user id 
-    const id = urlId || currentLoggedInUser?.id; // either a visiting id or a current logged in id
+    const id = urlId || currentLoggedInUserProfileId; // either a visiting id or a current logged in id
     if (!id || !getToken()) {
         window.location.href = "/login";
         return null;
@@ -54,7 +60,7 @@ const EditUserProfile = () => {
 
     // the use effect, is to when the component mount, it will call something automatically
     useEffect(() => {
-        if (id == currentLoggedInUser?.id){
+        if (id == currentLoggedInUserProfileId){
             fetchUserProfile(id);
         } else if (id != currentLoggedInUser?.id && currentLoggedInUser?.role === 'admin') {
             fetchUserProfile(id);

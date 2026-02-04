@@ -12,6 +12,7 @@ interface HeadlineProps {
 
 const Headline = ({ 
         id,
+        profileId,
         name, 
         dob, 
         headline,
@@ -34,13 +35,25 @@ const Headline = ({
                 return null;
             }
         }
+        const getCurrentUserProfileId = async () => {
+            try {
+                const profileId = await AsyncStorage.getItem("profileId");
+                return profileId;
+            } catch (error) {
+                console.error("Error getting profile ID:", error);
+                return null;
+            }
+        }
 
         const [loggedInUserId, setLoggedInUserId] = useState(null);
+        const [loggedInUserProfileId, setLoggedInUserProfileId] = useState(null);
 
         useEffect(() => {
             const fetchUserId = async () => {
                 const userId = await getLoggedInUserId();
+                const profileId = await getCurrentUserProfileId();
                 setLoggedInUserId(userId);
+                setLoggedInUserProfileId(profileId);
             };
             
             fetchUserId();
@@ -163,10 +176,11 @@ const Headline = ({
                 </View>
 
 
-                {loggedInUserId && loggedInUserId !== id && (
+                {loggedInUserProfileId && loggedInUserProfileId !== profileId && (
                     <FollowButton
                         currentUserId={loggedInUserId}
-                        profileId={id}
+                        currentProfileId={loggedInUserProfileId}
+                        profileId={profileId}
                         followers={followers}
                         following={following}
                         onFollowUpdate={onProfileRefresh}

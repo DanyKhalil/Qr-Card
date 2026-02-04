@@ -23,6 +23,7 @@ const Image = () => (
 );
 
 const Form = () => {
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -38,7 +39,7 @@ const Form = () => {
       if (token && user) {
         try {
           // Fetch fresh user data with subscription
-          const response = await axios.get('http://localhost:5050/api/auth/me', {
+          const response = await axios.get(`${API_BASE_URL}/api/auth/profile/${localStorage.getItem("profileId")}/subscription`, {
             headers: { Authorization: `Bearer ${token}` }
           });
           
@@ -74,7 +75,7 @@ const Form = () => {
   };
 
   const handleContinueWithoutAccount = () => {
-    navigate('/Filtering');
+    navigate('/scan-qr-code');
   };
 
   const handleLogin = async (e) => {
@@ -82,7 +83,7 @@ const Form = () => {
 
     try {
       // 1. Login to get token
-      const loginRes = await axios.post("http://localhost:5050/api/auth/login", {
+      const loginRes = await axios.post(`${API_BASE_URL}/api/auth/login`, {
         email,
         password,
       });
@@ -90,10 +91,10 @@ const Form = () => {
       // Save basic user info and token
       localStorage.setItem("token", loginRes.data.token);
       localStorage.setItem("user", JSON.stringify(loginRes.data.user));
-
+      localStorage.setItem("profileId", loginRes.data.user.profile_id)
       // 2. Fetch full user data with subscription
       try {
-        const userRes = await axios.get('http://localhost:5050/api/auth/me', {
+        const userRes = await axios.get(`${API_BASE_URL}/api/auth/profile/${loginRes.data.user.profile_id}/subscription`, {
           headers: { Authorization: `Bearer ${loginRes.data.token}` }
         });
 

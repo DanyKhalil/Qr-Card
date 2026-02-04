@@ -1,7 +1,7 @@
 // services/notificationsApi.js
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:5050/api';
+const API_BASE_URL = `${import.meta.env.VITE_API_BASE_URL}/api`;
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -23,9 +23,11 @@ api.interceptors.request.use(
 
 export const notificationsApi = {
   // Get user's notifications
-  getUserNotifications: async () => {
+  getUserNotifications: async (profileId) => {
     try {
-      const response = await api.get('/notifications');
+      const response = await api.get('/notifications', {
+        params: { profile_id: profileId },
+      });
       return response.data;
     } catch (error) {
       console.error("Get notifications API error:", error);
@@ -67,9 +69,11 @@ export const notificationsApi = {
   },
 
   // Mark all notifications as read
-  markAllAsRead: async () => {
+  markAllAsRead: async (profileId) => {
     try {
-      const response = await api.put('/notifications/mark-all-read');
+      const response = await api.put('/notifications/mark-all-read', {
+        profile_id: profileId
+      });
       return response.data;
     } catch (error) {
       console.error("Mark all as read API error:", error);
@@ -100,9 +104,11 @@ export const notificationsApi = {
   },
 
   // Get unread notifications count
-  getUnreadCount: async () => {
+  getUnreadCount: async (profileId) => {
     try {
-      const response = await api.get('/notifications/unread-count');
+      const response = await api.get('/notifications/unread-count', {
+        params: { profile_id: profileId },
+      });
       return response.data;
     } catch (error) {
       console.error("Get unread count API error:", error);

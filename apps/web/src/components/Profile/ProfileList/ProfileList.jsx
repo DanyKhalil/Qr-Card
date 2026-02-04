@@ -23,8 +23,13 @@ const ProfileList = ({ profiles = [], onProfileClick = () => {} }) => {
       return null;
     }
   };
+  const getCurrentUserProfileId = () => {
+    const profileId = localStorage.getItem("profileId");
+    return profileId;
+  }
   
   const loggedInUserId = getCurrentUser()?.id;
+  const loggedInUserProfileId = getCurrentUserProfileId();
 
   // Fetch current user's followers and following on component mount
   useEffect(() => {
@@ -35,7 +40,7 @@ const ProfileList = ({ profiles = [], onProfileClick = () => {} }) => {
       setError(null);
       
       try {
-        const data = await profileFollowApi.getUserFollowStatus(loggedInUserId);
+        const data = await profileFollowApi.getUserFollowStatus(loggedInUserProfileId);
         setFollowers(data.followers || []);
         setFollowing(data.following || []);
       } catch (err) {
@@ -53,12 +58,11 @@ const ProfileList = ({ profiles = [], onProfileClick = () => {} }) => {
 
   // Helper function to check follow relationship for a specific profile
   const getRelationshipStatus = (profileUserId) => {
-    if (!loggedInUserId || loggedInUserId === profileUserId) return null;
-    
+    if (!loggedInUserProfileId || loggedInUserProfileId === profileUserId) return null;
     // Check if current user follows this profile
-    const isFollowing = following.some(f => f.user_id === profileUserId);
+    const isFollowing = following.some(f => f.profile_id === profileUserId);
     // Check if this profile follows current user
-    const isFollower = followers.some(f => f.user_id === profileUserId);
+    const isFollower = followers.some(f => f.profile_id === profileUserId);
     
     return { isFollowing, isFollower };
   };
@@ -73,7 +77,7 @@ const ProfileList = ({ profiles = [], onProfileClick = () => {} }) => {
 
   // Handle follow/unfollow action
   const handleFollowAction = async (profileUserId, currentIsFollowing) => {
-    if (!loggedInUserId) {
+    if (!loggedInUserProfileId) {
       alert("Please login to follow users");
       return;
     }
@@ -81,23 +85,23 @@ const ProfileList = ({ profiles = [], onProfileClick = () => {} }) => {
     try {
       if (currentIsFollowing) {
         // Unfollow
-        await profileFollowApi.unfollowUser(loggedInUserId, profileUserId);
+        await profileFollowApi.unfollowUser(loggedInUserProfileId, profileUserId);
         // Update local state - remove from following
-        setFollowing(prev => prev.filter(f => f.user_id !== profileUserId));
+        setFollowing(prev => prev.filter(f => f.profile_id !== profileUserId));
         // If they were friends, update followers status
-        const wasFollower = followers.some(f => f.user_id === profileUserId);
+        const wasFollower = followers.some(f => f.profile_id === profileUserId);
         if (wasFollower) {
           // They still follow us, so just update local state
-          setFollowers(prev => prev.filter(f => f.user_id !== profileUserId));
+          setFollowers(prev => prev.filter(f => f.profile_id !== profileUserId));
         }
       } else {
         // Follow
-        await profileFollowApi.followUser(loggedInUserId, profileUserId);
+        await profileFollowApi.followUser(loggedInUserProfileId, profileUserId);
         // Add to following (we don't have full profile data, so add a placeholder)
-        const profileToFollow = profiles.find(p => p.user_id === profileUserId);
+        const profileToFollow = profiles.find(p => p.profile_id === profileUserId);
         if (profileToFollow) {
           setFollowing(prev => [...prev, {
-            user_id: profileUserId,
+            profile_id: profileUserId,
             name: profileToFollow.name,
             profile_pic_url: profileToFollow.profile_pic_url,
             headline: profileToFollow.headline
@@ -153,14 +157,14 @@ const ProfileList = ({ profiles = [], onProfileClick = () => {} }) => {
 
       <div className="visits-container">
         {profiles.map((profile) => {
-          const relationship = getRelationshipStatus(profile.user_id);
+          const relationship = getRelationshipStatus(profile.profile_id);
           const buttonLabel = relationship ? getButtonLabel(relationship.isFollowing, relationship.isFollower) : null;
           
           return (
             <div key={profile.follow_id || profile.user_id} className="visit-card">
               <div 
                 className="visitor-info"
-                onClick={() => navigate(`/profile/${profile.user_id}`)}
+                onClick={() => navigate(`/profile/${profile.profile_id}`)}
               >
                 {profile.profile_pic_url ? (
                   <img
@@ -181,12 +185,12 @@ const ProfileList = ({ profiles = [], onProfileClick = () => {} }) => {
               </div>
               
               {/* Follow button (only if not viewing own profile) */}
-              {relationship && loggedInUserId !== profile.user_id && (
+              {relationship && loggedInUserProfileId !== profile.id && (
                 <button
                   className={`follow-button ${buttonLabel?.toLowerCase().replace(' ', '-')}`}
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleFollowAction(profile.user_id, relationship.isFollowing);
+                    handleFollowAction(profile.profile_id, relationship.isFollowing);
                   }}
                 >
                   {buttonLabel}

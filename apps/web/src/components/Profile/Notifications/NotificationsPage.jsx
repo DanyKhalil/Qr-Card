@@ -19,7 +19,7 @@ const NotificationsPage = () => {
     try {
       setLoading(true);
       // Fetch from your API
-      const data = await notificationsApi.getUserNotifications();
+      const data = await notificationsApi.getUserNotifications(localStorage.getItem("profileId"));
       setNotifications(data.notifications || []);
       handleMarkAllAsRead();
     } catch (err) {
@@ -36,7 +36,7 @@ const NotificationsPage = () => {
 //   };
 
   const handleMarkAllAsRead = async () => {
-    notificationsApi.markAllAsRead()
+    notificationsApi.markAllAsRead(localStorage.getItem("profileId"))
   };
 
   return (

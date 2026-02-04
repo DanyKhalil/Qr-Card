@@ -1,72 +1,287 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import './Header.css';
 
-import companyLogo from "../../assets/images/logos/qr-card.png"
-import searchIcon from "../../assets/images/icons/search-icon-white.png"
-import scanQrIcon from "../../assets/images/icons/scan-qr-icon-white.png"
-import profileIcon from "../../assets/images/icons/profile-icon-white.png"
-import logoutIcon from "../../assets/images/icons/logout-icon.png"
-import notificationIcon from "../../assets/images/icons/notification-icon.png"
-import adminIcon from "../../assets/images/icons/admin-icon.png"
-import paymentIcon from "../../assets/images/icons/payment-icon.png"
-import { useNavigate, useParams } from 'react-router-dom';
+import companyLogo from "../../assets/images/logos/qr-card.png";
+import searchIcon from "../../assets/images/icons/search-icon-white.png";
+import scanQrIcon from "../../assets/images/icons/scan-qr-icon-white.png";
+import profileIcon from "../../assets/images/icons/profile-icon-white.png";
+import logoutIcon from "../../assets/images/icons/logout-icon.png";
+import notificationIcon from "../../assets/images/icons/notification-icon.png";
+import adminIcon from "../../assets/images/icons/admin-icon.png";
+import paymentIcon from "../../assets/images/icons/payment-icon.png";
 
-const Header = ({activeIndex}) => {
-    const getToken = () => {
-        return localStorage.getItem("token");
-    };
+import { useNavigate } from 'react-router-dom';
+import { userApi } from "../../services/userApi";
+import { notificationsApi } from "../../services/notificationApi";
+
+const Header = ({ activeIndex }) => {
+    const [profilePopup, setProfilePopup] = useState(null);
+    const [userProfiles, setUserProfiles] = useState([]);
+    const [addingProfile, setAddingProfile] = useState(false);
+    const [newProfileName, setNewProfileName] = useState("");
+    const [unreadCount, setUnreadCount] = useState(0);
+    const popupRef = useRef(null);
+
+    const navigate = useNavigate();
+    const currentProfileId = localStorage.getItem("profileId");
+
     const getCurrentUser = () => {
         const userStr = localStorage.getItem("user");
         if (!userStr) return null;
-        
         try {
             return JSON.parse(userStr);
-        } catch (error) {
-            console.error("Error parsing user data:", error);
+        } catch {
             return null;
         }
     };
 
+    /* ---------- Navigation ---------- */
+    const goToProfile = () => navigate(`/profile`);
+    const goToScanQrCode = () => navigate(`/scan-qr-code`);
+    const goToSearch = () => navigate(`/Filtering`);
+    const goToNotification = () => navigate(`/notifications`);
+    const goToAdmin = () => navigate(`/admin`);
+    const goToPayments = () => navigate(`/payments`);
 
-    const navigate = useNavigate();
-    const goToProfile = () => {navigate(`/profile`)}
-    const goToScanQrCode = () => {navigate(`/scan-qr-code`)}
-    const goToSearch = () => {navigate(`/Filtering`)}
     const logout = () => {
-        localStorage.removeItem("token");
-        localStorage.removeItem("subscription");
-        localStorage.removeItem("user");
+        localStorage.clear();
         navigate('/Login');
-    }
-    const goToNotification = () => {navigate(`/notifications`)}
-    const goToAdmin = () => {navigate(`/admin`)}
-    const goToPayments = () => {navigate(`/payments`)}
+    };
+
+    /* ---------- Profile Popup ---------- */
+    const handleProfileRightClick = async (e) => {
+        e.preventDefault();
+
+        const rect = e.currentTarget.getBoundingClientRect();
+        setProfilePopup({
+            top: rect.bottom + window.scrollY + 6,
+            left: rect.left + window.scrollX,
+        });
+
+        try {
+            if (!currentProfileId) return;
+            const response = await userApi.getProfilesByProfileId(currentProfileId);
+            setUserProfiles(response.profiles || []);
+        } catch (error) {
+            console.error("Failed to load profiles:", error);
+        }
+    };
+
+    const handleProfileSelect = (profileId) => {
+        if (profileId === currentProfileId) return;
+        localStorage.setItem("profileId", profileId);
+        setProfilePopup(null);
+        window.location.reload();
+    };
+
+    /* ---------- Create Profile ---------- */
+    const handleAddProfile = async () => {
+        if (!newProfileName.trim()) return;
+
+        try {
+            const response = await userApi.createProfileFromProfileId(
+                currentProfileId,
+                newProfileName.trim()
+            );
+
+            setUserProfiles(prev => [...prev, response.profile]);
+            setNewProfileName("");
+            setAddingProfile(false);
+        } catch (error) {
+            console.error("Failed to create profile:", error);
+        }
+    };
+
+    /* ---------- Delete Profile ---------- */
+    const handleDeleteProfile = async (e, profileId) => {
+        e.stopPropagation();
+
+        const confirmDelete = window.confirm(
+            "Are you sure you want to delete this profile?"
+        );
+        if (!confirmDelete) return;
+
+        try {
+            await userApi.deleteProfileByProfileId(profileId);
+
+            setUserProfiles(prev => {
+                const remaining = prev.filter(p => p.id !== profileId);
+
+                if (profileId === currentProfileId && remaining.length > 0) {
+                    localStorage.setItem("profileId", remaining[0].id);
+                    window.location.reload();
+                }
+
+                return remaining;
+            });
+        } catch (error) {
+            alert(
+                error.response?.data?.message ||
+                "Failed to delete profile"
+            );
+        }
+    };
+
+    /* ---------- Click Outside ---------- */
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (popupRef.current && !popupRef.current.contains(e.target)) {
+                setProfilePopup(null);
+                setAddingProfile(false);
+                setNewProfileName("");
+            }
+        };
+
+        if (profilePopup) {
+            document.addEventListener("mousedown", handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [profilePopup]);
+
+    useEffect(() => {
+        const fetchUnreadCount = async () => {
+            if (!currentProfileId) return;
+
+            try {
+                const data = await notificationsApi.getUnreadCount(currentProfileId);
+                setUnreadCount(data.unread_count || 0);
+            } catch (error) {
+                console.error("Failed to fetch unread notifications count:", error);
+            }
+        };
+
+        fetchUnreadCount();
+
+        // Optional: refresh every 30 seconds
+        const interval = setInterval(fetchUnreadCount, 30000);
+
+        return () => clearInterval(interval);
+    }, [currentProfileId]);
+
 
     let companyName = "QR CARD";
+
     let menuItems = [
-        getCurrentUser()?.role == 'admin' ? {name: (getCurrentUser()?.role == 'admin' ? "" : "Payments"), icon: paymentIcon, action:goToPayments, active:(activeIndex === -2)} : null,
-        getCurrentUser()?.role == 'admin' ? {name: (getCurrentUser()?.role == 'admin' ? "" : "Admin"), icon: adminIcon, action:goToAdmin, active:(activeIndex === -1)} : null,
-        getCurrentUser()?.id ? {name: (getCurrentUser()?.role == 'admin' ? "" : "Search"), icon: searchIcon, action:goToSearch, active:(activeIndex === 0)} : null,
-        {name: (getCurrentUser()?.role == 'admin' ? "" : "Scan QR"), icon: scanQrIcon, action: goToScanQrCode, active:(activeIndex === 1)},
-        getCurrentUser()?.id ? {name: (getCurrentUser()?.role == 'admin' ? "" : "Notifications"), icon: notificationIcon, action:goToNotification, active:(activeIndex === 2)} : null,
-        {name: (getCurrentUser()?.role == 'admin' ? "" : "My Profile"), icon: profileIcon, action: goToProfile, active:(activeIndex === 3)},
-        getCurrentUser()?.id ? {name: (getCurrentUser()?.role == 'admin' ? "" : "Logout"), icon: logoutIcon, action: logout, active:(activeIndex === 4)} : null ,
-    ].filter((obj) => obj !== null);
+        getCurrentUser()?.role === 'admin'
+            ? { name: "Payments", icon: paymentIcon, action: goToPayments, active: activeIndex === -2 }
+            : null,
+        getCurrentUser()?.role === 'admin'
+            ? { name: "Admin Panel", icon: adminIcon, action: goToAdmin, active: activeIndex === -1 }
+            : null,
+        getCurrentUser()?.id
+            ? { name: "Search", icon: searchIcon, action: goToSearch, active: activeIndex === 0 }
+            : null,
+        { name: "Scan QR", icon: scanQrIcon, action: goToScanQrCode, active: activeIndex === 1 },
+        getCurrentUser()?.id
+            ? { name: "Notifications", icon: notificationIcon, action: goToNotification, active: activeIndex === 2 }
+            : null,
+        { name: "My Profile", icon: profileIcon, action: goToProfile, active: activeIndex === 3 },
+        getCurrentUser()?.id
+            ? { name: "Logout", icon: logoutIcon, action: logout, active: activeIndex === 4 }
+            : null,
+    ].filter(Boolean);
+
     return (
         <div className="header">
-        <div className="header-left">
-            <img src={companyLogo} alt={`${companyName} logo`} className="logo" />
-            <span className="company-name">{companyName}</span>
-        </div>
-
-        <div className="header-right">
-            {menuItems.map((item, index) => (
-            <div key={index} className={item.active ? "menu-item active" : "menu-item"} onClick={()=> item.action()}>
-                <img src={item.icon} alt={item.name} className="menu-icon" />
-                <span className="menu-name">{item.name}</span>
+            <div className="header-left">
+                <img src={companyLogo} alt="QR CARD logo" className="logo" />
+                <span className="company-name">{companyName}</span>
             </div>
-            ))}
-        </div>
+
+            <div className="header-right">
+                {menuItems.map((item, index) => (
+                    <div
+                        key={index}
+                        className={item.active ? "menu-item active" : "menu-item"}
+                        onClick={item.action}
+                        onContextMenu={
+                            item.name === "My Profile"
+                                ? handleProfileRightClick
+                                : undefined
+                        }
+                    >
+                        <div className="notification-icon-wrapper">
+                            <img src={item.icon} alt={item.name} className="menu-icon" />
+
+                            {item.name === "Notifications" && unreadCount > 0 && (
+                                <span className="notification-badge">
+                                {unreadCount > 99 ? "99+" : unreadCount}
+                                </span>
+                            )}
+                        </div>
+                        <span className="menu-name">{getCurrentUser()?.role == 'admin' ? "" : item.name}</span>
+                    </div>
+                ))}
+            </div>
+
+            {profilePopup && (
+                <div
+                    ref={popupRef}
+                    className="profile-popup"
+                    style={profilePopup}
+                >
+                    {userProfiles.map(profile => {
+                        const isActive = profile.id === currentProfileId;
+
+                        return (
+                            <div
+                                key={profile.id}
+                                className={`profile-popup-item ${isActive ? "active" : ""}`}
+                                onClick={() => handleProfileSelect(profile.id)}
+                            >
+                                <img
+                                    src={profile.profile_pic_url || profileIcon}
+                                    alt={profile.name}
+                                    className="profile-popup-avatar"
+                                />
+
+                                <span className="profile-popup-name">
+                                    {profile.name}
+                                </span>
+
+                                <button
+                                    className="profile-popup-delete-btn"
+                                    title="Delete profile"
+                                    onClick={(e) =>
+                                        handleDeleteProfile(e, profile.id)
+                                    }
+                                >
+                                    ✕
+                                </button>
+                            </div>
+                        );
+                    })}
+
+                    {addingProfile ? (
+                        <div className="profile-popup-add">
+                            <input
+                                type="text"
+                                placeholder="Profile name"
+                                value={newProfileName}
+                                onChange={(e) => setNewProfileName(e.target.value)}
+                                className="profile-popup-input"
+                            />
+                            <button
+                                className="profile-popup-create-btn"
+                                onClick={handleAddProfile}
+                            >
+                                Create
+                            </button>
+                        </div>
+                    ) : (
+                        <div
+                            className="profile-popup-item"
+                            style={{ fontWeight: 'bold', justifyContent: 'center' }}
+                            onClick={() => setAddingProfile(true)}
+                        >
+                            + Add another profile
+                        </div>
+                    )}
+                </div>
+            )}
         </div>
     );
 };

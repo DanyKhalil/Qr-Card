@@ -134,7 +134,7 @@ const NotificationsList = ({ notifications = [], onNotificationClick = () => {} 
 
     // Navigate to sender's profile if available
     if (notification.sender?.id) {
-      router.push(`/user-profile/${notification.sender.id}`)
+      router.push(`/user-profile/${notification.sender_profile_id}`)
     }
   };
 

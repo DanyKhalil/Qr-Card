@@ -156,23 +156,34 @@
 
 /* Buttons */
 .admin-update-button,
-.admin-delete-button {
+.admin-delete-button,
+.admin-view-button {
     padding: 6px 12px;
     border-radius: 10px;
     cursor: pointer;
     font-weight: bold;
     border: none;
     margin-right: 6px;
+    margin-bottom: 6px;
     transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
-.admin-update-button {
+.admin-view-button {
     background-color: #4f46e5; /* indigo */
+    color: #f5f3ff; /* soft lavender text */
+}
+.admin-view-button:hover {
+    background-color: #3932ae; /* darker indigo */
+    transform: translateY(-1px);
+}
+
+.admin-update-button {
+    background-color: #ba9129; /* indigo */
     color: #f5f3ff; /* soft lavender text */
 }
 
 .admin-update-button:hover {
-    background-color: #4338ca; /* darker indigo */
+    background-color: #a17e26; /* darker indigo */
     transform: translateY(-1px);
 }
 

@@ -6,6 +6,7 @@ import Footer from "../components/Footer/Footer";
 import { useNavigate } from "react-router-dom";
 
 const AdminPayments = () => {
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const [payments, setPayments] = useState([]);
   const [filteredPayments, setFilteredPayments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -30,7 +31,7 @@ const AdminPayments = () => {
   const token = localStorage.getItem("token");
   const navigate = useNavigate();
 
-  // Fetch payments and stats on mount
+  // Fetch payments and stats
   useEffect(() => {
     fetchPayments();
     fetchStats();
@@ -46,8 +47,8 @@ const AdminPayments = () => {
     const filtered = payments.filter(payment => {
       const searchLower = search.toLowerCase();
       return (
-        payment.user?.name?.toLowerCase().includes(searchLower) ||
-        payment.user?.email?.toLowerCase().includes(searchLower) ||
+        payment.profile?.user?.name?.toLowerCase().includes(searchLower) ||
+        payment.profile?.user?.email?.toLowerCase().includes(searchLower) ||
         payment.transaction_reference?.toLowerCase().includes(searchLower) ||
         payment.id.toLowerCase().includes(searchLower)
       );
@@ -68,7 +69,7 @@ const AdminPayments = () => {
       });
 
       const res = await axios.get(
-        `http://localhost:5050/api/subscription/payments?${params}`,
+        `${API_BASE_URL}/api/subscription/payments?${params}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -93,7 +94,7 @@ const AdminPayments = () => {
   const fetchStats = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:5050/api/subscription/payments/stats`,
+        `${API_BASE_URL}/api/subscription/payments/stats`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setStats(res.data.stats);
@@ -108,14 +109,14 @@ const AdminPayments = () => {
 
     try {
       await axios.patch(
-        `http://localhost:5050/api/subscription/payments/${paymentId}`,
+        `${API_BASE_URL}/api/subscription/payments/${paymentId}`,
         { status: newStatus },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
       alert("Payment status updated successfully");
       fetchPayments();
-      fetchStats(); // Refresh stats
+      fetchStats();
     } catch (err) {
       console.error("Error updating payment:", err);
       alert(err.response?.data?.error || "Failed to update payment");
@@ -129,10 +130,10 @@ const AdminPayments = () => {
       ...prev,
       [name]: value
     }));
-    setCurrentPage(1); // Reset to first page when filters change
+    setCurrentPage(1);
   };
 
-  // Clear all filters
+  // Clear filters
   const clearFilters = () => {
     setFilters({
       status: "",
@@ -150,15 +151,13 @@ const AdminPayments = () => {
       alert("No receipt available for this payment");
       return;
     }
-    setSelectedReceipt(`http://localhost:5050${receiptUrl}`);
+    setSelectedReceipt(`${API_BASE_URL}${receiptUrl}`);
   };
 
   // Close receipt viewer
-  const closeReceipt = () => {
-    setSelectedReceipt(null);
-  };
+  const closeReceipt = () => setSelectedReceipt(null);
 
-  // Format date for display
+  // Format date
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
     const date = new Date(dateString);
@@ -175,11 +174,11 @@ const AdminPayments = () => {
   const formatCurrency = (amount, currency = "USD") => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
-      currency: currency
+      currency
     }).format(amount);
   };
 
-  // Get status badge style
+  // Status badge style
   const getStatusStyle = (status) => {
     const styles = {
       pending: { backgroundColor: "#fef3c7", color: "#92400e" },
@@ -190,7 +189,7 @@ const AdminPayments = () => {
     return styles[status] || { backgroundColor: "#f3f4f6", color: "#374151" };
   };
 
-  // Get method badge style
+  // Method badge style
   const getMethodStyle = (method) => {
     const styles = {
       bank_transfer: { backgroundColor: "#dbeafe", color: "#1e40af" },
@@ -203,11 +202,8 @@ const AdminPayments = () => {
     return styles[method] || { backgroundColor: "#f3f4f6", color: "#374151" };
   };
 
-  // Pagination handlers
   const goToPage = (page) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-    }
+    if (page >= 1 && page <= totalPages) setCurrentPage(page);
   };
 
   if (loading && payments.length === 0) {
@@ -235,12 +231,8 @@ const AdminPayments = () => {
             <h3>Payment Receipt</h3>
             <img src={selectedReceipt} alt="Payment Receipt" className="receipt-image" />
             <div className="receipt-actions">
-              <a href={selectedReceipt} download className="download-btn">
-                Download Receipt
-              </a>
-              <button className="close-btn" onClick={closeReceipt}>
-                Close
-              </button>
+              <a href={selectedReceipt} download className="download-btn">Download Receipt</a>
+              <button className="close-btn" onClick={closeReceipt}>Close</button>
             </div>
           </div>
         </div>
@@ -252,35 +244,25 @@ const AdminPayments = () => {
           <div className="header-stats">
             <div className="stat-card">
               <span className="stat-label">Total Revenue</span>
-              <span className="stat-value">
-                {stats ? formatCurrency(stats.total_revenue) : "$0.00"}
-              </span>
+              <span className="stat-value">{stats ? formatCurrency(stats.total_revenue) : "$0.00"}</span>
             </div>
             <div className="stat-card">
               <span className="stat-label">Pending</span>
-              <span className="stat-value">
-                {stats?.pending_payments || 0}
-              </span>
+              <span className="stat-value">{stats?.pending_payments || 0}</span>
             </div>
             <div className="stat-card">
               <span className="stat-label">Active Subs</span>
-              <span className="stat-value">
-                {stats?.active_subscriptions || 0}
-              </span>
+              <span className="stat-value">{stats?.active_subscriptions || 0}</span>
             </div>
           </div>
         </div>
 
-        {/* Filters Section */}
+        {/* Filters */}
         <div className="filters-section">
           <div className="filter-row">
             <div className="filter-group">
               <label>Status</label>
-              <select 
-                name="status" 
-                value={filters.status}
-                onChange={handleFilterChange}
-              >
+              <select name="status" value={filters.status} onChange={handleFilterChange}>
                 <option value="">All Status</option>
                 <option value="pending">Pending</option>
                 <option value="completed">Completed</option>
@@ -291,11 +273,7 @@ const AdminPayments = () => {
 
             <div className="filter-group">
               <label>Payment Method</label>
-              <select 
-                name="payment_method" 
-                value={filters.payment_method}
-                onChange={handleFilterChange}
-              >
+              <select name="payment_method" value={filters.payment_method} onChange={handleFilterChange}>
                 <option value="">All Methods</option>
                 <option value="bank_transfer">Bank Transfer</option>
                 <option value="cash">Cash</option>
@@ -308,22 +286,12 @@ const AdminPayments = () => {
 
             <div className="filter-group">
               <label>From Date</label>
-              <input
-                type="date"
-                name="start_date"
-                value={filters.start_date}
-                onChange={handleFilterChange}
-              />
+              <input type="date" name="start_date" value={filters.start_date} onChange={handleFilterChange} />
             </div>
 
             <div className="filter-group">
               <label>To Date</label>
-              <input
-                type="date"
-                name="end_date"
-                value={filters.end_date}
-                onChange={handleFilterChange}
-              />
+              <input type="date" name="end_date" value={filters.end_date} onChange={handleFilterChange} />
             </div>
           </div>
 
@@ -335,9 +303,7 @@ const AdminPayments = () => {
               onChange={(e) => setSearch(e.target.value)}
               className="payments-search"
             />
-            <button className="clear-filters-btn" onClick={clearFilters}>
-              Clear Filters
-            </button>
+            <button className="clear-filters-btn" onClick={clearFilters}>Clear Filters</button>
           </div>
         </div>
 
@@ -351,7 +317,6 @@ const AdminPayments = () => {
                 <th>Amount</th>
                 <th>Method</th>
                 <th>Status</th>
-                {/* <th>Reference</th> */}
                 <th>Receipt</th>
                 <th>Subscription</th>
                 <th>Actions</th>
@@ -361,9 +326,7 @@ const AdminPayments = () => {
             <tbody>
               {filteredPayments.length === 0 ? (
                 <tr>
-                  <td colSpan="9" className="no-data">
-                    No payments found
-                  </td>
+                  <td colSpan="8" className="no-data">No payments found</td>
                 </tr>
               ) : (
                 filteredPayments.map((payment) => (
@@ -371,141 +334,67 @@ const AdminPayments = () => {
                     <td>
                       <div className="date-cell">
                         <div className="date-main">{formatDate(payment.created_at)}</div>
-                        {payment.paid_at && (
-                          <div className="date-sub">Paid: {formatDate(payment.paid_at)}</div>
-                        )}
+                        {payment.paid_at && <div className="date-sub">Paid: {formatDate(payment.paid_at)}</div>}
                       </div>
                     </td>
 
                     <td>
                       <div className="user-cell">
-                        {payment.user?.profile?.profile_pic_url ? (
+                        {payment.profile?.profile_pic_url ? (
                           <img 
-                            src={`${payment.user.profile.profile_pic_url}`}
-                            alt={payment.user.name}
-                            className="user-avatar"
+                            src={payment.profile.profile_pic_url} 
+                            alt={payment.profile?.name || "User"} 
+                            className="user-avatar" 
                           />
                         ) : (
                           <div className="avatar-placeholder">
-                            {payment.user?.name?.charAt(0) || "U"}
+                            {payment.profile?.name?.charAt(0) || "U"}
                           </div>
                         )}
                         <div className="user-info">
-                          <div className="user-name">{payment.user?.name || "N/A"}</div>
-                          <div className="user-email">{payment.user?.email || "N/A"}</div>
+                          <div className="user-name">{payment.profile?.name || "N/A"}</div>
+                          <div className="user-email">{payment.profile?.user?.email || "N/A"}</div>
                         </div>
                       </div>
                     </td>
 
-                    <td className="amount-cell">
-                      {formatCurrency(payment.amount, payment.currency)}
-                    </td>
-
-                    <td>
-                      <span className="method-badge" style={getMethodStyle(payment.payment_method)}>
-                        {payment.payment_method || "N/A"}
-                      </span>
-                    </td>
-
-                    <td>
-                      <span className="status-badge" style={getStatusStyle(payment.status)}>
-                        {payment.status || "N/A"}
-                      </span>
-                    </td>
-
-                    {/* <td>
-                      <div className="reference-cell">
-                        {payment.transaction_reference ? (
-                          <>
-                            <div className="reference-main">{payment.transaction_reference}</div>
-                            {payment.notes && (
-                              <div className="reference-notes" title={payment.notes}>
-                                Note
-                              </div>
-                            )}
-                          </>
-                        ) : (
-                          "No reference"
-                        )}
-                      </div>
-                    </td> */}
+                    <td className="amount-cell">{formatCurrency(payment.amount, payment.currency)}</td>
+                    <td><span className="method-badge" style={getMethodStyle(payment.payment_method)}>{payment.payment_method || "N/A"}</span></td>
+                    <td><span className="status-badge" style={getStatusStyle(payment.status)}>{payment.status || "N/A"}</span></td>
 
                     <td>
                       {payment.receipt_url ? (
-                        <button
-                          className="view-receipt-btn"
-                          onClick={() => viewReceipt(payment.receipt_url)}
-                          title="View receipt"
-                        >
-                          View
-                        </button>
+                        <button className="view-receipt-btn" onClick={() => viewReceipt(payment.receipt_url)} title="View receipt">View</button>
                       ) : (
                         <span className="no-receipt">No receipt</span>
                       )}
                     </td>
 
                     <td>
-                      <div className="subscription-cell">
-                        {payment.subscription ? (
-                          <>
-                            <div className="sub-plan">{payment.subscription.plan?.name || "N/A"}</div>
-                            <div className="sub-status">{payment.subscription.status}</div>
-                          </>
-                        ) : (
-                          "No subscription"
-                        )}
-                      </div>
+                      {payment.subscription ? (
+                        <div className="subscription-cell">
+                          <div className="sub-plan">{payment.subscription.plan?.name || "N/A"}</div>
+                          <div className="sub-status">{payment.subscription.status}</div>
+                        </div>
+                      ) : "No subscription"}
                     </td>
 
                     <td>
                       <div className="action-buttons">
                         {payment.status === "pending" && (
                           <>
-                            <button
-                              className="activate-btn"
-                              onClick={() => handleUpdateStatus(payment.id, "completed")}
-                              title="Approve payment"
-                            >
-                              Approve
-                            </button>
-                            <button
-                              className="reject-btn"
-                              onClick={() => handleUpdateStatus(payment.id, "failed")}
-                              title="Reject payment"
-                            >
-                              Reject
-                            </button>
+                            <button className="activate-btn" onClick={() => handleUpdateStatus(payment.id, "completed")} title="Approve payment">Approve</button>
+                            <button className="reject-btn" onClick={() => handleUpdateStatus(payment.id, "failed")} title="Reject payment">Reject</button>
                           </>
                         )}
-                        
                         {payment.status === "completed" && (
-                          <button
-                            className="refund-btn"
-                            onClick={() => handleUpdateStatus(payment.id, "refunded")}
-                            title="Mark as refunded"
-                          >
-                            Refund
-                          </button>
+                          <button className="refund-btn" onClick={() => handleUpdateStatus(payment.id, "refunded")} title="Mark as refunded">Refund</button>
                         )}
-
                         {payment.status === "failed" && (
-                          <button
-                            className="retry-btn"
-                            onClick={() => handleUpdateStatus(payment.id, "pending")}
-                            title="Mark for retry"
-                          >
-                            Retry
-                          </button>
+                          <button className="retry-btn" onClick={() => handleUpdateStatus(payment.id, "pending")} title="Mark for retry">Retry</button>
                         )}
-
                         {payment.status === "refunded" && (
-                          <button
-                            className="view-details-btn"
-                            onClick={() => alert(`Refunded on: ${formatDate(payment.approved_at)}`)}
-                            title="View refund details"
-                          >
-                            Details
-                          </button>
+                          <button className="view-details-btn" onClick={() => alert(`Refunded on: ${formatDate(payment.approved_at)}`)} title="View refund details">Details</button>
                         )}
                       </div>
                     </td>
@@ -519,50 +408,22 @@ const AdminPayments = () => {
         {/* Pagination */}
         {totalPages > 1 && (
           <div className="pagination">
-            <button
-              className="pagination-btn"
-              onClick={() => goToPage(currentPage - 1)}
-              disabled={currentPage === 1}
-            >
-              ← Previous
-            </button>
-            
+            <button className="pagination-btn" onClick={() => goToPage(currentPage - 1)} disabled={currentPage === 1}>← Previous</button>
             <div className="page-numbers">
               {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                 let pageNum;
-                if (totalPages <= 5) {
-                  pageNum = i + 1;
-                } else if (currentPage <= 3) {
-                  pageNum = i + 1;
-                } else if (currentPage >= totalPages - 2) {
-                  pageNum = totalPages - 4 + i;
-                } else {
-                  pageNum = currentPage - 2 + i;
-                }
+                if (totalPages <= 5) pageNum = i + 1;
+                else if (currentPage <= 3) pageNum = i + 1;
+                else if (currentPage >= totalPages - 2) pageNum = totalPages - 4 + i;
+                else pageNum = currentPage - 2 + i;
 
                 return (
-                  <button
-                    key={pageNum}
-                    className={`page-btn ${currentPage === pageNum ? 'active' : ''}`}
-                    onClick={() => goToPage(pageNum)}
-                  >
-                    {pageNum}
-                  </button>
+                  <button key={pageNum} className={`page-btn ${currentPage === pageNum ? 'active' : ''}`} onClick={() => goToPage(pageNum)}>{pageNum}</button>
                 );
               })}
             </div>
-
-            <button
-              className="pagination-btn"
-              onClick={() => goToPage(currentPage + 1)}
-              disabled={currentPage === totalPages}
-            >
-              Next →
-            </button>
-
-            <span className="page-info">
-              Page {currentPage} of {totalPages} ({pagination.total} total payments)
-            </span>
+            <button className="pagination-btn" onClick={() => goToPage(currentPage + 1)} disabled={currentPage === totalPages}>Next →</button>
+            <span className="page-info">Page {currentPage} of {totalPages} ({pagination.total} total payments)</span>
           </div>
         )}
       </div>

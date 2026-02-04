@@ -15,6 +15,6 @@ router.post("/register", registerUser);
 router.get("/verify-email/:token", verifyEmail);
 
 // Protected route (requires authentication)
-router.get("/me", authenticate, getCurrentUserWithSubscription);
+router.get("/profile/:profileId/subscription", authenticate, getCurrentUserWithSubscription);
 
 export default router;

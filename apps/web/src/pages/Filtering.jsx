@@ -5,6 +5,7 @@ import Footer from "../components/Footer/Footer";
 import "../Style/Filtering.css";
 
 const Filtering = () => {
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const [users, setUsers] = useState([]);
   const [search, setSearch] = useState("");
   const [filters, setFilters] = useState([]); // followers / following
@@ -24,11 +25,15 @@ const Filtering = () => {
       return null;
     }
   };
+  const getCurrentUserProfileId = () => {
+    const profileId = localStorage.getItem("profileId");
+    return profileId;
+  }
 
   // Fetch users from backend
   const fetchUsers = async (searchQuery = "") => {
-    const user = getCurrentUser();
-    if (!user?.id) return;
+    const profileId = getCurrentUserProfileId();
+    if (!profileId) return;
 
     const filterQuery = filters.join(",");
     const roleQuery = roleFilter ? `&role=${roleFilter}` : "";
@@ -39,7 +44,7 @@ const Filtering = () => {
 
     try {
       const res = await fetch(
-        `http://localhost:5050/api/users2/follow?userId=${user.id}&search=${searchQuery}&filter=${filterQuery}${roleQuery}${verifiedQuery}${mutualQuery}${hasVideosQuery}${sortQuery}`
+        `${API_BASE_URL}/api/users2/follow?profileId=${profileId}&search=${searchQuery}&filter=${filterQuery}${roleQuery}${verifiedQuery}${mutualQuery}${hasVideosQuery}${sortQuery}`
       );
       const data = await res.json();
       setUsers(data);
@@ -103,7 +108,7 @@ const Filtering = () => {
             </label>
 
             {/* Role filter */}
-            <div className="role-filter">
+            {/* <div className="role-filter">
               <label htmlFor="roleSelect">Role / Job Type</label>
               <select
                 id="roleSelect"
@@ -115,17 +120,17 @@ const Filtering = () => {
                 <option value="admin">admin</option>
                 <option value="company">company</option>
               </select>
-            </div>
+            </div> */}
 
             {/* Verified */}
-            <label>
+            {/* <label>
               <input
                 type="checkbox"
                 checked={verifiedFilter}
                 onChange={() => setVerifiedFilter(!verifiedFilter)}
               />
               Verified Only
-            </label>
+            </label> */}
 
             {/* Mutual */}
             <label>
@@ -187,6 +192,7 @@ const Filtering = () => {
                   <ProfileCard
                     key={user.id}
                     id={user.id}
+                    profileId={user.profile_id}
                     name={user.name}
                     title={
                       user.isFollower && user.isFollowing

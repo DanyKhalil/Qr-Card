@@ -369,7 +369,7 @@ export default function AdminPaymentsMobile() {
               {formatCurrency(payment.amount, payment.currency)}
             </Text>
             <Text style={styles.paymentUser}>
-              {payment.user?.name || "Unknown User"}
+              {payment.profile?.name || "Unknown User"}
             </Text>
             <Text style={styles.paymentDate}>
               {formatDate(payment.created_at)}

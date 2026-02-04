@@ -1,6 +1,7 @@
 // controllers/subscriptionController.js
 import { User, UserSubscription, SubscriptionPlan, Payment, Profile, Notification } from "../models/index.js";
 import sequelize from "../config/db.js"
+import { Op } from "sequelize";
 
 /**
  * Get current user's subscription
@@ -8,13 +9,13 @@ import sequelize from "../config/db.js"
  */
 export const getCurrentSubscription = async (req, res) => {
   try {
-    const userId = req.user?.id; // Assuming auth middleware sets req.user
-    if (!userId) {
-      return res.status(401).json({ error: "Unauthorized" });
+    const { profile_id } = req.body; // Get profile_id from request body
+    if (!profile_id) {
+      return res.status(400).json({ error: "profile_id is required" });
     }
 
     const subscription = await UserSubscription.findOne({
-      where: { user_id: userId },
+      where: { profile_id }, // Use profile_id instead of user_id
       include: [
         {
           model: SubscriptionPlan,
@@ -57,11 +58,15 @@ export const getAvailablePlans = async (req, res) => {
  */
 export const subscribeToPlan = async (req, res) => {
   try {
-    const userId = req.user?.id;
-    const { plan_id, payment_details } = req.body;
+    const { profile_id, plan_id, payment_details } = req.body;
 
-    if (!userId) {
-      return res.status(401).json({ error: "Unauthorized" });
+    if (!profile_id) {
+      return res.status(400).json({ error: "profile_id is required" });
+    }
+
+    const profile = await Profile.findByPk(profile_id);
+    if (!profile) {
+      return res.status(404).json({ error: "Profile not found" });
     }
 
     const plan = await SubscriptionPlan.findByPk(plan_id);
@@ -69,13 +74,17 @@ export const subscribeToPlan = async (req, res) => {
       return res.status(404).json({ error: "Plan not found" });
     }
 
-    // Check if user already has an active subscription
+    // Check if profile already has an active subscription
     const currentSub = await UserSubscription.findOne({
-      where: { user_id: userId, status: "active" }
+      where: {
+        profile_id,
+        status: "active",
+        end_date: { [Op.gt]: new Date() }
+      }
     });
 
     if (currentSub) {
-      return res.status(400).json({ error: "User already has an active subscription" });
+      return res.status(400).json({ error: "Profile already has an active subscription" });
     }
 
     // Check for uploaded receipt if payment method requires it
@@ -83,36 +92,35 @@ export const subscribeToPlan = async (req, res) => {
     if (req.files && req.files.length > 0) {
       const receiptFile = req.files.find(file => file.fieldname === 'receipt');
       if (receiptFile) {
-        // Save receipt URL to payment
         receiptUrl = `/uploads/receipts/${receiptFile.filename}`;
       }
     }
 
     // Create new subscription
     const subscription = await UserSubscription.create({
-      user_id: userId,
+      profile_id,
       plan_id,
       start_date: new Date(),
-      end_date: new Date(Date.now() + 30*24*60*60*1000), // Example: 30 days
+      end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days example
       status: "pending", // start as pending until payment is confirmed
     });
 
     // Create initial pending payment
     const payment = await Payment.create({
-      user_id: userId,
+      profile_id,
       subscription_id: subscription.id,
       amount: plan.price,
       currency: plan.currency,
-      payment_method: payment_details?.method || "manual", // default to manual
+      payment_method: payment_details?.method || "manual",
       status: "pending",
-      receipt_url: receiptUrl, // ADD THIS LINE - was missing
+      receipt_url: receiptUrl,
       notes: payment_details?.notes || null
     });
 
-    res.status(201).json({ 
-      message: "Subscription created successfully. Payment is pending approval.", 
-      subscription, 
-      payment 
+    res.status(201).json({
+      message: "Subscription created successfully. Payment is pending approval.",
+      subscription,
+      payment
     });
   } catch (error) {
     console.error("Error in subscribeToPlan:", error);
@@ -126,25 +134,28 @@ export const subscribeToPlan = async (req, res) => {
  */
 export const cancelSubscription = async (req, res) => {
   try {
-    const userId = req.user?.id;
-    if (!userId) {
-      return res.status(401).json({ error: "Unauthorized" });
+    const { profile_id } = req.body;
+
+    if (!profile_id) {
+      return res.status(400).json({ error: "profile_id is required" });
     }
 
     const subscription = await UserSubscription.findOne({
-      where: { user_id: userId, is_active: true }
+      where: { profile_id, status: "active" }
     });
 
     if (!subscription) {
-      return res.status(404).json({ error: "No active subscription found" });
+      return res.status(404).json({ error: "No active subscription found for this profile" });
     }
 
-    subscription.is_active = false;
     subscription.status = "cancelled";
     subscription.end_date = new Date();
     await subscription.save();
 
-    res.json({ message: "UserSubscription cancelled successfully", subscription });
+    res.json({
+      message: "Subscription cancelled successfully",
+      subscription
+    });
   } catch (error) {
     console.error("Error in cancelSubscription:", error);
     res.status(500).json({ error: error.message });
@@ -189,13 +200,12 @@ export const getAllPayments = async (req, res) => {
       return res.status(403).json({ error: "Admin access required" });
     }
 
-    // Extract query parameters
     const {
+      profile_id,
       status,
       payment_method,
       start_date,
       end_date,
-      search,
       page = 1,
       limit = 20
     } = req.query;
@@ -204,89 +214,55 @@ export const getAllPayments = async (req, res) => {
     const limitNum = parseInt(limit);
     const offset = (pageNum - 1) * limitNum;
 
-    // Build where conditions
+    // Build where conditions for Payment
     const whereConditions = {};
-
-    if (status) {
-      whereConditions.status = status;
-    }
-
-    if (payment_method) {
-      whereConditions.payment_method = payment_method;
-    }
-
-    // Date range filter
+    if (status) whereConditions.status = status;
+    if (payment_method) whereConditions.payment_method = payment_method;
     if (start_date || end_date) {
       whereConditions.created_at = {};
-      if (start_date) {
-        whereConditions.created_at.$gte = new Date(start_date);
-      }
-      if (end_date) {
-        whereConditions.created_at.$lte = new Date(end_date);
-      }
+      if (start_date) whereConditions.created_at[Op.gte] = new Date(start_date);
+      if (end_date) whereConditions.created_at[Op.lte] = new Date(end_date);
     }
-
-    // Search in user name or email
-    let userWhereConditions = {};
-    if (search) {
-      userWhereConditions = {
-        $or: [
-          { name: { $like: `%${search}%` } },
-          { email: { $like: `%${search}%` } }
-        ]
-      };
-    }
+    if (profile_id) whereConditions.profile_id = profile_id;
 
     // Get total count for pagination
-    const totalCount = await Payment.count({
-      include: [{
-        model: User,
-        as: 'user',
-        where: userWhereConditions,
-        required: true
-      }],
-      where: whereConditions
-    });
+    const totalCount = await Payment.count({ where: whereConditions });
 
-    // Get payments with all related information
+    // Get payments with all related info
     const payments = await Payment.findAll({
       where: whereConditions,
       include: [
         {
-          model: User,
-          as: 'user',
-          where: userWhereConditions,
-          required: true,
-          attributes: [
-            'id', 'name', 'email', 'role', 'verified', 
-            'is_active', 'created_at'
-          ],
-          include: [{
-            model: Profile,
-            as: 'profile',
-            attributes: [
-              'id', 'profile_pic_url', 'phone_number',
-              'bio', 'headline', 'website'
-            ]
-          }]
+          model: Profile,
+          as: 'profile',
+          attributes: ['id', 'name', 'profile_pic_url', 'phone_number', 'bio', 'headline', 'website'],
+          include: [
+            {
+              model: User,
+              as: 'user',
+              attributes: ['id', 'email', 'role', 'verified', 'is_active', 'created_at']
+            }
+          ]
         },
         {
           model: UserSubscription,
           as: 'subscription',
-          include: [{
-            model: SubscriptionPlan,
-            as: 'plan',
-            attributes: ['id', 'name', 'price', 'currency', 'billing_interval']
-          }],
           attributes: [
             'id', 'status', 'start_date', 'end_date',
             'next_billing_date', 'auto_renew', 'notes', 'created_at'
+          ],
+          include: [
+            {
+              model: SubscriptionPlan,
+              as: 'plan',
+              attributes: ['id', 'name', 'price', 'currency', 'billing_interval']
+            }
           ]
         },
         {
           model: User,
           as: 'approved_by_admin',
-          attributes: ['id', 'name', 'email'],
+          attributes: ['id', 'email'],
           required: false
         }
       ],
@@ -298,48 +274,37 @@ export const getAllPayments = async (req, res) => {
       order: [['created_at', 'DESC']],
       limit: limitNum,
       offset: offset,
-      // Log the SQL for debugging
-      logging: console.log
     });
 
-    // Format response with additional calculated fields
+    // Format response with calculated fields
     const formattedPayments = payments.map(payment => {
       const paymentObj = payment.toJSON();
       
-      // Calculate days pending (if payment is pending)
       if (paymentObj.status === 'pending' && paymentObj.created_at) {
         const createdDate = new Date(paymentObj.created_at);
         const now = new Date();
-        const diffTime = Math.abs(now - createdDate);
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        const diffDays = Math.ceil((now - createdDate) / (1000 * 60 * 60 * 24));
         paymentObj.days_pending = diffDays;
       }
 
-      // Format dates for better readability
-      paymentObj.formatted_created_at = paymentObj.created_at 
-        ? new Date(paymentObj.created_at).toLocaleString() 
-        : null;
-      paymentObj.formatted_paid_at = paymentObj.paid_at 
-        ? new Date(paymentObj.paid_at).toLocaleString() 
-        : null;
-      paymentObj.formatted_approved_at = paymentObj.approved_at 
-        ? new Date(paymentObj.approfile_at).toLocaleString() 
-        : null;
+      paymentObj.formatted_created_at = paymentObj.created_at ? new Date(paymentObj.created_at).toLocaleString() : null;
+      paymentObj.formatted_paid_at = paymentObj.paid_at ? new Date(paymentObj.paid_at).toLocaleString() : null;
+      paymentObj.formatted_approved_at = paymentObj.approved_at ? new Date(paymentObj.approved_at).toLocaleString() : null;
 
       return paymentObj;
     });
 
-    // Calculate summary statistics
+    // Summary statistics
     const summary = {
       total: totalCount,
-      pending: await Payment.count({ where: { status: 'pending' } }),
-      completed: await Payment.count({ where: { status: 'completed' } }),
-      failed: await Payment.count({ where: { status: 'failed' } }),
-      refunded: await Payment.count({ where: { status: 'refunded' } }),
+      pending: await Payment.count({ where: { ...whereConditions, status: 'pending' } }),
+      completed: await Payment.count({ where: { ...whereConditions, status: 'completed' } }),
+      failed: await Payment.count({ where: { ...whereConditions, status: 'failed' } }),
+      refunded: await Payment.count({ where: { ...whereConditions, status: 'refunded' } }),
       total_amount: {
-        all: await Payment.sum('amount'),
-        completed: await Payment.sum('amount', { where: { status: 'completed' } }),
-        pending: await Payment.sum('amount', { where: { status: 'pending' } })
+        all: await Payment.sum('amount', { where: whereConditions }),
+        completed: await Payment.sum('amount', { where: { ...whereConditions, status: 'completed' } }),
+        pending: await Payment.sum('amount', { where: { ...whereConditions, status: 'pending' } })
       }
     };
 
@@ -360,7 +325,7 @@ export const getAllPayments = async (req, res) => {
         payment_method,
         start_date,
         end_date,
-        search
+        profile_id
       }
     });
 
@@ -380,35 +345,56 @@ export const getAllPayments = async (req, res) => {
  */
 export const updatePaymentStatus = async (req, res) => {
   try {
-    const userId = req.user?.id;
+    const adminId = req.user?.id;
     const { paymentId } = req.params;
-    const { status, notes, approved_by } = req.body;
+    const { status, notes } = req.body;
 
-    if (!userId) {
+    if (!adminId) {
       return res.status(401).json({ error: "Unauthorized" });
     }
 
-    // Check if user is admin
-    const user = await User.findByPk(userId);
-    if (!user || user.role !== 'admin') {
+    const adminUser = await User.findByPk(adminId, {
+      include: [
+        {
+          model: Profile,
+          as: "profiles",
+          attributes: ["id", "name"]
+        }
+      ]
+    });
+
+    if (!adminUser || adminUser.role !== "admin") {
       return res.status(403).json({ error: "Admin access required" });
     }
 
+    const adminProfileId =
+      adminUser.profiles?.length > 0 ? adminUser.profiles[0].id : null;
+
+    // Fetch payment
     const payment = await Payment.findByPk(paymentId, {
       include: [
         {
-          model: User,
-          as: 'user',
-          attributes: ['id', 'name', 'email']
+          model: Profile,
+          as: "profile",
+          attributes: ["id", "name"],
+          include: [
+            {
+              model: User,
+              as: "user",
+              attributes: ["id", "email"]
+            }
+          ]
         },
         {
           model: UserSubscription,
-          as: 'subscription',
-          include: [{
-            model: SubscriptionPlan,
-            as: 'plan',
-            attributes: ['name']
-          }]
+          as: "subscription",
+          include: [
+            {
+              model: SubscriptionPlan,
+              as: "plan",
+              attributes: ["name"]
+            }
+          ]
         }
       ]
     });
@@ -417,14 +403,11 @@ export const updatePaymentStatus = async (req, res) => {
       return res.status(404).json({ error: "Payment not found" });
     }
 
-    // Store old status for comparison
     const oldStatus = payment.status;
-
-    // Update payment
     const updateData = {};
 
     if (status) {
-      if (!['pending', 'completed', 'failed', 'refunded'].includes(status)) {
+      if (!["pending", "completed", "failed", "refunded"].includes(status)) {
         return res.status(400).json({ error: "Invalid status value" });
       }
       updateData.status = status;
@@ -434,71 +417,62 @@ export const updatePaymentStatus = async (req, res) => {
       updateData.notes = notes;
     }
 
-    let notificationMessage = '';
-    let notificationType = '';
-    let notificationTitle = '';
+    let notificationMessage = "";
+    let notificationType = "";
+    let notificationTitle = "";
 
-    // If marking as completed, update approved_at and approved_by
-    if (status === 'completed') {
+    // Payment approved → activate subscription
+    if (status === "completed") {
       updateData.approved_at = new Date();
-      updateData.approved_by = userId;
-      
-      // Also update the associated subscription to active
+      updateData.approved_by = adminId;
+
       if (payment.subscription) {
         await UserSubscription.update(
-          { 
-            status: 'active',
+          {
+            status: "active",
             start_date: new Date(),
-            end_date: new Date(Date.now() + 30*24*60*60*1000) // 30 days from now
+            end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
           },
           { where: { id: payment.subscription.id } }
         );
       }
 
-      // Create notification for payment completion
-      notificationType = 'payment_approved';
-      notificationTitle = 'Payment Approved';
-      notificationMessage = `Your payment of $${payment.amount} for ${payment.subscription?.plan?.name || 'subscription'} has been approved. Your subscription is now active!`;
+      notificationType = "payment_approved";
+      notificationTitle = "Payment Approved";
+      notificationMessage = `Your payment of $${payment.amount} for ${
+        payment.subscription?.plan?.name || "subscription"
+      } has been approved.`;
     }
 
-    // FIX: Also update subscription when payment is rejected (failed)
-    if (status === 'failed' && payment.subscription) {
+    if (status === "failed" && payment.subscription) {
       await UserSubscription.update(
-        { 
-          status: 'suspended',
-        },
+        { status: "suspended" },
         { where: { id: payment.subscription.id } }
       );
 
-      // Create notification for payment rejection
-      notificationType = 'payment_rejected';
-      notificationTitle = 'Payment Rejected';
-      notificationMessage = `Your payment of $${payment.amount} for ${payment.subscription?.plan?.name || 'subscription'} has been rejected. Please contact support if you believe this is an error.`;
+      notificationType = "payment_rejected";
+      notificationTitle = "Payment Rejected";
+      notificationMessage = `Your payment of $${payment.amount} has been rejected.`;
     }
 
-    // Handle refunded payments
-    if (status === 'refunded' && payment.subscription) {
+    if (status === "refunded" && payment.subscription) {
       await UserSubscription.update(
-        { 
-          status: 'cancelled',
-        },
+        { status: "cancelled" },
         { where: { id: payment.subscription.id } }
       );
 
-      // Create notification for refund
-      notificationType = 'payment_refunded';
-      notificationTitle = 'Payment Refunded';
-      notificationMessage = `Your payment of $${payment.amount} for ${payment.subscription?.plan?.name || 'subscription'} has been refunded. Your subscription has been cancelled.`;
+      notificationType = "payment_refunded";
+      notificationTitle = "Payment Refunded";
+      notificationMessage = `Your payment of $${payment.amount} has been refunded.`;
     }
 
-    // Save payment updates
     await Payment.update(updateData, { where: { id: paymentId } });
 
-    // Create notification if status changed and we have a user to notify
-    if (status && status !== oldStatus && payment.user && notificationType) {
+    // ✅ Notification now uses PROFILE name + sender_profile_id
+    if (status && status !== oldStatus && payment.profile?.user && notificationType) {
       await Notification.create({
-        user_id: payment.user.id, // User who made the payment
-        sender_id: userId, // Admin who processed the payment
+        receiver_profile_id: payment.profile.id,
+        sender_profile_id: adminProfileId,
         type: notificationType,
         title: notificationTitle,
         message: notificationMessage,
@@ -511,34 +485,26 @@ export const updatePaymentStatus = async (req, res) => {
           old_status: oldStatus,
           new_status: status
         },
-        action_url: status === 'completed' ? '/profile' : '/subscribe',
-        action_label: status === 'completed' ? 'Go to Profile' : 'View Plans',
+        action_url: status === "completed" ? "/profile" : "/subscribe",
+        action_label: status === "completed" ? "Go to Profile" : "View Plans",
         is_read: false,
         is_sent: false,
         is_seen: false
       });
     }
 
-    // Get updated payment with all relationships
     const updatedPayment = await Payment.findByPk(paymentId, {
       include: [
         {
-          model: User,
-          as: 'user',
-          attributes: ['id', 'name', 'email']
+          model: Profile,
+          as: "profile",
+          attributes: ["id", "name"],
+          include: [{ model: User, as: "user", attributes: ["id", "email"] }]
         },
         {
           model: UserSubscription,
-          as: 'subscription',
-          include: [{
-            model: SubscriptionPlan,
-            as: 'plan'
-          }]
-        },
-        {
-          model: User,
-          as: 'approved_by_admin',
-          attributes: ['id', 'name', 'email']
+          as: "subscription",
+          include: [{ model: SubscriptionPlan, as: "plan" }]
         }
       ]
     });
@@ -547,17 +513,18 @@ export const updatePaymentStatus = async (req, res) => {
       success: true,
       message: "Payment updated successfully",
       payment: updatedPayment,
-      notification_sent: notificationType ? true : false
+      notification_sent: !!notificationType
     });
 
   } catch (error) {
-    console.error("Error in updatePaymentStatus:", error);
-    res.status(500).json({ 
-      success: false, 
-      error: error.message 
+    console.error("DEBUG: Error in updatePaymentStatus:", error);
+    res.status(500).json({
+      success: false,
+      error: error.message
     });
   }
 };
+
 
 /**
  * Get payment statistics (Admin only)

@@ -8,8 +8,8 @@ import { Notification, User, Profile } from "../models/index.js";
 export const createNotification = async (req, res) => {
   try {
     const {
-      user_id,
-      sender_id,
+      receiver_profile_id,
+      sender_profile_id, // optional
       type,
       title,
       message,
@@ -18,10 +18,9 @@ export const createNotification = async (req, res) => {
       action_label
     } = req.body;
 
-    // Create the notification
     const notification = await Notification.create({
-      user_id,
-      sender_id,
+      receiver_profile_id,
+      sender_profile_id: sender_profile_id || null,
       type,
       title,
       message,
@@ -31,12 +30,12 @@ export const createNotification = async (req, res) => {
       is_read: false,
       is_sent: false,
       is_seen: false,
-      created_at: new Date()
+      created_at: new Date(),
     });
 
-    res.status(201).json({ 
-      message: "Notification created", 
-      notification 
+    res.status(201).json({
+      message: "Notification created",
+      notification,
     });
   } catch (error) {
     console.error("Error creating notification:", error);
@@ -50,34 +49,36 @@ export const createNotification = async (req, res) => {
  */
 export const getUserNotifications = async (req, res) => {
   try {
-    // Get user ID from auth token (adjust based on your auth)
-    const userId = req.user.id;
+    const { profile_id } = req.query;
+
+    if (!profile_id) {
+      return res.status(400).json({ error: "profile_id is required" });
+    }
 
     const notifications = await Notification.findAll({
-      where: { user_id: userId },
-      order: [['created_at', 'DESC']],
+      where: { receiver_profile_id: profile_id },
+      order: [["created_at", "DESC"]],
       limit: 50,
       include: [
         {
-          model: User,
-          as: 'sender', // Make sure this association exists in Notification model
-          attributes: ['id', 'name'],
-          include: [
-            {
-              model: Profile,
-              as: 'profile',
-              attributes: ['profile_pic_url']
-            }
-          ]
-        }
-      ]
+          model: Profile,
+          as: "senderProfile",
+          attributes: ["id", "profile_pic_url", "user_id"], // <-- add user_id
+        },
+        {
+          model: Profile,
+          as: "receiverProfile",
+          attributes: ["id", "user_id"], // <-- add user_id
+        },
+      ],
     });
 
-    // Format the response
-    const formattedNotifications = notifications.map(notification => ({
+    const formattedNotifications = notifications.map((notification) => ({
       id: notification.id,
-      user_id: notification.user_id,
-      sender_id: notification.sender_id,
+      receiver_profile_id: notification.receiver_profile_id,
+      sender_profile_id: notification.sender_profile_id,
+      receiver_user_id: notification.receiverProfile?.user_id || null,
+      sender_user_id: notification.senderProfile?.user_id || null,
       type: notification.type,
       title: notification.title,
       message: notification.message,
@@ -91,11 +92,19 @@ export const getUserNotifications = async (req, res) => {
       read_at: notification.read_at,
       sent_at: notification.sent_at,
       seen_at: notification.seen_at,
-      sender: notification.sender ? {
-        id: notification.sender.id,
-        name: notification.sender.name,
-        profile_pic_url: notification.sender.profile?.profile_pic_url
-      } : null
+      sender: notification.senderProfile
+        ? {
+            id: notification.senderProfile.id,
+            profile_pic_url: notification.senderProfile.profile_pic_url,
+            user_id: notification.senderProfile.user_id, // <-- include user_id
+          }
+        : null,
+      receiver: notification.receiverProfile
+        ? {
+            id: notification.receiverProfile.id,
+            user_id: notification.receiverProfile.user_id, // <-- include user_id
+          }
+        : null,
     }));
 
     res.json({ notifications: formattedNotifications });
@@ -107,30 +116,63 @@ export const getUserNotifications = async (req, res) => {
 
 
 
+
 export const markAllNotificationsAsRead = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const { profile_id } = req.body;
 
-    // Update all unread notifications for this user
+    if (!profile_id) {
+      return res.status(400).json({ error: "profile_id is required" });
+    }
+
     const [updatedCount] = await Notification.update(
       {
         is_read: true,
-        read_at: new Date()
+        read_at: new Date(),
       },
       {
         where: {
-          user_id: userId,
-          is_read: false
-        }
+          receiver_profile_id: profile_id,
+          is_read: false,
+        },
       }
     );
 
     res.json({
       message: `Marked ${updatedCount} notifications as read`,
-      updated_count: updatedCount
+      updated_count: updatedCount,
     });
   } catch (error) {
     console.error("Error marking all notifications as read:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+/**
+ * Get unread notifications count for a profile
+ * GET /notifications/unread-count?profile_id=123
+ */
+export const getUnreadNotificationCount = async (req, res) => {
+  try {
+    const { profile_id } = req.query;
+
+    if (!profile_id) {
+      return res.status(400).json({ error: "profile_id is required" });
+    }
+
+    const unreadCount = await Notification.count({
+      where: {
+        receiver_profile_id: profile_id,
+        is_read: false,
+      },
+    });
+
+    res.json({
+      profile_id,
+      unread_count: unreadCount,
+    });
+  } catch (error) {
+    console.error("Error getting unread notification count:", error);
     res.status(500).json({ error: error.message });
   }
 };

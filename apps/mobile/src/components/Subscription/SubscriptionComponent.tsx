@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   Alert,
   Platform,
+  Image,
 } from "react-native";
 import { router } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
@@ -17,6 +18,9 @@ import AvailablePlans from "./AvailablePlans/AvailablePlans";
 import PaymentMethod from "./PaymentMethod/PaymentMethod";
 import ReceiptUploadModal from "./ReceiptModal/ReceiptModal";
 import { subscriptionApi } from "../../services/subscriptionApi";
+import bankIcon from "../../../assets/images/payments/bank.png";
+import paypalIcon from "../../../assets/images/payments/paypal.png";
+import cryptoIcon from "../../../assets/images/payments/crypto.png";
 
 /* ===================== TYPES ===================== */
 
@@ -40,6 +44,7 @@ interface CurrentUser {
 }
 
 interface SubscriptionComponentProps {
+  profileId: any,
   plans?: Plan[];
   currentUser?: CurrentUser;
   refreshPlans?: () => void;
@@ -48,6 +53,7 @@ interface SubscriptionComponentProps {
 /* ===================== COMPONENT ===================== */
 
 const SubscriptionComponent: React.FC<SubscriptionComponentProps> = ({
+  profileId,
   plans = [],
   currentUser,
   refreshPlans,
@@ -55,7 +61,7 @@ const SubscriptionComponent: React.FC<SubscriptionComponentProps> = ({
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
   const [showPayment, setShowPayment] = useState(false);
   const [showReceiptModal, setShowReceiptModal] = useState(false);
-  const [paymentMethod] = useState("bank_transfer");
+  const [paymentMethod, setPaymentMethod] = useState("bank_transfer");
   const [receiptFile, setReceiptFile] = useState<any>(null);
   const [subscribing, setSubscribing] = useState(false);
   const [subscribeMessage, setSubscribeMessage] = useState("");
@@ -118,6 +124,7 @@ const SubscriptionComponent: React.FC<SubscriptionComponentProps> = ({
       };
 
       await subscriptionApi.subscribeToPlan(
+        profileId,
         selectedPlan.id,
         paymentDetails,
         receiptFile
@@ -138,11 +145,20 @@ const SubscriptionComponent: React.FC<SubscriptionComponentProps> = ({
     }
   };
 
+  const PaymentPreview = ({ icon, title, subtitle }: any) => (
+    <View style={styles.paymentPreview}>
+      <Image source={icon} style={styles.paymentLogo} resizeMode="contain" />
+      <View style={styles.paymentInfo}>
+        <Text style={styles.paymentTitle}>{title}</Text>
+        <Text style={styles.paymentSubtitle}>{subtitle}</Text>
+      </View>
+    </View>
+  );
   /* ===================== UI ===================== */
 
   return (
     <ScrollView style={styles.container}>
-      <CurrentSubscription />
+      {/* <CurrentSubscription /> */}
 
       <AvailablePlans
         plans={plans}
@@ -162,6 +178,71 @@ const SubscriptionComponent: React.FC<SubscriptionComponentProps> = ({
           <Text style={styles.priceDisplay}>
             ${selectedPlan.price} / {selectedPlan.billing_interval}
           </Text>
+
+          {/* Payment Method Selection */}
+            <View style={styles.paymentMethodSection}>
+              <Text style={styles.sectionTitle}>Select Payment Method</Text>
+
+              <View style={styles.methodButtons}>
+                <TouchableOpacity
+                  style={[
+                    styles.methodButton,
+                    paymentMethod === "bank_transfer" && styles.methodActive,
+                  ]}
+                  onPress={() => setPaymentMethod("bank_transfer")}
+                >
+                  <Text>Bank</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[
+                    styles.methodButton,
+                    paymentMethod === "paypal" && styles.methodActive,
+                  ]}
+                  onPress={() => setPaymentMethod("paypal")}
+                >
+                  <Text>PayPal</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[
+                    styles.methodButton,
+                    paymentMethod === "crypto" && styles.methodActive,
+                  ]}
+                  onPress={() => setPaymentMethod("crypto")}
+                >
+                  <Text>Crypto</Text>
+                </TouchableOpacity>
+              </View>
+
+              {/* Payment Preview */}
+              <View style={styles.previewWrapper}>
+                {paymentMethod === "bank_transfer" && (
+                  <PaymentPreview
+                    icon={bankIcon}
+                    title="Bank Transfer"
+                    subtitle="Complete the transfer and upload your receipt"
+                  />
+                )}
+
+                {paymentMethod === "paypal" && (
+                  <PaymentPreview
+                    icon={paypalIcon}
+                    title="PayPal"
+                    subtitle="Secure PayPal payment (no receipt required)"
+                  />
+                )}
+
+                {paymentMethod === "crypto" && (
+                  <PaymentPreview
+                    icon={cryptoIcon}
+                    title="Cryptocurrency"
+                    subtitle="Send crypto and upload transaction proof"
+                  />
+                )}
+              </View>
+            </View>
+
 
           {/* Receipt Upload */}
           <View style={styles.receiptUploadSection}>
@@ -222,7 +303,7 @@ const SubscriptionComponent: React.FC<SubscriptionComponentProps> = ({
         </View>
       )}
 
-      <PaymentMethod plan={selectedPlan} />
+      {/* <PaymentMethod plan={selectedPlan} /> */}
     </ScrollView>
   );
 };
@@ -313,5 +394,64 @@ const styles = StyleSheet.create({
   },
   disabledButton: {
     opacity: 0.5,
+  },
+
+  
+  paymentMethodSection: {
+    marginTop: 24,
+  },
+
+  methodButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 16,
+  },
+
+  methodButton: {
+    flex: 1,
+    padding: 12,
+    marginHorizontal: 4,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#cbd5e1",
+    alignItems: "center",
+  },
+
+  methodActive: {
+    backgroundColor: "#e0e7ff",
+    borderColor: "#2563eb",
+  },
+
+  previewWrapper: {
+    marginTop: 12,
+  },
+
+  paymentPreview: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 16,
+    borderRadius: 14,
+    backgroundColor: "#f8fafc",
+  },
+
+  paymentLogo: {
+    width: 48,
+    height: 48,
+    marginRight: 14,
+  },
+
+  paymentInfo: {
+    flex: 1,
+  },
+
+  paymentTitle: {
+    fontWeight: "700",
+    fontSize: 16,
+  },
+
+  paymentSubtitle: {
+    marginTop: 4,
+    color: "#475569",
+    fontSize: 13,
   },
 });

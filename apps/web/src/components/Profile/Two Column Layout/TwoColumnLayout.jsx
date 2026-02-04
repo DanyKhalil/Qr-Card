@@ -20,6 +20,7 @@ const TwoColumnLayout = ({
     videos = [],
     locations = [],
     id = "User001",
+    profileId,
     customContent,
     QrCodeColor = "#6366f1", // Updated from white to muted indigo/purple
     profilePic,
@@ -67,6 +68,10 @@ const TwoColumnLayout = ({
             return null;
         }
     };
+    const getCurrentUserProfileId = () => {
+        const profileId = localStorage.getItem("profileId");
+        return profileId;
+    };
     
     return (
         <div className={`two-column-layout ${className}`}>
@@ -74,7 +79,7 @@ const TwoColumnLayout = ({
                 <TitleAndLinks title="Contact" links={contactLinks}/>
                 <TitleAndLinks title="Connect" links={formatSocialLinks(connectLinks)}/>
                 <TitleAndLinks title="Website" links={[{name:websiteLink, iconName:"web"}].filter(link => link.name && String(link.name).trim() !== '')}/>
-                {id===getCurrentUser()?.id && (<ProfileQrCode 
+                {profileId===getCurrentUserProfileId() && (<ProfileQrCode 
                     profileUrl={profileUrlForQrCode} 
                     color={QrCodeColor}
                     name={userName}

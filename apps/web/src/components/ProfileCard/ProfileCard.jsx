@@ -3,7 +3,7 @@ import "./ProfileCard.css";
 import { useNavigate } from "react-router-dom";
 import { IoPersonOutline } from 'react-icons/io5';
 
-const ProfileCard = ({ id, name, title, imageUrl }) => {
+const ProfileCard = ({ id, profileId, name, title, imageUrl }) => {
   const navigate = useNavigate();
   return (
     <div className="profile-card">
@@ -19,7 +19,7 @@ const ProfileCard = ({ id, name, title, imageUrl }) => {
       </div>
       <h2 className="profile-name">{name}</h2>
       {/* <p className="profile-title">{title}</p> */}
-      <button className="profile-button" onClick={()=>navigate(`/profile/${id}`)}>View Profile</button>
+      <button className="profile-button" onClick={()=>navigate(`/profile/${profileId}`)}>View Profile</button>
     </div>
   );
 };

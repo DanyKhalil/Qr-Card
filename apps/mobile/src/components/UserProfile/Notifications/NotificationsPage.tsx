@@ -14,6 +14,7 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import NotificationsList from "./NotificationsList";
 import { notificationsApi } from "../../../services/notificationsApi";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const { width } = Dimensions.get("window");
 
@@ -32,10 +33,11 @@ const NotificationsPage = () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await notificationsApi.getUserNotifications();
+      const profileId = await AsyncStorage.getItem("profileId")
+      const data = await notificationsApi.getUserNotifications(profileId);
       setNotifications(data.notifications || []);
       // Call API but DON'T update local state
-      await notificationsApi.markAllAsRead();
+      await notificationsApi.markAllAsRead(profileId);
     } catch (err) {
       console.error("Error fetching notifications:", err);
       setError("Failed to load notifications. Please try again.");

@@ -13,6 +13,10 @@ const Profile = sequelize.define(
             type: DataTypes.CHAR(36),
             allowNull: false,
         },
+        name: {
+            type: DataTypes.STRING(255),
+            allowNull: false,
+        },
         profile_pic_url: {
             type: DataTypes.STRING(500),
         },
@@ -94,6 +98,10 @@ Profile.associate = function(models) {
         foreignKey: 'profile_id',
         as: 'analytics'
     });
+    Profile.hasMany(models.ProfileAnalytics, {
+        foreignKey: 'visitor_profile_id',
+        as: 'profile_visits_made'
+    });
 
 
     // Profiles *following* other profiles
@@ -116,6 +124,24 @@ Profile.associate = function(models) {
         foreignKey: "profile_id",
         as: "custom_items"
     });
+
+    Profile.hasMany(models.UserSubscription, {
+        foreignKey: 'profile_id',
+        as: 'subscriptions'
+    });
+
+    // Notifications received by this profile
+    Profile.hasMany(models.Notification, {
+        foreignKey: "receiver_profile_id",
+        as: "notifications"
+    });
+
+    // Notifications sent by this profile
+    Profile.hasMany(models.Notification, {
+        foreignKey: "sender_profile_id",
+        as: "sent_notifications"
+    });
+
 };
 
 export default Profile;

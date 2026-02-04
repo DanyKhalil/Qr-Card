@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from './api';
 
 export const profileAnalyticsApi = {
@@ -12,8 +13,10 @@ export const profileAnalyticsApi = {
     },
     visitUserProfile: async (id: string, qrScan: boolean = false) => {
         try {
+            const profileId = await AsyncStorage.getItem("profileId")
             const response = await api.post(`/profile-analytics/${id}`, {
-                qr_scan: qrScan
+                qr_scan: qrScan,
+                sender_profile_id: profileId,
             });
             return response.data;
         } catch (error) {

@@ -1,13 +1,12 @@
 import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import Header from "../components/Header/Header";
 import Footer from "../components/Footer/Footer";
 import SubscriptionComponent from "../components/Subscription/SubscriptionComponent";
 import { subscriptionApi } from "../services/subscriptionApi.js";
 
 const Subscription = () => {
-    const getToken = () => {
-        return localStorage.getItem("token");
-    };
+    const getToken = () => localStorage.getItem("token");
     const getCurrentUser = () => {
         const userStr = localStorage.getItem("user");
         if (!userStr) return null;
@@ -25,12 +24,23 @@ const Subscription = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    // --- Get profile_id from URL query ---
+    const location = useLocation();
+    const queryParams = new URLSearchParams(location.search);
+    const profileId = queryParams.get("profile_id");
+
     const fetchPlans = async () => {
+        if (!profileId) {
+            setError("Profile ID is required.");
+            setLoading(false);
+            return;
+        }
+
         try {
             setLoading(true);
             setError(null);
 
-            const data = await subscriptionApi.getAvailablePlans();
+            const data = await subscriptionApi.getAvailablePlans(profileId);
             setPlans(data.plans);
 
         } catch (err) {
@@ -65,7 +75,7 @@ const Subscription = () => {
         return (
             <div className="App">
                 <Header />
-                <div className="error-container" style={{paddingTop: '100px'}}>
+                <div className="error-container" style={{ paddingTop: '100px' }}>
                     <p>{error}</p>
                     <button onClick={fetchPlans}>Retry</button>
                 </div>
@@ -75,11 +85,12 @@ const Subscription = () => {
     }
 
     return (
-        <div className="App" style={{paddingTop: '100px'}}>
+        <div className="App" style={{ paddingTop: '100px' }}>
             <SubscriptionComponent
                 plans={plans}
                 refreshPlans={fetchPlans}
                 currentUser={currentUser}
+                profileId={profileId}
             />
         </div>
     );

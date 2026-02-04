@@ -3,6 +3,8 @@ import Modal from '../../Modals/Modal/Modal';
 import Button from '../../../Profile/Button/Button';
 import './AddItemModal.css';
 
+const MAX_CHARS = 100;
+
 const AddItemModal = ({ visible, onClose, onAdd, contentType }) => {
   const [title, setTitle] = useState('');
   const [visibility, setVisibility] = useState(true);
@@ -151,26 +153,34 @@ const AddItemModal = ({ visible, onClose, onAdd, contentType }) => {
     switch (field.type) {
       case 'text':
         return (
+        <div className="input-with-counter">
           <input
             type="text"
             value={value}
+            maxLength={MAX_CHARS}
             onChange={(e) => handleFieldChange(field.key, e.target.value)}
             className="field-input"
             placeholder={`Enter ${fieldName.toLowerCase()}...`}
             required={field.required}
           />
+          <div className="char-counter">{String(value).length}/{MAX_CHARS}</div>
+        </div>
         );
       
       case 'longtext':
         return (
+        <div className="input-with-counter">
           <textarea
             value={value}
+            maxLength={MAX_CHARS}
             onChange={(e) => handleFieldChange(field.key, e.target.value)}
             className="field-textarea"
             placeholder={`Enter ${fieldName.toLowerCase()}...`}
             rows="4"
             required={field.required}
           />
+          <div className="char-counter">{String(value).length}/{MAX_CHARS}</div>
+        </div>
         );
       
       case 'number':
@@ -211,8 +221,10 @@ const AddItemModal = ({ visible, onClose, onAdd, contentType }) => {
       
       case 'json':
         return (
+        <div className="input-with-counter">
           <textarea
             value={typeof value === 'string' ? value : JSON.stringify(value, null, 2)}
+            maxLength={MAX_CHARS}
             onChange={(e) => {
               try {
                 const parsedValue = JSON.parse(e.target.value);
@@ -226,6 +238,8 @@ const AddItemModal = ({ visible, onClose, onAdd, contentType }) => {
             rows="4"
             required={field.required}
           />
+          <div className="char-counter">{String(value).length}/{MAX_CHARS}</div>
+        </div>
         );
       
       case 'image':

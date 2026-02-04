@@ -2,9 +2,11 @@ import api from './api';
 
 export const notificationsApi = {
   // Get user's notifications
-  getUserNotifications: async () => {
+  getUserNotifications: async (profileId) => {
     try {
-      const response = await api.get('/notifications');
+      const response = await api.get('/notifications', {
+        params: { profile_id: profileId },
+      });
       return response.data;
     } catch (error) {
       console.error("Get notifications API error:", error);
@@ -46,9 +48,11 @@ export const notificationsApi = {
   },
 
   // Mark all notifications as read
-  markAllAsRead: async () => {
+  markAllAsRead: async (profileId) => {
     try {
-      const response = await api.put('/notifications/mark-all-read');
+      const response = await api.put('/notifications/mark-all-read', {
+        profile_id: profileId
+      });
       return response.data;
     } catch (error) {
       console.error("Mark all as read API error:", error);
@@ -79,13 +83,19 @@ export const notificationsApi = {
   },
 
   // Get unread notifications count
-  getUnreadCount: async () => {
+  getUnreadCount: async (profileId) => {
     try {
-      const response = await api.get('/notifications/unread-count');
-      return response.data;
+      if (profileId) {
+        console.log(profileId)
+        const response = await api.get('/notifications/unread-count', {
+          params: { profile_id: profileId },
+        });
+        return response.data;
+      }
     } catch (error) {
-      console.error("Get unread count API error:", error);
-      throw error;
+      console.log("Get unread count API error:", error);
+      // hello
+      // throw error;
     }
   }
 };

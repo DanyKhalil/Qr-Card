@@ -11,10 +11,6 @@ const User = sequelize.define(
       primaryKey: true,
       defaultValue: DataTypes.UUIDV4,
     },
-    name: {
-      type: DataTypes.STRING(255),
-      allowNull: false,
-    },
     email: {
       type: DataTypes.STRING(255),
       allowNull: false,
@@ -57,26 +53,11 @@ const User = sequelize.define(
 );
 
 User.associate = function(models) {
-  User.hasOne(models.Profile, {
+  User.hasMany(models.Profile, {
     foreignKey: 'user_id',
-    as: 'profile'
+    as: 'profiles'
   });
-  User.hasMany(models.ProfileAnalytics, {
-    foreignKey: 'visitor_user_id',
-    as: 'profile_visits_made' // visits this user made to other profiles
-  });
-  User.hasMany(models.Notification, {
-    foreignKey: 'user_id',
-    as: 'notifications'
-  });
-  User.hasMany(models.UserSubscription, {
-    foreignKey: "user_id",
-    as: "subscriptions",
-  });
-  User.hasMany(models.Payment, {
-    foreignKey: "user_id",
-    as: "payments",
-  });
+
   User.hasMany(models.Payment, {
     foreignKey: "approved_by",
     as: "approved_payments",

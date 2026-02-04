@@ -7,7 +7,7 @@ import {
   StyleSheet,
   Alert
 } from "react-native";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import SubscriptionComponent from "../../../src/components/Subscription/SubscriptionComponent";
 import { subscriptionApi } from "../../../src/services/subscriptionApi";
@@ -17,6 +17,12 @@ const Subscription = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
+  
+  // Get profile_id from URL parameters
+  const { profile_id } = useLocalSearchParams();
+  
+  // Extract profileId - handle both string and array cases
+  const profileId = Array.isArray(profile_id) ? profile_id[0] : profile_id;
 
   const getCurrentUser = async () => {
     try {
@@ -85,6 +91,13 @@ const Subscription = () => {
     checkAuthAndLoadData();
   }, []);
 
+  // Debug: log the profileId for verification
+  useEffect(() => {
+    if (profileId) {
+      console.log("Profile ID from URL:", profileId);
+    }
+  }, [profileId]);
+
   if (loading) {
     return (
       <View style={styles.container}>
@@ -131,6 +144,7 @@ const Subscription = () => {
   return (
     <View style={styles.container}>
       <SubscriptionComponent
+        profileId={profileId} // Pass the profileId from URL
         plans={plans}
         refreshPlans={fetchPlans}
         currentUser={currentUser}

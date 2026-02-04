@@ -6,6 +6,8 @@ import Footer from "../components/Footer/Footer";
 import "../Style/AdminUsers.css"; // Make sure your CSS includes the login-input, dropdown-input, login-button classes
 
 const AddUserPage = () => {
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -24,7 +26,7 @@ const AddUserPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("http://localhost:5050/api/users3", form, {
+      await axios.post(`${API_BASE_URL}/api/users3`, form, {
         headers: { Authorization: `Bearer ${token}` },
       });
       alert("User created successfully!");
