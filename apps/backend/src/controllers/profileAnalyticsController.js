@@ -57,85 +57,95 @@ export const createProfileVisit = async (req, res) => {
     const { id } = req.params; // this is now the profile ID
     const { qr_scan = false, sender_profile_id } = req.body;
 
+    // Get the profile being visited
+    const profile = await Profile.findOne({
+      where: { id },
+      attributes: ['id', 'user_id', 'name']
+    });
 
-    // If no sender_profile_id, we cannot create a visit
+    if (!profile) {
+      return res.status(404).json({ error: 'Profile not found' });
+    }
+
+    // If sender exists, check if admin
     if (sender_profile_id) {
-      // Get the profile being visited
-      const profile = await Profile.findOne({
-        where: { id },
-        attributes: ['id', 'user_id', 'name']
-      });
       const visitor_profile = await Profile.findOne({
         where: { id: sender_profile_id },
-        attributes: ['id', 'user_id', 'name']
+        attributes: ['id', 'user_id', 'name'],
+        include: [{
+          model: User,
+          as: 'user',
+          attributes: ['role']
+        }]
       });
 
-      if (!profile) {
-        return res.status(404).json({ error: 'Profile not found' });
+      if (!visitor_profile) {
+        return res.status(404).json({ error: 'Visitor profile not found' });
       }
 
-      // Prevent creating a visit if the visitor is the same profile
+      // Do nothing if visitor is admin
+      if (visitor_profile.user?.role === 'admin') {
+        return res.status(200).json({ message: 'Admin visits are not tracked' });
+      }
+
+      // Prevent self-visits
       if (sender_profile_id === profile.id) {
         return res.status(200).json({ message: 'Cannot create visit for your own profile' });
       }
 
-      // Create the new visit record
+      // Create visit
       const newVisit = await ProfileAnalytics.create({
         profile_id: profile.id,
-        visitor_profile_id: sender_profile_id, // <-- use sender_profile_id
-        qr_scan: qr_scan
+        visitor_profile_id: sender_profile_id,
+        qr_scan
       });
 
-      // Create a notification for the profile owner
-        await Notification.create({
-          receiver_profile_id: profile.id,          // the profile being visited
-          sender_profile_id: sender_profile_id,    // visitor's profile ID
-          type: "profile_visit",
-          title: "Profile Viewed",
-          message: `${visitor_profile?.name || "Someone"} viewed your profile`,
-          metadata: {
-            visitor_profile_id: sender_profile_id,
-            qr_scan: qr_scan
-          },
-          is_read: false,
-          is_sent: false,
-          is_seen: false
-        });
+      // Create notification
+      await Notification.create({
+        receiver_profile_id: profile.id,
+        sender_profile_id: sender_profile_id,
+        type: "profile_visit",
+        title: "Profile Viewed",
+        message: `${visitor_profile.name || "Someone"} viewed your profile`,
+        metadata: {
+          visitor_profile_id: sender_profile_id,
+          qr_scan
+        },
+        is_read: false,
+        is_sent: false,
+        is_seen: false
+      });
 
-      res.status(201).json(newVisit);
+      return res.status(201).json(newVisit);
     }
-    else {
-      const profile = await Profile.findOne({
-        where: { id },
-        attributes: ['id', 'user_id', 'name']
-      });
-      const newVisit = await ProfileAnalytics.create({
-        profile_id: profile.id,
+
+    // Anonymous visit (no sender profile)
+    const newVisit = await ProfileAnalytics.create({
+      profile_id: profile.id,
+      visitor_profile_id: null,
+      qr_scan
+    });
+
+    await Notification.create({
+      receiver_profile_id: profile.id,
+      sender_profile_id: null,
+      type: "profile_visit",
+      title: "Profile Viewed",
+      message: "Someone viewed your profile",
+      metadata: {
         visitor_profile_id: null,
-        qr_scan: qr_scan
-      });
+        qr_scan
+      },
+      is_read: false,
+      is_sent: false,
+      is_seen: false
+    });
 
-      // Create a notification for the profile owner
-        await Notification.create({
-          receiver_profile_id: profile.id,          // the profile being visited
-          sender_profile_id: null,    // visitor's profile ID
-          type: "profile_visit",
-          title: "Profile Viewed",
-          message: `Someone viewed your profile`,
-          metadata: {
-            visitor_profile_id: null,
-            qr_scan: qr_scan
-          },
-          is_read: false,
-          is_sent: false,
-          is_seen: false
-        });
-
-      res.status(201).json(newVisit);
-    }
+    return res.status(201).json(newVisit);
 
   } catch (error) {
     console.error("createProfileVisit error:", error);
     res.status(400).json({ error: error.message });
   }
 };
+
