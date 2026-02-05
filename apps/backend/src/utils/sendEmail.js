@@ -4,7 +4,9 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: process.env.EMAIL_HOST,
+  port: Number(process.env.EMAIL_PORT),
+  secure: process.env.EMAIL_SECURE === "true", // false for 587
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
@@ -15,7 +17,7 @@ export const sendVerificationEmail = async (email, token) => {
   const verifyURL = `${process.env.CLIENT_URL}/verify-email/${token}`;
 
   const mailOptions = {
-    from: `"QR Card" <${process.env.EMAIL_USER}>`,
+    from: `"QR Cardify" <${process.env.EMAIL_USER}>`,
     to: email,
     subject: "Verify Your Email",
     html: `

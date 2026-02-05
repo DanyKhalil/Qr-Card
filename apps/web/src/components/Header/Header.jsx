@@ -49,9 +49,7 @@ const Header = ({ activeIndex }) => {
     };
 
     /* ---------- Profile Popup ---------- */
-    const handleProfileRightClick = async (e) => {
-        e.preventDefault();
-
+    const handleProfileHover = async (e) => {
         const rect = e.currentTarget.getBoundingClientRect();
         setProfilePopup({
             top: rect.bottom + window.scrollY + 6,
@@ -122,6 +120,13 @@ const Header = ({ activeIndex }) => {
         }
     };
 
+
+    const handleProfileLeave = () => {
+        setProfilePopup(null);
+        setAddingProfile(false);
+        setNewProfileName("");
+    };
+
     /* ---------- Click Outside ---------- */
     useEffect(() => {
         const handleClickOutside = (e) => {
@@ -162,7 +167,7 @@ const Header = ({ activeIndex }) => {
     }, [currentProfileId]);
 
 
-    let companyName = "QR CARD";
+    let companyName = "QR CARDIFY";
 
     let menuItems = [
         getCurrentUser()?.role === 'admin'
@@ -187,7 +192,7 @@ const Header = ({ activeIndex }) => {
     return (
         <div className="header">
             <div className="header-left">
-                <img src={companyLogo} alt="QR CARD logo" className="logo" />
+                <img src={companyLogo} alt="QR CARDIFY logo" className="logo" />
                 <span className="company-name">{companyName}</span>
             </div>
 
@@ -197,9 +202,9 @@ const Header = ({ activeIndex }) => {
                         key={index}
                         className={item.active ? "menu-item active" : "menu-item"}
                         onClick={item.action}
-                        onContextMenu={
+                        onMouseEnter={
                             item.name === "My Profile"
-                                ? handleProfileRightClick
+                                ? handleProfileHover
                                 : undefined
                         }
                     >
@@ -222,6 +227,11 @@ const Header = ({ activeIndex }) => {
                     ref={popupRef}
                     className="profile-popup"
                     style={profilePopup}
+                    onMouseEnter={() => {
+                        // keep open
+                        setProfilePopup(profilePopup);
+                    }}
+                    onMouseLeave={handleProfileLeave}
                 >
                     {userProfiles.map(profile => {
                         const isActive = profile.id === currentProfileId;

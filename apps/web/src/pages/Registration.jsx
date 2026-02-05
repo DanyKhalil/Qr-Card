@@ -29,6 +29,9 @@ const RegistrationForm = () => {
   const [passwordError, setPasswordError] = useState("");
   const navigate = useNavigate();
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+
   // Check if user is already logged in
   useEffect(() => {
     const checkAuth = () => {
@@ -51,20 +54,20 @@ const RegistrationForm = () => {
   };
 
   const handleContinueWithoutAccount = () => {
-    navigate('/scan-qr-code');
-  };
+      navigate('/scan-qr-code');
+    };
 
-  const handleSubmit = async (e) => {
+    const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate passwords match
     if (password !== confirmPassword) {
       setPasswordError("Passwords do not match");
       return;
     }
 
-    // Clear any previous password error
     setPasswordError("");
+    setIsSubmitting(true);
+    setMessage("");
 
     try {
       await axios.post(`${API_BASE_URL}/api/auth/register`, {
@@ -78,6 +81,8 @@ const RegistrationForm = () => {
     } catch (err) {
       console.error(err);
       setMessage(err.response?.data?.error || "Registration failed");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -161,8 +166,12 @@ const RegistrationForm = () => {
 
             {/* Buttons Container */}
             <div className="buttons-container">
-              <button className="signup-button" type="submit">
-                Sign up
+              <button 
+                className="signup-button" 
+                type="submit"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? <span className="spinner"></span> : "Sign up"}
               </button>
 
               <button 

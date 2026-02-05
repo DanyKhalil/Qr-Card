@@ -30,6 +30,10 @@ const Form = () => {
   const [isChecking, setIsChecking] = useState(true);
   const navigate = useNavigate();
 
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+
   // Check if user is already logged in
   useEffect(() => {
     const checkAuth = async () => {
@@ -80,6 +84,8 @@ const Form = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
+    setError("");
 
     try {
       // 1. Login to get token
@@ -123,8 +129,11 @@ const Form = () => {
 
     } catch (err) {
       setError(err.response?.data?.error || "Login failed");
+    } finally {
+      setIsSubmitting(false);
     }
   };
+
 
   // Show loading while checking authentication
   if (isChecking) {
@@ -174,8 +183,12 @@ const Form = () => {
 
             {/* Buttons Container */}
             <div className="buttons-container">
-              <button className="login-button" type='submit'>
-                Login
+              <button 
+                className="login-button" 
+                type="submit"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? <span className="spinner"></span> : "Login"}
               </button>
 
               <button 
