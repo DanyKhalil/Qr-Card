@@ -73,13 +73,36 @@ const EditUserProfile = () => {
 
     if (loading) {
         return (
-        <div className="App">
-            <div className="loading-container">
-                <p>Loading user profile...</p>
+            <div className="App">
+                <div style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    height: "60vh"
+                }}>
+                    <div style={{
+                        width: "50px",
+                        height: "50px",
+                        border: "6px solid #cce4ff",
+                        borderTop: "6px solid #1e90ff",
+                        borderRadius: "50%",
+                        animation: "spin 0.9s linear infinite"
+                    }} />
+                </div>
+
+                <style>
+                    {`
+                        @keyframes spin {
+                            to {
+                                transform: rotate(360deg);
+                            }
+                        }
+                    `}
+                </style>
             </div>
-        </div>
         );
     }
+
 
     if (error) {
         return (
