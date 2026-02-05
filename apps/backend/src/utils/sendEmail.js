@@ -17,7 +17,7 @@ export const sendVerificationEmail = async (email, token) => {
   const verifyURL = `${process.env.CLIENT_URL}/verify-email/${token}`;
 
   const mailOptions = {
-    from: `"QR Card" <${process.env.EMAIL_USER}>`,
+    from: `"QR Cardify" <${process.env.EMAIL_USER}>`,
     to: email,
     subject: "Verify Your Email",
     html: `

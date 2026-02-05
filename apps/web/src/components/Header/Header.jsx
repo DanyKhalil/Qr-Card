@@ -167,7 +167,7 @@ const Header = ({ activeIndex }) => {
     }, [currentProfileId]);
 
 
-    let companyName = "QR CARD";
+    let companyName = "QR CARDIFY";
 
     let menuItems = [
         getCurrentUser()?.role === 'admin'
@@ -192,7 +192,7 @@ const Header = ({ activeIndex }) => {
     return (
         <div className="header">
             <div className="header-left">
-                <img src={companyLogo} alt="QR CARD logo" className="logo" />
+                <img src={companyLogo} alt="QR CARDIFY logo" className="logo" />
                 <span className="company-name">{companyName}</span>
             </div>
 

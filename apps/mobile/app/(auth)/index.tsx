@@ -26,7 +26,7 @@ const WelcomePage = ({ navigation }) => {
       /> }
 
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.title}>QR CARD</Text>
+        <Text style={styles.title}>QR CARDIFY</Text>
 
         <Text style={styles.subtitle}>
           Generate your first Digital ID or{"\n"}Business Card

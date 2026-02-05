@@ -15,7 +15,7 @@ const WelcomePage = () => {
     <div className="welcome-page">
       <div className="welcome-container">
         <div className="welcome-left">
-          <h1 className="title">QR CARD</h1>
+          <h1 className="title">QR CARDIFY</h1>
           <h2 className="subtitle">
             Generate your first Digital ID or <br /> Business Card
           </h2>
