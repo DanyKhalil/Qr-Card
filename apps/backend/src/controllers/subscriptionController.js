@@ -1,7 +1,7 @@
 // controllers/subscriptionController.js
 import { User, UserSubscription, SubscriptionPlan, Payment, Profile, Notification } from "../models/index.js";
 import sequelize from "../config/db.js"
-import { Op } from "sequelize";
+import { Op, fn, col, where } from "sequelize";
 
 /**
  * Get current user's subscription
@@ -190,15 +190,10 @@ export const cancelSubscription = async (req, res) => {
 export const getAllPayments = async (req, res) => {
   try {
     const userId = req.user?.id;
-    if (!userId) {
-      return res.status(401).json({ error: "Unauthorized" });
-    }
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
-    // Check if user is admin
     const user = await User.findByPk(userId);
-    if (!user || user.role !== 'admin') {
-      return res.status(403).json({ error: "Admin access required" });
-    }
+    if (!user || user.role !== 'admin') return res.status(403).json({ error: "Admin access required" });
 
     const {
       profile_id,
@@ -207,49 +202,61 @@ export const getAllPayments = async (req, res) => {
       start_date,
       end_date,
       page = 1,
-      limit = 20
+      limit = 20,
+      search
     } = req.query;
 
     const pageNum = parseInt(page);
     const limitNum = parseInt(limit);
     const offset = (pageNum - 1) * limitNum;
 
-    // Build where conditions for Payment
-    const whereConditions = {};
-    if (status) whereConditions.status = status;
-    if (payment_method) whereConditions.payment_method = payment_method;
+    // Base payment filters
+    const paymentWhere = {};
+    if (status) paymentWhere.status = status;
+    if (payment_method) paymentWhere.payment_method = payment_method;
     if (start_date || end_date) {
-      whereConditions.created_at = {};
-      if (start_date) whereConditions.created_at[Op.gte] = new Date(start_date);
-      if (end_date) whereConditions.created_at[Op.lte] = new Date(end_date);
+      paymentWhere.created_at = {};
+      if (start_date) paymentWhere.created_at[Op.gte] = new Date(start_date);
+      if (end_date) paymentWhere.created_at[Op.lte] = new Date(end_date);
     }
-    if (profile_id) whereConditions.profile_id = profile_id;
+    if (profile_id) paymentWhere.profile_id = profile_id;
 
-    // Get total count for pagination
-    const totalCount = await Payment.count({ where: whereConditions });
-
-    // Get payments with all related info
-    const payments = await Payment.findAll({
-      where: whereConditions,
+    // Build include for Profile -> User
+    const profileInclude = {
+      model: Profile,
+      as: 'profile',
+      attributes: ['id', 'name', 'profile_pic_url', 'phone_number', 'bio', 'headline', 'website'],
+      required: search ? true : false, // **required for JOIN filtering**
       include: [
         {
-          model: Profile,
-          as: 'profile',
-          attributes: ['id', 'name', 'profile_pic_url', 'phone_number', 'bio', 'headline', 'website'],
-          include: [
-            {
-              model: User,
-              as: 'user',
-              attributes: ['id', 'email', 'role', 'verified', 'is_active', 'created_at']
-            }
-          ]
-        },
+          model: User,
+          as: 'user',
+          attributes: ['id', 'email', 'role', 'verified', 'is_active', 'created_at'],
+          required: search ? true : false // required for filtering on email
+        }
+      ]
+    };
+
+    // Add search filter if needed
+    const whereSearch = {};
+    if (search) {
+      whereSearch[Op.or] = [
+        { '$profile.name$': { [Op.like]: `%${search}%` } },
+        { '$profile.user.email$': { [Op.like]: `%${search}%` } }
+      ];
+    }
+
+    // Query with pagination
+    const { count, rows } = await Payment.findAndCountAll({
+      where: { ...paymentWhere, ...whereSearch },
+      include: [
+        profileInclude,
         {
           model: UserSubscription,
           as: 'subscription',
           attributes: [
-            'id', 'status', 'start_date', 'end_date',
-            'next_billing_date', 'auto_renew', 'notes', 'created_at'
+            'id', 'status', 'start_date', 'end_date', 'next_billing_date',
+            'auto_renew', 'notes', 'created_at'
           ],
           include: [
             {
@@ -273,38 +280,33 @@ export const getAllPayments = async (req, res) => {
       ],
       order: [['created_at', 'DESC']],
       limit: limitNum,
-      offset: offset,
+      offset
     });
 
-    // Format response with calculated fields
-    const formattedPayments = payments.map(payment => {
-      const paymentObj = payment.toJSON();
-      
-      if (paymentObj.status === 'pending' && paymentObj.created_at) {
-        const createdDate = new Date(paymentObj.created_at);
-        const now = new Date();
-        const diffDays = Math.ceil((now - createdDate) / (1000 * 60 * 60 * 24));
-        paymentObj.days_pending = diffDays;
+    // Format payments
+    const formattedPayments = rows.map(payment => {
+      const p = payment.toJSON();
+      if (p.status === 'pending' && p.created_at) {
+        const createdDate = new Date(p.created_at);
+        p.days_pending = Math.ceil((new Date() - createdDate) / (1000 * 60 * 60 * 24));
       }
-
-      paymentObj.formatted_created_at = paymentObj.created_at ? new Date(paymentObj.created_at).toLocaleString() : null;
-      paymentObj.formatted_paid_at = paymentObj.paid_at ? new Date(paymentObj.paid_at).toLocaleString() : null;
-      paymentObj.formatted_approved_at = paymentObj.approved_at ? new Date(paymentObj.approved_at).toLocaleString() : null;
-
-      return paymentObj;
+      p.formatted_created_at = p.created_at ? new Date(p.created_at).toLocaleString() : null;
+      p.formatted_paid_at = p.paid_at ? new Date(p.paid_at).toLocaleString() : null;
+      p.formatted_approved_at = p.approved_at ? new Date(p.approved_at).toLocaleString() : null;
+      return p;
     });
 
-    // Summary statistics
+    // Summary stats (ignoring search)
     const summary = {
-      total: totalCount,
-      pending: await Payment.count({ where: { ...whereConditions, status: 'pending' } }),
-      completed: await Payment.count({ where: { ...whereConditions, status: 'completed' } }),
-      failed: await Payment.count({ where: { ...whereConditions, status: 'failed' } }),
-      refunded: await Payment.count({ where: { ...whereConditions, status: 'refunded' } }),
+      total: count,
+      pending: await Payment.count({ where: { ...paymentWhere, status: 'pending' } }),
+      completed: await Payment.count({ where: { ...paymentWhere, status: 'completed' } }),
+      failed: await Payment.count({ where: { ...paymentWhere, status: 'failed' } }),
+      refunded: await Payment.count({ where: { ...paymentWhere, status: 'refunded' } }),
       total_amount: {
-        all: await Payment.sum('amount', { where: whereConditions }),
-        completed: await Payment.sum('amount', { where: { ...whereConditions, status: 'completed' } }),
-        pending: await Payment.sum('amount', { where: { ...whereConditions, status: 'pending' } })
+        all: await Payment.sum('amount', { where: paymentWhere }),
+        completed: await Payment.sum('amount', { where: { ...paymentWhere, status: 'completed' } }),
+        pending: await Payment.sum('amount', { where: { ...paymentWhere, status: 'pending' } })
       }
     };
 
@@ -314,30 +316,25 @@ export const getAllPayments = async (req, res) => {
       pagination: {
         page: pageNum,
         limit: limitNum,
-        total: totalCount,
-        pages: Math.ceil(totalCount / limitNum),
-        hasNext: pageNum < Math.ceil(totalCount / limitNum),
+        total: count,
+        pages: Math.ceil(count / limitNum),
+        hasNext: pageNum < Math.ceil(count / limitNum),
         hasPrev: pageNum > 1
       },
       summary,
-      filters: {
-        status,
-        payment_method,
-        start_date,
-        end_date,
-        profile_id
-      }
+      filters: { status, payment_method, start_date, end_date, profile_id, search }
     });
 
   } catch (error) {
     console.error("Error in getAllPayments:", error);
-    res.status(500).json({ 
-      success: false, 
+    res.status(500).json({
+      success: false,
       error: error.message,
       details: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
 };
+
 
 /**
  * Update payment status (Admin only)
