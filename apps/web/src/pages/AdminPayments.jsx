@@ -363,7 +363,7 @@ const AdminPayments = () => {
                       </div>
                     </td>
 
-                    <td>
+                    <td onClick={() => navigate(`/profile/${payment.profile?.id}`)}>
                       <div className="user-cell">
                         {payment.profile?.profile_pic_url ? (
                           <img 
