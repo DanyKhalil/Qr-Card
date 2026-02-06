@@ -105,13 +105,18 @@ export const subscribeToPlan = async (req, res) => {
       status: "pending", // start as pending until payment is confirmed
     });
 
+    const details =
+      typeof payment_details === "string"
+        ? JSON.parse(payment_details)
+        : payment_details;
+
     // Create initial pending payment
     const payment = await Payment.create({
       profile_id,
       subscription_id: subscription.id,
       amount: plan.price,
       currency: plan.currency,
-      payment_method: payment_details?.method || "manual",
+      payment_method: details?.method || "manual",
       status: "pending",
       receipt_url: receiptUrl,
       notes: payment_details?.notes || null
