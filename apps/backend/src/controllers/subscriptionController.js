@@ -87,23 +87,49 @@ export const subscribeToPlan = async (req, res) => {
       return res.status(400).json({ error: "Profile already has an active subscription" });
     }
 
-    // Check for uploaded receipt if payment method requires it
+    // Handle receipt upload
     let receiptUrl = null;
     if (req.files && req.files.length > 0) {
-      const receiptFile = req.files.find(file => file.fieldname === 'receipt');
+      const receiptFile = req.files.find(file => file.fieldname === "receipt");
       if (receiptFile) {
         receiptUrl = `/uploads/receipts/${receiptFile.filename}`;
       }
     }
 
+    // 🧠 Calculate end_date based on billing_interval
+    const startDate = new Date();
+    let endDate = new Date(startDate);
+
+    console.log(plan.billing_interval)
+
+    switch (plan.billing_interval) {
+      case "monthly":
+        endDate.setMonth(endDate.getMonth() + 1);
+        break;
+
+      case "yearly":
+        endDate.setFullYear(endDate.getFullYear() + 1);
+        break;
+
+      case "lifetime":
+        endDate.setFullYear(endDate.getFullYear() + 100);
+        break;
+
+      default:
+        endDate.setMonth(endDate.getMonth() + 1);
+    }
+    console.log(endDate)
+
     // Create new subscription
     const subscription = await UserSubscription.create({
       profile_id,
       plan_id,
-      start_date: new Date(),
-      end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days example
-      status: "pending", // start as pending until payment is confirmed
+      start_date: startDate,
+      end_date: endDate,
+      status: "pending",
     });
+
+    console.log(subscription)
 
     const details =
       typeof payment_details === "string"
@@ -119,7 +145,7 @@ export const subscribeToPlan = async (req, res) => {
       payment_method: details?.method || "manual",
       status: "pending",
       receipt_url: receiptUrl,
-      notes: payment_details?.notes || null
+      notes: details?.notes || null
     });
 
     res.status(201).json({
@@ -132,6 +158,7 @@ export const subscribeToPlan = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
 
 /**
  * Cancel current subscription
@@ -429,14 +456,34 @@ export const updatePaymentStatus = async (req, res) => {
       updateData.approved_by = adminId;
 
       if (payment.subscription) {
-        await UserSubscription.update(
-          {
-            status: "active",
-            start_date: new Date(),
-            end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-          },
-          { where: { id: payment.subscription.id } }
-        );
+        const subscription = await UserSubscription.findByPk(payment.subscription.id, {
+          include: [{ model: SubscriptionPlan, as: "plan" }]
+        });
+
+        if (!subscription) throw new Error("Subscription not found");
+
+        const startDate = new Date();
+        let endDate = new Date(startDate);
+
+        switch (subscription.plan.billing_interval) {
+          case "monthly":
+            endDate.setMonth(endDate.getMonth() + 1);
+            break;
+          case "yearly":
+            endDate.setFullYear(endDate.getFullYear() + 1);
+            break;
+          case "lifetime":
+            endDate.setFullYear(endDate.getFullYear() + 100);
+            break;
+          default:
+            endDate.setMonth(endDate.getMonth() + 1);
+        }
+
+        await subscription.update({
+          status: "active",
+          start_date: startDate,
+          end_date: endDate
+        });
       }
 
       notificationType = "payment_approved";
@@ -446,9 +493,10 @@ export const updatePaymentStatus = async (req, res) => {
       } has been approved.`;
     }
 
+
     if (status === "failed" && payment.subscription) {
       await UserSubscription.update(
-        { status: "suspended" },
+        { status: "cancelled" },
         { where: { id: payment.subscription.id } }
       );
 

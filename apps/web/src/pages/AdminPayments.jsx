@@ -242,6 +242,8 @@ const AdminPayments = () => {
     );
   }
 
+  console.log(payments)
+
   return (
     <div className="admin-payments-page">
       <Header activeIndex={-2} />
@@ -396,12 +398,18 @@ const AdminPayments = () => {
                     <td>
                       {payment.subscription ? (
                         <div className="subscription-cell">
-                          <div className="sub-plan">{payment.subscription.plan?.name || "N/A"}</div>
+                          <div className="sub-plan">
+                            {payment.subscription.plan?.name || "N/A"}
+                          </div>
                           <div className="sub-status-row">
                             <span
                               className={`sub-status-badge ${
                                 payment.subscription.status === "pending"
                                   ? "pending"
+                                  : payment.subscription.status === "cancelled"
+                                  ? "expired"
+                                  : payment.subscription.plan?.billing_interval === "lifetime"
+                                  ? "active"
                                   : new Date(payment.subscription.end_date) < new Date()
                                   ? "expired"
                                   : "active"
@@ -409,13 +417,29 @@ const AdminPayments = () => {
                             >
                               {payment.subscription.status === "pending"
                                 ? "Pending"
+                                : payment.subscription.status === "cancelled"
+                                ? "Expired"
+                                : payment.subscription.plan?.billing_interval === "lifetime"
+                                ? "Active"
                                 : new Date(payment.subscription.end_date) < new Date()
                                 ? "Expired"
                                 : "Active"}
                             </span>
 
-                            {/* Show expiry date only if active */}
+                            {/* Show expiry date or infinity — but NOT if failed */}
                             {payment.subscription.status !== "pending" &&
+                              payment.subscription.status !== "failed" &&
+                              payment.subscription.status !== "cancelled" &&
+                              payment.subscription.plan?.billing_interval === "lifetime" && (
+                                <span className="sub-expires-on">
+                                  till <span title="Lifetime subscription">∞</span>
+                                </span>
+                            )}
+
+                            {payment.subscription.status !== "pending" &&
+                              payment.subscription.status !== "failed" &&
+                              payment.subscription.status !== "cancelled" &&
+                              payment.subscription.plan?.billing_interval !== "lifetime" &&
                               new Date(payment.subscription.end_date) >= new Date() && (
                                 <span className="sub-expires-on">
                                   till {formatDateWithoutTime(payment.subscription.end_date)}
@@ -423,8 +447,12 @@ const AdminPayments = () => {
                             )}
                           </div>
                         </div>
-                      ) : "No subscription"}
+                      ) : (
+                        "No subscription"
+                      )}
                     </td>
+
+
 
 
                     <td>
