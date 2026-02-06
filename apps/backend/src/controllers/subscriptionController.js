@@ -594,8 +594,17 @@ export const getPaymentStats = async (req, res) => {
     });
 
     // Active subscriptions
+    const today = new Date();
+
     const activeSubscriptions = await UserSubscription.count({
-      where: { status: 'active' }
+      where: {
+        status: {
+          [Op.ne]: 'pending' // exclude pending
+        },
+        end_date: {
+          [Op.gt]: today // end date in the future
+        }
+      }
     });
 
     res.json({

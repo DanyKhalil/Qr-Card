@@ -183,6 +183,15 @@ const AdminPayments = () => {
       minute: "2-digit"
     });
   };
+  const formatDateWithoutTime = (dateString) => {
+    if (!dateString) return "N/A";
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric"
+    });
+  };
 
   // Format currency
   const formatCurrency = (amount, currency = "USD") => {
@@ -388,10 +397,35 @@ const AdminPayments = () => {
                       {payment.subscription ? (
                         <div className="subscription-cell">
                           <div className="sub-plan">{payment.subscription.plan?.name || "N/A"}</div>
-                          <div className="sub-status">{payment.subscription.status}</div>
+                          <div className="sub-status-row">
+                            <span
+                              className={`sub-status-badge ${
+                                payment.subscription.status === "pending"
+                                  ? "pending"
+                                  : new Date(payment.subscription.end_date) < new Date()
+                                  ? "expired"
+                                  : "active"
+                              }`}
+                            >
+                              {payment.subscription.status === "pending"
+                                ? "Pending"
+                                : new Date(payment.subscription.end_date) < new Date()
+                                ? "Expired"
+                                : "Active"}
+                            </span>
+
+                            {/* Show expiry date only if active */}
+                            {payment.subscription.status !== "pending" &&
+                              new Date(payment.subscription.end_date) >= new Date() && (
+                                <span className="sub-expires-on">
+                                  till {formatDateWithoutTime(payment.subscription.end_date)}
+                                </span>
+                            )}
+                          </div>
                         </div>
                       ) : "No subscription"}
                     </td>
+
 
                     <td>
                       <div className="action-buttons">
