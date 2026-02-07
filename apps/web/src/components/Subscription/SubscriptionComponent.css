@@ -585,3 +585,46 @@
     background: linear-gradient(135deg, #64748b, #94a3b8);
     color: white;
 }
+
+
+
+
+/* Payment Instructions */
+.payment-instructions {
+    margin-top: 18px;
+    padding: 20px 24px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #f8fafc, #eef2ff);
+    border: 2px solid #e5e7eb;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+    animation: fadeIn 0.3s ease;
+}
+
+.payment-instructions h5 {
+    margin: 0 0 12px 0;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.payment-instructions ul {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 12px 0;
+}
+
+.payment-instructions li {
+    margin-bottom: 6px;
+    font-size: 0.95rem;
+    color: #374151;
+}
+
+.payment-instructions li strong {
+    color: #111827;
+}
+
+.instruction-note {
+    font-size: 0.9rem;
+    color: #4b5563;
+    font-style: italic;
+}
