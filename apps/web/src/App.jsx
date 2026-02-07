@@ -26,6 +26,9 @@ import SubscribePage from './pages/SubscribePage.jsx';
 import SubscriptionSuccess from './pages/SubscriptionSuccess.jsx';
 import AdminPayments from './pages/AdminPayments.jsx';
 
+
+import ResetPassword from './pages/ResetPassword.jsx';
+
 function App() {
   return (    
     <Routes>
@@ -37,6 +40,7 @@ function App() {
       <Route path="/login" element={<Login/>}/>
       <Route path="/registration" element={<RegistrationForm/>}/>
       <Route path="/verify-email/:token" element={<VerifyEmail />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/Filtering" element={<Filtering/>}></Route>
       <Route path="/" element={<WelcomePage/>}></Route>
       <Route path="/scan-qr-code" element={<ScanQrCode/>}/>
