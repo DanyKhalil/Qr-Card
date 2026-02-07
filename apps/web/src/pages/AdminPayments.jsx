@@ -12,6 +12,7 @@ const AdminPayments = () => {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState(null);
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState(search);
   const [filters, setFilters] = useState({
     status: "",
     payment_method: "",
@@ -23,7 +24,7 @@ const AdminPayments = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [pagination, setPagination] = useState({
     page: 1,
-    limit: 20,
+    limit: 10,
     total: 0,
     pages: 1
   });
@@ -35,27 +36,40 @@ const AdminPayments = () => {
   useEffect(() => {
     fetchPayments();
     fetchStats();
-  }, [currentPage, filters]);
+  }, [currentPage, filters, debouncedSearch]);
 
-  // Filter payments based on search
+  // // Filter payments based on search
+  // useEffect(() => {
+  //   if (!search.trim()) {
+  //     setFilteredPayments(payments);
+  //     return;
+  //   }
+
+  //   const filtered = payments.filter(payment => {
+  //     const searchLower = search.toLowerCase();
+  //     return (
+  //       payment.profile?.user?.name?.toLowerCase().includes(searchLower) ||
+  //       payment.profile?.user?.email?.toLowerCase().includes(searchLower) ||
+  //       payment.transaction_reference?.toLowerCase().includes(searchLower) ||
+  //       payment.id.toLowerCase().includes(searchLower)
+  //     );
+  //   });
+
+  //   setFilteredPayments(filtered);
+  // }, [search, payments]);
+
   useEffect(() => {
-    if (!search.trim()) {
-      setFilteredPayments(payments);
-      return;
-    }
+    setCurrentPage(1);
+  }, [debouncedSearch]);
 
-    const filtered = payments.filter(payment => {
-      const searchLower = search.toLowerCase();
-      return (
-        payment.profile?.user?.name?.toLowerCase().includes(searchLower) ||
-        payment.profile?.user?.email?.toLowerCase().includes(searchLower) ||
-        payment.transaction_reference?.toLowerCase().includes(searchLower) ||
-        payment.id.toLowerCase().includes(searchLower)
-      );
-    });
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(search); // update after user stops typing for 500ms
+    }, 500); // 500ms delay
 
-    setFilteredPayments(filtered);
-  }, [search, payments]);
+    // Cleanup timeout if user types again before delay
+    return () => clearTimeout(handler);
+  }, [search]);
 
   // Fetch payments with filters and pagination
   const fetchPayments = async () => {
@@ -65,7 +79,7 @@ const AdminPayments = () => {
         page: currentPage,
         limit: pagination.limit,
         ...filters,
-        search: search
+        search: debouncedSearch
       });
 
       const res = await axios.get(
@@ -169,6 +183,15 @@ const AdminPayments = () => {
       minute: "2-digit"
     });
   };
+  const formatDateWithoutTime = (dateString) => {
+    if (!dateString) return "N/A";
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric"
+    });
+  };
 
   // Format currency
   const formatCurrency = (amount, currency = "USD") => {
@@ -218,6 +241,8 @@ const AdminPayments = () => {
       </div>
     );
   }
+
+  console.log(payments)
 
   return (
     <div className="admin-payments-page">
@@ -324,12 +349,12 @@ const AdminPayments = () => {
             </thead>
 
             <tbody>
-              {filteredPayments.length === 0 ? (
+              {payments.length === 0 ? (
                 <tr>
                   <td colSpan="8" className="no-data">No payments found</td>
                 </tr>
               ) : (
-                filteredPayments.map((payment) => (
+                payments.map((payment) => (
                   <tr key={payment.id} className={payment.status}>
                     <td>
                       <div className="date-cell">
@@ -338,7 +363,7 @@ const AdminPayments = () => {
                       </div>
                     </td>
 
-                    <td>
+                    <td onClick={() => navigate(`/profile/${payment.profile?.id}`)}>
                       <div className="user-cell">
                         {payment.profile?.profile_pic_url ? (
                           <img 
@@ -373,11 +398,62 @@ const AdminPayments = () => {
                     <td>
                       {payment.subscription ? (
                         <div className="subscription-cell">
-                          <div className="sub-plan">{payment.subscription.plan?.name || "N/A"}</div>
-                          <div className="sub-status">{payment.subscription.status}</div>
+                          <div className="sub-plan">
+                            {payment.subscription.plan?.name || "N/A"}
+                          </div>
+                          <div className="sub-status-row">
+                            <span
+                              className={`sub-status-badge ${
+                                payment.subscription.status === "pending"
+                                  ? "pending"
+                                  : payment.subscription.status === "cancelled"
+                                  ? "expired"
+                                  : payment.subscription.plan?.billing_interval === "lifetime"
+                                  ? "active"
+                                  : new Date(payment.subscription.end_date) < new Date()
+                                  ? "expired"
+                                  : "active"
+                              }`}
+                            >
+                              {payment.subscription.status === "pending"
+                                ? "Pending"
+                                : payment.subscription.status === "cancelled"
+                                ? "Expired"
+                                : payment.subscription.plan?.billing_interval === "lifetime"
+                                ? "Active"
+                                : new Date(payment.subscription.end_date) < new Date()
+                                ? "Expired"
+                                : "Active"}
+                            </span>
+
+                            {/* Show expiry date or infinity — but NOT if failed */}
+                            {payment.subscription.status !== "pending" &&
+                              payment.subscription.status !== "failed" &&
+                              payment.subscription.status !== "cancelled" &&
+                              payment.subscription.plan?.billing_interval === "lifetime" && (
+                                <span className="sub-expires-on">
+                                  till <span title="Lifetime subscription">∞</span>
+                                </span>
+                            )}
+
+                            {payment.subscription.status !== "pending" &&
+                              payment.subscription.status !== "failed" &&
+                              payment.subscription.status !== "cancelled" &&
+                              payment.subscription.plan?.billing_interval !== "lifetime" &&
+                              new Date(payment.subscription.end_date) >= new Date() && (
+                                <span className="sub-expires-on">
+                                  till {formatDateWithoutTime(payment.subscription.end_date)}
+                                </span>
+                            )}
+                          </div>
                         </div>
-                      ) : "No subscription"}
+                      ) : (
+                        "No subscription"
+                      )}
                     </td>
+
+
+
 
                     <td>
                       <div className="action-buttons">
@@ -406,7 +482,7 @@ const AdminPayments = () => {
         </div>
 
         {/* Pagination */}
-        {totalPages > 1 && (
+        {pagination.total > pagination.limit && (
           <div className="pagination">
             <button className="pagination-btn" onClick={() => goToPage(currentPage - 1)} disabled={currentPage === 1}>← Previous</button>
             <div className="page-numbers">
@@ -423,7 +499,10 @@ const AdminPayments = () => {
               })}
             </div>
             <button className="pagination-btn" onClick={() => goToPage(currentPage + 1)} disabled={currentPage === totalPages}>Next →</button>
-            <span className="page-info">Page {currentPage} of {totalPages} ({pagination.total} total payments)</span>
+            <span className="page-info">
+              Page {currentPage} of {pagination.pages} ({pagination.total} total payments)
+            </span>
+
           </div>
         )}
       </div>

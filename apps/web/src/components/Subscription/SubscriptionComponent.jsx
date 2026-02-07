@@ -145,6 +145,68 @@ const SubscriptionComponent = ({ plans = [], currentUser, refreshPlans, profileI
         </>
     );
 
+
+
+
+
+
+
+    const PaymentInstructions = ({ method }) => {
+        if (method === "bank_transfer") {
+            return (
+            <div className="payment-instructions">
+                <h5>🏦 Bank Transfer Details</h5>
+                <ul>
+                <li><strong>Account Name:</strong> Example Company Ltd</li>
+                <li><strong>Bank Name:</strong> Global Trust Bank</li>
+                <li><strong>Account Number:</strong> 1234567890</li>
+                <li><strong>IBAN:</strong> GB12 GTBK 1234 5678 9012 34</li>
+                <li><strong>SWIFT/BIC:</strong> GTBKGB2L</li>
+                <li><strong>Reference:</strong> Your Profile ID or Email</li>
+                </ul>
+                <p className="instruction-note">
+                Please complete the transfer and upload your receipt below.
+                </p>
+            </div>
+            );
+        }
+
+        if (method === "paypal") {
+            return (
+            <div className="payment-instructions">
+                <h5>🅿️ PayPal Payment</h5>
+                <ul>
+                <li><strong>PayPal Email:</strong> payments@example.com</li>
+                <li><strong>Payment Note:</strong> Your Profile ID or Email</li>
+                </ul>
+                <p className="instruction-note">
+                Send the payment to the email above. Then upload your receipt.
+                </p>
+            </div>
+            );
+        }
+
+        if (method === "crypto") {
+            return (
+            <div className="payment-instructions">
+                <h5>💰 Crypto Wallet Details</h5>
+                <ul>
+                <li><strong>Network:</strong> USDT (TRC20)</li>
+                <li><strong>Wallet Address:</strong> TX9f3uJkLmPqR8sD9AbC123456789XYZ</li>
+                <li><strong>Memo / Tag:</strong> Not required</li>
+                </ul>
+                <p className="instruction-note">
+                Send the exact amount and upload your transaction screenshot.
+                </p>
+            </div>
+            );
+        }
+
+        return null;
+    };
+
+
+
     return (
         <div className="subscription-container">
             <Header activeIndex={-1} />
@@ -219,6 +281,7 @@ const SubscriptionComponent = ({ plans = [], currentUser, refreshPlans, profileI
                                 />
                             )}
                         </div>
+                        <PaymentInstructions method={paymentMethod} />
                     </div>
 
                     {/* Receipt Upload - Part of subscription flow */}

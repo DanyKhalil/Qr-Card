@@ -25,7 +25,7 @@ const SubscriptionPlan = sequelize.define(
       defaultValue: "USD",
     },
     billing_interval: {
-      type: DataTypes.ENUM("monthly", "yearly"),
+      type: DataTypes.ENUM("monthly", "yearly", "lifetime"),
       allowNull: false,
       defaultValue: "monthly",
     },
