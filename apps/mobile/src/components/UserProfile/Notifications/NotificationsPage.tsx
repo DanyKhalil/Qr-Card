@@ -119,6 +119,7 @@ const NotificationsPage = () => {
                 } catch (err) {
                 }
               }}
+              fetchNotifications={fetchNotifications}
             />
           )}
         </View>

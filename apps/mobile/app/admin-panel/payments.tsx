@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -13,6 +13,7 @@ import {
   FlatList,
   RefreshControl,
   Platform,
+  Linking,
 } from "react-native";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -32,9 +33,12 @@ import {
   DollarSign,
   Clock,
   Users,
-  MoreVertical
+  User,
+  ExternalLink,
+  Info
 } from 'lucide-react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { router } from "expo-router";
 
 export default function AdminPaymentsMobile() {
   const [payments, setPayments] = useState([]);
@@ -43,6 +47,7 @@ export default function AdminPaymentsMobile() {
   const [refreshing, setRefreshing] = useState(false);
   const [stats, setStats] = useState(null);
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [filters, setFilters] = useState({
     status: "",
     payment_method: "",
@@ -53,7 +58,7 @@ export default function AdminPaymentsMobile() {
   const [selectedReceipt, setSelectedReceipt] = useState(null);
   const [pagination, setPagination] = useState({
     page: 1,
-    limit: 20,
+    limit: 10,
     total: 0,
     pages: 1
   });
@@ -63,6 +68,11 @@ export default function AdminPaymentsMobile() {
   });
   const [expandedPayment, setExpandedPayment] = useState(null);
   const [activeFilterCount, setActiveFilterCount] = useState(0);
+  
+  const transformImageUrl = (url: string) => {
+    if (!url) return url;
+    return url.replace('http://localhost:5050', DEVELOPMENT_CONFIG.backendBaseUrl);
+  };
 
   // Fetch token helper
   const getToken = async () => {
@@ -81,11 +91,20 @@ export default function AdminPaymentsMobile() {
     if (filters.payment_method) count++;
     if (filters.start_date) count++;
     if (filters.end_date) count++;
-    if (search.trim()) count++;
+    if (debouncedSearch.trim()) count++;
     setActiveFilterCount(count);
-  }, [filters, search]);
+  }, [filters, debouncedSearch]);
 
-  // Fetch payments
+  // Debounced search effect (WEB FEATURE)
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 500);
+
+    return () => clearTimeout(handler);
+  }, [search]);
+
+  // Fetch payments (with debounced search)
   const fetchPayments = async () => {
     try {
       setLoading(true);
@@ -95,7 +114,7 @@ export default function AdminPaymentsMobile() {
         page: pagination.page,
         limit: pagination.limit,
         ...filters,
-        search: search
+        search: debouncedSearch
       };
 
       // Format dates
@@ -149,31 +168,11 @@ export default function AdminPaymentsMobile() {
     }
   };
 
-  // Initial load
+  // Initial load and pagination changes
   useEffect(() => {
     fetchPayments();
     fetchStats();
-  }, [pagination.page]);
-
-  // Filter payments based on search
-  useEffect(() => {
-    if (!search.trim()) {
-      setFilteredPayments(payments);
-      return;
-    }
-
-    const filtered = payments.filter(payment => {
-      const searchLower = search.toLowerCase();
-      return (
-        payment.user?.name?.toLowerCase().includes(searchLower) ||
-        payment.user?.email?.toLowerCase().includes(searchLower) ||
-        payment.transaction_reference?.toLowerCase().includes(searchLower) ||
-        payment.id.toLowerCase().includes(searchLower)
-      );
-    });
-
-    setFilteredPayments(filtered);
-  }, [search, payments]);
+  }, [pagination.page, filters, debouncedSearch]);
 
   // Handle refresh
   const onRefresh = () => {
@@ -241,10 +240,11 @@ export default function AdminPaymentsMobile() {
       end_date: null
     });
     setSearch("");
+    setDebouncedSearch("");
     setPagination(prev => ({ ...prev, page: 1 }));
   };
 
-  // Format date
+  // Format date (with time - WEB FEATURE)
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
     const date = new Date(dateString);
@@ -256,6 +256,17 @@ export default function AdminPaymentsMobile() {
     });
   };
 
+  // Format date without time (WEB FEATURE)
+  const formatDateWithoutTime = (dateString) => {
+    if (!dateString) return "N/A";
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric"
+    });
+  };
+
   // Format currency
   const formatCurrency = (amount, currency = "USD") => {
     return new Intl.NumberFormat("en-US", {
@@ -264,28 +275,54 @@ export default function AdminPaymentsMobile() {
     }).format(amount);
   };
 
-  // Get status color
-  const getStatusColor = (status) => {
-    const colors = {
-      pending: "#F59E0B",
-      completed: "#10B981",
-      failed: "#EF4444",
-      refunded: "#8B5CF6"
+  // Get status style (WEB FEATURE - colors)
+  const getStatusStyle = (status) => {
+    const styles = {
+      pending: { backgroundColor: "#fef3c7", color: "#92400e" },
+      completed: { backgroundColor: "#d1fae5", color: "#065f46" },
+      failed: { backgroundColor: "#fee2e2", color: "#991b1b" },
+      refunded: { backgroundColor: "#f3e8ff", color: "#6b21a8" }
     };
-    return colors[status] || "#6B7280";
+    return styles[status] || { backgroundColor: "#f3f4f6", color: "#374151" };
   };
 
-  // Get method color
-  const getMethodColor = (method) => {
-    const colors = {
-      bank_transfer: "#3B82F6",
-      cash: "#8B5CF6",
-      paypal: "#0EA5E9",
-      stripe: "#F59E0B",
-      crypto: "#10B981",
-      manual: "#6B7280"
+  // Get method style (WEB FEATURE - colors)
+  const getMethodStyle = (method) => {
+    const styles = {
+      bank_transfer: { backgroundColor: "#dbeafe", color: "#1e40af" },
+      cash: { backgroundColor: "#f3e8ff", color: "#6b21a8" },
+      paypal: { backgroundColor: "#f0f9ff", color: "#0369a1" },
+      stripe: { backgroundColor: "#fef3c7", color: "#92400e" },
+      crypto: { backgroundColor: "#dcfce7", color: "#166534" },
+      manual: { backgroundColor: "#f3f4f6", color: "#374151" }
     };
-    return colors[method] || "#6B7280";
+    return styles[method] || { backgroundColor: "#f3f4f6", color: "#374151" };
+  };
+
+  // Get subscription status (WEB FEATURE)
+  const getSubscriptionStatus = (subscription) => {
+    if (!subscription) return null;
+    
+    if (subscription.status === "pending") {
+      return { text: "Pending", type: "pending", color: "#fcd34d", textColor: "#374151" };
+    }
+    if (subscription.status === "cancelled") {
+      return { text: "Expired", type: "expired", color: "#fca5a5", textColor: "#991b1b" };
+    }
+    if (subscription.plan?.billing_interval === "lifetime") {
+      return { text: "Active", type: "active", color: "#6ee7b7", textColor: "#065f46" };
+    }
+    if (new Date(subscription.end_date) < new Date()) {
+      return { text: "Expired", type: "expired", color: "#fca5a5", textColor: "#991b1b" };
+    }
+    return { text: "Active", type: "active", color: "#6ee7b7", textColor: "#065f46" };
+  };
+
+  // Navigate to user profile (WEB FEATURE)
+  const navigateToUserProfile = (profileId) => {
+    if (profileId) {
+      router.push(`/(stack)/user-profile/${profileId}`);
+    }
   };
 
   // Toggle payment expansion
@@ -300,23 +337,98 @@ export default function AdminPaymentsMobile() {
     }
   };
 
-  // Render status badge
-  const renderStatusBadge = (status) => (
-    <View style={[styles.statusBadge, { backgroundColor: getStatusColor(status) + '20' }]}>
-      <Text style={[styles.statusText, { color: getStatusColor(status) }]}>
-        {status?.charAt(0).toUpperCase() + status?.slice(1) || "N/A"}
-      </Text>
-    </View>
-  );
+  // Generate page numbers (WEB FEATURE - smart pagination)
+  const getPageNumbers = () => {
+    const totalPages = pagination.pages;
+    const currentPage = pagination.page;
+    const pages = [];
+    
+    if (totalPages <= 5) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else if (currentPage <= 3) {
+      for (let i = 1; i <= 5; i++) pages.push(i);
+    } else if (currentPage >= totalPages - 2) {
+      for (let i = totalPages - 4; i <= totalPages; i++) pages.push(i);
+    } else {
+      for (let i = currentPage - 2; i <= currentPage + 2; i++) pages.push(i);
+    }
+    
+    return pages;
+  };
 
-  // Render method badge
-  const renderMethodBadge = (method) => (
-    <View style={[styles.methodBadge, { backgroundColor: getMethodColor(method) + '20' }]}>
-      <Text style={[styles.methodText, { color: getMethodColor(method) }]}>
-        {method ? method.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') : "N/A"}
-      </Text>
-    </View>
-  );
+  // Render user avatar (WEB FEATURE)
+  const renderUserAvatar = (payment) => {
+    const profile = payment.profile || {};
+    const name = profile.name || "U";
+    
+    if (profile.profile_pic_url) {
+      return (
+        <Image
+          source={{ uri: transformImageUrl(profile.profile_pic_url) }} 
+          style={styles.userAvatar}
+        />
+      );
+    }
+    
+    return (
+      <View style={styles.avatarPlaceholder}>
+        <Text style={styles.avatarText}>{name.charAt(0)}</Text>
+      </View>
+    );
+  };
+
+  // Render subscription cell (WEB FEATURE)
+  const renderSubscriptionCell = (subscription) => {
+    if (!subscription) return <Text style={styles.noSubscription}>No subscription</Text>;
+    
+    const status = getSubscriptionStatus(subscription);
+    const planName = subscription.plan?.name || "N/A";
+    
+    return (
+      <View style={styles.subscriptionCell}>
+        <Text style={styles.subPlan}>{planName}</Text>
+        <View style={styles.subStatusRow}>
+          <View style={[styles.subStatusBadge, { backgroundColor: status.color }]}>
+            <Text style={[styles.subStatusText, { color: status.textColor }]}>
+              {status.text}
+            </Text>
+          </View>
+          
+          {status.type === "active" && subscription.plan?.billing_interval === "lifetime" && (
+            <Text style={styles.subExpires}>till ∞</Text>
+          )}
+          
+          {status.type === "active" && subscription.plan?.billing_interval !== "lifetime" && (
+            <Text style={styles.subExpires}>till {formatDateWithoutTime(subscription.end_date)}</Text>
+          )}
+        </View>
+      </View>
+    );
+  };
+
+  // Render status badge (updated with web colors)
+  const renderStatusBadge = (status) => {
+    const style = getStatusStyle(status);
+    return (
+      <View style={[styles.statusBadge, { backgroundColor: style.backgroundColor }]}>
+        <Text style={[styles.statusText, { color: style.color }]}>
+          {status?.charAt(0).toUpperCase() + status?.slice(1) || "N/A"}
+        </Text>
+      </View>
+    );
+  };
+
+  // Render method badge (updated with web colors)
+  const renderMethodBadge = (method) => {
+    const style = getMethodStyle(method);
+    return (
+      <View style={[styles.methodBadge, { backgroundColor: style.backgroundColor }]}>
+        <Text style={[styles.methodText, { color: style.color }]}>
+          {method ? method.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') : "N/A"}
+        </Text>
+      </View>
+    );
+  };
 
   // Render stats cards
   const renderStatsCards = () => (
@@ -353,61 +465,75 @@ export default function AdminPaymentsMobile() {
     </ScrollView>
   );
 
-  // Render payment item
+  // Render payment item (updated with web features)
   const renderPaymentItem = ({ item: payment }) => {
+    if (!payment) return null;
+
     const isExpanded = expandedPayment === payment.id;
+    const profile = payment.profile || {};
+    const subscription = payment.subscription;
     
     return (
       <TouchableOpacity
-        style={styles.paymentCard}
+        style={[
+          styles.paymentCard,
+          payment.status === "pending" && styles.pendingCard,
+          payment.status === "completed" && styles.completedCard,
+          payment.status === "failed" && styles.failedCard,
+          payment.status === "refunded" && styles.refundedCard,
+        ]}
         onPress={() => togglePaymentExpansion(payment.id)}
         activeOpacity={0.9}
       >
         <View style={styles.paymentHeader}>
-          <View style={styles.paymentInfo}>
+          {/* User Section - WEB FEATURE */}
+          <TouchableOpacity 
+            style={styles.userSection}
+            onPress={() => profile.id && navigateToUserProfile(profile.id)}
+          >
+            {renderUserAvatar(payment)}
+            <View style={styles.userInfo}>
+              <Text style={styles.userName}>{profile.name || "Unknown User"}</Text>
+              <Text style={styles.userEmail}>
+                {profile.user?.email || payment.user?.email || "N/A"}
+              </Text>
+            </View>
+            <ExternalLink size={16} color="#6B7280" />
+          </TouchableOpacity>
+
+          {/* Amount & Status */}
+          <View style={styles.paymentMeta}>
             <Text style={styles.paymentAmount}>
               {formatCurrency(payment.amount, payment.currency)}
             </Text>
-            <Text style={styles.paymentUser}>
-              {payment.profile?.name || "Unknown User"}
-            </Text>
-            <Text style={styles.paymentDate}>
-              {formatDate(payment.created_at)}
-            </Text>
+            <View style={styles.badgeContainer}>
+              {renderStatusBadge(payment.status)}
+              {renderMethodBadge(payment.payment_method)}
+            </View>
           </View>
-          <View style={styles.paymentStatus}>
-            {renderStatusBadge(payment.status)}
-            {renderMethodBadge(payment.payment_method)}
+        </View>
+
+        {/* Date Row - WEB FEATURE (with paid date) */}
+        <View style={styles.dateRow}>
+          <View style={styles.dateItem}>
+            <Text style={styles.dateLabel}>Created:</Text>
+            <Text style={styles.dateValue}>{formatDate(payment.created_at)}</Text>
           </View>
+          {payment.paid_at && (
+            <View style={styles.dateItem}>
+              <Text style={styles.dateLabel}>Paid:</Text>
+              <Text style={styles.dateValue}>{formatDate(payment.paid_at)}</Text>
+            </View>
+          )}
         </View>
 
         {isExpanded && (
           <View style={styles.paymentDetails}>
-            {/* User Info */}
-            <View style={styles.detailSection}>
-              <Text style={styles.detailLabel}>User Information</Text>
-              <View style={styles.detailRow}>
-                <Text style={styles.detailKey}>Email:</Text>
-                <Text style={styles.detailValue}>{payment.user?.email || "N/A"}</Text>
-              </View>
-              <View style={styles.detailRow}>
-                <Text style={styles.detailKey}>Reference:</Text>
-                <Text style={styles.detailValue}>{payment.transaction_reference || "N/A"}</Text>
-              </View>
-            </View>
-
-            {/* Subscription Info */}
-            {payment.subscription && (
+            {/* Subscription Info - WEB FEATURE */}
+            {subscription && (
               <View style={styles.detailSection}>
                 <Text style={styles.detailLabel}>Subscription</Text>
-                <View style={styles.detailRow}>
-                  <Text style={styles.detailKey}>Plan:</Text>
-                  <Text style={styles.detailValue}>{payment.subscription.plan?.name || "N/A"}</Text>
-                </View>
-                <View style={styles.detailRow}>
-                  <Text style={styles.detailKey}>Status:</Text>
-                  <Text style={styles.detailValue}>{payment.subscription.status}</Text>
-                </View>
+                {renderSubscriptionCell(subscription)}
               </View>
             )}
 
@@ -452,6 +578,18 @@ export default function AdminPaymentsMobile() {
                 </TouchableOpacity>
               )}
 
+              {payment.status === "refunded" && payment.approved_at && (
+                <TouchableOpacity
+                  style={[styles.actionButton, styles.detailsButton]}
+                  onPress={() => 
+                    Alert.alert("Refund Details", `Refunded on: ${formatDate(payment.approved_at)}`)
+                  }
+                >
+                  <Info size={16} color="#FFF" />
+                  <Text style={styles.actionButtonText}>Details</Text>
+                </TouchableOpacity>
+              )}
+
               {payment.receipt_url && (
                 <TouchableOpacity
                   style={[styles.actionButton, styles.viewButton]}
@@ -471,7 +609,7 @@ export default function AdminPaymentsMobile() {
     );
   };
 
-  // Render filter modal
+    // Render filter modal
   const renderFilterModal = () => (
     <Modal
       visible={showFilters}
@@ -548,7 +686,7 @@ export default function AdminPaymentsMobile() {
                 <Calendar size={20} color="#6B7280" />
                 <Text style={styles.dateInputText}>
                   {filters.start_date 
-                    ? filters.start_date.toLocaleDateString("en-US")
+                    ? formatDateWithoutTime(filters.start_date.toISOString())
                     : "Start Date"
                   }
                 </Text>
@@ -561,7 +699,7 @@ export default function AdminPaymentsMobile() {
                 <Calendar size={20} color="#6B7280" />
                 <Text style={styles.dateInputText}>
                   {filters.end_date 
-                    ? filters.end_date.toLocaleDateString("en-US")
+                    ? formatDateWithoutTime(filters.end_date.toISOString())
                     : "End Date"
                   }
                 </Text>
@@ -571,7 +709,7 @@ export default function AdminPaymentsMobile() {
                 <DateTimePicker
                   value={filters.start_date || new Date()}
                   mode="date"
-                  display="default"
+                  display={Platform.OS === 'ios' ? "spinner" : "default"}
                   onChange={(event, date) => handleDateChange(event, date, 'start')}
                 />
               )}
@@ -580,7 +718,7 @@ export default function AdminPaymentsMobile() {
                 <DateTimePicker
                   value={filters.end_date || new Date()}
                   mode="date"
-                  display="default"
+                  display={Platform.OS === 'ios' ? "spinner" : "default"}
                   onChange={(event, date) => handleDateChange(event, date, 'end')}
                 />
               )}
@@ -598,7 +736,7 @@ export default function AdminPaymentsMobile() {
               style={[styles.modalButton, styles.applyButton]}
               onPress={() => {
                 setShowFilters(false);
-                fetchPayments();
+                // fetchPayments will be triggered by useEffect
               }}
             >
               <Text style={styles.applyButtonText}>Apply Filters</Text>
@@ -626,24 +764,26 @@ export default function AdminPaymentsMobile() {
             </TouchableOpacity>
           </View>
           
-          <View style={styles.receiptImageContainer}>
+          <ScrollView style={styles.receiptImageContainer}>
             <Image
               source={{ uri: selectedReceipt }}
               style={styles.receiptImage}
               resizeMode="contain"
             />
-          </View>
+          </ScrollView>
 
           <View style={styles.receiptModalFooter}>
             <TouchableOpacity
               style={[styles.receiptButton, styles.downloadButton]}
               onPress={() => {
-                // Implement download functionality
-                Alert.alert("Info", "Download functionality would be implemented here");
+                // For mobile, we can use Linking to open the URL
+                if (selectedReceipt) {
+                  Linking.openURL(selectedReceipt);
+                }
               }}
             >
               <Download size={20} color="#FFF" />
-              <Text style={styles.receiptButtonText}>Download</Text>
+              <Text style={styles.receiptButtonText}>Open/Download</Text>
             </TouchableOpacity>
             
             <TouchableOpacity
@@ -658,129 +798,163 @@ export default function AdminPaymentsMobile() {
     </Modal>
   );
 
-  // Render pagination
+  // Render pagination (WEB FEATURE - enhanced pagination)
   const renderPagination = () => {
     if (pagination.pages <= 1) return null;
 
+    const pageNumbers = getPageNumbers();
+    
     return (
-      <View style={styles.pagination}>
-        <TouchableOpacity
-          style={[styles.paginationButton, pagination.page === 1 && styles.paginationButtonDisabled]}
-          onPress={() => goToPage(pagination.page - 1)}
-          disabled={pagination.page === 1}
-        >
-          <ChevronLeft size={20} color={pagination.page === 1 ? "#9CA3AF" : "#3B82F6"} />
-          <Text style={[
-            styles.paginationButtonText,
-            pagination.page === 1 && styles.paginationButtonTextDisabled
-          ]}>
-            Previous
-          </Text>
-        </TouchableOpacity>
+      <View style={styles.paginationContainer}>
+        <View style={styles.pagination}>
+          <TouchableOpacity
+            style={[styles.paginationButton, pagination.page === 1 && styles.paginationButtonDisabled]}
+            onPress={() => goToPage(pagination.page - 1)}
+            disabled={pagination.page === 1}
+          >
+            <ChevronLeft size={20} color={pagination.page === 1 ? "#9CA3AF" : "#3B82F6"} />
+            <Text style={[
+              styles.paginationButtonText,
+              pagination.page === 1 && styles.paginationButtonTextDisabled
+            ]}>
+              Previous
+            </Text>
+          </TouchableOpacity>
 
-        <View style={styles.pageInfo}>
-          <Text style={styles.pageInfoText}>
-            Page {pagination.page} of {pagination.pages}
-          </Text>
+          <View style={styles.pageNumbers}>
+            {pageNumbers.map((pageNum) => (
+              <TouchableOpacity
+                key={pageNum}
+                style={[
+                  styles.pageButton,
+                  pagination.page === pageNum && styles.pageButtonActive
+                ]}
+                onPress={() => goToPage(pageNum)}
+              >
+                <Text style={[
+                  styles.pageButtonText,
+                  pagination.page === pageNum && styles.pageButtonTextActive
+                ]}>
+                  {pageNum}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          <TouchableOpacity
+            style={[styles.paginationButton, pagination.page === pagination.pages && styles.paginationButtonDisabled]}
+            onPress={() => goToPage(pagination.page + 1)}
+            disabled={pagination.page === pagination.pages}
+          >
+            <Text style={[
+              styles.paginationButtonText,
+              pagination.page === pagination.pages && styles.paginationButtonTextDisabled
+            ]}>
+              Next
+            </Text>
+            <ChevronRight size={20} color={pagination.page === pagination.pages ? "#9CA3AF" : "#3B82F6"} />
+          </TouchableOpacity>
         </View>
-
-        <TouchableOpacity
-          style={[styles.paginationButton, pagination.page === pagination.pages && styles.paginationButtonDisabled]}
-          onPress={() => goToPage(pagination.page + 1)}
-          disabled={pagination.page === pagination.pages}
-        >
-          <Text style={[
-            styles.paginationButtonText,
-            pagination.page === pagination.pages && styles.paginationButtonTextDisabled
-          ]}>
-            Next
-          </Text>
-          <ChevronRight size={20} color={pagination.page === pagination.pages ? "#9CA3AF" : "#3B82F6"} />
-        </TouchableOpacity>
+        
+        <Text style={styles.pageInfo}>
+          Page {pagination.page} of {pagination.pages} ({pagination.total} Total Payments)
+        </Text>
       </View>
     );
   };
 
   return (
     <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.title}>Payment Management</Text>
-        {renderStatsCards()}
-      </View>
-
-      {/* Search and Filter Bar */}
-      <View style={styles.searchBar}>
-        <View style={styles.searchInputContainer}>
-          <Search size={20} color="#6B7280" />
-          <TextInput
-            placeholder="Search payments..."
-            value={search}
-            onChangeText={setSearch}
-            style={styles.searchInput}
-            placeholderTextColor="#9CA3AF"
+      {/* Main ScrollView - Everything scrolls */}
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={true}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={["#3B82F6"]}
+            tintColor="#3B82F6"
           />
-          {search ? (
-            <TouchableOpacity onPress={() => setSearch("")}>
-              <X size={20} color="#6B7280" />
-            </TouchableOpacity>
-          ) : null}
+        }
+      >
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.title}>Payment Management</Text>
+          {renderStatsCards()}
         </View>
 
-        <TouchableOpacity
-          style={[styles.filterButton, activeFilterCount > 0 && styles.filterButtonActive]}
-          onPress={() => setShowFilters(true)}
-        >
-          <Filter size={20} color={activeFilterCount > 0 ? "#FFF" : "#6B7280"} />
-          {activeFilterCount > 0 && (
-            <View style={styles.filterBadge}>
-              <Text style={styles.filterBadgeText}>{activeFilterCount}</Text>
-            </View>
-          )}
-        </TouchableOpacity>
-      </View>
+        {/* Search and Filter Bar */}
+        <View style={styles.searchBar}>
+          <View style={styles.searchInputContainer}>
+            <Search size={20} color="#6B7280" />
+            <TextInput
+              placeholder="Search by user name, email, or reference..."
+              value={search}
+              onChangeText={setSearch}
+              style={styles.searchInput}
+              placeholderTextColor="#9CA3AF"
+            />
+            {search ? (
+              <TouchableOpacity onPress={() => setSearch("")}>
+                <X size={20} color="#6B7280" />
+              </TouchableOpacity>
+            ) : null}
+          </View>
 
-      {/* Content */}
-      {loading && payments.length === 0 ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#3B82F6" />
-          <Text style={styles.loadingText}>Loading payments...</Text>
-        </View>
-      ) : (
-        <>
-          <FlatList
-            data={filteredPayments}
-            renderItem={renderPaymentItem}
-            keyExtractor={(item) => item.id}
-            contentContainerStyle={styles.listContainer}
-            showsVerticalScrollIndicator={false}
-            refreshControl={
-              <RefreshControl
-                refreshing={refreshing}
-                onRefresh={onRefresh}
-                colors={["#3B82F6"]}
-                tintColor="#3B82F6"
-              />
-            }
-            ListEmptyComponent={
-              <View style={styles.emptyContainer}>
-                <Text style={styles.emptyText}>No payments found</Text>
-                {activeFilterCount > 0 && (
-                  <TouchableOpacity
-                    style={styles.emptyButton}
-                    onPress={clearFilters}
-                  >
-                    <Text style={styles.emptyButtonText}>Clear Filters</Text>
-                  </TouchableOpacity>
-                )}
+          <TouchableOpacity
+            style={[styles.filterButton, activeFilterCount > 0 && styles.filterButtonActive]}
+            onPress={() => setShowFilters(true)}
+          >
+            <Filter size={20} color={activeFilterCount > 0 ? "#FFF" : "#6B7280"} />
+            {activeFilterCount > 0 && (
+              <View style={styles.filterBadge}>
+                <Text style={styles.filterBadgeText}>{activeFilterCount}</Text>
               </View>
-            }
-          />
-          {renderPagination()}
-        </>
-      )}
+            )}
+          </TouchableOpacity>
+        </View>
 
-      {/* Modals */}
+        {/* Content */}
+        {loading && payments.length === 0 ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#3B82F6" />
+            <Text style={styles.loadingText}>Loading payments...</Text>
+          </View>
+        ) : payments.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>No payments found</Text>
+            {activeFilterCount > 0 && (
+              <TouchableOpacity
+                style={styles.emptyButton}
+                onPress={clearFilters}
+              >
+                <Text style={styles.emptyButtonText}>Clear Filters</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        ) : (
+          <>
+            {/* Payments List */}
+            <View style={styles.paymentsList}>
+              {payments.map(payment => (
+                <View key={payment.id}>
+                  {renderPaymentItem({ item: payment })}
+                </View>
+              ))}
+            </View>
+            
+            {/* Pagination */}
+            {renderPagination()}
+          </>
+        )}
+
+        {/* Bottom padding for scroll */}
+        <View style={styles.bottomPadding} />
+      </ScrollView>
+
+      {/* Modals (outside the scroll) */}
       {renderFilterModal()}
       {renderReceiptModal()}
     </View>
@@ -808,15 +982,15 @@ const styles = StyleSheet.create({
   },
   statCard: {
     backgroundColor: "#FFF",
-    borderRadius: 12,
+    borderRadius: 20,
     padding: 16,
     marginRight: 12,
     minWidth: 150,
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 8,
-    elevation: 3,
+    // shadowColor: "#000",
+    // shadowOpacity: 0.05,
+    // shadowOffset: { width: 0, height: 2 },
+    // shadowRadius: 8,
+    // elevation: 3,
     borderWidth: 1,
     borderColor: "#F3F4F6",
   },
@@ -858,7 +1032,7 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     marginLeft: 12,
-    fontSize: 16,
+    fontSize: 14,
     color: "#111827",
   },
   filterButton: {
@@ -895,6 +1069,7 @@ const styles = StyleSheet.create({
   listContainer: {
     paddingBottom: 20,
   },
+  // Payment card with status-based backgrounds (WEB FEATURE)
   paymentCard: {
     backgroundColor: "#FFF",
     borderRadius: 16,
@@ -908,37 +1083,85 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#F3F4F6",
   },
+  pendingCard: {
+    backgroundColor: "#fffbeb",
+  },
+  completedCard: {
+    backgroundColor: "#f0fdf4",
+  },
+  failedCard: {
+    backgroundColor: "#fef2f2",
+  },
+  refundedCard: {
+    backgroundColor: "#faf5ff",
+  },
   paymentHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
+    marginBottom: 12,
   },
-  paymentInfo: {
+  // User section (WEB FEATURE)
+  userSection: {
     flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    marginRight: 12,
+  },
+  userAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: "#E5E7EB",
+  },
+  avatarPlaceholder: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#3B82F6",
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: "#E5E7EB",
+  },
+  avatarText: {
+    color: "#FFF",
+    fontWeight: "600",
+    fontSize: 16,
+  },
+  userInfo: {
+    flex: 1,
+    marginLeft: 12,
+    marginRight: 8,
+  },
+  userName: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#111827",
+    marginBottom: 2,
+  },
+  userEmail: {
+    fontSize: 12,
+    color: "#6B7280",
+  },
+  paymentMeta: {
+    alignItems: "flex-end",
   },
   paymentAmount: {
     fontSize: 20,
     fontWeight: "700",
-    color: "#111827",
-    marginBottom: 4,
+    color: "#059669",
+    marginBottom: 8,
   },
-  paymentUser: {
-    fontSize: 16,
-    color: "#374151",
-    marginBottom: 4,
-  },
-  paymentDate: {
-    fontSize: 14,
-    color: "#6B7280",
-  },
-  paymentStatus: {
+  badgeContainer: {
     alignItems: "flex-end",
   },
   statusBadge: {
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
-    marginBottom: 8,
+    marginBottom: 4,
   },
   statusText: {
     fontSize: 12,
@@ -954,6 +1177,28 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "600",
     textTransform: "capitalize",
+  },
+  // Date row (WEB FEATURE)
+  dateRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: "#E5E7EB",
+  },
+  dateItem: {
+    flex: 1,
+  },
+  dateLabel: {
+    fontSize: 12,
+    color: "#6B7280",
+    marginBottom: 2,
+  },
+  dateValue: {
+    fontSize: 14,
+    color: "#374151",
+    fontWeight: "500",
   },
   paymentDetails: {
     marginTop: 16,
@@ -977,12 +1222,51 @@ const styles = StyleSheet.create({
   detailKey: {
     fontSize: 14,
     color: "#6B7280",
-    width: 80,
+    width: 100,
   },
   detailValue: {
     fontSize: 14,
     color: "#111827",
     flex: 1,
+    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+  },
+  // Subscription cell (WEB FEATURE)
+  subscriptionCell: {
+    backgroundColor: "#FFF",
+    borderRadius: 8,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+  },
+  subPlan: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#1F2937",
+    marginBottom: 8,
+  },
+  subStatusRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  subStatusBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  subStatusText: {
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  subExpires: {
+    fontSize: 12,
+    color: "#6B7280",
+    fontWeight: "500",
+  },
+  noSubscription: {
+    fontSize: 14,
+    color: "#9CA3AF",
+    fontStyle: "italic",
   },
   detailActions: {
     flexDirection: "row",
@@ -1015,9 +1299,13 @@ const styles = StyleSheet.create({
   retryButton: {
     backgroundColor: "#F59E0B",
   },
+  detailsButton: {
+    backgroundColor: "#6B7280",
+  },
   viewButton: {
     backgroundColor: "#3B82F6",
   },
+  // Filter modal styles
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.5)",
@@ -1125,9 +1413,10 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#FFF",
   },
+  // Receipt modal
   receiptModalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: "rgba(0, 0, 0, 0.8)",
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
@@ -1136,7 +1425,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFF",
     borderRadius: 20,
     width: "100%",
-    maxHeight: "80%",
+    maxHeight: "90%",
   },
   receiptModalHeader: {
     flexDirection: "row",
@@ -1153,6 +1442,7 @@ const styles = StyleSheet.create({
   },
   receiptImageContainer: {
     padding: 20,
+    maxHeight: 400,
   },
   receiptImage: {
     width: "100%",
@@ -1185,13 +1475,21 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#FFF",
   },
+  // Enhanced pagination (WEB FEATURE)
+  paginationContainer: {
+    paddingVertical: 16,
+    borderTopWidth: 1,
+    borderTopColor: "#F3F4F6",
+    backgroundColor: "#FFF",
+    borderRadius: 12,
+    marginTop: 8,
+    paddingHorizontal: 16,
+  },
   pagination: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 16,
-    borderTopWidth: 1,
-    borderTopColor: "#F3F4F6",
+    marginBottom: 8,
   },
   paginationButton: {
     flexDirection: "row",
@@ -1215,12 +1513,36 @@ const styles = StyleSheet.create({
   paginationButtonTextDisabled: {
     color: "#9CA3AF",
   },
-  pageInfo: {
+  pageNumbers: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  pageButton: {
+    width: 40,
+    height: 40,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    borderRadius: 8,
+    backgroundColor: "#FFF",
+    justifyContent: "center",
     alignItems: "center",
   },
-  pageInfoText: {
+  pageButtonActive: {
+    backgroundColor: "#3B82F6",
+    borderColor: "#3B82F6",
+  },
+  pageButtonText: {
     fontSize: 14,
+    fontWeight: "600",
+    color: "#374151",
+  },
+  pageButtonTextActive: {
+    color: "#FFF",
+  },
+  pageInfo: {
+    textAlign: "center",
     color: "#6B7280",
+    fontSize: 14,
   },
   loadingContainer: {
     flex: 1,
@@ -1253,5 +1575,53 @@ const styles = StyleSheet.create({
     color: "#FFF",
     fontWeight: "600",
     fontSize: 16,
+  },
+   scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 30, // Extra padding at bottom
+  },
+  paymentsList: {
+    marginBottom: 20,
+  },
+  bottomPadding: {
+    height: 30,
+  },
+  
+  // Also UPDATE this existing style:
+  emptyContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 60,
+    backgroundColor: "#FFF", // Add background
+    borderRadius: 16, // Add borderRadius
+    padding: 30, // Add padding
+    marginTop: 20, // Add marginTop
+    shadowColor: "#000", // Add shadow
+    shadowOpacity: 0.05,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 8,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: "#F3F4F6",
+  },
+  
+  // Also UPDATE this existing style:
+  loadingContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+    minHeight: 300, // Add minHeight
+    backgroundColor: "#FFF", // Add background
+    borderRadius: 16, // Add borderRadius
+    padding: 30, // Add padding
+    marginTop: 20, // Add marginTop
+    shadowColor: "#000", // Add shadow
+    shadowOpacity: 0.05,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 8,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: "#F3F4F6",
   },
 });
