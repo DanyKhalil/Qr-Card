@@ -47,6 +47,19 @@ export const notificationsApi = {
     }
   },
 
+  // Mark all notifications as seen (ADDED)
+  markAllAsSeen: async (profileId) => {
+    try {
+      const response = await api.put('/notifications/mark-all-seen', {
+        profile_id: profileId,
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Mark all as seen API error:", error);
+      throw error;
+    }
+  },
+
   // Mark all notifications as read
   markAllAsRead: async (profileId) => {
     try {
@@ -94,8 +107,6 @@ export const notificationsApi = {
       }
     } catch (error) {
       console.log("Get unread count API error:", error);
-      // hello
-      // throw error;
     }
   }
 };

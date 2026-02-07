@@ -15,15 +15,35 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import { User, Eye, Bell } from "lucide-react-native";
 import { router } from "expo-router";
+import notificationsApi from '../../../services/notificationsApi';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width } = Dimensions.get("window");
 
-const NotificationsList = ({ notifications = [], onNotificationClick = () => {} }) => {
+const NotificationsList = ({ notifications = [], onNotificationClick = () => {}, fetchNotifications = () => {} }) => {
   const navigation = useNavigation();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [unreadCount, setUnreadCount] = useState(0);
   const [pulseAnim] = useState(new Animated.Value(1));
+
+  const handleClearAll = async () => {
+    try {
+      setLoading(true);
+      const currentProfileId = await AsyncStorage.getItem('profileId');
+      if (!currentProfileId) {
+        console.error("No profile ID found. Cannot mark notifications as seen.");
+        return;
+      }
+      await notificationsApi.markAllAsSeen(currentProfileId);
+      setLoading(false);
+      fetchNotifications();
+    } catch (err) {
+      // console.error("Clear all notifications error:", err);
+      setError("Failed to clear notifications");
+      setLoading(false);
+    }
+  };
 
   const transformImageUrl = (url: string) => {
     if (!url) 
@@ -179,6 +199,19 @@ const NotificationsList = ({ notifications = [], onNotificationClick = () => {} 
               <Text style={styles.unreadText}>{unreadCount} unread</Text>
             </View>
           )}
+          <TouchableOpacity
+            onPress={handleClearAll}
+            disabled={loading}
+            style={[
+              styles.clearAllBtn,
+              loading && styles.clearAllBtnDisabled,
+            ]}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.clearAllText}>
+              {loading ? "Clearing..." : "Clear all"}
+            </Text>
+          </TouchableOpacity>
           <View style={styles.countBadge}>
             <Text style={styles.countText}>{notifications.length}</Text>
           </View>
@@ -486,6 +519,23 @@ const styles = StyleSheet.create({
       android: "Roboto",
       default: "System",
     }),
+  },
+   clearAllBtn: {
+    backgroundColor: 'transparent',
+    borderWidth: 2,
+    borderColor: '#e2e8f0',
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    borderRadius: 20,
+    alignSelf: 'flex-start',
+  },
+  clearAllText: {
+    color: '#64748b',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  clearAllBtnDisabled: {
+    opacity: 0.6,
   },
 });
 
