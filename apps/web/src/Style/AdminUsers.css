@@ -255,7 +255,7 @@
 /* Input fields */
 .login-input,
 .dropdown-input {
-  width: 100%;
+  width: 300px;
   max-width: 445px;
   height: 42px;
   padding: 0 16px;

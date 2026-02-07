@@ -5,9 +5,19 @@ import jwt from "jsonwebtoken";
 
 // GET all profiles (ADMIN)
 export const getAllUsers = async (req, res) => {
-  const search = req.query.search || "";
+  const {
+    search = "",
+    role,
+    verified,
+    locked,
+    sortBy = "joined_at",
+    sortOrder = "DESC",
+  } = req.query;
 
   try {
+    /* =========================
+       SEARCH (name / role / email)
+    ========================= */
     const searchWhere = search
       ? {
           [Op.or]: [
@@ -24,6 +34,38 @@ export const getAllUsers = async (req, res) => {
         }
       : {};
 
+    /* =========================
+       USER FILTERS
+    ========================= */
+    const userWhere = {};
+
+    if (role) userWhere.role = role;
+
+    if (verified !== '') {
+      userWhere.verified = verified === "true";
+    }
+
+    if (locked !== undefined) {
+      // locked = true → visibility = false
+      userWhere.visibility = locked === "true" ? false : true;
+    }
+
+    /* =========================
+       SORTING (SAFE MAP)
+    ========================= */
+    const sortMap = {
+      joined_at: ["created_at"], // Profile.created_at
+      name: ["name"], // Profile.name
+      role: [{ model: User, as: "user" }, "role"],
+    };
+
+    const order = sortMap[sortBy]
+      ? [[...sortMap[sortBy], sortOrder]]
+      : [["created_at", "DESC"]];
+
+    /* =========================
+       QUERY
+    ========================= */
     const profiles = await Profile.findAll({
       where: searchWhere,
       attributes: [
@@ -34,25 +76,30 @@ export const getAllUsers = async (req, res) => {
         "bio",
         "headline",
         "website",
+        "created_at", // ✅ DATE JOINED (PROFILE)
       ],
       include: [
         {
           model: User,
           as: "user",
-          attributes: ["id", "email", "role", "verified", "visibility"],
+          where: userWhere,
+          attributes: ["email", "role", "verified", "visibility"],
         },
       ],
-      order: [["name", "ASC"]],
+      order,
     });
 
-    const result = profiles.map(p => ({
-      id: p.user.id,
-      profile_id: p.id,
+    /* =========================
+       RESPONSE SHAPE
+    ========================= */
+    const result = profiles.map((p) => ({
+      profile_id: p.id, // ✅ profile id only
       name: p.name,
       email: p.user.email,
       role: p.user.role,
       verified: p.user.verified,
       visibility: p.user.visibility,
+      joined_at: p.created_at, // ✅ from PROFILE
       profile_pic_url: p.profile_pic_url,
       cover_pic_url: p.cover_pic_url,
       bio: p.bio,
@@ -68,7 +115,6 @@ export const getAllUsers = async (req, res) => {
 };
 
 
-
 // POST new user (Admin)
 export const createUser = async (req, res) => {
   try {
@@ -79,7 +125,11 @@ export const createUser = async (req, res) => {
     }
 
     const existingUser = await User.findOne({ where: { email } });
-    if (existingUser) return res.status(400).json({ error: "Email already registered" });
+    if (existingUser) {
+      return res
+        .status(400)
+        .json({ error: "Email already registered" });
+    }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -98,10 +148,12 @@ export const createUser = async (req, res) => {
       cover_pic_url: null,
       bio: "",
       headline: "",
-      website: ""
+      website: "",
     });
 
-    res.status(201).json({ message: "User created successfully", user: newUser });
+    res
+      .status(201)
+      .json({ message: "User created successfully", user: newUser });
   } catch (error) {
     console.error("POST /api/users error:", error);
     res.status(500).json({ error: "Server error" });
@@ -116,23 +168,43 @@ export const updateUser = async (req, res) => {
 
     // 1️⃣ Find profile first
     const profile = await Profile.findByPk(profileId);
-    if (!profile) return res.status(404).json({ error: "Profile not found" });
+    if (!profile) {
+      return res.status(404).json({ error: "Profile not found" });
+    }
 
     // 2️⃣ Load user via profile
     const user = await User.findByPk(profile.user_id);
-    if (!user) return res.status(404).json({ error: "User not found" });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
 
     const authHeader = req.headers.authorization;
-    if (!authHeader) return res.status(401).json({ error: "Unauthorized" });
-    const token = authHeader.split(" ")[1];
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || "SECRET_KEY");
+    if (!authHeader) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
 
-    if (decoded.id === user.id) return res.status(403).json({ error: "You cannot update yourself" });
-    if (user.role === "admin") return res.status(403).json({ error: "You cannot update another admin" });
+    const token = authHeader.split(" ")[1];
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET || "SECRET_KEY"
+    );
+
+    if (decoded.id === user.id) {
+      return res
+        .status(403)
+        .json({ error: "You cannot update yourself" });
+    }
+
+    if (user.role === "admin") {
+      return res
+        .status(403)
+        .json({ error: "You cannot update another admin" });
+    }
 
     profile.name = name || profile.name;
     user.email = email || user.email;
     user.role = role || user.role;
+
     if (verified !== undefined) user.verified = verified;
     if (visibility !== undefined) user.visibility = visibility; // Added visibility update
 
@@ -152,22 +224,41 @@ export const deleteUser = async (req, res) => {
     const profileId = req.params.id;
 
     const profile = await Profile.findByPk(profileId);
-    if (!profile) return res.status(404).json({ error: "Profile not found" });
+    if (!profile) {
+      return res.status(404).json({ error: "Profile not found" });
+    }
 
     const user = await User.findByPk(profile.user_id);
-    if (!user) return res.status(404).json({ error: "User not found" });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
 
     const authHeader = req.headers.authorization;
-    if (!authHeader) return res.status(401).json({ error: "Unauthorized" });
-    const token = authHeader.split(" ")[1];
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || "SECRET_KEY");
+    if (!authHeader) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
 
-    if (decoded.id === user.id) return res.status(403).json({ error: "You cannot delete yourself" });
-    if (user.role === "admin") return res.status(403).json({ error: "You cannot delete another admin" });
+    const token = authHeader.split(" ")[1];
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET || "SECRET_KEY"
+    );
+
+    if (decoded.id === user.id) {
+      return res
+        .status(403)
+        .json({ error: "You cannot delete yourself" });
+    }
+
+    if (user.role === "admin") {
+      return res
+        .status(403)
+        .json({ error: "You cannot delete another admin" });
+    }
 
     // Check how many profiles this user has
     const profileCount = await Profile.count({
-      where: { user_id: user.id }
+      where: { user_id: user.id },
     });
 
     // Always delete the profile
