@@ -276,7 +276,7 @@ const UserProfilePage = ({ id, scrollToBottom }) => {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                 <ActivityIndicator size="large" color="#82C294" />
-                <Text style={{ marginTop: 16 }}>[DEBUG] Loading user profile...</Text>
+                <Text style={{ marginTop: 16 }}>Loading user profile...</Text>
             </View>
         );
     }

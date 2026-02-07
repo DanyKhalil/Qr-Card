@@ -201,9 +201,15 @@ const NotificationsList = ({ notifications = [], onNotificationClick = () => {} 
                 styles.notificationCard,
                 isUnread && styles.unreadCard,
               ]}
-              onPress={() => handleNotificationClick(notification)}
-              activeOpacity={0.7}
+              onPress={
+                titleInfo.text !== "Notification"
+                  ? () => handleNotificationClick(notification)
+                  : undefined
+              }
+              activeOpacity={titleInfo.text !== "Notification" ? 0.7 : 1}
+              disabled={titleInfo.text === "Notification"}
             >
+
               <View style={styles.notificationIndicator}>
                 {isUnread && (
                   <Animated.View
