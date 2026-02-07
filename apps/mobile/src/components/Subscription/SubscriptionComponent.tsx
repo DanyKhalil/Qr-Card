@@ -156,6 +156,117 @@ const SubscriptionComponent: React.FC<SubscriptionComponentProps> = ({
   );
   /* ===================== UI ===================== */
 
+  const PaymentInstructions = ({ method }) => {
+    if (method === "bank_transfer") {
+      return (
+        <View style={styles.container2}>
+          <Text style={styles.title2}>🏦 Bank Transfer Details</Text>
+          <View style={styles.list}>
+            <Text style={styles.listItem}>
+              <Text style={styles.bold}>Account Name:</Text> Example Company Ltd
+            </Text>
+            <Text style={styles.listItem}>
+              <Text style={styles.bold}>Bank Name:</Text> Global Trust Bank
+            </Text>
+            <Text style={styles.listItem}>
+              <Text style={styles.bold}>Account Number:</Text> 1234567890
+            </Text>
+            <Text style={styles.listItem}>
+              <Text style={styles.bold}>IBAN:</Text> GB12 GTBK 1234 5678 9012 34
+            </Text>
+            <Text style={styles.listItem}>
+              <Text style={styles.bold}>SWIFT/BIC:</Text> GTBKGB2L
+            </Text>
+            <Text style={styles.listItem}>
+              <Text style={styles.bold}>Reference:</Text> Your Profile ID or Email
+            </Text>
+          </View>
+          <Text style={styles.note}>
+            Please complete the transfer and upload your receipt below.
+          </Text>
+        </View>
+      );
+    }
+
+    if (method === "paypal") {
+      return (
+        <View style={styles.container2}>
+          <Text style={styles.title2}>🅿️ PayPal Payment</Text>
+          <View style={styles.list}>
+            <Text style={styles.listItem}>
+              <Text style={styles.bold}>PayPal Email:</Text> payments@example.com
+            </Text>
+            <Text style={styles.listItem}>
+              <Text style={styles.bold}>Payment Note:</Text> Your Profile ID or Email
+            </Text>
+          </View>
+          <Text style={styles.note}>
+            Send the payment to the email above. Then upload your receipt.
+          </Text>
+        </View>
+      );
+    }
+
+    if (method === "crypto") {
+      return (
+        <View style={styles.container2}>
+          <Text style={styles.title2}>💰 Crypto Wallet Details</Text>
+          <View style={styles.list}>
+            <Text style={styles.listItem}>
+              <Text style={styles.bold}>Network:</Text> USDT (TRC20)
+            </Text>
+            <Text style={styles.listItem}>
+              <Text style={styles.bold}>Wallet Address:</Text> TX9f3uJkLmPqR8sD9AbC123456789XYZ
+            </Text>
+            <Text style={styles.listItem}>
+              <Text style={styles.bold}>Memo / Tag:</Text> Not required
+            </Text>
+          </View>
+          <Text style={styles.note}>
+            Send the exact amount and upload your transaction screenshot.
+          </Text>
+        </View>
+      );
+    }
+
+    if (method === "cash") {
+      return (
+        <View style={styles.container2}>
+          <Text style={styles.title2}>💵 Cash Payment Instructions</Text>
+          <Text style={styles.note}>
+            Please contact our support team for cash payment arrangements.
+          </Text>
+        </View>
+      );
+    }
+
+    if (method === "stripe") {
+      return (
+        <View style={styles.container2}>
+          <Text style={styles.title2}>💳 Stripe Payment</Text>
+          <Text style={styles.note}>
+            Complete the payment using the Stripe checkout form. No additional details required.
+          </Text>
+        </View>
+      );
+    }
+
+    if (method === "manual") {
+      return (
+        <View style={styles.container2}>
+          <Text style={styles.title2}>📝 Manual Payment</Text>
+          <Text style={styles.note}>
+            Please contact our support team for manual payment processing instructions.
+          </Text>
+        </View>
+      );
+    }
+
+    return null;
+  };
+
+
+
   return (
     <ScrollView style={styles.container}>
       {/* <CurrentSubscription /> */}
@@ -241,6 +352,7 @@ const SubscriptionComponent: React.FC<SubscriptionComponentProps> = ({
                   />
                 )}
               </View>
+              <PaymentInstructions method={paymentMethod} />
             </View>
 
 
@@ -453,5 +565,46 @@ const styles = StyleSheet.create({
     marginTop: 4,
     color: "#475569",
     fontSize: 13,
+  },
+
+
+
+
+
+  container2: {
+    backgroundColor: '#f8fafc',
+    borderRadius: 12,
+    padding: 16,
+    marginVertical: 12,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  title2: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#1e293b',
+    marginBottom: 12,
+  },
+  list: {
+    marginBottom: 12,
+  },
+  listItem: {
+    fontSize: 14,
+    color: '#475569',
+    marginBottom: 6,
+    lineHeight: 20,
+  },
+  bold: {
+    fontWeight: '600',
+    color: '#1e293b',
+  },
+  note: {
+    fontSize: 13,
+    color: '#64748b',
+    fontStyle: 'italic',
+    lineHeight: 18,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#e2e8f0',
   },
 });
