@@ -56,6 +56,19 @@
   margin-bottom: 30px;
 }
 
+.login-input-add {
+  width: 100%;
+  max-width: 445px;
+  height: 38.67px;
+  border: 1px solid #6B63FF; /* muted indigo border */
+  border-radius: 10px;
+  display: block;
+  margin-bottom: 5px;
+  padding-left: 20px;
+  font-family: 'Arial', 'Helvetica', sans-serif;
+  box-sizing: border-box;
+}
+
 /* Input with icon wrapper */
 .input-with-icon {
   position: relative;

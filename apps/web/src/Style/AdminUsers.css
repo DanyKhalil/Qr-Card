@@ -814,9 +814,3 @@
 }
 
 /* Remove old duplicate/unused styles */
-.admin-filters,
-.login-input,
-.login-button,
-.login-form {
-    display: none;
-}
