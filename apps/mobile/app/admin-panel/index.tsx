@@ -12,15 +12,29 @@ import {
   KeyboardAvoidingView,
   Modal,
   Platform,
+  FlatList,
 } from "react-native";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { DEVELOPMENT_CONFIG } from '../../src/config/development';
-import { Lock, LockOpen, Eye, EyeOff } from 'lucide-react-native';
+import { 
+  Lock, 
+  LockOpen, 
+  Eye, 
+  EyeOff, 
+  Filter, 
+  SortAsc, 
+  SortDesc, 
+  ChevronLeft, 
+  ChevronRight,
+  X,
+  ChevronDown
+} from 'lucide-react-native';
 
 export default function AdminUsersMobile() {
   const [users, setUsers] = useState([]);
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [loading, setLoading] = useState(false);
   const [editingUserId, setEditingUserId] = useState(null);
   const [editForm, setEditForm] = useState({ 
@@ -42,6 +56,30 @@ export default function AdminUsersMobile() {
   const [roleDropdownVisible, setRoleDropdownVisible] = useState(false);
   const [showEditPassword, setShowEditPassword] = useState(false);
   const [editPassword, setEditPassword] = useState("");
+  
+  // NEW: Filters state
+  const [filtersModalVisible, setFiltersModalVisible] = useState(false);
+  const [filters, setFilters] = useState({
+    role: "",
+    verified: "",
+    locked: ""
+  });
+  
+  // NEW: Sorting state
+  const [sortBy, setSortBy] = useState("joined_at");
+  const [sortOrder, setSortOrder] = useState("DESC");
+  
+  // NEW: Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 10,
+    total: 0,
+    pages: 1,
+    hasNext: false,
+    hasPrev: false
+  });
+  
   const debounceRef = useRef(null);
 
   // Fetch token helper
@@ -54,26 +92,79 @@ export default function AdminUsersMobile() {
     }
   };
 
-  // Fetch users with normalized booleans (like web version)
+  // Debounce search
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 500);
+    
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [search]);
+
+  // Reset to page 1 when filters/search/sort change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearch, filters, sortBy, sortOrder]);
+
+  // Fetch users with pagination and filters
   const fetchUsers = async () => {
     setLoading(true);
     setError("");
     try {
       const token = await getToken();
+      const params = {
+        search: debouncedSearch,
+        role: filters.role,
+        verified: filters.verified,
+        locked: filters.locked,
+        sortBy,
+        sortOrder,
+        page: currentPage,
+        limit: pagination.limit
+      };
+
       const res = await axios.get(`${DEVELOPMENT_CONFIG.backendBaseUrl}/api/users3`, {
-        params: { search },
+        params,
         headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       });
 
-      // Normalize booleans (fixes locked column issue) - same as web
-      const normalized = res.data.map((u) => ({
+      // Handle different response formats (same as web)
+      let usersData = [];
+      let paginationData = {};
+
+      if (res.data.success && res.data.users && res.data.pagination) {
+        // New paginated response
+        usersData = res.data.users;
+        paginationData = res.data.pagination;
+      } else if (Array.isArray(res.data)) {
+        // Old response format (array)
+        usersData = res.data;
+        paginationData = {
+          page: 1,
+          limit: res.data.length,
+          total: res.data.length,
+          pages: 1,
+          hasNext: false,
+          hasPrev: false
+        };
+      } else if (res.data.data && res.data.pagination) {
+        // Alternative response format
+        usersData = res.data.data;
+        paginationData = res.data.pagination;
+      }
+
+      // Normalize booleans (same as web)
+      const normalized = usersData.map((u) => ({
         ...u,
-        visibility: 
-          u.visibility === false || u.visibility === "false" ? false : true,
+        visibility: u.visibility === false || u.visibility === "false" ? false : true,
         verified: u.verified === true || u.verified === "true" ? true : false,
       }));
 
-      setUsers(Array.isArray(normalized) ? normalized : []);
+      setUsers(normalized);
+      setPagination(paginationData);
     } catch (err) {
       console.error(err);
       setError("Failed to fetch users. You might be unauthorized.");
@@ -84,18 +175,58 @@ export default function AdminUsersMobile() {
   };
 
   useEffect(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(fetchUsers, 350);
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-    };
-  }, [search]);
-
-  useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [currentPage, debouncedSearch, filters, sortBy, sortOrder]);
 
-  // Edit user
+  // NEW: Handle sort change
+  const handleSort = (column) => {
+    if (sortBy === column) {
+      setSortOrder(sortOrder === "ASC" ? "DESC" : "ASC");
+    } else {
+      setSortBy(column);
+      setSortOrder("DESC");
+    }
+  };
+
+  // NEW: Apply filters from modal
+  const applyFilters = (newFilters) => {
+    setFilters(newFilters);
+    setFiltersModalVisible(false);
+  };
+
+  // NEW: Clear all filters
+  const clearFilters = () => {
+    setFilters({
+      role: "",
+      verified: "",
+      locked: ""
+    });
+    setSearch("");
+    setSortBy("joined_at");
+    setSortOrder("DESC");
+  };
+
+  // NEW: Pagination navigation
+  const goToPage = (page) => {
+    if (page >= 1 && page <= pagination.pages) {
+      setCurrentPage(page);
+    }
+  };
+
+  // NEW: Format date for mobile
+  const formatDate = (dateString) => {
+    if (!dateString) return "N/A";
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric"
+    });
+  };
+
+  // Rest of your existing functions (handleEdit, handleUpdate, handleDelete, etc.)
+  // ... [All your existing functions remain the same] ...
+
   const handleEdit = (user) => {
     setEditingUserId(user.id);
     setEditForm({
@@ -111,7 +242,6 @@ export default function AdminUsersMobile() {
 
   const handleEditChange = (key, value) => {
     if (key === "locked") {
-      // locked = !visibility (same as web logic)
       setEditForm((prev) => ({ ...prev, visibility: !value }));
     } else {
       setEditForm((prev) => ({ ...prev, [key]: value }));
@@ -124,7 +254,6 @@ export default function AdminUsersMobile() {
       const token = await getToken();
       const updateData = { ...editForm };
       
-      // Include password only if it was changed
       if (editPassword.trim() !== "") {
         updateData.password = editPassword;
       }
@@ -139,11 +268,9 @@ export default function AdminUsersMobile() {
       
       const updatedUser = res.data?.user || res.data || { id, ...editForm };
       
-      // Normalize the updated user
       const normalizedUser = {
         ...updatedUser,
-        visibility: 
-          updatedUser.visibility === false || updatedUser.visibility === "false" ? false : true,
+        visibility: updatedUser.visibility === false || updatedUser.visibility === "false" ? false : true,
         verified: updatedUser.verified === true || updatedUser.verified === "true" ? true : false,
       };
       
@@ -151,7 +278,7 @@ export default function AdminUsersMobile() {
       setEditingUserId(null);
       setEditPassword("");
       Alert.alert("Success", "User updated successfully!");
-      fetchUsers(); // Refresh data like web version
+      fetchUsers();
     } catch (err) {
       console.error(err);
       Alert.alert("Error", err.response?.data?.error || "Failed to update user");
@@ -160,7 +287,6 @@ export default function AdminUsersMobile() {
     }
   };
 
-  // Delete user
   const handleDelete = (id) => {
     Alert.alert(
       "Delete User",
@@ -176,7 +302,7 @@ export default function AdminUsersMobile() {
               await axios.delete(`${DEVELOPMENT_CONFIG.backendBaseUrl}/api/users3/${id}`, {
                 headers: token ? { Authorization: `Bearer ${token}` } : undefined,
               });
-              setUsers((prev) => prev.filter((u) => u.id !== id));
+              fetchUsers();
               Alert.alert("Success", "User deleted successfully!");
             } catch (err) {
               console.error(err);
@@ -189,9 +315,8 @@ export default function AdminUsersMobile() {
     );
   };
 
-  // Lock/Unlock user
   const handleToggleLock = async (user) => {
-    const newVisibility = !user.visibility; // toggle visibility
+    const newVisibility = !user.visibility;
     const action = newVisibility ? "unlock" : "lock";
     
     Alert.alert(
@@ -223,8 +348,7 @@ export default function AdminUsersMobile() {
               const updatedUser = res.data?.user || res.data || { ...user, visibility: newVisibility };
               const normalizedUser = {
                 ...updatedUser,
-                visibility: 
-                  updatedUser.visibility === false || updatedUser.visibility === "false" ? false : true,
+                visibility: updatedUser.visibility === false || updatedUser.visibility === "false" ? false : true,
                 verified: updatedUser.verified === true || updatedUser.verified === "true" ? true : false,
               };
               
@@ -241,7 +365,6 @@ export default function AdminUsersMobile() {
     );
   };
 
-  // Add user handlers
   const handleAddChange = (key, value) => {
     setAddForm((prev) => ({ ...prev, [key]: value }));
   };
@@ -273,7 +396,7 @@ export default function AdminUsersMobile() {
 
   // Helper functions for locked status
   const getLockedStatus = (user) => {
-    return user.visibility ? "No" : "Yes"; // visibility true = not locked (same as web)
+    return user.visibility ? "No" : "Yes";
   };
 
   const getLockedStyle = (user) => {
@@ -290,6 +413,171 @@ export default function AdminUsersMobile() {
     );
   };
 
+  // NEW: Render user item for FlatList
+  const renderUserItem = ({ item: user }) => {
+    const isEditing = editingUserId === user.id;
+    return (
+      <View style={styles.userCard}>
+        <View style={styles.userInfoContainer}>
+          <View style={styles.userHeaderRow}>
+            <Text style={styles.userName}>{user.name}</Text>
+            <View style={styles.lockStatusContainer}>
+              {getLockedIcon(user)}
+              <Text style={[styles.lockStatusText, getLockedStyle(user)]}>
+                {getLockedStatus(user)}
+              </Text>
+            </View>
+          </View>
+          <Text style={styles.userEmail}>{user.email}</Text>
+          <View style={styles.userMetaRow}>
+            <Text style={styles.userRole}>Role: {user.role}</Text>
+            <Text style={[
+              styles.userVerified, 
+              user.verified ? styles.verifiedYes : styles.verifiedNo
+            ]}>
+              Verified: {user.verified ? "Yes" : "No"}
+            </Text>
+          </View>
+          <Text style={styles.dateJoined}>
+            Joined: {formatDate(user.joined_at)}
+          </Text>
+        </View>
+        
+        <View style={styles.actionsContainer}>
+          {/* <TouchableOpacity
+            style={[styles.actionButton, styles.lockButton]}
+            onPress={() => handleToggleLock(user)}
+          >
+            {!user.visibility ? (
+              <LockOpen size={14} color="#FFF" />
+            ) : (
+              <Lock size={14} color="#FFF" />
+            )}
+            <Text style={styles.actionButtonText}>
+              {!user.visibility ? "Unlock" : "Lock"}
+            </Text>
+          </TouchableOpacity> */}
+          
+          <TouchableOpacity
+            style={[styles.actionButton, styles.editButton]}
+            onPress={() => handleEdit(user)}
+          >
+            <Text style={styles.actionButtonText}>Edit</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity
+            style={[styles.actionButton, styles.deleteButton]}
+            onPress={() => handleDelete(user.profile_id)}
+          >
+            <Text style={styles.actionButtonText}>Delete</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Edit Form */}
+        {isEditing && (
+          <View style={styles.editFormContainer}>
+            <Text style={styles.editFormTitle}>Edit User</Text>
+            
+            <TextInput
+              placeholder="Name"
+              value={editForm.name}
+              onChangeText={(v) => handleEditChange("name", v)}
+              style={styles.editInput}
+            />
+            
+            <TextInput
+              placeholder="Email"
+              value={editForm.email}
+              onChangeText={(v) => handleEditChange("email", v)}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              style={styles.editInput}
+            />
+            
+            <TextInput
+              placeholder="Role"
+              value={editForm.role}
+              onChangeText={(v) => handleEditChange("role", v)}
+              style={styles.editInput}
+            />
+            
+            <View style={styles.passwordInputContainer}>
+              <TextInput
+                placeholder="New Password (leave empty to keep current)"
+                value={editPassword}
+                onChangeText={setEditPassword}
+                secureTextEntry={!showEditPassword}
+                style={[styles.editInput, { flex: 1 }]}
+              />
+              <TouchableOpacity
+                style={styles.eyeButton}
+                onPress={() => setShowEditPassword(!showEditPassword)}
+              >
+                {showEditPassword ? (
+                  <EyeOff size={20} color="#666" />
+                ) : (
+                  <Eye size={20} color="#666" />
+                )}
+              </TouchableOpacity>
+            </View>
+            
+            <View style={styles.switchRow}>
+              <Text style={styles.switchLabel}>Verified:</Text>
+              <Switch
+                value={editForm.verified}
+                onValueChange={(v) => handleEditChange("verified", v)}
+                trackColor={{ false: "#D1D1D6", true: "#34C759" }}
+              />
+              <Text style={styles.switchText}>
+                {editForm.verified ? "Yes" : "No"}
+              </Text>
+            </View>
+            
+            <View style={styles.switchRow}>
+              <Text style={styles.switchLabel}>Locked:</Text>
+              <Switch
+                value={!editForm.visibility}
+                onValueChange={(v) => handleEditChange("locked", v)}
+                trackColor={{ false: "#D1D1D6", true: "#FF3B30" }}
+              />
+              <Text style={styles.switchText}>
+                {!editForm.visibility ? "Yes" : "No"}
+              </Text>
+            </View>
+            
+            <View style={styles.editFormActions}>
+              <TouchableOpacity
+                style={[styles.editFormButton, styles.saveButton]}
+                onPress={() => handleUpdate(user.profile_id)}
+              >
+                <Text style={styles.editFormButtonText}>Save</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={[styles.editFormButton, styles.cancelButton]}
+                onPress={() => {
+                  setEditingUserId(null);
+                  setEditPassword("");
+                }}
+              >
+                <Text style={[styles.editFormButtonText, { color: "#FF3B30" }]}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+      </View>
+    );
+  };
+
+
+  // NEW: Check if any filters are active
+  const hasActiveFilters = () => {
+    return Object.values(filters).some(value => value !== "") || 
+           search !== "" || 
+           sortBy !== "joined_at" || 
+           sortOrder !== "DESC";
+  };
+
   return (
     <KeyboardAvoidingView 
       style={{ flex: 1 }} 
@@ -298,19 +586,93 @@ export default function AdminUsersMobile() {
       <View style={styles.container}>
         <Text style={styles.header}>Admin — Users</Text>
 
-        <View style={styles.searchRow}>
-          <TextInput
-            placeholder="Search by name or role..."
-            value={search}
-            onChangeText={setSearch}
-            style={styles.searchInput}
-            placeholderTextColor="#999"
-          />
+        {/* Stats Row */}
+        <View style={styles.statsRow}>
+          <View style={styles.statCard}>
+            <Text style={styles.statLabel}>Total Users</Text>
+            <Text style={styles.statValue}>{pagination.total || users.length}</Text>
+          </View>
+          <View style={styles.statCard}>
+            <Text style={styles.statLabel}>Page</Text>
+            <Text style={styles.statValue}>{currentPage}/{pagination.pages}</Text>
+          </View>
+        </View>
+
+        {/* Search and Controls Row */}
+        <View style={styles.controlsRow}>
+          <View style={styles.searchContainer}>
+            <TextInput
+              placeholder="Search by name or email..."
+              value={search}
+              onChangeText={setSearch}
+              style={styles.searchInput}
+              placeholderTextColor="#999"
+            />
+          </View>
+          
+          <TouchableOpacity
+            style={[styles.filterButton, hasActiveFilters() && styles.filterButtonActive]}
+            onPress={() => setFiltersModalVisible(true)}
+          >
+            <Filter size={20} color={hasActiveFilters() ? "#007AFF" : "#666"} />
+          </TouchableOpacity>
+          
           <TouchableOpacity
             style={styles.addButton}
             onPress={() => setAddModalVisible(true)}
           >
-            <Text style={styles.addButtonText}>Add User</Text>
+            <Text style={styles.addButtonText}>+ Add</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Active Filters Badge */}
+        {hasActiveFilters() && (
+          <TouchableOpacity 
+            style={styles.activeFiltersBadge}
+            onPress={clearFilters}
+          >
+            <Text style={styles.activeFiltersText}>
+              Filters Active • Tap to clear
+            </Text>
+            <X size={14} color="#007AFF" />
+          </TouchableOpacity>
+        )}
+
+        {/* Sorting Controls */}
+        <View style={styles.sortingRow}>
+          <Text style={styles.sortingLabel}>Sort by:</Text>
+          <TouchableOpacity
+            style={[styles.sortButton, sortBy === "joined_at" && styles.sortButtonActive]}
+            onPress={() => handleSort("joined_at")}
+          >
+            <Text style={styles.sortButtonText}>Date Joined</Text>
+            {sortBy === "joined_at" && (
+              sortOrder === "ASC" ? 
+                <SortAsc size={14} color="#007AFF" /> : 
+                <SortDesc size={14} color="#007AFF" />
+            )}
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.sortButton, sortBy === "name" && styles.sortButtonActive]}
+            onPress={() => handleSort("name")}
+          >
+            <Text style={styles.sortButtonText}>Name</Text>
+            {sortBy === "name" && (
+              sortOrder === "ASC" ? 
+                <SortAsc size={14} color="#007AFF" /> : 
+                <SortDesc size={14} color="#007AFF" />
+            )}
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.sortButton, sortBy === "role" && styles.sortButtonActive]}
+            onPress={() => handleSort("role")}
+          >
+            <Text style={styles.sortButtonText}>Role</Text>
+            {sortBy === "role" && (
+              sortOrder === "ASC" ? 
+                <SortAsc size={14} color="#007AFF" /> : 
+                <SortDesc size={14} color="#007AFF" />
+            )}
           </TouchableOpacity>
         </View>
 
@@ -321,168 +683,209 @@ export default function AdminUsersMobile() {
             <ActivityIndicator size="large" color="#007AFF" />
           </View>
         ) : (
-          <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
-            {users.length === 0 ? (
-              <View style={styles.emptyContainer}>
-                <Text style={styles.emptyText}>No users found</Text>
-              </View>
-            ) : (
-              users.map((user) => {
-                const isEditing = editingUserId === user.id;
-                return (
-                  <View key={user.id} style={styles.userCard}>
-                    <View style={styles.userInfoContainer}>
-                      <View style={styles.userHeaderRow}>
-                        <Text style={styles.userName}>{user.name}</Text>
-                        <View style={styles.lockStatusContainer}>
-                          {getLockedIcon(user)}
-                          <Text style={[styles.lockStatusText, getLockedStyle(user)]}>
-                            {getLockedStatus(user)}
-                          </Text>
-                        </View>
-                      </View>
-                      <Text style={styles.userEmail}>{user.email}</Text>
-                      <View style={styles.userMetaRow}>
-                        <Text style={styles.userRole}>Role: {user.role}</Text>
-                        <Text style={[
-                          styles.userVerified, 
-                          user.verified ? styles.verifiedYes : styles.verifiedNo
-                        ]}>
-                          Verified: {user.verified ? "Yes" : "No"}
-                        </Text>
-                      </View>
-                    </View>
-                    
-                    <View style={styles.actionsContainer}>
-                      <TouchableOpacity
-                        style={[styles.actionButton, styles.lockButton]}
-                        onPress={() => handleToggleLock(user)}
-                      >
-                        {!user.visibility ? (
-                          <LockOpen size={14} color="#FFF" />
-                        ) : (
-                          <Lock size={14} color="#FFF" />
-                        )}
-                        <Text style={styles.actionButtonText}>
-                          {!user.visibility ? "Unlock" : "Lock"}
-                        </Text>
-                      </TouchableOpacity>
-                      
-                      <TouchableOpacity
-                        style={[styles.actionButton, styles.editButton]}
-                        onPress={() => handleEdit(user)}
-                      >
-                        <Text style={styles.actionButtonText}>Edit</Text>
-                      </TouchableOpacity>
-                      
-                      <TouchableOpacity
-                        style={[styles.actionButton, styles.deleteButton]}
-                        onPress={() => handleDelete(user.profile_id)}
-                      >
-                        <Text style={styles.actionButtonText}>Delete</Text>
-                      </TouchableOpacity>
-                    </View>
+          <>
+            <FlatList
+              data={users}
+              renderItem={renderUserItem}
+              keyExtractor={(item) => item.profile_id}
+              contentContainerStyle={styles.listContainer}
+              showsVerticalScrollIndicator={false}
+              ListEmptyComponent={
+                <View style={styles.emptyContainer}>
+                  <Text style={styles.emptyText}>
+                    {hasActiveFilters() 
+                      ? "No users found matching your criteria" 
+                      : "No users found"}
+                  </Text>
+                </View>
+              }
+            />
 
-                    {/* Edit Form (expands below card when editing) */}
-                    {isEditing && (
-                      <View style={styles.editFormContainer}>
-                        <Text style={styles.editFormTitle}>Edit User</Text>
-                        
-                        <TextInput
-                          placeholder="Name"
-                          value={editForm.name}
-                          onChangeText={(v) => handleEditChange("name", v)}
-                          style={styles.editInput}
-                        />
-                        
-                        <TextInput
-                          placeholder="Email"
-                          value={editForm.email}
-                          onChangeText={(v) => handleEditChange("email", v)}
-                          keyboardType="email-address"
-                          autoCapitalize="none"
-                          style={styles.editInput}
-                        />
-                        
-                        <TextInput
-                          placeholder="Role"
-                          value={editForm.role}
-                          onChangeText={(v) => handleEditChange("role", v)}
-                          style={styles.editInput}
-                        />
-                        
-                        <View style={styles.passwordInputContainer}>
-                          <TextInput
-                            placeholder="New Password (leave empty to keep current)"
-                            value={editPassword}
-                            onChangeText={setEditPassword}
-                            secureTextEntry={!showEditPassword}
-                            style={[styles.editInput, { flex: 1 }]}
-                          />
-                          <TouchableOpacity
-                            style={styles.eyeButton}
-                            onPress={() => setShowEditPassword(!showEditPassword)}
-                          >
-                            {showEditPassword ? (
-                              <EyeOff size={20} color="#666" />
-                            ) : (
-                              <Eye size={20} color="#666" />
-                            )}
-                          </TouchableOpacity>
-                        </View>
-                        
-                        <View style={styles.switchRow}>
-                          <Text style={styles.switchLabel}>Verified:</Text>
-                          <Switch
-                            value={editForm.verified}
-                            onValueChange={(v) => handleEditChange("verified", v)}
-                            trackColor={{ false: "#D1D1D6", true: "#34C759" }}
-                          />
-                          <Text style={styles.switchText}>
-                            {editForm.verified ? "Yes" : "No"}
-                          </Text>
-                        </View>
-                        
-                        <View style={styles.switchRow}>
-                          <Text style={styles.switchLabel}>Locked:</Text>
-                          <Switch
-                            value={!editForm.visibility} // locked = !visibility
-                            onValueChange={(v) => handleEditChange("locked", v)}
-                            trackColor={{ false: "#D1D1D6", true: "#FF3B30" }}
-                          />
-                          <Text style={styles.switchText}>
-                            {!editForm.visibility ? "Yes" : "No"}
-                          </Text>
-                        </View>
-                        
-                        <View style={styles.editFormActions}>
-                          <TouchableOpacity
-                            style={[styles.editFormButton, styles.saveButton]}
-                            onPress={() => handleUpdate(user.profile_id)}
-                          >
-                            <Text style={styles.editFormButtonText}>Save</Text>
-                          </TouchableOpacity>
-                          
-                          <TouchableOpacity
-                            style={[styles.editFormButton, styles.cancelButton]}
-                            onPress={() => {
-                              setEditingUserId(null);
-                              setEditPassword("");
-                            }}
-                          >
-                            <Text style={[styles.editFormButtonText, { color: "#FF3B30" }]}>Cancel</Text>
-                          </TouchableOpacity>
-                        </View>
-                      </View>
-                    )}
-                  </View>
-                );
-              })
+            {/* Pagination Controls */}
+            {pagination.total > pagination.limit && (
+              <View style={styles.paginationContainer}>
+                <TouchableOpacity
+                  style={[styles.paginationButton, currentPage === 1 && styles.paginationButtonDisabled]}
+                  onPress={() => goToPage(currentPage - 1)}
+                  disabled={currentPage === 1}
+                >
+                  <ChevronLeft size={20} color={currentPage === 1 ? "#999" : "#007AFF"} />
+                </TouchableOpacity>
+                
+                <Text style={styles.pageInfo}>
+                  Page {currentPage} of {pagination.pages}
+                </Text>
+                
+                <TouchableOpacity
+                  style={[styles.paginationButton, currentPage === pagination.pages && styles.paginationButtonDisabled]}
+                  onPress={() => goToPage(currentPage + 1)}
+                  disabled={currentPage === pagination.pages}
+                >
+                  <ChevronRight size={20} color={currentPage === pagination.pages ? "#999" : "#007AFF"} />
+                </TouchableOpacity>
+              </View>
             )}
-          </ScrollView>
+          </>
         )}
 
-        {/* Add User Modal */}
+        {/* Filters Modal */}
+        <Modal
+          visible={filtersModalVisible}
+          animationType="slide"
+          transparent={true}
+          onRequestClose={() => setFiltersModalVisible(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.filtersModalContainer}>
+              <View style={styles.filtersModalHeader}>
+                <Text style={styles.filtersModalTitle}>Filters & Sort</Text>
+                <TouchableOpacity
+                  onPress={() => setFiltersModalVisible(false)}
+                  style={styles.closeButton}
+                >
+                  <X size={24} color="#666" />
+                </TouchableOpacity>
+              </View>
+              
+              <ScrollView style={styles.filtersModalContent}>
+                {/* Role Filter */}
+                <View style={styles.filterSection}>
+                  <Text style={styles.filterLabel}>Role</Text>
+                  <View style={styles.filterOptions}>
+                    {["", "admin", "user"].map((role) => (
+                      <TouchableOpacity
+                        key={role || "all"}
+                        style={[
+                          styles.filterOption,
+                          filters.role === role && styles.filterOptionActive
+                        ]}
+                        onPress={() => setFilters(prev => ({ ...prev, role }))}
+                      >
+                        <Text style={[
+                          styles.filterOptionText,
+                          filters.role === role && styles.filterOptionTextActive
+                        ]}>
+                          {role === "" ? "All Roles" : role === "admin" ? "Admin" : "User"}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
+
+                {/* Verification Filter */}
+                <View style={styles.filterSection}>
+                  <Text style={styles.filterLabel}>Verification</Text>
+                  <View style={styles.filterOptions}>
+                    {["", "true", "false"].map((verified) => (
+                      <TouchableOpacity
+                        key={verified || "all"}
+                        style={[
+                          styles.filterOption,
+                          filters.verified === verified && styles.filterOptionActive
+                        ]}
+                        onPress={() => setFilters(prev => ({ ...prev, verified }))}
+                      >
+                        <Text style={[
+                          styles.filterOptionText,
+                          filters.verified === verified && styles.filterOptionTextActive
+                        ]}>
+                          {verified === "" ? "All" : verified === "true" ? "Verified" : "Not Verified"}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
+
+                {/* Lock Status Filter */}
+                <View style={styles.filterSection}>
+                  <Text style={styles.filterLabel}>Account Status</Text>
+                  <View style={styles.filterOptions}>
+                    {["", "true", "false"].map((locked) => (
+                      <TouchableOpacity
+                        key={locked || "all"}
+                        style={[
+                          styles.filterOption,
+                          filters.locked === locked && styles.filterOptionActive
+                        ]}
+                        onPress={() => setFilters(prev => ({ ...prev, locked }))}
+                      >
+                        <Text style={[
+                          styles.filterOptionText,
+                          filters.locked === locked && styles.filterOptionTextActive
+                        ]}>
+                          {locked === "" ? "All Status" : locked === "true" ? "Locked" : "Unlocked"}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
+
+                {/* Sorting Section */}
+                <View style={styles.filterSection}>
+                  <Text style={styles.filterLabel}>Sort By</Text>
+                  <View style={styles.filterOptions}>
+                    {[
+                      { value: "joined_at", label: "Date Joined" },
+                      { value: "name", label: "Name" },
+                      { value: "role", label: "Role" }
+                    ].map((sort) => (
+                      <TouchableOpacity
+                        key={sort.value}
+                        style={[
+                          styles.filterOption,
+                          sortBy === sort.value && styles.filterOptionActive
+                        ]}
+                        onPress={() => setSortBy(sort.value)}
+                      >
+                        <Text style={[
+                          styles.filterOptionText,
+                          sortBy === sort.value && styles.filterOptionTextActive
+                        ]}>
+                          {sort.label}
+                        </Text>
+                        {sortBy === sort.value && (
+                          <TouchableOpacity
+                            onPress={() => setSortOrder(sortOrder === "ASC" ? "DESC" : "ASC")}
+                            style={styles.sortOrderButton}
+                          >
+                            {sortOrder === "ASC" ? 
+                              <SortAsc size={16} color="#007AFF" /> : 
+                              <SortDesc size={16} color="#007AFF" />
+                            }
+                          </TouchableOpacity>
+                        )}
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
+              </ScrollView>
+              
+              <View style={styles.filtersModalFooter}>
+                <TouchableOpacity
+                  style={[styles.modalActionButton, styles.clearButton]}
+                  onPress={() => {
+                    clearFilters();
+                    setFiltersModalVisible(false);
+                  }}
+                >
+                  <Text style={[styles.modalActionButtonText, { color: "#FF3B30" }]}>
+                    Clear All
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.modalActionButton, styles.applyButton]}
+                  onPress={() => setFiltersModalVisible(false)}
+                >
+                  <Text style={[styles.modalActionButtonText, { color: "#007AFF" }]}>
+                    Apply Filters
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
+
+        {/* Add User Modal (existing - keep as is) */}
         <Modal
           visible={addModalVisible}
           animationType="slide"
@@ -519,7 +922,6 @@ export default function AdminUsersMobile() {
                   style={styles.modalInput}
                 />
 
-                {/* Custom Role Dropdown */}
                 <View style={{ marginBottom: 12 }}>
                   <Text style={styles.modalLabel}>Role *</Text>
                   <TouchableOpacity
@@ -547,17 +949,17 @@ export default function AdminUsersMobile() {
                   )}
                 </View>
 
-                <View style={styles.modalSwitchRow}>
+                {/* <View style={styles.modalSwitchRow}>
                   <Text style={styles.modalLabel}>Locked:</Text>
                   <Switch
-                    value={!addForm.visibility} // locked = !visibility
+                    value={!addForm.visibility}
                     onValueChange={(v) => handleAddChange("visibility", !v)}
                     trackColor={{ false: "#D1D1D6", true: "#FF3B30" }}
                   />
                   <Text style={styles.modalSwitchText}>
                     {!addForm.visibility ? "Yes" : "No"}
                   </Text>
-                </View>
+                </View> */}
 
                 <View style={styles.modalButtons}>
                   <TouchableOpacity
@@ -598,33 +1000,79 @@ const styles = StyleSheet.create({
     padding: 16 
   },
   header: { 
-    fontSize: 24, 
+    fontSize: 28, 
     fontWeight: "700", 
-    marginBottom: 20, 
+    marginBottom: 16, 
     color: "#1C1C1E",
     marginTop: Platform.OS === 'ios' ? 10 : 0,
   },
-  searchRow: { 
-    flexDirection: "row", 
-    alignItems: "center", 
-    marginBottom: 20 
+  // Stats Row
+  statsRow: {
+    flexDirection: "row",
+    gap: 12,
+    marginBottom: 20,
+  },
+  statCard: {
+    flex: 1,
+    backgroundColor: "#FFF",
+    borderRadius: 12,
+    padding: 10,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  statLabel: {
+    fontSize: 12,
+    color: "#8E8E93",
+    fontWeight: "500",
+    marginBottom: 4,
+  },
+  statValue: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#1C1C1E",
+  },
+  // Controls Row
+  controlsRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+    gap: 8,
+  },
+  searchContainer: {
+    flex: 1,
   },
   searchInput: { 
-    flex: 1, 
     height: 48, 
     borderWidth: 1, 
     borderColor: "#C7C7CC", 
-    borderRadius: 10, 
+    borderRadius: 12, 
     paddingHorizontal: 16, 
     backgroundColor: "#FFF",
     fontSize: 16,
     color: "#1C1C1E",
   },
+  filterButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    backgroundColor: "#FFF",
+    borderWidth: 1,
+    borderColor: "#C7C7CC",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  filterButtonActive: {
+    borderColor: "#007AFF",
+    backgroundColor: "#F0F7FF",
+  },
   addButton: { 
-    marginLeft: 12, 
-    paddingHorizontal: 20, 
-    paddingVertical: 12, 
-    borderRadius: 10, 
+    paddingHorizontal: 16, 
+    height: 48,
+    borderRadius: 12, 
     backgroundColor: "#007AFF", 
     justifyContent: "center", 
     alignItems: "center" 
@@ -634,6 +1082,192 @@ const styles = StyleSheet.create({
     fontWeight: "600", 
     fontSize: 16 
   },
+  // Active Filters Badge
+  activeFiltersBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#F0F7FF",
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    marginBottom: 12,
+    gap: 6,
+  },
+  activeFiltersText: {
+    fontSize: 14,
+    color: "#007AFF",
+    fontWeight: "500",
+  },
+  // Sorting Row
+  sortingRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 16,
+    gap: 8,
+  },
+  sortingLabel: {
+    fontSize: 14,
+    color: "#8E8E93",
+    marginRight: 4,
+  },
+  sortButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: "#FFF",
+    borderWidth: 1,
+    borderColor: "#C7C7CC",
+    gap: 4,
+  },
+  sortButtonActive: {
+    borderColor: "#007AFF",
+    backgroundColor: "#F0F7FF",
+  },
+  sortButtonText: {
+    fontSize: 14,
+    color: "#1C1C1E",
+  },
+  sortOrderButton: {
+    marginLeft: 2,
+  },
+  // List
+  listContainer: {
+    paddingBottom: 20,
+  },
+  userCard: {
+    backgroundColor: "#FFF",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 8,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: "#F2F2F7",
+  },
+  dateJoined: {
+    fontSize: 12,
+    color: "#8E8E93",
+    marginTop: 4,
+  },
+  // Pagination
+  paginationContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingTop: 16,
+    paddingBottom: 30,
+    borderTopWidth: 1,
+    borderTopColor: "#F2F2F7",
+    gap: 24,
+  },
+  paginationButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "#FFF",
+    borderWidth: 1,
+    borderColor: "#C7C7CC",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  paginationButtonDisabled: {
+    opacity: 0.5,
+  },
+  pageInfo: {
+    fontSize: 16,
+    color: "#1C1C1E",
+    fontWeight: "500",
+  },
+  // Filters Modal
+  filtersModalContainer: {
+    flex: 1,
+    backgroundColor: "#FFF",
+    marginTop: 60,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+  },
+  filtersModalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F2F2F7",
+  },
+  filtersModalTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#1C1C1E",
+  },
+  closeButton: {
+    padding: 4,
+  },
+  filtersModalContent: {
+    flex: 1,
+    padding: 20,
+  },
+  filterSection: {
+    marginBottom: 24,
+  },
+  filterLabel: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#1C1C1E",
+    marginBottom: 12,
+  },
+  filterOptions: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  filterOption: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
+    backgroundColor: "#F2F2F7",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  filterOptionActive: {
+    backgroundColor: "#F0F7FF",
+    borderWidth: 1,
+    borderColor: "#007AFF",
+  },
+  filterOptionText: {
+    fontSize: 14,
+    color: "#666",
+  },
+  filterOptionTextActive: {
+    color: "#007AFF",
+    fontWeight: "500",
+  },
+  filtersModalFooter: {
+    flexDirection: "row",
+    padding: 20,
+    borderTopWidth: 1,
+    borderTopColor: "#F2F2F7",
+    gap: 12,
+  },
+  modalActionButton: {
+    flex: 1,
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: "center",
+  },
+  clearButton: {
+    backgroundColor: "#F2F2F7",
+  },
+  applyButton: {
+    backgroundColor: "#F0F7FF",
+  },
+  // Existing styles (keep all your existing styles below)
   errorText: { 
     color: "#FF3B30", 
     marginTop: 8, 
@@ -656,19 +1290,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#8E8E93",
     textAlign: "center",
-  },
-  userCard: {
-    backgroundColor: "#FFF",
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 8,
-    elevation: 3,
-    borderWidth: 1,
-    borderColor: "#F2F2F7",
   },
   userInfoContainer: {
     marginBottom: 12,
@@ -886,13 +1507,6 @@ const styles = StyleSheet.create({
     flexDirection: "row", 
     justifyContent: "flex-end", 
     gap: 12 
-  },
-  modalActionButton: { 
-    paddingVertical: 12, 
-    paddingHorizontal: 24, 
-    borderRadius: 10,
-    minWidth: 120,
-    alignItems: "center",
   },
   modalActionButtonText: { 
     fontWeight: "600", 
