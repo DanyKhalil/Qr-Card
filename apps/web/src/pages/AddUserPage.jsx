@@ -83,7 +83,7 @@ const AddUserPage = () => {
             className="dropdown-input"
           >
             <option value="user">User</option>
-            <option value="company">Company</option>
+            {/* <option value="company">Company</option> */}
             <option value="admin">Admin</option>
           </select>
           <button type="submit" className="login-button">

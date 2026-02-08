@@ -12,12 +12,21 @@ export const getAllUsers = async (req, res) => {
     locked,
     sortBy = "joined_at",
     sortOrder = "DESC",
+    page = 1,
+    limit = 20,
   } = req.query;
 
   try {
-    /* =========================
-       SEARCH (name / role / email)
-    ========================= */
+    // =========================
+    // PAGINATION SETUP
+    // =========================
+    const pageNum = parseInt(page);
+    const limitNum = parseInt(limit);
+    const offset = (pageNum - 1) * limitNum;
+
+    // =========================
+    // SEARCH (name / role / email)
+    // =========================
     const searchWhere = search
       ? {
           [Op.or]: [
@@ -34,25 +43,25 @@ export const getAllUsers = async (req, res) => {
         }
       : {};
 
-    /* =========================
-       USER FILTERS
-    ========================= */
+    // =========================
+    // USER FILTERS
+    // =========================
     const userWhere = {};
 
     if (role) userWhere.role = role;
 
-    if (verified !== '') {
+    if (verified !== undefined && verified !== '') {
       userWhere.verified = verified === "true";
     }
 
-    if (locked !== undefined) {
+    if (locked !== undefined && locked !== '') {
       // locked = true → visibility = false
       userWhere.visibility = locked === "true" ? false : true;
     }
 
-    /* =========================
-       SORTING (SAFE MAP)
-    ========================= */
+    // =========================
+    // SORTING (SAFE MAP)
+    // =========================
     const sortMap = {
       joined_at: ["created_at"], // Profile.created_at
       name: ["name"], // Profile.name
@@ -63,9 +72,23 @@ export const getAllUsers = async (req, res) => {
       ? [[...sortMap[sortBy], sortOrder]]
       : [["created_at", "DESC"]];
 
-    /* =========================
-       QUERY
-    ========================= */
+    // =========================
+    // GET TOTAL COUNT
+    // =========================
+    const totalCount = await Profile.count({
+      where: searchWhere,
+      include: [
+        {
+          model: User,
+          as: "user",
+          where: userWhere,
+        },
+      ],
+    });
+
+    // =========================
+    // QUERY WITH PAGINATION
+    // =========================
     const profiles = await Profile.findAll({
       where: searchWhere,
       attributes: [
@@ -87,11 +110,13 @@ export const getAllUsers = async (req, res) => {
         },
       ],
       order,
+      limit: limitNum,
+      offset,
     });
 
-    /* =========================
-       RESPONSE SHAPE
-    ========================= */
+    // =========================
+    // RESPONSE SHAPE
+    // =========================
     const result = profiles.map((p) => ({
       profile_id: p.id, // ✅ profile id only
       name: p.name,
@@ -107,10 +132,41 @@ export const getAllUsers = async (req, res) => {
       website: p.website,
     }));
 
-    res.json(result);
+    // =========================
+    // PAGINATION METADATA
+    // =========================
+    const totalPages = Math.ceil(totalCount / limitNum);
+
+    // =========================
+    // RESPONSE WITH PAGINATION
+    // =========================
+    res.json({
+      success: true,
+      users: result,
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        total: totalCount,
+        pages: totalPages,
+        hasNext: pageNum < totalPages,
+        hasPrev: pageNum > 1,
+      },
+      filters: {
+        search,
+        role,
+        verified,
+        locked,
+        sortBy,
+        sortOrder,
+      },
+    });
   } catch (error) {
     console.error("GET /api/users (profiles) error:", error);
-    res.status(500).json({ error: "Server error" });
+    res.status(500).json({ 
+      success: false,
+      error: "Server error",
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 };
 
