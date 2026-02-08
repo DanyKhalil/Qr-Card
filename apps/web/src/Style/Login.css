@@ -349,3 +349,271 @@ body, html {
   cursor: not-allowed;
   transform: none;
 }
+
+
+
+
+
+
+
+
+
+
+/* ===== FORGOT PASSWORD LINK ===== */
+.forgot-password-link {
+  text-align: right;
+  width: 100%;
+  max-width: 445px;
+  margin-bottom: 20px;
+  margin-top: -5px;
+}
+
+.forgot-password-link span {
+  font-size: 14px;
+  color: #666;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.forgot-password-link span.clickable {
+  color: #6B63FF;
+}
+
+.forgot-password-link span.clickable:hover {
+  color: #4F46E5;
+  text-decoration: underline;
+}
+
+.forgot-password-link span.disabled {
+  color: #999;
+  cursor: not-allowed;
+}
+
+/* ===== MODAL STYLES ===== */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modal-container {
+  background: white;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 500px;
+  padding: 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  animation: modalSlideIn 0.3s ease;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.modal-header h2 {
+  margin: 0;
+  color: #333;
+  font-size: 24px;
+}
+
+.close-icon {
+  font-size: 24px;
+  color: #999;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.close-icon:hover {
+  color: #666;
+}
+
+.modal-description {
+  color: #666;
+  margin-bottom: 25px;
+  line-height: 1.5;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 15px;
+  margin-top: 25px;
+}
+
+.modal-submit {
+  flex: 1;
+  background: linear-gradient(to right, #A9A1FF, #6B63FF);
+  color: white;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.modal-submit:hover:not(:disabled) {
+  background: linear-gradient(to right, #9184E8, #4F46E5);
+}
+
+.modal-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.modal-cancel {
+  flex: 1;
+  background: white;
+  color: #666;
+  padding: 12px;
+  border: 2px solid #ddd;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.modal-cancel:hover:not(:disabled) {
+  background: #f5f5f5;
+  border-color: #999;
+}
+
+.modal-message {
+  margin-top: 15px;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.modal-message.error {
+  background-color: #fee;
+  color: #d32f2f;
+  border: 1px solid #ffcdd2;
+}
+
+.modal-message.info {
+  background-color: #e8f4fd;
+  color: #1976d2;
+  border: 1px solid #bbdefb;
+}
+
+/* ===== CONFIRMATION STEP STYLES ===== */
+.confirmation-content {
+  text-align: center;
+}
+
+.email-icon {
+  margin: 20px 0;
+  display: inline-block;
+  padding: 20px;
+  background-color: #f0f0ff;
+  border-radius: 50%;
+}
+
+.confirmation-content h3 {
+  color: #333;
+  margin-bottom: 15px;
+}
+
+.confirmation-text {
+  color: #666;
+  margin-bottom: 10px;
+}
+
+.user-email-display {
+  background-color: #f8f9fa;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  color: #333;
+  font-weight: 500;
+  margin: 15px 0;
+}
+
+.instructions {
+  text-align: left;
+  margin: 25px 0;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  border-left: 4px solid #6B63FF;
+}
+
+.instructions p {
+  margin-top: 0;
+  color: #333;
+  font-weight: 500;
+}
+
+.instructions ol {
+  margin: 10px 0 0 0;
+  padding-left: 20px;
+  color: #666;
+}
+
+.instructions li {
+  margin-bottom: 8px;
+}
+
+.note {
+  color: #666;
+  font-size: 14px;
+  margin: 20px 0;
+  padding: 10px;
+  background-color: #fff8e1;
+  border-radius: 8px;
+}
+
+.resend-text {
+  margin-top: 20px;
+  color: #666;
+  font-size: 14px;
+}
+
+.resend-link {
+  color: #6B63FF;
+  cursor: pointer;
+  margin-left: 5px;
+  font-weight: 500;
+}
+
+.resend-link:hover {
+  text-decoration: underline;
+}
+
+/* Responsive modal */
+@media (max-width: 600px) {
+  .modal-container {
+    padding: 20px;
+    margin: 10px;
+  }
+  
+  .modal-header h2 {
+    font-size: 20px;
+  }
+  
+  .modal-buttons {
+    flex-direction: column;
+  }
+}

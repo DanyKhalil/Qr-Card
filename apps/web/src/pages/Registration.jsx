@@ -74,7 +74,7 @@ const RegistrationForm = () => {
         name,
         email,
         password,
-        role: "client"
+        role: "user"
       });
 
       setMessage("Registration successful! Please check your email to verify your account.");

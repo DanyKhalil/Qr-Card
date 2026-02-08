@@ -4,6 +4,10 @@ import bcrypt from "bcrypt";
 import dotenv from "dotenv";
 import { sendVerificationEmail } from "../utils/sendEmail.js";
 
+import crypto from 'crypto';
+import { sendPasswordResetEmail } from "../utils/sendEmail.js"; 
+
+
 dotenv.config();
 
 const JWT_SECRET = process.env.JWT_SECRET || "SECRET_KEY";
@@ -179,3 +183,272 @@ export const getCurrentUserWithSubscription = async (req, res) => {
   }
 };
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Reset Password
+
+// ===========================================
+// PASSWORD RESET FUNCTIONS
+// ===========================================
+
+/**
+ * 1. Request password reset (forgot password)
+ */
+export const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    // 1. Find user by email
+    const user = await User.findOne({
+      where: { email },
+      attributes: ['id', 'email']
+    });
+
+    // Security: Return same response whether user exists or not
+    const responseMessage = "If an account exists with this email, you will receive a password reset link.";
+
+    if (!user) {
+      return res.status(200).json({
+        success: true,
+        message: responseMessage
+      });
+    }
+
+    // 2. Generate reset token and send email
+    const resetData = await sendPasswordResetEmail(email, user.id);
+
+    // 3. Save the hashed token and expiration to the database
+    await User.update(
+      {
+        reset_password_token: resetData.resetTokenHash,
+        reset_password_expires: new Date(resetData.resetTokenExpires)
+      },
+      {
+        where: { id: user.id }
+      }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: responseMessage
+    });
+
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    res.status(500).json({
+      success: false,
+      message: "Server error. Please try again later."
+    });
+  }
+};
+
+/**
+ * 2. Helper function to validate reset token
+ */
+const validateResetToken = async (userId, token) => {
+  try {
+    // Get user with reset token
+    const user = await User.findOne({
+      where: { id: userId },
+      attributes: ['id', 'reset_password_token', 'reset_password_expires']
+    });
+
+    if (!user || !user.reset_password_token || !user.reset_password_expires) {
+      return { valid: false, user: null };
+    }
+
+    // Check if token has expired
+    const now = new Date();
+    const expiresDate = new Date(user.reset_password_expires);
+
+    if (now > expiresDate) {
+      // Clean up expired token
+      await User.update(
+        {
+          reset_password_token: null,
+          reset_password_expires: null
+        },
+        {
+          where: { id: userId }
+        }
+      );
+      return { valid: false, user: null };
+    }
+
+    // Hash the incoming token to compare with stored hash
+    const incomingTokenHash = crypto
+      .createHash('sha256')
+      .update(token)
+      .digest('hex');
+
+    // Compare hashes
+    const isValid = crypto.timingSafeEqual(
+      Buffer.from(incomingTokenHash),
+      Buffer.from(user.reset_password_token)
+    );
+
+    return { valid: isValid, user };
+
+  } catch (error) {
+    console.error('Token validation error:', error);
+    return { valid: false, user: null };
+  }
+};
+
+/**
+ * 3. Verify reset token (when user clicks the link)
+ * This endpoint checks if the token is valid before showing the reset form
+ */
+export const verifyResetToken = async (req, res) => {
+  try {
+    const { token, userId } = req.query;
+
+    if (!token || !userId) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing token or user ID"
+      });
+    }
+
+    // Validate token
+    const { valid } = await validateResetToken(userId, token);
+
+    if (!valid) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid or expired reset token. Please request a new password reset."
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Token is valid"
+    });
+
+  } catch (error) {
+    console.error('Verify token error:', error);
+    res.status(500).json({
+      success: false,
+      message: "Server error. Please try again."
+    });
+  }
+};
+
+/**
+ * 4. Reset password (after token verification)
+ */
+export const resetPassword = async (req, res) => {
+  try {
+    const { token, userId, newPassword } = req.body;
+
+    if (!token || !userId || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "All fields are required"
+      });
+    }
+
+    // Validate password strength
+    if (newPassword.length < 8) {
+      return res.status(400).json({
+        success: false,
+        message: "Password must be at least 8 characters long"
+      });
+    }
+
+    // Validate token
+    const { valid } = await validateResetToken(userId, token);
+
+    if (!valid) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid or expired reset token. Please request a new password reset."
+      });
+    }
+
+    // Hash the new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update password and clear reset token
+    await User.update(
+      {
+        password: hashedPassword,
+        reset_password_token: null,
+        reset_password_expires: null
+      },
+      {
+        where: { id: userId }
+      }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Password reset successful. You can now login with your new password."
+    });
+
+  } catch (error) {
+    console.error('Reset password error:', error);
+    res.status(500).json({
+      success: false,
+      message: "Server error. Please try again."
+    });
+  }
+};
