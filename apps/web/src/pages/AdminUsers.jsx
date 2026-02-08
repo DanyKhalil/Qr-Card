@@ -7,9 +7,19 @@ import { useNavigate } from "react-router-dom";
 
 const AdminUsers = () => {
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
   const [users, setUsers] = useState([]);
   const [search, setSearch] = useState("");
   const [editingUserId, setEditingUserId] = useState(null);
+
+  // Filters
+  const [roleFilter, setRoleFilter] = useState("");
+  const [verifiedFilter, setVerifiedFilter] = useState("");
+  const [lockedFilter, setLockedFilter] = useState("");
+
+  // Sorting
+  const [sortBy, setSortBy] = useState("joined_at");
+  const [sortOrder, setSortOrder] = useState("DESC");
 
   const [editForm, setEditForm] = useState({
     name: "",
@@ -19,29 +29,37 @@ const AdminUsers = () => {
     visibility: true,
   });
 
+  // Reset password state
+  const [resetPasswordUserId, setResetPasswordUserId] = useState(null);
+  const [newPassword, setNewPassword] = useState("");
+  const [resetMessage, setResetMessage] = useState("");
+  const [isResetting, setIsResetting] = useState(false);
+
   const token = localStorage.getItem("token");
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchUsers();
-  }, [search]);
+  }, [search, roleFilter, verifiedFilter, lockedFilter, sortBy, sortOrder]);
 
-  // ======================
-  // FETCH USERS + Normalize booleans
-  // ======================
   const fetchUsers = async () => {
     try {
-      const res = await axios.get(
-        `${API_BASE_URL}/api/users3?search=${search}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const res = await axios.get(`${API_BASE_URL}/api/users3`, {
+        headers: { Authorization: `Bearer ${token}` },
+        params: {
+          search,
+          role: roleFilter,
+          verified: verifiedFilter,
+          locked: lockedFilter,
+          sortBy,
+          sortOrder,
+        },
+      });
 
-      // Normalize booleans (fixes locked column issue)
       const normalized = res.data.map((u) => ({
         ...u,
-        visibility:
-          u.visibility === false || u.visibility === "false" ? false : true,
-        verified: u.verified === true || u.verified === "true" ? true : false,
+        verified: u.verified === true || u.verified === "true",
+        visibility: !(u.visibility === false || u.visibility === "false"),
       }));
 
       setUsers(normalized);
@@ -51,47 +69,46 @@ const AdminUsers = () => {
     }
   };
 
-  // ======================
-  // DELETE USER
-  // ======================
-  const handleDelete = async (id) => {
+  const handleSort = (column) => {
+    if (sortBy === column) {
+      setSortOrder(sortOrder === "ASC" ? "DESC" : "ASC");
+    } else {
+      setSortBy(column);
+      setSortOrder("DESC");
+    }
+  };
+
+  const handleDelete = async (profileId) => {
     if (!window.confirm("Are you sure you want to delete this user?")) return;
 
     try {
-      await axios.delete(`${API_BASE_URL}/api/users3/${id}`, {
+      await axios.delete(`${API_BASE_URL}/api/users3/${profileId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      setUsers(users.filter((user) => user.id !== id));
       alert("User deleted successfully");
+      fetchUsers(); // refresh table after deletion
     } catch (err) {
       console.error("Error deleting user:", err);
       alert("Failed to delete user");
     }
   };
 
-  // ======================
-  // EDIT USER
-  // ======================
   const handleEdit = (user) => {
-    setEditingUserId(user.id);
+    setEditingUserId(user.profile_id);
     setEditForm({
       name: user.name,
       email: user.email,
       role: user.role,
       verified: user.verified,
-      visibility: user.visibility, // true = unlocked
+      visibility: user.visibility,
     });
   };
 
-  // ======================
-  // HANDLE EDIT CHANGES
-  // ======================
   const handleEditChange = (e) => {
     const { name, type, checked, value } = e.target;
 
     if (name === "locked") {
-      // locked checked → visibility false
       setEditForm((prev) => ({
         ...prev,
         visibility: !checked,
@@ -104,20 +121,18 @@ const AdminUsers = () => {
     }
   };
 
-  // ======================
-  // UPDATE USER
-  // ======================
-  const handleUpdate = async (id) => {
+  const handleUpdate = async (profileId) => {
     try {
       const res = await axios.put(
-        `${API_BASE_URL}/api/users3/${id}`,
+        `${API_BASE_URL}/api/users3/${profileId}`,
         editForm,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      setUsers(users.map((user) => (user.id === id ? res.data.user : user)));
+      setUsers(
+        users.map((u) => (u.profile_id === profileId ? res.data.user : u))
+      );
+
       setEditingUserId(null);
       alert("User updated successfully");
       fetchUsers();
@@ -127,183 +142,289 @@ const AdminUsers = () => {
     }
   };
 
-  // ======================
-  // Display Locked Column
-  // ======================
-  const getLockedStatus = (user) => {
-    return user.visibility ? "No" : "Yes"; // visibility true = not locked
+  const getLockedStatus = (user) => (user.visibility ? "No" : "Yes");
+  const getLockedStyle = (user) =>
+    !user.visibility ? { color: "red", fontWeight: "bold" } : {};
+
+  const handleResetPassword = async (profileId) => {
+    if (!newPassword) {
+      setResetMessage("Please enter a new password");
+      return;
+    }
+    setIsResetting(true);
+    setResetMessage("");
+
+    try {
+      await axios.post(
+        `${API_BASE_URL}/api/users3/${profileId}/reset-password`,
+        { newPassword },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      setResetMessage("Password reset successfully");
+      setResetPasswordUserId(null);
+    } catch (err) {
+      console.error(err);
+      setResetMessage(err.response?.data?.error || "Failed to reset password");
+    } finally {
+      setIsResetting(false);
+    }
   };
 
-  const getLockedStyle = (user) => {
-    return !user.visibility
-      ? { color: "red", fontWeight: "bold" }
-      : {};
-  };
-
-  // ======================
-  // RENDER
-  // ======================
   return (
     <div className="admin-users-page">
-      <Header activeIndex={-1}/>
+      <Header activeIndex={-1} />
 
       <div className="admin-users-container">
         <h1>Admin Panel</h1>
 
+        {/* Search + Add */}
         <div className="admin-search-add-container">
           <input
             type="text"
-            placeholder="Search by name or role..."
+            placeholder="Search by name, email or role..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="admin-search"
           />
-          <button
-            className="admin-add-button"
-            onClick={() => navigate("/admin/add-user")}
-          >
-            Add User
-          </button>
+
+          <div className="admin-add-button-container">
+            <button
+              className="admin-add-button"
+              onClick={() => navigate("/admin/add-user")}
+            >
+              Add User
+            </button>
+          </div>
         </div>
 
-        <table className="admin-users-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Role</th>
-              <th>Verified</th>
-              <th>Locked</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
+        {/* Filters */}
+        <div
+          className="admin-filters"
+          style={{
+            display: "flex",
+            gap: "12px",
+            marginBottom: "24px",
+            flexWrap: "wrap",
+          }}
+        >
+          <select
+            className="dropdown-input"
+            value={roleFilter}
+            onChange={(e) => setRoleFilter(e.target.value)}
+          >
+            <option value="">All Roles</option>
+            <option value="admin">Admin</option>
+            <option value="user">User</option>
+          </select>
 
-          <tbody>
-            {users.map((user) => {
-              const isEditing = editingUserId === user.id;
+          <select
+            className="dropdown-input"
+            value={verifiedFilter}
+            onChange={(e) => setVerifiedFilter(e.target.value)}
+          >
+            <option value="">All</option>
+            <option value="true">Verified</option>
+            <option value="false">Not Verified</option>
+          </select>
 
-              return (
-                <tr key={user.id}>
-                  <td>{user.id}</td>
+          <select
+            className="dropdown-input"
+            value={lockedFilter}
+            onChange={(e) => setLockedFilter(e.target.value)}
+          >
+            <option value="">All</option>
+            <option value="true">Locked</option>
+            <option value="false">Unlocked</option>
+          </select>
+        </div>
 
-                  {/* NAME */}
-                  <td>
-                    {isEditing ? (
-                      <input
-                        type="text"
-                        name="name"
-                        value={editForm.name}
-                        onChange={handleEditChange}
-                      />
-                    ) : (
-                      user.name
-                    )}
-                  </td>
+        {/* Table */}
+        <div className="admin-users-table-container">
+          <table className="admin-users-table">
+            <thead>
+              <tr>
+                <th onClick={() => handleSort("joined_at")}>
+                  Date Joined{" "}
+                  {sortBy === "joined_at" ? (sortOrder === "ASC" ? "▲" : "▼") : ""}
+                </th>
+                <th onClick={() => handleSort("name")}>
+                  Name {sortBy === "name" ? (sortOrder === "ASC" ? "▲" : "▼") : ""}
+                </th>
+                <th>Email</th>
+                <th onClick={() => handleSort("role")}>
+                  Role {sortBy === "role" ? (sortOrder === "ASC" ? "▲" : "▼") : ""}
+                </th>
+                <th>Verified</th>
+                <th>Locked</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
 
-                  {/* EMAIL */}
-                  <td>
-                    {isEditing ? (
-                      <input
-                        type="email"
-                        name="email"
-                        value={editForm.email}
-                        onChange={handleEditChange}
-                      />
-                    ) : (
-                      user.email
-                    )}
-                  </td>
+            <tbody>
+  {users.map((user) => {
+    const isEditing = editingUserId === user.profile_id;
+    const isResettingThis = resetPasswordUserId === user.profile_id;
 
-                  {/* ROLE */}
-                  <td>
-                    {isEditing ? (
-                      <input
-                        type="text"
-                        name="role"
-                        value={editForm.role}
-                        onChange={handleEditChange}
-                      />
-                    ) : (
-                      user.role
-                    )}
-                  </td>
+    return (
+      <React.Fragment key={user.profile_id}>
+        {/* Main user row */}
+        <tr className={isEditing ? "editing" : ""}>
+          <td>{new Date(user.joined_at).toLocaleDateString()}</td>
 
-                  {/* VERIFIED */}
-                  <td>
-                    {isEditing ? (
-                      <input
-                        type="checkbox"
-                        name="verified"
-                        checked={editForm.verified}
-                        onChange={handleEditChange}
-                      />
-                    ) : user.verified ? (
-                      "Yes"
-                    ) : (
-                      "No"
-                    )}
-                  </td>
+          <td>
+            {isEditing ? (
+              <input
+                name="name"
+                value={editForm.name}
+                onChange={handleEditChange}
+              />
+            ) : (
+              user.name
+            )}
+          </td>
 
-                  {/* LOCKED */}
-                  <td style={getLockedStyle(user)}>
-                    {isEditing ? (
-                      <input
-                        type="checkbox"
-                        name="locked"
-                        checked={!editForm.visibility} // locked = !visibility
-                        onChange={handleEditChange}
-                      />
-                    ) : (
-                      getLockedStatus(user)
-                    )}
-                  </td>
+          <td>
+            {isEditing ? (
+              <input
+                name="email"
+                value={editForm.email}
+                onChange={handleEditChange}
+              />
+            ) : (
+              user.email
+            )}
+          </td>
 
-                  {/* ACTIONS */}
-                  <td>
-                    {isEditing ? (
-                      <>
-                        <button
-                          className="admin-update-button"
-                          onClick={() => handleUpdate(user.profile_id)}
-                        >
-                          Save
-                        </button>
-                        <button
-                          className="admin-delete-button"
-                          onClick={() => setEditingUserId(null)}
-                        >
-                          Cancel
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <button
-                          className="admin-view-button"
-                          onClick={() => navigate(`/profile/${user.profile_id}`)}
-                        >
-                          View
-                        </button>
-                        <button
-                          className="admin-update-button"
-                          onClick={() => handleEdit(user)}
-                        >
-                          Edit
-                        </button>
-                        <button
-                          className="admin-delete-button"
-                          onClick={() => handleDelete(user.profile_id)}
-                        >
-                          Delete
-                        </button>
-                      </>
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+          <td>
+            {isEditing ? (
+              <input
+                name="role"
+                value={editForm.role}
+                onChange={handleEditChange}
+              />
+            ) : (
+              user.role
+            )}
+          </td>
+
+          <td>
+            {isEditing ? (
+              <input
+                type="checkbox"
+                name="verified"
+                checked={editForm.verified}
+                onChange={handleEditChange}
+              />
+            ) : user.verified ? (
+              "Yes"
+            ) : (
+              "No"
+            )}
+          </td>
+
+          <td style={getLockedStyle(user)}>
+            {isEditing ? (
+              <input
+                type="checkbox"
+                name="locked"
+                checked={!editForm.visibility}
+                onChange={handleEditChange}
+              />
+            ) : (
+              getLockedStatus(user)
+            )}
+          </td>
+
+          <td>
+            {isEditing ? (
+              <>
+                <button
+                  className="admin-update-button"
+                  onClick={() => handleUpdate(user.profile_id)}
+                >
+                  Save
+                </button>
+                <button
+                  className="admin-delete-button"
+                  onClick={() => setEditingUserId(null)}
+                >
+                  Cancel
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  className="admin-view-button"
+                  onClick={() =>
+                    navigate(`/profile/${user.profile_id}`)
+                  }
+                >
+                  View
+                </button>
+                <button
+                  className="admin-update-button"
+                  onClick={() => handleEdit(user)}
+                >
+                  Edit
+                </button>
+                <button
+                  className="admin-delete-button"
+                  onClick={() => handleDelete(user.profile_id)}
+                >
+                  Delete
+                </button>
+                <button
+                  className="admin-reset-button"
+                  onClick={() => {
+                    setResetPasswordUserId(user.profile_id);
+                    setNewPassword("");
+                    setResetMessage("");
+                  }}
+                >
+                  Reset Password
+                </button>
+              </>
+            )}
+          </td>
+        </tr>
+
+        {/* Reset password inline form */}
+        {isResettingThis && (
+          <tr className="reset-password-row">
+            <td colSpan="7">
+              <div className="reset-password-form">
+                <input
+                  type="password"
+                  placeholder="New Password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                />
+                <button
+                  onClick={() => handleResetPassword(user.profile_id)}
+                  disabled={isResetting}
+                >
+                  {isResetting ? "Resetting..." : "Reset Password"}
+                </button>
+                <button
+                  onClick={() => setResetPasswordUserId(null)}
+                >
+                  Cancel
+                </button>
+                {resetMessage && (
+                  <span className="reset-message">{resetMessage}</span>
+                )}
+              </div>
+            </td>
+          </tr>
+        )}
+      </React.Fragment>
+    );
+  })}
+</tbody>
+
+          </table>
+        </div>
       </div>
 
       <Footer />

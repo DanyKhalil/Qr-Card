@@ -255,7 +255,7 @@
 /* Input fields */
 .login-input,
 .dropdown-input {
-  width: 100%;
+  width: 300px;
   max-width: 445px;
   height: 42px;
   padding: 0 16px;
@@ -343,4 +343,111 @@
     padding: 16px;
     max-width: 100%;
   }
+}
+
+/* Reset Password inline row */
+.reset-password-row td {
+  padding: 12px 16px;
+  background-color: #e0e0ff; /* soft lavender for emphasis */
+  border-bottom: 1px solid #4f46e5; /* indigo border line */
+}
+
+/* Container inside the table cell */
+.reset-password-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+/* Password input */
+.reset-password-form input[type="password"] {
+  flex: 1 1 250px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 2px solid #4f46e5; /* indigo border */
+  font-size: 16px;
+  outline: none;
+  transition: border 0.3s ease, box-shadow 0.3s ease;
+}
+
+.reset-password-form input[type="password"]:focus {
+  border-color: #4338ca; /* darker indigo on focus */
+  box-shadow: 0 0 6px rgba(79, 70, 229, 0.3);
+}
+
+/* Reset password buttons */
+.reset-password-form button {
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.reset-password-form button:first-of-type {
+  background-color: #4f46e5; /* indigo */
+  color: #f5f3ff;
+}
+
+.reset-password-form button:first-of-type:hover {
+  background-color: #4338ca;
+  transform: translateY(-1px);
+}
+
+.reset-password-form button:nth-of-type(2) {
+  background-color: #f44336; /* cancel button */
+  color: #fff;
+}
+
+.reset-password-form button:nth-of-type(2):hover {
+  background-color: #da190b;
+  transform: translateY(-1px);
+}
+
+/* Message text below the form */
+.reset-password-form .reset-message {
+  flex-basis: 100%;
+  color: #f44336; /* red for errors */
+  font-size: 14px;
+  margin-top: 6px;
+}
+
+/* Responsive: stack on small screens */
+@media (max-width: 600px) {
+  .reset-password-form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .reset-password-form input[type="password"],
+  .reset-password-form button {
+    width: 100%;
+  }
+
+  .reset-password-form .reset-message {
+    margin-top: 8px;
+    text-align: center;
+  }
+}
+
+/* Reset Password button in table row */
+.admin-reset-button {
+    padding: 6px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: bold;
+    border: none;
+    background-color: #4f46e5; /* indigo */
+    color: #f5f3ff; /* soft lavender text */
+    margin-right: 6px;
+    margin-bottom: 6px;
+    transition: all 0.3s ease, transform 0.2s ease;
+}
+
+.admin-reset-button:hover {
+    background-color: #4338ca; /* darker indigo on hover */
+    transform: translateY(-1px);
 }
