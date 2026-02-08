@@ -275,3 +275,47 @@ export const deleteUser = async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 };
+
+
+export const resetUserPassword = async (req, res) => {
+  try {
+    const profileId = req.params.id;
+    const { newPassword } = req.body;
+
+    if (!newPassword) {
+      return res.status(400).json({ error: "New password is required" });
+    }
+
+    // 1️⃣ Find profile and user
+    const profile = await Profile.findByPk(profileId);
+    if (!profile) return res.status(404).json({ error: "Profile not found" });
+
+    const user = await User.findByPk(profile.user_id);
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    // 2️⃣ Admin authorization
+    const authHeader = req.headers.authorization;
+    if (!authHeader) return res.status(401).json({ error: "Unauthorized" });
+
+    const token = authHeader.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || "SECRET_KEY");
+
+    if (decoded.id === user.id) {
+      return res.status(403).json({ error: "You cannot reset your own password" });
+    }
+
+    if (user.role === "admin") {
+      return res.status(403).json({ error: "You cannot reset another admin's password" });
+    }
+
+    // 3️⃣ Hash new password and update
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    await user.save();
+
+    res.json({ message: "Password reset successfully" });
+  } catch (error) {
+    console.error("Reset password error:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+};

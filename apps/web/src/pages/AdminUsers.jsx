@@ -29,6 +29,12 @@ const AdminUsers = () => {
     visibility: true,
   });
 
+  // Reset password state
+  const [resetPasswordUserId, setResetPasswordUserId] = useState(null);
+  const [newPassword, setNewPassword] = useState("");
+  const [resetMessage, setResetMessage] = useState("");
+  const [isResetting, setIsResetting] = useState(false);
+
   const token = localStorage.getItem("token");
   const navigate = useNavigate();
 
@@ -140,6 +146,31 @@ const AdminUsers = () => {
   const getLockedStyle = (user) =>
     !user.visibility ? { color: "red", fontWeight: "bold" } : {};
 
+  const handleResetPassword = async (profileId) => {
+    if (!newPassword) {
+      setResetMessage("Please enter a new password");
+      return;
+    }
+    setIsResetting(true);
+    setResetMessage("");
+
+    try {
+      await axios.post(
+        `${API_BASE_URL}/api/users3/${profileId}/reset-password`,
+        { newPassword },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      setResetMessage("Password reset successfully");
+      setResetPasswordUserId(null);
+    } catch (err) {
+      console.error(err);
+      setResetMessage(err.response?.data?.error || "Failed to reset password");
+    } finally {
+      setIsResetting(false);
+    }
+  };
+
   return (
     <div className="admin-users-page">
       <Header activeIndex={-1} />
@@ -168,38 +199,45 @@ const AdminUsers = () => {
         </div>
 
         {/* Filters */}
-<div className="admin-filters" style={{ display: "flex", gap: "12px", marginBottom: "24px", flexWrap: "wrap" }}>
-  <select
-    className="dropdown-input"
-    value={roleFilter}
-    onChange={(e) => setRoleFilter(e.target.value)}
-  >
-    <option value="">All Roles</option>
-    <option value="admin">Admin</option>
-    <option value="user">User</option>
-  </select>
+        <div
+          className="admin-filters"
+          style={{
+            display: "flex",
+            gap: "12px",
+            marginBottom: "24px",
+            flexWrap: "wrap",
+          }}
+        >
+          <select
+            className="dropdown-input"
+            value={roleFilter}
+            onChange={(e) => setRoleFilter(e.target.value)}
+          >
+            <option value="">All Roles</option>
+            <option value="admin">Admin</option>
+            <option value="user">User</option>
+          </select>
 
-  <select
-    className="dropdown-input"
-    value={verifiedFilter}
-    onChange={(e) => setVerifiedFilter(e.target.value)}
-  >
-    <option value="">All</option>
-    <option value="true">Verified</option>
-    <option value="false">Not Verified</option>
-  </select>
+          <select
+            className="dropdown-input"
+            value={verifiedFilter}
+            onChange={(e) => setVerifiedFilter(e.target.value)}
+          >
+            <option value="">All</option>
+            <option value="true">Verified</option>
+            <option value="false">Not Verified</option>
+          </select>
 
-  <select
-    className="dropdown-input"
-    value={lockedFilter}
-    onChange={(e) => setLockedFilter(e.target.value)}
-  >
-    <option value="">All</option>
-    <option value="true">Locked</option>
-    <option value="false">Unlocked</option>
-  </select>
-</div>
-
+          <select
+            className="dropdown-input"
+            value={lockedFilter}
+            onChange={(e) => setLockedFilter(e.target.value)}
+          >
+            <option value="">All</option>
+            <option value="true">Locked</option>
+            <option value="false">Unlocked</option>
+          </select>
+        </div>
 
         {/* Table */}
         <div className="admin-users-table-container">
@@ -224,125 +262,167 @@ const AdminUsers = () => {
             </thead>
 
             <tbody>
-              {users.map((user) => {
-                const isEditing = editingUserId === user.profile_id;
+  {users.map((user) => {
+    const isEditing = editingUserId === user.profile_id;
+    const isResettingThis = resetPasswordUserId === user.profile_id;
 
-                return (
-                  <tr
-                    key={user.profile_id}
-                    className={isEditing ? "editing" : ""}
-                  >
-                    <td>{new Date(user.joined_at).toLocaleDateString()}</td>
+    return (
+      <React.Fragment key={user.profile_id}>
+        {/* Main user row */}
+        <tr className={isEditing ? "editing" : ""}>
+          <td>{new Date(user.joined_at).toLocaleDateString()}</td>
 
-                    <td>
-                      {isEditing ? (
-                        <input
-                          name="name"
-                          value={editForm.name}
-                          onChange={handleEditChange}
-                        />
-                      ) : (
-                        user.name
-                      )}
-                    </td>
+          <td>
+            {isEditing ? (
+              <input
+                name="name"
+                value={editForm.name}
+                onChange={handleEditChange}
+              />
+            ) : (
+              user.name
+            )}
+          </td>
 
-                    <td>
-                      {isEditing ? (
-                        <input
-                          name="email"
-                          value={editForm.email}
-                          onChange={handleEditChange}
-                        />
-                      ) : (
-                        user.email
-                      )}
-                    </td>
+          <td>
+            {isEditing ? (
+              <input
+                name="email"
+                value={editForm.email}
+                onChange={handleEditChange}
+              />
+            ) : (
+              user.email
+            )}
+          </td>
 
-                    <td>
-                      {isEditing ? (
-                        <input
-                          name="role"
-                          value={editForm.role}
-                          onChange={handleEditChange}
-                        />
-                      ) : (
-                        user.role
-                      )}
-                    </td>
+          <td>
+            {isEditing ? (
+              <input
+                name="role"
+                value={editForm.role}
+                onChange={handleEditChange}
+              />
+            ) : (
+              user.role
+            )}
+          </td>
 
-                    <td>
-                      {isEditing ? (
-                        <input
-                          type="checkbox"
-                          name="verified"
-                          checked={editForm.verified}
-                          onChange={handleEditChange}
-                        />
-                      ) : user.verified ? (
-                        "Yes"
-                      ) : (
-                        "No"
-                      )}
-                    </td>
+          <td>
+            {isEditing ? (
+              <input
+                type="checkbox"
+                name="verified"
+                checked={editForm.verified}
+                onChange={handleEditChange}
+              />
+            ) : user.verified ? (
+              "Yes"
+            ) : (
+              "No"
+            )}
+          </td>
 
-                    <td style={getLockedStyle(user)}>
-                      {isEditing ? (
-                        <input
-                          type="checkbox"
-                          name="locked"
-                          checked={!editForm.visibility}
-                          onChange={handleEditChange}
-                        />
-                      ) : (
-                        getLockedStatus(user)
-                      )}
-                    </td>
+          <td style={getLockedStyle(user)}>
+            {isEditing ? (
+              <input
+                type="checkbox"
+                name="locked"
+                checked={!editForm.visibility}
+                onChange={handleEditChange}
+              />
+            ) : (
+              getLockedStatus(user)
+            )}
+          </td>
 
-                    <td>
-                      {isEditing ? (
-                        <>
-                          <button
-                            className="admin-update-button"
-                            onClick={() => handleUpdate(user.profile_id)}
-                          >
-                            Save
-                          </button>
-                          <button
-                            className="admin-delete-button"
-                            onClick={() => setEditingUserId(null)}
-                          >
-                            Cancel
-                          </button>
-                        </>
-                      ) : (
-                        <>
-                          <button
-                            className="admin-view-button"
-                            onClick={() =>
-                              navigate(`/profile/${user.profile_id}`)
-                            }
-                          >
-                            View
-                          </button>
-                          <button
-                            className="admin-update-button"
-                            onClick={() => handleEdit(user)}
-                          >
-                            Edit
-                          </button>
-                          <button
-                            className="admin-delete-button"
-                            onClick={() => handleDelete(user.profile_id)}
-                          >
-                            Delete
-                          </button>
-                        </>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
+          <td>
+            {isEditing ? (
+              <>
+                <button
+                  className="admin-update-button"
+                  onClick={() => handleUpdate(user.profile_id)}
+                >
+                  Save
+                </button>
+                <button
+                  className="admin-delete-button"
+                  onClick={() => setEditingUserId(null)}
+                >
+                  Cancel
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  className="admin-view-button"
+                  onClick={() =>
+                    navigate(`/profile/${user.profile_id}`)
+                  }
+                >
+                  View
+                </button>
+                <button
+                  className="admin-update-button"
+                  onClick={() => handleEdit(user)}
+                >
+                  Edit
+                </button>
+                <button
+                  className="admin-delete-button"
+                  onClick={() => handleDelete(user.profile_id)}
+                >
+                  Delete
+                </button>
+                <button
+                  className="admin-reset-button"
+                  onClick={() => {
+                    setResetPasswordUserId(user.profile_id);
+                    setNewPassword("");
+                    setResetMessage("");
+                  }}
+                >
+                  Reset Password
+                </button>
+              </>
+            )}
+          </td>
+        </tr>
+
+        {/* Reset password inline form */}
+        {isResettingThis && (
+          <tr className="reset-password-row">
+            <td colSpan="7">
+              <div className="reset-password-form">
+                <input
+                  type="password"
+                  placeholder="New Password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                />
+                <button
+                  onClick={() => handleResetPassword(user.profile_id)}
+                  disabled={isResetting}
+                >
+                  {isResetting ? "Resetting..." : "Reset Password"}
+                </button>
+                <button
+                  onClick={() => setResetPasswordUserId(null)}
+                >
+                  Cancel
+                </button>
+                {resetMessage && (
+                  <span className="reset-message">{resetMessage}</span>
+                )}
+              </div>
+            </td>
+          </tr>
+        )}
+      </React.Fragment>
+    );
+  })}
+</tbody>
+
           </table>
         </div>
       </div>
