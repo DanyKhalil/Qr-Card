@@ -55,7 +55,7 @@ const AddUserPage = () => {
             value={form.name}
             onChange={handleChange}
             required
-            className="login-input"
+            className="login-input-add"
           />
           <input
             type="email"
@@ -64,7 +64,7 @@ const AddUserPage = () => {
             value={form.email}
             onChange={handleChange}
             required
-            className="login-input"
+            className="login-input-add"
           />
           <input
             type="password"
@@ -73,7 +73,7 @@ const AddUserPage = () => {
             value={form.password}
             onChange={handleChange}
             required
-            className="login-input"
+            className="login-input-add"
           />
           <select
             name="role"
@@ -83,7 +83,7 @@ const AddUserPage = () => {
             className="dropdown-input"
           >
             <option value="user">User</option>
-            <option value="company">Company</option>
+            {/* <option value="company">Company</option> */}
             <option value="admin">Admin</option>
           </select>
           <button type="submit" className="login-button">
